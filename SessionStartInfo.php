@@ -43,7 +43,7 @@ class SessionStartInfo {
         //huge mock/ should be deleted
 
 
-        $this->appIdOrName = "App Id 1111";
+      /*  $this->appIdOrName = "App Id 1111";
         $this->scenarioIdOrName = "Scenario Name 1111";
         $this->branchName = "Branch name ";
         $this->batchInfo = array("startedAt"=>date("Y-m-d\TH:i:s\Z"));
@@ -53,7 +53,7 @@ class SessionStartInfo {
                     "height" => 800
                 )
         );
-        $this->agentId = "mysdk/1.3";
+        $this->agentId = "mysdk/1.3";*/
 
 
     }

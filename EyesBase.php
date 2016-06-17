@@ -2,11 +2,12 @@
 require "ServerConnectorFactory.php";
 require "Logger.php";
 require "SessionStartInfo.php";
+require "AppEnvironment.php";
 class EyesBase {
 
     const SEQUENTIAL = "aaa";  ///Session type ???
     const DEFAULT_MATCH_TIMEOUT = 2; // Seconds
-    const  USE_DEFAULT_TIMEOUT = -1;
+    const USE_DEFAULT_TIMEOUT = -1;
 
     private $isDisabled;
     private $isOpen;
@@ -22,44 +23,48 @@ class EyesBase {
     private $baselineName;
     private $branchName;
     private $parentBranchName;
+    private $failureReports;
+    private $hostApp;
+    private $hostOS;
 
     public function __construct($serverUrl)
     {
 
-       /* if (isDisabled) {
-            userInputs = null;
+        if ($this->getIsDisabled()) {
+            $this->userInputs = null;
             return;
         }
 
         //ArgumentGuard.notNull(serverUrl, "serverUrl");
-
+/*
         logger = new Logger();
         scaleProviderHandler = new SimplePropertyHandler<ScaleProvider>();
         scaleProviderHandler.set(new NullScaleProvider());
         positionProvider = new InvalidPositionProvider();
         scaleMethod = ScaleMethod.getDefault();
-        viewportSize = null;
- */
+        */
+        $this->viewportSize = null;
+
         $logger = "";
         $this->serverConnector = ServerConnectorFactory::create($logger, $this->getBaseAgentId(), $serverUrl);
-  /*    matchTimeout = DEFAULT_MATCH_TIMEOUT;
-        runningSession = null;
+        $this->matchTimeout = self::DEFAULT_MATCH_TIMEOUT;
+   /*     runningSession = null;
         defaultMatchSettings = new ImageMatchSettings();
         failureReports = FailureReports.ON_CLOSE;
         userInputs = new ArrayDeque<Trigger>();
-
-        // New tests are automatically saved by default.
-        saveNewTests = true;
-        saveFailedTests = false;
-        agentId = null;
-        lastScreenshot = null;
 */
+        // New tests are automatically saved by default.
+        $this->saveNewTests = true;
+        $this->saveFailedTests = false;
+        $this->agentId = null;
+        $this->lastScreenshot = null;
+
     }
     /**
      * @return The base agent id of the SDK.
      */
     protected function getBaseAgentId(){//should be abstract
-        return '';
+        return "mysdk/1.3";
     }
 
     /**
@@ -67,7 +72,7 @@ class EyesBase {
      * user given agent id.
      */
     protected function getFullAgentId() {
-        return "";
+        return $this->getBaseAgentId();
         /*String agentId = getAgentId();
         if (agentId == null) {
             return getBaseAgentId();
@@ -151,8 +156,19 @@ class EyesBase {
         return $this->currentAppName != null ? $this->currentAppName : $this->appName;
     }
 
+    /**
+     * @return The inferred environment string
+     * or {@code null} if none is available. The inferred string is in the
+     * format "source:info" where source is either "useragent" or "pos".
+     * Information associated with a "useragent" source is a valid browser user
+     * agent string. Information associated with a "pos" source is a string of
+     * the format "process-name;os-name" where "process-name" is the name of the
+     * main module of the executed process and "os-name" is the OS name.
+     */
+    protected function getInferredEnvironment(){return "";}  /// Should be abstract
 
-/**
+
+    /**
      * Application environment is the environment (e.g., the host OS) which
      * runs the application under test.
      * @return The current application environment.
@@ -160,20 +176,20 @@ class EyesBase {
     protected function getAppEnvironment() {
 
         //ATTENTION!!!!!!!!
-        return '';   ///// temporary mock NEED TO SET ALL ENV
+        //return '';   ///// temporary mock NEED TO SET ALL ENV
         $appEnv = new AppEnvironment();
 
             // If hostOS isn't set, we'll try and extract and OS ourselves.
         if ($this->hostOS != null) {
-            $this->appEnv->setOs($hostOS);
+            $appEnv->setOs($this->hostOS);
         }
 
         if ($this->hostApp != null) {
-            $appEnv->setHostingApp($hostApp);
+            $appEnv->setHostingApp($this->hostApp);
         }
 
-        $this->appEnv->setInferred($this->getInferredEnvironment());
-        $this->appEnv->setDisplaySize($viewportSize);
+        $appEnv->setInferred($this->getInferredEnvironment());
+        $appEnv->setDisplaySize($this->viewportSize);
         return $appEnv;
     }
 
@@ -228,10 +244,9 @@ class EyesBase {
             if(empty($testName)){
                 throw new Exception('$testName is not null');
             }
-//$this->serverConnector->startSession("hohohh"); /// not from here. just test
 
             Logger::log("Agent = ". $this->getFullAgentId());
-            Logger::log(sprintf("openBase('%s', '%s', '%s')", $appName, $testName, $viewportSize));
+            Logger::log(sprintf("openBase('%s', '%s', '%s')", $appName, $testName, json_encode($viewportSize)));
 
             if ($this->getApiKey() == null) {
                 Logger::log(errMsg);
@@ -240,17 +255,17 @@ class EyesBase {
 
             Logger::log(sprintf("Eyes server URL is '%s'", $this->serverConnector->getServerUrl()));
             Logger::log(sprintf("Timeout = '%d'", $this->serverConnector->getTimeout()));
-            Logger::log(sprintf("matchTimeout = '%d' ", $matchTimeout));
-            Logger::log(sprintf("Default match settings = '%s' ", $defaultMatchSettings));
-            Logger::log(sprintf("FailureReports = '%s' ", $failureReports));
+            Logger::log(sprintf("matchTimeout = '%d' ", $this->matchTimeout));
+            Logger::log(sprintf("Default match settings = '%s' ", $this->defaultMatchSettings));
+            Logger::log(sprintf("FailureReports = '%s' ", $this->failureReports));
 
 
             if ($this->getIsOpen()) {
                 $this->abortIfNotClosed();
                 $errMsg = "A test is already running";
-                            //logger.log(errMsg);
-                            throw new EyesException(errMsg);
-                        }
+                Logger::log($errMsg);
+                throw new EyesException(errMsg);
+            }
 
             $this->currentAppName = ($appName != null) ? $appName : $this->appName;
             $this->testName = $testName;
@@ -261,9 +276,9 @@ class EyesBase {
             $isOpen = true;
 
         } catch (Exception $e) {
-                //logger.log(String.format("%s", e.getMessage()));
-                //logger.getLogHandler().close();
-            die($e->getMessage());
+                Logger::log(String.format("%s", e.getMessage()));
+                //Logger::getLogHandler().close();
+            die($e->getMessage()); // temporary
             throw $e;
         }
     }
@@ -285,14 +300,11 @@ class EyesBase {
      * @throws com.applitools.eyes.TestFailedException Thrown if a mismatch is
      *          detected and immediate failure reports are enabled.
      */
-    public function checkWindowBase($regionProvider, $tag, $ignoreMismatch, $retryTimeout) {
-
-        $result;
-
+    public function checkWindowBase($regionProvider, $tag = null, $ignoreMismatch = null, $retryTimeout = null) {
         if ($this->getIsDisabled()) {
             Logger::log("Ignored");
-            //$result = new MatchResult();
-            //$result->setAsExpected(true);
+            $result = new MatchResult();
+            $result->setAsExpected(true);
             return $result;
         }
 
@@ -341,7 +353,7 @@ class EyesBase {
                 Logger::log(sprintf("Mismatch! (%s)", $tag));
             }
 
-            if ($this->getFailureReports() == FailureReports.IMMEDIATE) {
+            if ($this->getFailureReports() == "FailureReports::IMMEDIATE") {
                 throw new TestFailedException(sprintf("Mismatch found in '%s' of '%s'",
                         $sessionStartInfo->getScenarioIdOrName(), $sessionStartInfo->getAppIdOrName()));
             }
@@ -372,17 +384,17 @@ class EyesBase {
             Logger::log("No batch set");
             $testBatch = ''/*new BatchInfo(null)*/;
         } else {
-            Logger::log("Batch is " . $batch);
-            $testBatch = $batch;
+            Logger::log("Batch is " . $this->batch);
+            $testBatch = $this->batch;
         }
 
         //$appEnv = $this->getAppEnvironment();   need to check is it correct?
-        Logger::log("Application environment is " . $this->getAppEnvironment());
+        Logger::log("Application environment is " . serialize($this->getAppEnvironment()));
 
         $sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
             $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $this->getAppEnvironment(),
             $this->defaultMatchSettings, $this->branchName, $this->parentBranchName);
-
+echo "ddddddddd"; print_r($sessionStartInfo); die();
         Logger::log("Starting server session...");
         $runningSession = $this->serverConnector->startSession($sessionStartInfo);
 
@@ -397,6 +409,87 @@ class EyesBase {
             $shouldMatchWindowRunOnceOnTimeout = false;
         }
     }
+
+
+
+    /**
+     * Ends the test.
+     *
+     * @param throwEx If true, an exception will be thrown for failed/new tests.
+     * @return The test results.
+     * @throws TestFailedException if a mismatch was found and throwEx is true.
+     * @throws NewTestException    if this is a new test was found and throwEx
+     *                             is true.
+     */
+    public function close($throwEx) {
+        try {
+            if ($this->isDisabled) {
+                logger::log("Ignored");
+                return null;
+            }
+            Logger::verbose(sprintf("close(%b)", $throwEx));
+            ArgumentGuard::isValidState($this->isOpen, "Eyes not open");
+
+            $this->isOpen = false;
+
+            $lastScreenshot = null;
+            //$this->clearUserInputs();
+
+            if ($this->runningSession == null) {
+                Logger::log("Server session was not started");
+                Logger::log("--- Empty test ended.");
+                return new TestResults();
+            }
+
+            $isNewSession = $this->runningSession->getIsNewSession();
+            $sessionResultsUrl = $this->runningSession->getUrl();
+
+            Logger::log("Ending server session...");
+            $save = ($isNewSession && $this->saveNewTests) || (!$isNewSession && $this->saveFailedTests);
+            Logger::verbose("Automatically save test? " + $save);
+            $results = $this->serverConnector->stopSession($this->runningSession, false, $save);
+
+            $results->setNew($isNewSession);
+            $results->setUrl($sessionResultsUrl);
+            Logger::verbose($results->toString());
+
+            if (!$isNewSession && (0 < $results->getMismatches() || 0 < $results->getMissing())) {
+
+                Logger::log("--- Failed test ended. See details at " . sessionResultsUrl);
+
+                if ($throwEx) {
+                    $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
+                          . "' of '" . $this->sessionStartInfo->getAppIdOrName() . "'. See details at " . $sessionResultsUrl;
+                    throw new TestFailedException($results, $message);
+                }
+                return $results;
+            }
+
+            if ($isNewSession) {
+                $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
+                Logger::log("--- New test ended. " . $instructions);
+                if (throwEx) {
+                    $message = "'" . sessionStartInfo.getScenarioIdOrName()
+                                . "' of '" . $this->sessionStartInfo->getAppIdOrName()
+                                . "'. " . $instructions;
+                            throw new NewTestException($results, $message);
+                }
+                return $results;
+            }
+            // Test passed
+            Logger::log("--- Test passed. See details at " . $sessionResultsUrl);
+            return $results;
+        } finally {
+            // Making sure that we reset the running session even if an
+            // exception was thrown during close.
+            $this->runningSession = null;
+            $this->currentAppName = null;
+            Logger::getLogHandler()->close();
+        }
+    }
+
+
+
 
 }
 

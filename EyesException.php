@@ -1,28 +1,17 @@
 <?php
-/*
-* Applitools SDK for Selenium integration.
-*/
-
 /**
  * Applitools Eyes Exception.
  */
-class EyesException extends RuntimeException {
-
-    /**
-     * Creates an EyesException instance.
-     * @param message A description of the error.
-     */
-public EyesException(String message) {
-super(message);
-}
+class EyesException extends Exception {
 
 /**
  * Creates an EyesException instance.
  * @param message A description of the error.
+ * @param code Code of the error.
  * @param e The throwable this exception should wrap.
  */
-public EyesException(String message, Throwable e) {
-    super(message, e);
-}
+    public function __construct($message, $code = 0, Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
 }
 ?>
