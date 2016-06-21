@@ -1,5 +1,6 @@
 <?php
 require "ServerConnectorInterface.php";
+require "RunningSession.php";
 class ServerConnector implements ServerConnectorInterface{
 
     const TIMEOUT = 300000; // 5 Minutes
@@ -105,8 +106,8 @@ class ServerConnector implements ServerConnectorInterface{
             'startInfo' => [
                 "appIdOrName" => $sessionStartInfo->getAppIdOrName(),
                 "scenarioIdOrName" => $sessionStartInfo->getScenarioIdOrName(),
-                "batchInfo" => $sessionStartInfo->getbatchInfo(),
-                "environment" => $sessionStartInfo->getEnvironment(),
+                "batchInfo" => $sessionStartInfo->getBatchInfo(),
+                "environment" => ["displaySize" => $sessionStartInfo->getEnvironment()->getDisplaySize()],
                 "matchLevel" => "Strict",
                 "agentId" => $sessionStartInfo->getAgentId()
             ]
@@ -139,25 +140,35 @@ class ServerConnector implements ServerConnectorInterface{
                     )
                 );
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $serverOutput = curl_exec ($ch);
+                $result = curl_exec ($ch);
                 $information = curl_getinfo($ch);
             /*    $response = endPoint.queryParam("apiKey", apiKey).
                     accept(MediaType.APPLICATION_JSON).
                     entity(postData, MediaType.APPLICATION_JSON_TYPE).
                     post(ClientResponse.class);*/
         } catch (Exception $e) {  //RuntimeException
-                //logger.log("startSession(): Server request failed: " + e.getMessage());
+            Logger::log("startSession(): Server request failed: " + $e->getMessage());
             throw $e;
         }
-
+        $validStatusCodes = array('200', '201');
+        if(!in_array($information['http_code'],$validStatusCodes)){
+            $runningSession = null;
+        }else{
+            $result = json_decode($result, true);
+            $runningSession = new RunningSession();
+            $runningSession->setId($result['id']);
+            //$runningSession->setId($result['id']);
+        }
+echo "<pre>"; print_r($params); echo "</pre>";
+echo "<pre>"; print_r($sessionStartInfo->getEnvironment()->getDisplaySize()); echo "</pre>";
 echo "<pre>"; print_r($information); echo "</pre>";
-die("Stop.Session should be started");
+//die("Stop.Session should be started");
         // Ok, let's create the running session from the response
-        $validStatusCodes = array();
+
         //validStatusCodes.add(ClientResponse.Status.OK.getStatusCode());
         //validStatusCodes.add(ClientResponse.Status.CREATED.getStatusCode());
 
-        //runningSession = parseResponseWithJsonData(response, validStatusCodes, RunningSession.class);
+        //$runningSession = parseResponseWithJsonData(response, validStatusCodes, RunningSession.class);
 
         // If this is a new session, we set this flag.
         //statusCode = response.getStatus();

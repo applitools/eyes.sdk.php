@@ -3,7 +3,7 @@ require "ArgumentGuard.php";
 /**
 * A batch of tests.
 */
-public class BatchInfo {
+class BatchInfo {
 
     const BATCH_TIMEZONE = "UTC";
     private  $id;
@@ -17,10 +17,10 @@ public class BatchInfo {
     * @param startedAt Batch start time
     */
     public function __construct($name, $startedAt=null) {
-        ArgumentGuard::notNull($startedAt, "startedAt");
+        //ArgumentGuard::notNull($startedAt, "startedAt");
         $this->id = rand();
         $this->name = $name;
-        $this->startedAt = (empty($startedAt) ? date("Y-m-d") : $startedAt);
+        $this->startedAt = (empty($startedAt) ? date("Y-m-d\TH:i:s\Z") : $startedAt);
     }
 
 

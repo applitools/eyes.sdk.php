@@ -3,6 +3,7 @@ require "ServerConnectorFactory.php";
 require "Logger.php";
 require "SessionStartInfo.php";
 require "AppEnvironment.php";
+require "BatchInfo.php";
 class EyesBase {
 
     const SEQUENTIAL = "aaa";  ///Session type ???
@@ -382,26 +383,26 @@ class EyesBase {
 
         if ($this->batch == null) {
             Logger::log("No batch set");
-            $testBatch = ''/*new BatchInfo(null)*/;
+            $testBatch = new BatchInfo(null);
         } else {
             Logger::log("Batch is " . $this->batch);
             $testBatch = $this->batch;
         }
 
-        //$appEnv = $this->getAppEnvironment();   need to check is it correct?
+        $appEnv = $this->getAppEnvironment(); ///////  need to check is it correct?
         Logger::log("Application environment is " . serialize($this->getAppEnvironment()));
 
         $sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
-            $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $this->getAppEnvironment(),
+            $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $appEnv,
             $this->defaultMatchSettings, $this->branchName, $this->parentBranchName);
-echo "ddddddddd"; print_r($sessionStartInfo); die();
+//echo "ddddddddd"; print_r($sessionStartInfo); die();
         Logger::log("Starting server session...");
-        $runningSession = $this->serverConnector->startSession($sessionStartInfo);
+        $this->runningSession = $this->serverConnector->startSession($sessionStartInfo);
+//print_r($this->runningSession); die();
+        Logger::log("Server session ID is ". $this->runningSession->getId());
 
-        Logger::log("Server session ID is ". $runningSession->getId());
-
-        $testInfo = "'" . $testName . "' of '" . $this->getAppName() . "' " . $appEnv;
-        if ($runningSession->getIsNewSession()) {
+        $testInfo = "'" . $this->testName . "' of '" . $this->getAppName() . "' " . serialize($appEnv);
+        if ($this->runningSession->getIsNewSession()) {
             Logger::log("--- New test started - " . $testInfo);
             $shouldMatchWindowRunOnceOnTimeout = true;
         } else {
@@ -487,10 +488,6 @@ echo "ddddddddd"; print_r($sessionStartInfo); die();
             Logger::getLogHandler()->close();
         }
     }
-
-
-
-
 }
 
 ?>

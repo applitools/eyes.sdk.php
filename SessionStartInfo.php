@@ -79,7 +79,7 @@ class SessionStartInfo {
     }
 
     public function getBatchInfo() {
-        return $this->batchInfo;
+        return array("startedAt"=>$this->batchInfo->getStartedAt());
     }
 
     public function getEnvName() {
