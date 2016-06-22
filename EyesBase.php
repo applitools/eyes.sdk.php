@@ -323,18 +323,20 @@ class EyesBase {
             $this->startSession();
             Logger::log("Done!");
 
-            /*$matchWindowTask = new MatchWindowTask(
+            $appOutputProvider = new AppOutputProvider() {
+                getAppOutput(RegionProvider $regionProvider_, EyesScreenshot $lastScreenshot_) {
+                    return getAppOutputWithScreenshot($regionProvider_, $lastScreenshot_);
+                }
+             };
+
+            $matchWindowTask = new MatchWindowTask(
                                     $logger,
                                     $serverConnector,
                                     $runningSession,
                                     $matchTimeout,
                                     // A callback which will call getAppOutput
-                                    new AppOutputProvider() {
-                                        getAppOutput(RegionProvider $regionProvider_, EyesScreenshot lastScreenshot_) {
-                                            return getAppOutputWithScreenshot($regionProvider_, $lastScreenshot_);
-                                        }
-                                    }
-            );*/
+                                    $appOutputProvider
+            );
         }
 
         Logger::log("Calling match window...");

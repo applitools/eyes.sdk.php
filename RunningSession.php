@@ -13,7 +13,7 @@ class RunningSession {
 
 
     public function getIsNewSession() {
-        return isNewSession;
+        return $this->isNewSession;
     }
 
     public function setIsNewSession($isNewSession) {
