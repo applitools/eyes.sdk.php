@@ -1,5 +1,5 @@
 <?php
-require "ArgumentGuard.php";
+require "EyesScreenshot.php";
 /**
  * Encapsulates a screenshot taken by the images SDK.
  */
@@ -14,13 +14,14 @@ class EyesImagesScreenshot extends EyesScreenshot {
      * @param location The top/left coordinates of the screenshot in context
      *                 relative coordinates type.
      */
-    public function __construct(BufferedImage $image, Location $location = Location(0, 0))
+    public function __construct(BufferedImage $image, Location $location)
     {
         //  super(image);   ????
-        //if (empty($location)) {
+        if (empty($location)) {
+            $location = Location(0, 0);
             $rectangleSize = new RectangleSize($image->getWidth(), $image->getHeight());
             $this->bounds = new Region($location, $rectangleSize);
-        /*}else{
+        }/*else{
             $this(image, new );
         }*/
     }
@@ -34,7 +35,7 @@ class EyesImagesScreenshot extends EyesScreenshot {
         // We want to get the sub-screenshot in as-is coordinates type.
         $subScreenshotRegion = getIntersectedRegion($region, $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
 
-        if ($subScreenshotRegion->isEmpty() || ($throwIfClipped && (!subScreenshotRegion->getSize() == region.getSize()))) {
+        if ($subScreenshotRegion->isEmpty() || ($throwIfClipped && (!$subScreenshotRegion->getSize() == $region->getSize()))) {
             throw new OutOfBoundsException(sptintf(
                     "Region [%s, (%s)] is out of screenshot bounds [%s]",
                     $region, json_encode($coordinatesType), $bounds));

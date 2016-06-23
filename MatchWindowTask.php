@@ -2,8 +2,8 @@
 /*
 * Applitools SDK for Selenium integration.
 */
-require "ArgumentGuard.php";
-require "Logger.php";
+//require "ArgumentGuard.php";
+//require "Logger.php";
 
 class MatchWindowTask {
 

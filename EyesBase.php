@@ -4,6 +4,11 @@ require "Logger.php";
 require "SessionStartInfo.php";
 require "AppEnvironment.php";
 require "BatchInfo.php";
+require "AppOutputProvider.php";
+require "MatchWindowTask.php";
+require "EyesImagesScreenshot.php";
+require "Region.php";
+
 class EyesBase {
 
     const SEQUENTIAL = "aaa";  ///Session type ???
@@ -27,6 +32,10 @@ class EyesBase {
     private $failureReports;
     private $hostApp;
     private $hostOS;
+    private $userInputs = array(); //new ArrayDeque<Trigger>();
+    private $shouldMatchWindowRunOnceOnTimeout;
+    private $lastScreenshot;
+
 
     public function __construct($serverUrl)
     {
@@ -58,7 +67,7 @@ class EyesBase {
         $this->saveNewTests = true;
         $this->saveFailedTests = false;
         $this->agentId = null;
-        $this->lastScreenshot = null;
+        $this->lastScreenshot = new EyesImagesScreenshot();
 
     }
     /**
@@ -309,8 +318,8 @@ class EyesBase {
             return $result;
         }
 
-        //ArgumentGuard.isValidState(getIsOpen(), "Eyes not open");
-        //ArgumentGuard.notNull(regionProvider, "regionProvider");
+        //ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
+        ArgumentGuard::notNull($regionProvider, "regionProvider");
 
         Logger::log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
 
@@ -323,36 +332,32 @@ class EyesBase {
             $this->startSession();
             Logger::log("Done!");
 
-            $appOutputProvider = new AppOutputProvider() {
-                getAppOutput(RegionProvider $regionProvider_, EyesScreenshot $lastScreenshot_) {
-                    return getAppOutputWithScreenshot($regionProvider_, $lastScreenshot_);
-                }
-             };
+            $appOutputProvider = new AppOutputProvider();
 
             $matchWindowTask = new MatchWindowTask(
-                                    $logger,
-                                    $serverConnector,
-                                    $runningSession,
-                                    $matchTimeout,
+                                    //$logger,
+                                    $this->serverConnector,
+                                    $this->runningSession,
+                                    $this->matchTimeout,
                                     // A callback which will call getAppOutput
                                     $appOutputProvider
             );
         }
 
         Logger::log("Calling match window...");
-        $result = $matchWindowTask->matchWindow(getUserInputs(), $lastScreenshot, $regionProvider, $tag,
-                $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
+        $result = $matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider, $tag,
+                $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
         Logger::log("MatchWindow Done!");
 
         if (!$result->getAsExpected()) {
-            if (!ignoreMismatch) {
+            if (!$ignoreMismatch) {
                 $this->clearUserInputs();
-                $lastScreenshot = $result->getScreenshot();
+                $this->lastScreenshot = $result->getScreenshot();
             }
 
             $shouldMatchWindowRunOnceOnTimeout = true;
 
-            if (!$runningSession.getIsNewSession()) {
+            if (!$this->runningSession.getIsNewSession()) {
                 Logger::log(sprintf("Mismatch! (%s)", $tag));
             }
 
@@ -362,7 +367,7 @@ class EyesBase {
             }
         } else { // Match successful
             clearUserInputs();
-            $lastScreenshot = $result->getScreenshot();
+            $this->lastScreenshot = $result->getScreenshot();
         }
 
         Logger::log("Done!");
@@ -370,6 +375,18 @@ class EyesBase {
     }
 
 
+    /**
+     * @return User inputs collected between {@code checkWindowBase}
+     * invocations.
+     */
+    protected function getUserInputs() {
+        if ($this->isDisabled) {
+            return null;
+        }
+        /*result = new Trigger[userInputs.size()];
+                return userInputs.toArray(result);*/
+        return $this->userInputs;
+    }
 
     /**
      * Start eyes session on the eyes server.

@@ -4,7 +4,6 @@
 */
 class ArgumentGuard
 {
-
     /**
      * Fails if the input parameter is null.
      * @param param The input parameter.

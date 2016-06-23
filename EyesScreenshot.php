@@ -3,9 +3,9 @@
 * Base class for handling screenshots.
 */
 abstract class EyesScreenshot {
-    protected image;// BufferedImage
+    protected $image;// BufferedImage
 
-    public EyesScreenshot(BufferedImage $image) {
+    public function __construct(BufferedImage $image) {
         ArgumentGuard::notNull($image, "image");
         $this->image = $image;
     }
@@ -40,7 +40,7 @@ abstract class EyesScreenshot {
     * @return A new location which is the transformation of {@code location} to
     * the {@code to} coordinates type.
     */
-    protected function Location convertLocation(Location $location, CoordinatesType $from, CoordinatesType $to){
+    protected function convertLocation(Location $location, CoordinatesType $from, CoordinatesType $to){
     } //abstract
 
     /**
@@ -54,22 +54,13 @@ abstract class EyesScreenshot {
     * @throws com.applitools.eyes.OutOfBoundsException If the location is
     * not inside the frame's region in the screenshot.
     */
-    public function getLocationInScreenshot(Location location, CoordinatesType coordinatesType){
+    public function getLocationInScreenshot(Location $location, CoordinatesType $coordinatesType){
     }// abstract.
 
-    /**
-    * Get the intersection of the given region with the screenshot.
-    *
-    * @param region The region to intersect.
-    * @param originalCoordinatesType The coordinates type of {@code region}.
-    * @param resultCoordinatesType The coordinates type of the resulting
-    *                              region.
-    * @return The intersected region, in {@code resultCoordinatesType}
-    * coordinates.
-    */
-    protected abstract Region getIntersectedRegion(Region region,
-    CoordinatesType originalCoordinatesType,
-    CoordinatesType resultCoordinatesType);
+
+    protected abstract function getIntersectedRegion(Region $region,
+    CoordinatesType $originalCoordinatesType,
+    CoordinatesType $resultCoordinatesType);
 
     /**
     * Get the intersection of the given region with the screenshot.
@@ -78,10 +69,9 @@ abstract class EyesScreenshot {
     * @param coordinatesType The coordinates type of {@code region}.
     * @return The intersected region, in {@code coordinatesType} coordinates.
     */
-    protected Region getIntersectedRegion(Region region,
-    CoordinatesType coordinatesType) {
-    return getIntersectedRegion(region, coordinatesType, coordinatesType);
-    }
+    /*protected function getIntersectedRegion(Region $region, CoordinatesType $coordinatesType) {
+        return getIntersectedRegion($region, $coordinatesType, $coordinatesType);
+    }*/
 
     /**
     * Converts a region's location coordinates with the {@code from}
@@ -94,21 +84,18 @@ abstract class EyesScreenshot {
     * @return A new region which is the transformation of {@code region} to
     * the {@code to} coordinates type.
     */
-    protected Region convertRegionLocation(Region region,
-    CoordinatesType from,
-    CoordinatesType to) {
-    ArgumentGuard.notNull(region, "region");
+    protected function convertRegionLocation(Region $region, CoordinatesType $from, CoordinatesType $to) {
+        ArgumentGuard::notNull($region, "region");
 
-    if (region.isEmpty()) {
-    return new Region(region);
-    }
+        if ($region->isEmpty()) {
+        return new Region($region);
+        }
 
-    ArgumentGuard.notNull(from, "from");
-    ArgumentGuard.notNull(to, "to");
+        ArgumentGuard::notNull($from, "from");
+        ArgumentGuard::notNull($to, "to");
 
-    Location updatedLocation = convertLocation(region.getLocation(), from,
-    to);
+        $updatedLocation = convertLocation($region->getLocation(), $from, $to);
 
-    return new Region(updatedLocation, region.getSize());
+        return new Region($updatedLocation, $region->getSize());
     }
 }

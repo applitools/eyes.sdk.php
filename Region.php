@@ -1,5 +1,5 @@
 <?php
-require "ArgumentGuard.php";
+//require "ArgumentGuard.php";
 
 /**
  * Represents a region.
@@ -9,19 +9,19 @@ class Region {
     private $top;
     private $width;
     private $height;
-
-    const EMPTY = new Region(0, 0, 0, 0);
+    public static $empty;
 
     protected function makeEmpty() {
-        $this->left = self::EMPTY->getLeft();
-        $this->top = self::EMPTY->getTop();
-        $this->width = self::EMPTY->getWidth();
-        $this->height = self::EMPTY->getHeight();
+        $this->left = self::$empty->getLeft();
+        $this->top = self::$empty->getTop();
+        $this->width = self::$empty->getWidth();
+        $this->height = self::$empty->getHeight();
     }
 
     public function __construct($left, $top, $width, $height) {
         ArgumentGuard::greaterThanOrEqualToZero($width, "width");
         ArgumentGuard::greaterThanOrEqualToZero($height, "height");
+        $this->empty = new Region(0, 0, 0, 0);
 
         $this->left = $left;
         $this->top = $top;
@@ -34,10 +34,10 @@ class Region {
      * @return true if the region is empty, false otherwise.
      */
     public function isEmpty() {
-        return $this.getLeft() == self::EMPTY->getLeft()
-        && $this->getTop() == self::EMPTY->getTop()
-        && $this->getWidth() == self::EMPTY->getWidth()
-        && $this->getHeight() == self::EMPTY->getHeight();
+        return $this.getLeft() == self::$empty->getLeft()
+        && $this->getTop() == self::$empty->getTop()
+        && $this->getWidth() == self::$empty->getWidth()
+        && $this->getHeight() == self::$empty->getHeight();
     }
 
     public function equals(Object $obj) {
@@ -48,7 +48,7 @@ class Region {
         if (!($obj instanceof Region)) {
             return  false;
         }
-        $other = (Region) $obj; // clone????
+        $other = clone $obj; // clone????
 
         return ($this->getLeft() == $other->getLeft())
         && ($this->getTop() == $other->getTop())
@@ -60,7 +60,7 @@ class Region {
         return ($this->left . $this->top . $this->width + $this->height);
     }
 
-    public function __construct(Location $location, RectangleSize $size) {
+    /*public function __construct(Location $location, RectangleSize $size) {
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($size, "size");
 
@@ -77,7 +77,7 @@ class Region {
         $this->top = $other->getTop();
         $this->width = $other->getWidth();
         $this->height = $other->getHeight();
-    }
+    }*/
 
     /**
      *
@@ -139,7 +139,7 @@ class Region {
 
         // Normalizing.
         if ($subRegionWidth > $containerRegion->width) {
-            $subRegionWidth = containerRegion->width;
+            $subRegionWidth = $containerRegion->width;
         }
         if ($subRegionHeight > $containerRegion->height) {
             $subRegionHeight = $containerRegion->height;
@@ -187,41 +187,43 @@ class Region {
      * maxSubRegionSize is equal or greater than the current region,
      * only a single region is returned.
      */
-    private static /*Iterable<Region>*/ getSubRegionsWithVaryingSize(Region containerRegion, RectangleSize maxSubRegionSize) {
-        ArgumentGuard.notNull(containerRegion, "containerRegion");
-        ArgumentGuard.notNull(maxSubRegionSize, "maxSubRegionSize");
-        ArgumentGuard.greaterThanZero(maxSubRegionSize.getWidth(),
+    private static function getSubRegionsWithVaryingSize(Region $containerRegion, RectangleSize $maxSubRegionSize) {
+        ArgumentGuard::notNull($containerRegion, "containerRegion");
+        ArgumentGuard::notNull($maxSubRegionSize, "maxSubRegionSize");
+        ArgumentGuard::greaterThanZero($maxSubRegionSize->getWidth(),
             "maxSubRegionSize.getWidth()");
-        ArgumentGuard.greaterThanZero(maxSubRegionSize.getHeight(),
+        ArgumentGuard::greaterThanZero($maxSubRegionSize->getHeight(),
             "maxSubRegionSize.getHeight()");
 
-        List<Region> subRegions = new LinkedList<Region>();
+        /*List<Region>*/ $subRegions = new /*LinkedList<*/Region();
 
-        int currentTop = containerRegion.top;
-        int bottom = containerRegion.top + containerRegion.height;
-        int right = containerRegion.left + containerRegion.width;
+        $currentTop = $containerRegion->top;
+        $bottom = $containerRegion->top + $containerRegion->height;
+        $right = $containerRegion->left + $containerRegion->width;
 
-        while (currentTop < bottom) {
+        while ($currentTop < $bottom) {
 
-            int currentBottom = currentTop + maxSubRegionSize.getHeight();
-            if (currentBottom > bottom) { currentBottom = bottom; }
-
-            int currentLeft = containerRegion.left;
-            while (currentLeft < right) {
-                int currentRight = currentLeft + maxSubRegionSize.getWidth();
-                if (currentRight > right) { currentRight = right; }
-
-                int currentHeight = currentBottom - currentTop;
-                int currentWidth = currentRight - currentLeft;
-
-                subRegions.add(new Region(currentLeft, currentTop,
-                    currentWidth, currentHeight));
-
-                currentLeft += maxSubRegionSize.getWidth();
+            $currentBottom = $currentTop + $maxSubRegionSize->getHeight();
+            if ($currentBottom > $bottom) {
+                $currentBottom = $bottom;
             }
-            currentTop += maxSubRegionSize.getHeight();
+
+            $currentLeft = $containerRegion->left;
+            while ($currentLeft < $right) {
+                $currentRight = $currentLeft + $maxSubRegionSize->getWidth();
+                if ($currentRight > $right) { $currentRight = $right; }
+
+                $currentHeight = $currentBottom - $currentTop;
+                $currentWidth = $currentRight - $currentLeft;
+
+                $subRegions->add(new Region($currentLeft, $currentTop,
+                    $currentWidth, $currentHeight));
+
+                $currentLeft += $maxSubRegionSize->getWidth();
+            }
+            $currentTop += $maxSubRegionSize->getHeight();
         }
-        return subRegions;
+        return $subRegions;
     }
 
     /**
@@ -236,22 +238,21 @@ class Region {
      * subRegionSize} is equal or greater than the current region,
      * only a single region is returned.
      */
-    public Iterable<Region> getSubRegions(RectangleSize subRegionSize,
-                                          boolean isFixedSize) {
-    if (isFixedSize) {
-        return getSubRegionsWithFixedSize(this, subRegionSize);
+    public function getSubRegions(RectangleSize $subRegionSize, $isFixedSize) {
+    if ($isFixedSize) {
+        return getSubRegionsWithFixedSize($this, $subRegionSize);
     }
 
-    return getSubRegionsWithVaryingSize(this, subRegionSize);
+    return getSubRegionsWithVaryingSize($this, $subRegionSize);
 }
 
     /**
      * See {@link #getSubRegions(RectangleSize, boolean)}.
      * {@code isFixedSize} defaults to {@code false}.
      */
-    public Iterable<Region> getSubRegions(RectangleSize subRegionSize) {
-    return getSubRegions(subRegionSize, false);
-}
+   /* public function getSubRegions(RectangleSize $subRegionSize) {
+        return $this->getSubRegions($subRegionSize, false);
+    }*/
 
     /**
      * Check if a region is contained within the current region.
@@ -260,16 +261,16 @@ class Region {
      * @return True if {@code other} is contained within the current region,
      *          false otherwise.
      */
-    @SuppressWarnings("UnusedDeclaration")
-    public boolean contains(Region other) {
-    int right = left + width;
-        int otherRight = other.getLeft() + other.getWidth();
 
-        int bottom = top + height;
-        int otherBottom = other.getTop() + other.getHeight();
+    public function contains(Region $other) {
+        $right = $this->left + $this->width;
+        $otherRight = $other->getLeft() + $other->getWidth();
 
-        return top <= other.getTop() && left <= other.getLeft()
-        && bottom >= otherBottom && right >= otherRight;
+        $bottom = $this->top + $this->height;
+        $otherBottom = $other->getTop() + $other->getHeight();
+
+        return $this->top <= $other->getTop() && $this->left <= $other->getLeft()
+        && $bottom >= $otherBottom && $right >= $otherRight;
     }
 
     /**
@@ -279,31 +280,31 @@ class Region {
      * @return True if the location is contained within this region,
      *          false otherwise.
      */
-    public boolean contains(Location location) {
-    return location.getX() >= left
-    && location.getX() <= (left + width)
-    && location.getY() >= top
-    && location.getY() <= (top + height);
-}
+    /*public function contains(Location $location) {
+        return $location->getX() >= $this->left
+        && $location->getX() <= ($this->left + $this->width)
+        && $location->getY() >= $this->top
+        && $location->getY() <= ($this->top + $this->height);
+    }*/
 
     /**
      * Check if a region is intersected with the current region.
      * @param other The region to check intersection with.
      * @return True if the regions are intersected, false otherwise.
      */
-    public boolean isIntersected(Region other) {
-    int right = left + width;
-        int bottom = top + height;
+    public function isIntersected(Region $other) {
+        $right = $this->left + $this->width;
+        $bottom = $this->top + $this->height;
 
-        int otherLeft = other.getLeft();
-        int otherTop = other.getTop();
-        int otherRight = otherLeft + other.getWidth();
-        int otherBottom = otherTop + other.getHeight();
+        $otherLeft = $other->getLeft();
+        $otherTop = $other->getTop();
+        $otherRight = $otherLeft + $other->getWidth();
+        $otherBottom = $otherTop + $other->getHeight();
 
-        return (((left <= otherLeft && otherLeft <= right)
-                ||  (otherLeft <= left && left <= otherRight))
-            && ((top <= otherTop && otherTop <= bottom)
-                ||  (otherTop <= top && top <= otherBottom)));
+        return ((($this->left <= $otherLeft && $otherLeft <= $right)
+                ||  ($otherLeft <= $this->left && $this->left <= $otherRight))
+            && (($this->top <= $otherTop && $otherTop <= $bottom)
+                ||  ($otherTop <= $this->top && $this->top <= $otherBottom)));
     }
 
     /**
@@ -311,65 +312,64 @@ class Region {
      * {@code other}
      * @param other The region with which to intersect.
      */
-    public void intersect(Region other) {
+    public function intersect(Region $other) {
 
-    // If there's no intersection set this as the Empty region.
-    if (!isIntersected(other)) {
-        makeEmpty();
-        return;
-    }
+        // If there's no intersection set this as the Empty region.
+        if (!isIntersected($other)) {
+            $this->makeEmpty();
+            return;
+        }
 
-    // The regions intersect. So let's first find the left & top values
-    int otherLeft = other.getLeft();
-        int otherTop = other.getTop();
+        // The regions intersect. So let's first find the left & top values
+        $otherLeft = $other->getLeft();
+        $otherTop = $other->getTop();
 
-        int intersectionLeft = (left >= otherLeft) ? left : otherLeft;
-        int intersectionTop = (top >= otherTop) ? top : otherTop;
+        $intersectionLeft = ($this->left >= $otherLeft) ? $this->left : $otherLeft;
+        $intersectionTop = ($this->top >= $otherTop) ? $this->top : $otherTop;
 
         // Now the width and height of the intersect
-        int right = left + width;
-        int otherRight = otherLeft + other.getWidth();
-        int intersectionRight = (right <= otherRight) ? right : otherRight;
-        int intersectionWidth = intersectionRight - intersectionLeft;
+        $right = $this>left + $this->width;
+        $otherRight = $otherLeft + $other->getWidth();
+        $intersectionRight = ($right <= $otherRight) ? $right : $otherRight;
+        $intersectionWidth = $intersectionRight - $intersectionLeft;
 
-        int bottom = top + height;
-        int otherBottom = otherTop + other.getHeight();
-        int intersectionBottom = (bottom <= otherBottom) ? bottom : otherBottom;
-        int intersectionHeight = intersectionBottom - intersectionTop;
+        $bottom = $this->top + $this->height;
+        $otherBottom = $otherTop + $other->getHeight();
+        $intersectionBottom = ($bottom <= $otherBottom) ? $bottom : $otherBottom;
+        $intersectionHeight = $intersectionBottom - $intersectionTop;
 
-        left = intersectionLeft;
-        top = intersectionTop;
-        width = intersectionWidth;
-        height = intersectionHeight;
+        $this->left = $intersectionLeft;
+        $this->top = $intersectionTop;
+        $this->width = $intersectionWidth;
+        $this->height = $intersectionHeight;
 
     }
 
 
-    public int getLeft() {
-        return left;
+    public function getLeft() {
+        return $this->left;
     }
 
-    public int getTop() {
-        return top;
+    public function getTop() {
+        return $this->top;
     }
 
-    public int getWidth() {
-        return width;
+    public function getWidth() {
+        return $this->width;
     }
 
-    public int getHeight() {
-        return height;
+    public function getHeight() {
+        return $this->height;
     }
 
-    public Location getMiddleOffset() {
-int middleX = width / 2;
-        int middleY = height / 2;
+    public function getMiddleOffset() {
+        $middleX = $this->width / 2;
+        $middleY = $this->height / 2;
 
-        return new Location(middleX, middleY);
+        return new Location($middleX, $middleY);
     }
 
-    @Override
-    public String toString() {
-        return "(" + left + ", " + top + ") " + width + "x" + height;
+    public function toString() {
+        return "(" . $this->left . ", " . $this->top . ") " . $this->width . "x" . $this->height;
     }
 }
