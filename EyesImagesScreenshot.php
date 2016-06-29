@@ -14,16 +14,15 @@ class EyesImagesScreenshot extends EyesScreenshot {
      * @param location The top/left coordinates of the screenshot in context
      *                 relative coordinates type.
      */
-    public function __construct(BufferedImage $image, Location $location)
+    public function __construct(BufferedImage $image = null, Location $location = null)
     {
-        //  super(image);   ????
-        if (empty($location)) {
-            $location = Location(0, 0);
-            $rectangleSize = new RectangleSize($image->getWidth(), $image->getHeight());
-            $this->bounds = new Region($location, $rectangleSize);
-        }/*else{
-            $this(image, new );
-        }*/
+        if(!empty($image)){
+            if (empty($location)) {
+                $location = new Location(0, 0);
+                $rectangleSize = new RectangleSize($image->getWidth(), $image->getHeight());
+                $this->bounds = new Region($location, $rectangleSize);
+            }
+        }
     }
 
 

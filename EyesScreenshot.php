@@ -88,7 +88,7 @@ abstract class EyesScreenshot {
         ArgumentGuard::notNull($region, "region");
 
         if ($region->isEmpty()) {
-        return new Region($region);
+            return new Region($region);
         }
 
         ArgumentGuard::notNull($from, "from");
