@@ -8,6 +8,7 @@ require "AppOutputProvider.php";
 require "MatchWindowTask.php";
 require "EyesImagesScreenshot.php";
 require "Region.php";
+require "StitchMode.php";
 
 class EyesBase {
 
@@ -46,13 +47,13 @@ class EyesBase {
         }
 
         //ArgumentGuard.notNull(serverUrl, "serverUrl");
-/*
-        logger = new Logger();
-        scaleProviderHandler = new SimplePropertyHandler<ScaleProvider>();
-        scaleProviderHandler.set(new NullScaleProvider());
-        positionProvider = new InvalidPositionProvider();
-        scaleMethod = ScaleMethod.getDefault();
-        */
+
+        $this->logger = new Logger();
+        /*      scaleProviderHandler = new SimplePropertyHandler<ScaleProvider>();
+              scaleProviderHandler.set(new NullScaleProvider());
+              positionProvider = new InvalidPositionProvider();
+              scaleMethod = ScaleMethod.getDefault();
+              */
         $this->viewportSize = null;
 
         $logger = "";
@@ -154,7 +155,7 @@ class EyesBase {
     /**
      * @param size The required viewport size.
      */
-    protected function setViewportSize(/*RectangleSize*/ $size){ //should be abstract in this class
+    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size){ //should be abstract in this class
         $this->viewportSize = $size;
     }
 

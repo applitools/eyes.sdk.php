@@ -1,5 +1,6 @@
 <?php
 require "EyesBase.php";
+require "MoveToRegionVisibilityStrategy.php";
 
 /**
  * The main API gateway for the SDK.
@@ -44,7 +45,7 @@ void drive(WebDriver driver);
      *
      * @param serverUrl  The Eyes server URL.
      */
-    public function __construct(URI $serverUrl)
+    public function __construct($serverUrl)
     {
 
         /*
@@ -59,10 +60,10 @@ void drive(WebDriver driver);
         $this->forceFullPageScreenshot = false;
         $this->dontGetTitle = false;
         $this->hideScrollbars = false;
-        $this->devicePixelRatio = UNKNOWN_DEVICE_PIXEL_RATIO;
-        $this->stitchMode = StitchMode.SCROLL;
-        $this->waitBeforeScreenshots = DEFAULT_WAIT_BEFORE_SCREENSHOTS;
-        $this->regionVisibilityStrategy = new MoveToRegionVisibilityStrategy($logger);
+        $this->devicePixelRatio = self::UNKNOWN_DEVICE_PIXEL_RATIO;
+        $this->stitchMode = StitchMode::SCROLL;
+        $this->waitBeforeScreenshots = self::DEFAULT_WAIT_BEFORE_SCREENSHOTS;
+        $this->regionVisibilityStrategy = new MoveToRegionVisibilityStrategy($this->logger);
 }
 
 
@@ -123,9 +124,9 @@ void drive(WebDriver driver);
     public function setScrollToRegion($shouldScroll) {
         if ($shouldScroll) {
             $this->regionVisibilityStrategy =
-                new MoveToRegionVisibilityStrategy($logger);
+                new MoveToRegionVisibilityStrategy($this->logger);
         } else {
-            $this->regionVisibilityStrategy = new NopRegionVisibilityStrategy($logger);
+            $this->regionVisibilityStrategy = new NopRegionVisibilityStrategy($this->logger);
         }
     }
 
@@ -148,11 +149,11 @@ void drive(WebDriver driver);
         if ($this->driver != null) {
             switch ($mode) {
                 case self::CSS:
-                    $posProvider = new CssTranslatePositionProvider($logger, $this->driver);
+                    $posProvider = new CssTranslatePositionProvider($this->logger, $this->driver);
                     $this->setPositionProvider($posProvider);
                     break;
                 default:
-                    $posProvider = new ScrollPositionProvider($logger, $this->driver);
+                    $posProvider = new ScrollPositionProvider($this->logger, $this->driver);
                     setPositionProvider($posProvider);
             }
         }
@@ -238,7 +239,7 @@ void drive(WebDriver driver);
         ArgumentGuard::notNull($driver, "driver");
 
         if ($driver instanceof RemoteWebDriver) {
-            $this->driver = new EyesWebDriver($logger, $this, /*(RemoteWebDriver)*/ $driver);
+            $this->driver = new EyesWebDriver($this->logger, $this, /*(RemoteWebDriver)*/ $driver);
         } else if ($driver instanceof EyesWebDriver) {
                 $this->driver = /*(EyesWebDriver)*/ $driver;
         } else {
@@ -251,11 +252,11 @@ void drive(WebDriver driver);
         // Setting the correct position provider.
         switch ($this->getStitchMode()) {
             case self::CSS:
-                $cssTranslatePositionnew = CssTranslatePositionProvider($logger, $this->driver);
+                $cssTranslatePositionnew = CssTranslatePositionProvider($this->logger, $this->driver);
                 $this->setPositionProvider($cssTranslatePositionnew);
                 break;
             default:
-                $scrollPositionnew = ScrollPositionProvider($logger, $this->driver);
+                $scrollPositionnew = ScrollPositionProvider($this->logger, $this->driver);
                 $this->setPositionProvider($scrollPositionnew);
             }
 
@@ -332,7 +333,7 @@ void drive(WebDriver driver);
             $timeout = $deadline + self::RESPONSE_TIME_DEFAULT_DIFF_FROM_DEADLINE;
         }
         if(!empty($viewportSize)){
-            $his->setViewportSize(driver, viewportSize);
+            $his->setViewportSize($driver, $viewportSize);
         }
         $this->open($driver, $appName, $testName, $SessionType::PROGRESSION);
         $runnableAction = null;
@@ -496,7 +497,7 @@ void drive(WebDriver driver);
             $screenshotImage = ImageUtils::imageFromBase64($screenshot64); //BufferedImage instance
             $screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
             Logger::log("Done! Building required object...");
-            $screenshot = new EyesWebDriverScreenshot($logger, $this->driver, $screenshotImage);
+            $screenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
             Logger::log("Done!");
 
             $regionToCheck = new RegionProvider(); /*{
@@ -612,9 +613,7 @@ void drive(WebDriver driver);
                                    $matchTimeout = null, $tag,
                                    $stitchContent = false) {
         if ($this->getIsDisabled()) {
-            Logger::log(String.format(
-                    "checkRegionInFrame(framePath, selector, %d, '%s'): Ignored",
-                    $matchTimeout, $tag));
+            Logger::log(sprintf("checkRegionInFrame(framePath, selector, %d, '%s'): Ignored", $matchTimeout, $tag));
             return;
         }
         if(empty($matchTimeout)){
@@ -636,10 +635,10 @@ void drive(WebDriver driver);
 //???????
 
         Logger::log("Done! Calling checkRegionInFrame..");
-        checkRegionInFrame(framePath[framePath.length - 1], selector,
-            matchTimeout, tag, stitchContent);
+        checkRegionInFrame(framePath[framePath.length - 1], $selector,
+            $matchTimeout, $tag, $stitchContent);
         Logger::log("Done! switching back to default content..");
-        $this->driver->switchTo().defaultContent();
+        $this->driver->switchTo()->defaultContent();
         Logger::log("Done! Switching into the original frame..");
 //???????        ((EyesTargetLocator)(driver.switchTo())).frames(originalFrameChain);
         Logger::log("Done!");
@@ -663,13 +662,13 @@ void drive(WebDriver driver);
         if ($element instanceof EyesRemoteWebElement) {
             $eyesElement = /*(EyesRemoteWebElement)*/ $element;
         } else {
-            $eyesElement = new EyesRemoteWebElement($logger, $driver, /*(RemoteWebElement)*/ $element);
+            $eyesElement = new EyesRemoteWebElement($this->logger, $driver, /*(RemoteWebElement)*/ $element);
         }
 
         $originalPositionProvider = $this->getPositionProvider();
         try {
             $this->checkFrameOrElement = true;
-            $this->setPositionProvider(new ElementPositionProvider($logger, $driver,
+            $this->setPositionProvider(new ElementPositionProvider($this->logger, $driver,
                 $element));
 
             // Set overflow to "hidden".
@@ -853,7 +852,7 @@ void drive(WebDriver driver);
     public function getViewportSize(WebDriver $driver = null) {
         ArgumentGuard::notNull($this->driver, "driver");
         if(!empty($driver)){
-            return EyesSeleniumUtils::extractViewportSize($logger, $$this->driver);
+            return EyesSeleniumUtils::extractViewportSize($this->logger, $$this->driver);
         }else{
             return $driver->getDefaultContentViewportSize();
         }
@@ -878,7 +877,7 @@ void drive(WebDriver driver);
         $this->driver->switchTo()->defaultContent();
 
         try {
-            EyesSeleniumUtils::setViewportSize($logger, $this->driver, $size);
+            EyesSeleniumUtils::setViewportSize($this->logger, $this->driver, $size);
         } catch (EyesException $e) {
         // Just in case the user catches this error
         /*(EyesTargetLocator)*/ $this->driver->switchTo()->frames($originalFrame);
@@ -901,32 +900,32 @@ void drive(WebDriver driver);
             $originalOverflow = EyesSeleniumUtils::hideScrollbars($this->driver, 200);
         }
         try {
-            $imageProvider = new TakesScreenshotImageProvider($logger, $this->driver);
-            $screenshotFactory = new EyesWebDriverScreenshotFactory($logger, $this->driver);
+            $imageProvider = new TakesScreenshotImageProvider($this->logger, $this->driver);
+            $screenshotFactory = new EyesWebDriverScreenshotFactory($this->logger, $this->driver);
             if (checkFrameOrElement) {
                 Logger::log("Check frame/element requested");
-                $algo = new FullPageCaptureAlgorithm($logger);
+                $algo = new FullPageCaptureAlgorithm($this->logger);
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $regionToCheck,
                         $positionProvider, $positionProvider,
                         $scaleProviderHandler->get(),
                         $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 Logger::log("Building screenshot object...");
-                $result = new EyesWebDriverScreenshot($logger, $this->driver, $entireFrameOrElement,
+                $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
                     new RectangleSize($entireFrameOrElement->getWidth(), $entireFrameOrElement->getHeight()));
             } else if ($forceFullPageScreenshot) {
                 Logger::log("Full page screenshot requested.");
                 // Save the current frame path.
                 $originalFrame = $this->driver->getFrameChain();
                 $this->driver->switchTo()->defaultContent();
-                $algo = new FullPageCaptureAlgorithm($logger);
+                $algo = new FullPageCaptureAlgorithm($this->logger);
                 $regionProvider = new RegionProvider();
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
-                        new ScrollPositionProvider($logger, $this->driver),
+                        new ScrollPositionProvider($this->logger, $this->driver),
                         $positionProvider, $scaleProviderHandler->get(),
                         $regionProvidergetWaitBeforeScreenshots(), $screenshotFactory);
 
                 /*(EyesTargetLocator)*/ $this->driver->switchTo()->frames($originalFrame);
-                $result = new EyesWebDriverScreenshot($logger, $this->driver, $fullPageImage);
+                $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);
             } else {
                 Logger::verbose("Screenshot requested...");
                 $screenshot64 = $this->driver->getScreenshotAs(OutputType::BASE64);
@@ -935,7 +934,7 @@ void drive(WebDriver driver);
                 Logger::log("Done!");
                 $screenshotImage = $scaleProviderHandler->get()->scaleImage($screenshotImage);
                 Logger::verbose("Creating screenshot object...");
-                $result = new EyesWebDriverScreenshot($logger, $this->driver, $screenshotImage);
+                $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
             }
             Logger::verbose("Done!");
             return $result;
