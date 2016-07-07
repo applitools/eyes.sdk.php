@@ -1,5 +1,4 @@
 <?php
-require "ArgumentGuard.php";
 /**
 * A batch of tests.
 */

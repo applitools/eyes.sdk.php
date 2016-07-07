@@ -2,19 +2,7 @@
 /*
  * Applitools software.
  */
-package com.applitools.utils;
 
-import com.applitools.eyes.*;
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.ios.IOSDriver;
-import io.appium.java_client.remote.MobileCapabilityType;
-import org.openqa.selenium.*;
-import org.openqa.selenium.interactions.internal.Coordinates;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * We named this class EyesSeleniumUtils because there's a SeleniumUtils

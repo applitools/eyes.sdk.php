@@ -1,15 +1,15 @@
 <?php
-require "ServerConnectorFactory.php";
-require "Logger.php";
-require "SessionStartInfo.php";
-require "AppEnvironment.php";
-require "BatchInfo.php";
-require "AppOutputProvider.php";
-require "MatchWindowTask.php";
-require "EyesImagesScreenshot.php";
-require "Region.php";
-require "StitchMode.php";
-
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ServerConnectorFactory.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Logger.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/SessionStartInfo.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/AppEnvironment.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/BatchInfo.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ArgumentGuard.php";
+require "../../eyes/eyes.php/eyes.images.php/src/main/php/com/applitools/eyes/EyesImagesScreenshot.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProvider.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/MatchWindowTask.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Region.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/SimplePropertyHandler.php";
 class EyesBase {
 
     const SEQUENTIAL = "aaa";  ///Session type ???
@@ -36,6 +36,8 @@ class EyesBase {
     private $userInputs = array(); //new ArrayDeque<Trigger>();
     private $shouldMatchWindowRunOnceOnTimeout;
     private $lastScreenshot;
+    private $scaleProviderHandler; //PropertyHandler<ScaleProvider>
+    private $cutProviderHandler; //PropertyHandler<CutProvider>
 
 
     public function __construct($serverUrl)
@@ -46,18 +48,20 @@ class EyesBase {
             return;
         }
 
-        //ArgumentGuard.notNull(serverUrl, "serverUrl");
+        ArgumentGuard::notNull($serverUrl, "serverUrl");
 
         $this->logger = new Logger();
-        /*      scaleProviderHandler = new SimplePropertyHandler<ScaleProvider>();
-              scaleProviderHandler.set(new NullScaleProvider());
-              positionProvider = new InvalidPositionProvider();
+
+        $scaleProviderHandler = new SimplePropertyHandler();
+        //$scaleProviderHandler->set(new NullScaleProvider());
+            /*   positionProvider = new InvalidPositionProvider();
               scaleMethod = ScaleMethod.getDefault();
               */
         $this->viewportSize = null;
 
-        $logger = "";
+        $logger = new Logger();
         $this->serverConnector = ServerConnectorFactory::create($logger, $this->getBaseAgentId(), $serverUrl);
+
         $this->matchTimeout = self::DEFAULT_MATCH_TIMEOUT;
    /*     runningSession = null;
         defaultMatchSettings = new ImageMatchSettings();
@@ -395,11 +399,7 @@ class EyesBase {
     protected function startSession() {
         Logger::log("startSession()");
 
-        if ($this->viewportSize == null) {
-            $this->viewportSize = $this->getViewportSize();    //need to check is it correct idea?
-        } else {
-            $this->setViewportSize($this->viewportSize);  //need to check is it correct idea?
-        }
+        $this->setViewportSize($this->viewportSize);
 
         if ($this->batch == null) {
             Logger::log("No batch set");

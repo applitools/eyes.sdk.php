@@ -12,6 +12,14 @@ class ServerConnector implements ServerConnectorInterface{
     private $endPoint;
     private $proxySettings;
     private $serverUrl;
+    private $logger;
+
+    public function __construct($logger, $sdkName, $serverUrl)
+    {
+        $this->logger = $logger;
+        $this->sdkName = $sdkName;
+        $this->serverUrl = $serverUrl;
+    }
 
     /**
      * Sets the proxy settings to be used by the rest client.

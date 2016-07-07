@@ -1,7 +1,7 @@
 <?php
-require "EyesBase.php";
+require '../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/EyesBase.php';
+require "StitchMode.php";
 require "MoveToRegionVisibilityStrategy.php";
-
 /**
  * The main API gateway for the SDK.
  */
@@ -226,7 +226,7 @@ void drive(WebDriver driver);
      * @return A wrapped WebDriver which enables Eyes trigger recording and
      * frame handling.
      */
-    protected function open(WebDriver $driver, $appName, $testName,
+    public function open(WebDriver $driver, $appName, $testName,
                           RectangleSize $viewportSize = null, SessionType $sessionType = null) {
 
         if ($this->getIsDisabled()) {
@@ -635,7 +635,7 @@ void drive(WebDriver driver);
 //???????
 
         Logger::log("Done! Calling checkRegionInFrame..");
-        checkRegionInFrame(framePath[framePath.length - 1], $selector,
+        checkRegionInFrame($framePath/*[framePath.length - 1]*/, $selector,
             $matchTimeout, $tag, $stitchContent);
         Logger::log("Done! switching back to default content..");
         $this->driver->switchTo()->defaultContent();
@@ -864,7 +864,7 @@ void drive(WebDriver driver);
      *
      * {@inheritDoc}
      */
-    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size) {
+    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size = null) {
         if(!empty($driver)){
             ArgumentGuard::notNull($driver, "driver");
             EyesSeleniumUtils::setViewportSize(new Logger(), $driver, $size);
@@ -961,7 +961,7 @@ void drive(WebDriver driver);
     protected function getInferredEnvironment() {
         $userAgent = $this->driver->getUserAgent();
         if ($this->userAgent != null) {
-            return "useragent:" . $this->userAgent;
+            return "useragent:" . $userAgent;
         }
 
         return null;
