@@ -2,6 +2,7 @@
 require '../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/EyesBase.php';
 require "StitchMode.php";
 require "MoveToRegionVisibilityStrategy.php";
+require "EyesWebDriver.php";
 /**
  * The main API gateway for the SDK.
  */

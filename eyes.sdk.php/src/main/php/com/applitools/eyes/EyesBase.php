@@ -8,8 +8,12 @@ require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/A
 require "../../eyes/eyes.php/eyes.images.php/src/main/php/com/applitools/eyes/EyesImagesScreenshot.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProvider.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/MatchWindowTask.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/InvalidPositionProvider.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Region.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/SimplePropertyHandler.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullScaleProvider.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ImageMatchSettings.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/FailureReports.php";
 class EyesBase {
 
     const SEQUENTIAL = "aaa";  ///Session type ???
@@ -53,21 +57,20 @@ class EyesBase {
         $this->logger = new Logger();
 
         $scaleProviderHandler = new SimplePropertyHandler();
-        //$scaleProviderHandler->set(new NullScaleProvider());
-            /*   positionProvider = new InvalidPositionProvider();
-              scaleMethod = ScaleMethod.getDefault();
-              */
+        $scaleProviderHandler->set(new NullScaleProvider());
+        $positionProvider = new InvalidPositionProvider();
+        $scaleMethod = ScaleMethod::getDefault();
         $this->viewportSize = null;
 
         $logger = new Logger();
         $this->serverConnector = ServerConnectorFactory::create($logger, $this->getBaseAgentId(), $serverUrl);
 
         $this->matchTimeout = self::DEFAULT_MATCH_TIMEOUT;
-   /*     runningSession = null;
-        defaultMatchSettings = new ImageMatchSettings();
-        failureReports = FailureReports.ON_CLOSE;
-        userInputs = new ArrayDeque<Trigger>();
-*/
+        $runningSession = null;
+        $defaultMatchSettings = new ImageMatchSettings();
+        $failureReports = FailureReports::ON_CLOSE;
+        //$userInputs = new ArrayDeque<Trigger>();
+
         // New tests are automatically saved by default.
         $this->saveNewTests = true;
         $this->saveFailedTests = false;
