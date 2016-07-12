@@ -3,14 +3,17 @@ require '../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/EyesB
 require "StitchMode.php";
 require "MoveToRegionVisibilityStrategy.php";
 require "EyesWebDriver.php";
+require "FrameChain.php";
+
 /**
  * The main API gateway for the SDK.
  */
-class Eyes extends EyesBase {
+class Eyes extends EyesBase
+{
 
-/*public interface WebDriverAction {
-void drive(WebDriver driver);
-}*/
+    /*public interface WebDriverAction {
+    void drive(WebDriver driver);
+    }*/
 
     const UNKNOWN_DEVICE_PIXEL_RATIO = 0;
     const DEFAULT_DEVICE_PIXEL_RATIO = 1;
@@ -34,7 +37,7 @@ void drive(WebDriver driver);
     private $checkFrameOrElement;
     private $regionToCheck; //RegionProvider
     private $hideScrollbars;
-	private $rotation; //ImageRotation
+    private $rotation; //ImageRotation
     private $devicePixelRatio;
     private $stitchMode; //StitchMode
     private $waitBeforeScreenshots;
@@ -65,12 +68,11 @@ void drive(WebDriver driver);
         $this->stitchMode = StitchMode::SCROLL;
         $this->waitBeforeScreenshots = self::DEFAULT_WAIT_BEFORE_SCREENSHOTS;
         $this->regionVisibilityStrategy = new MoveToRegionVisibilityStrategy($this->logger);
-}
+    }
 
 
-
-
-    public function getBaseAgentId() {
+    public function getBaseAgentId()
+    {
         return "eyes.selenium.java/2.50";
     }
 
@@ -80,14 +82,16 @@ void drive(WebDriver driver);
      *
      * @param shouldForce Whether to force a full page screenshot or not.
      */
-    public function setForceFullPageScreenshot($shouldForce) {
+    public function setForceFullPageScreenshot($shouldForce)
+    {
         $this->forceFullPageScreenshot = $shouldForce;
     }
 
     /**
      * @return Whether Eyes should force a full page screenshot.
      */
-    public function getForceFullPageScreenshot() {
+    public function getForceFullPageScreenshot()
+    {
         return $this->forceFullPageScreenshot;
     }
 
@@ -99,7 +103,8 @@ void drive(WebDriver driver);
      *                              smaller or equal to 0, will cause the
      *                              default value to be used.
      */
-    public function setWaitBeforeScreenshots($waitBeforeScreenshots) {
+    public function setWaitBeforeScreenshots($waitBeforeScreenshots)
+    {
         if ($waitBeforeScreenshots <= 0) {
             $this->waitBeforeScreenshots = self::DEFAULT_WAIT_BEFORE_SCREENSHOTS;
         } else {
@@ -111,7 +116,8 @@ void drive(WebDriver driver);
      *
      * @return The time to wait just before taking a screenshot.
      */
-    public function getWaitBeforeScreenshots() {
+    public function getWaitBeforeScreenshots()
+    {
         return $this->waitBeforeScreenshots;
     }
 
@@ -122,7 +128,8 @@ void drive(WebDriver driver);
      * @param shouldScroll Whether to automatically scroll to a region being
      *                     validated.
      */
-    public function setScrollToRegion($shouldScroll) {
+    public function setScrollToRegion($shouldScroll)
+    {
         if ($shouldScroll) {
             $this->regionVisibilityStrategy =
                 new MoveToRegionVisibilityStrategy($this->logger);
@@ -134,7 +141,8 @@ void drive(WebDriver driver);
     /**
      * @return Whether to automatically scroll to a region being validated.
      */
-    public function getScrollToRegion() {
+    public function getScrollToRegion()
+    {
         return !($this->regionVisibilityStrategy instanceof NopRegionVisibilityStrategy);
     }
 
@@ -145,7 +153,8 @@ void drive(WebDriver driver);
      *
      * @param mode The stitch mode to set.
      */
-    public function setStitchMode($mode) {
+    public function setStitchMode($mode)
+    {
         $this->stitchMode = $mode;
         if ($this->driver != null) {
             switch ($mode) {
@@ -164,7 +173,8 @@ void drive(WebDriver driver);
      *
      * @return The current stitch mode settings.
      */
-    public function getStitchMode() {
+    public function getStitchMode()
+    {
         return $this->stitchMode;
     }
 
@@ -172,7 +182,8 @@ void drive(WebDriver driver);
      * Hide the scrollbars when taking screenshots.
      * @param shouldHide Whether to hide the scrollbars or not.
      */
-    public function setHideScrollbars($shouldHide) {
+    public function setHideScrollbars($shouldHide)
+    {
         $this->hideScrollbars = $shouldHide;
     }
 
@@ -180,7 +191,8 @@ void drive(WebDriver driver);
      *
      * @return Whether or not scrollbars are hidden when taking screenshots.
      */
-    public function getHideScrollbars() {
+    public function getHideScrollbars()
+    {
         return $this->hideScrollbars;
     }
 
@@ -188,7 +200,8 @@ void drive(WebDriver driver);
      *
      * @return The image rotation data.
      */
-    public function getRotation() {
+    public function getRotation()
+    {
         return $this->rotation;
     }
 
@@ -196,7 +209,8 @@ void drive(WebDriver driver);
      *
      * @param rotation The image rotation data.
      */
-    public function setRotation(ImageRotation $rotation) {
+    public function setRotation(ImageRotation $rotation)
+    {
         $this->rotation = $rotation;
         if ($this->driver != null) {
             $this->driver->setRotation($rotation);
@@ -208,7 +222,8 @@ void drive(WebDriver driver);
      * @return The device pixel ratio, or {@link #UNKNOWN_DEVICE_PIXEL_RATIO}
      * if the DPR is not known yet or if it wasn't possible to extract it.
      */
-    public function getDevicePixelRatio() {
+    public function getDevicePixelRatio()
+    {
         return $this->devicePixelRatio;
     }
 
@@ -228,7 +243,8 @@ void drive(WebDriver driver);
      * frame handling.
      */
     public function open(WebDriver $driver, $appName, $testName,
-                          RectangleSize $viewportSize = null, SessionType $sessionType = null) {
+                         RectangleSize $viewportSize = null, SessionType $sessionType = null)
+    {
 
         if ($this->getIsDisabled()) {
             Logger::verbose("Ignored");
@@ -242,11 +258,11 @@ void drive(WebDriver driver);
         if ($driver instanceof RemoteWebDriver) {
             $this->driver = new EyesWebDriver($this->logger, $this, /*(RemoteWebDriver)*/ $driver);
         } else if ($driver instanceof EyesWebDriver) {
-                $this->driver = /*(EyesWebDriver)*/ $driver;
+            $this->driver = /*(EyesWebDriver)*/ $driver;
         } else {
-                $errMsg = "Driver is not a RemoteWebDriver (" . $driver->getClass()->getName() . ")";
-                Logger::log($errMsg);
-                throw new EyesException($errMsg);
+            $errMsg = "Driver is not a RemoteWebDriver (" . $driver->getClass()->getName() . ")";
+            Logger::log($errMsg);
+            throw new EyesException($errMsg);
         }
         $this->devicePixelRatio = self::UNKNOWN_DEVICE_PIXEL_RATIO;
 
@@ -259,7 +275,7 @@ void drive(WebDriver driver);
             default:
                 $scrollPositionnew = ScrollPositionProvider($this->logger, $this->driver);
                 $this->setPositionProvider($scrollPositionnew);
-            }
+        }
 
         $this->driver->setRotation($this->rotation);
         return $this->driver;
@@ -276,8 +292,9 @@ void drive(WebDriver driver);
      * @throws TestFailedException Thrown if a mismatch is detected and
      *                             immediate failure reports are enabled.
      */
-    public function checkWindow($matchTimeout, $tag) {
-        if(empty($matchTimeout)){
+    public function checkWindow($matchTimeout, $tag)
+    {
+        if (empty($matchTimeout)) {
             $matchTimeout = self::USE_DEFAULT_MATCH_TIMEOUT;
         }
 
@@ -303,7 +320,8 @@ void drive(WebDriver driver);
      *                       (i.e., the visible part of the document's body) or
      *                       {@code null} to use the current window's viewport.
      */
-    public function testWindow(WebDriver $driver, $appName = null, $testName, RectangleSize $viewportSize = null) {
+    public function testWindow(WebDriver $driver, $appName = null, $testName, RectangleSize $viewportSize = null)
+    {
         $this->open($driver, $appName, $testName, $viewportSize);
         try {
             $this->checkWindow($testName);
@@ -325,18 +343,19 @@ void drive(WebDriver driver);
      *                   loaded. (Seconds)
      */
     public function testResponseTime(WebDriver $driver, $appName,
-                                 $testName, WebDriverAction $action = null,
-                                 $deadline, $timeout, RectangleSize $viewportSize) {
-        if(empty($deadline)){
+                                     $testName, WebDriverAction $action = null,
+                                     $deadline, $timeout, RectangleSize $viewportSize)
+    {
+        if (empty($deadline)) {
             $deadline = self::RESPONSE_TIME_DEFAULT_DEADLINE;
         }
-        if(empty($timeout)){
+        if (empty($timeout)) {
             $timeout = $deadline + self::RESPONSE_TIME_DEFAULT_DIFF_FROM_DEADLINE;
         }
-        if(!empty($viewportSize)){
+        if (!empty($viewportSize)) {
             $his->setViewportSize($driver, $viewportSize);
         }
-        $this->open($driver, $appName, $testName, $SessionType::PROGRESSION);
+        $this->open($driver, $appName, $testName, SessionType::PROGRESSION);
         $runnableAction = null;
         if ($action != null) {
             $runnableAction = null;/*new Runnable() {
@@ -351,13 +370,14 @@ void drive(WebDriver driver);
         Logger::log("Checking if deadline was exceeded...");
         $deadlineExceeded = true;
         if ($result != null) {
-            $tao = /*TimedAppOutput*/ $result->getMatchWindowData()->getAppOutput();
+            $tao = /*TimedAppOutput*/
+                $result->getMatchWindowData()->getAppOutput();
             $resultElapsed = $tao->getElapsed();
             $deadlineMs = $deadline * 1000;
             Logger::log(sprintf("Deadline: %d, Elapsed time for match: %d", $deadlineMs, $resultElapsed));
             $deadlineExceeded = $resultElapsed > $deadlineMs;
         }
-        Logger::log("Deadline exceeded? "+ $deadlineExceeded);
+        Logger::log("Deadline exceeded? " + $deadlineExceeded);
 
         $this->closeResponseTime($deadlineExceeded);
     }
@@ -375,11 +395,12 @@ void drive(WebDriver driver);
      * @throws TestFailedException Thrown if a mismatch is detected and
      *                             immediate failure reports are enabled.
      */
-    public function checkRegion(Region $region, $matchTimeout = null, $tag = null, $stitchContent = null, $selector =  null) {
+    public function checkRegion(Region $region, $matchTimeout = null, $tag = null, $stitchContent = null, $selector = null)
+    {
 
         if ($this->getIsDisabled()) {
             Logger::log(sprintf("CheckRegion([%s], %d, '%s'): Ignored",
-                    $region, $matchTimeout, $tag));
+                $region, $matchTimeout, $tag));
             return;
         }
 
@@ -392,14 +413,14 @@ void drive(WebDriver driver);
         ArgumentGuard::notNull($region, "region");
 
         Logger::log(sprintf("CheckRegion([%s], %d, '%s')", $region,
-                $matchTimeout, $tag));
+            $matchTimeout, $tag));
 
         $regionProvider = RegionProvider();
         parent::checkWindowBase(
-                $regionProvider,
-                $tag,
-                false,
-                $matchTimeout
+            $regionProvider,
+            $tag,
+            false,
+            $matchTimeout
         );
         Logger::log("Done! trying to scroll back to original position..");
         $this->regionVisibilityStrategy->returnToOriginalPosition($positionProvider); /// ????
@@ -426,12 +447,14 @@ void drive(WebDriver driver);
      *                      {@link #checkElement(By, int, String)} on the
      *                      region.
      */
-    public function checkRegionInFrameSelector(/*may be WebElement*/$frameIndex, By $selector, $matchTimeout = null, $tag = null, $stitchContent = null) {
+    public function checkRegionInFrameSelector(/*may be WebElement*/
+        $frameIndex, By $selector, $matchTimeout = null, $tag = null, $stitchContent = null)
+    {
         if ($this->getIsDisabled()) {
             Logger::log(sprintf("CheckRegionInFrame(%d, selector, %d, '%s'): Ignored", $frameIndex, $matchTimeout, $tag));
             return;
         }
-        if(empty($matchTimeout)){
+        if (empty($matchTimeout)) {
             $matchTimeout = self::USE_DEFAULT_MATCH_TIMEOUT;
         }
         $this->driver->switchTo()->frame($frameIndex);
@@ -444,13 +467,11 @@ void drive(WebDriver driver);
     }
 
 
-
-
-
     /**
      * Updates the state of scaling related parameters.
      */
-    protected function updateScalingParams() {
+    protected function updateScalingParams()
+    {
         if ($this->devicePixelRatio == self::UNKNOWN_DEVICE_PIXEL_RATIO) {
             Logger::log("Trying to extract device pixel ratio...");
             try {
@@ -470,7 +491,7 @@ void drive(WebDriver driver);
                 // This can happen in Appium for example.
                 Logger::log("Failed to set ContextBasedScaleProvider.");
                 Logger::log("Using FixedScaleProvider instead...");
-                $this->scaleProviderHandler->set(new FixedScaleProvider(1/devicePixelRatio));
+                $this->scaleProviderHandler->set(new FixedScaleProvider(1 / devicePixelRatio));
             }
             Logger::log("Done!");
         }
@@ -483,7 +504,8 @@ void drive(WebDriver driver);
      *                     (Milliseconds)
      * @param tag An optional tag to be associated with the snapshot.
      */
-    protected function checkCurrentFrame($matchTimeout, $tag) {
+    protected function checkCurrentFrame($matchTimeout, $tag)
+    {
         try {
             Logger::log(sprintf("CheckCurrentFrame(%d, '%s')", $matchTimeout, $tag));
 
@@ -529,20 +551,21 @@ void drive(WebDriver driver);
      *                     (Milliseconds)
      * @param tag An optional tag to be associated with the match.
      */
-    public function checkFrame($frameNameOrIdOrIndex, $matchTimeout, $tag) {
+    public function checkFrame($frameNameOrIdOrIndex, $matchTimeout, $tag)
+    {
         if ($this->getIsDisabled()) {
             Logger::log(sprintf("CheckFrame(%s, %d, '%s'): Ignored",
-                    $frameNameOrIdOrIndex, $matchTimeout, $tag));
+                $frameNameOrIdOrIndex, $matchTimeout, $tag));
             return;
         }
-        if(empty($matchTimeout)){
+        if (empty($matchTimeout)) {
             $matchTimeout = self::USE_DEFAULT_MATCH_TIMEOUT;
         }
 
         ArgumentGuard::notNull($frameNameOrIdOrIndex, "frameNameOrId");
 
         Logger::log(sprintf("CheckFrame(%s, %d, '%s')",
-                $frameNameOrIdOrIndex, $matchTimeout, $tag));
+            $frameNameOrIdOrIndex, $matchTimeout, $tag));
 
         Logger::log("Switching to frame with name/id/index: " . $frameNameOrIdOrIndex .
             " ...");
@@ -565,36 +588,36 @@ void drive(WebDriver driver);
      * @param matchTimeout The amount of time to retry matching (milliseconds).
      * @param tag An optional tag to be associated with the match.
      */
-  /*  public void checkFrame(String[] framePath, int matchTimeout, String tag) {
-        if (getIsDisabled()) {
-            logger.log(String.format(
-                    "checkFrame(framePath, %d, '%s'): Ignored",
-                    matchTimeout,
-                    tag));
-            return;
-        }
-        ArgumentGuard.notNull(framePath, "framePath");
-        ArgumentGuard.greaterThanZero(framePath.length, "framePath.length");
-        logger.log(String.format(
-                "checkFrame(framePath, %d, '%s')", matchTimeout, tag));
-        FrameChain originalFrameChain = driver.getFrameChain();
-        // We'll switch into the PARENT frame of the frame we want to check,
-        // and call check frame.
-        logger.verbose("Switching to parent frame according to frames path..");
-        String[] parentFramePath = new String[framePath.length-1];
-        System.arraycopy(framePath, 0, parentFramePath, 0,
-            parentFramePath.length);
-        ((EyesTargetLocator)(driver.switchTo())).frames(parentFramePath);
-        logger.verbose("Done! Calling checkFrame..");
-        checkFrame(framePath[framePath.length - 1], matchTimeout, tag);
-        logger.verbose("Done! switching to default content..");
-        driver.switchTo().defaultContent();
-        logger.verbose("Done! Switching back into the original frame..");
-        ((EyesTargetLocator)(driver.switchTo())).frames(originalFrameChain);
-        logger.verbose("Done!");
-    }
-
-*/
+    /*  public void checkFrame(String[] framePath, int matchTimeout, String tag) {
+          if (getIsDisabled()) {
+              logger.log(String.format(
+                      "checkFrame(framePath, %d, '%s'): Ignored",
+                      matchTimeout,
+                      tag));
+              return;
+          }
+          ArgumentGuard.notNull(framePath, "framePath");
+          ArgumentGuard.greaterThanZero(framePath.length, "framePath.length");
+          logger.log(String.format(
+                  "checkFrame(framePath, %d, '%s')", matchTimeout, tag));
+          FrameChain originalFrameChain = driver.getFrameChain();
+          // We'll switch into the PARENT frame of the frame we want to check,
+          // and call check frame.
+          logger.verbose("Switching to parent frame according to frames path..");
+          String[] parentFramePath = new String[framePath.length-1];
+          System.arraycopy(framePath, 0, parentFramePath, 0,
+              parentFramePath.length);
+          ((EyesTargetLocator)(driver.switchTo())).frames(parentFramePath);
+          logger.verbose("Done! Calling checkFrame..");
+          checkFrame(framePath[framePath.length - 1], matchTimeout, tag);
+          logger.verbose("Done! switching to default content..");
+          driver.switchTo().defaultContent();
+          logger.verbose("Done! Switching back into the original frame..");
+          ((EyesTargetLocator)(driver.switchTo())).frames(originalFrameChain);
+          logger.verbose("Done!");
+      }
+  
+  */
     /**
      * Switches into the given frame, takes a snapshot of the application under
      * test and matches a region specified by the given selector.
@@ -611,13 +634,14 @@ void drive(WebDriver driver);
      *                      region.
      */
     public function checkRegionInFramePath($framePath = array(), By $selector,
-                                   $matchTimeout = null, $tag,
-                                   $stitchContent = false) {
+                                           $matchTimeout = null, $tag,
+                                           $stitchContent = false)
+    {
         if ($this->getIsDisabled()) {
             Logger::log(sprintf("checkRegionInFrame(framePath, selector, %d, '%s'): Ignored", $matchTimeout, $tag));
             return;
         }
-        if(empty($matchTimeout)){
+        if (empty($matchTimeout)) {
             $matchTimeout = self::USE_DEFAULT_MATCH_TIMEOUT;
         }
         ArgumentGuard::notNull($framePath, "framePath");
@@ -656,14 +680,17 @@ void drive(WebDriver driver);
      * @throws TestFailedException if a mismatch is detected and
      *                             immediate failure reports are enabled
      */
-    protected function checkElement(WebElement $element, $matchTimeout = null, $tag = null) {
+    protected function checkElement(WebElement $element, $matchTimeout = null, $tag = null)
+    {
         $originalOverflow = null;
 
         // Since the element might already have been found using EyesWebDriver.
         if ($element instanceof EyesRemoteWebElement) {
-            $eyesElement = /*(EyesRemoteWebElement)*/ $element;
+            $eyesElement = /*(EyesRemoteWebElement)*/
+                $element;
         } else {
-            $eyesElement = new EyesRemoteWebElement($this->logger, $driver, /*(RemoteWebElement)*/ $element);
+            $eyesElement = new EyesRemoteWebElement($this->logger, $driver, /*(RemoteWebElement)*/
+                $element);
         }
 
         $originalPositionProvider = $this->getPositionProvider();
@@ -702,18 +729,19 @@ void drive(WebDriver driver);
                 }
             };*/
             parent::checkWindowBase(
-                /*new RegionProvider() {
-                        public Region getRegion() {
-                            return Region.EMPTY;
-                        }
+            /*new RegionProvider() {
+                    public Region getRegion() {
+                        return Region.EMPTY;
+                    }
 
-                        public CoordinatesType getCoordinatesType() {
-                            return null;
-                        }
-                    }*/$regionToCheck,
-                    $tag,
-                    false,
-                    $matchTimeout
+                    public CoordinatesType getCoordinatesType() {
+                        return null;
+                    }
+                }*/
+                $regionToCheck,
+                $tag,
+                false,
+                $matchTimeout
             );
         } finally {
             if ($originalOverflow != null) {
@@ -735,7 +763,8 @@ void drive(WebDriver driver);
      *                relative coordinates).
      * @param cursor  The cursor's position relative to the control.
      */
-    protected function addMouseTriggerCursor(MouseAction $action, Region $control, Location $cursor) {
+    protected function addMouseTriggerCursor(MouseAction $action, Region $control, Location $cursor)
+    {
         if ($this->getIsDisabled()) {
             Logger::log(sprintf("Ignoring %s (disabled)", $action));
             return;
@@ -744,11 +773,13 @@ void drive(WebDriver driver);
         // Triggers are actually performed on the previous window.
         if ($this->lastScreenshot == null) {
             Logger::log(sprintf("Ignoring %s (no screenshot)",
-                    $action));
+                $action));
             return;
         }
 
-        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), /*(EyesWebDriverScreenshot) */$this->lastScreenshot.getFrameChain())) {
+        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), /*(EyesWebDriverScreenshot) */
+            $this->lastScreenshot . getFrameChain())
+        ) {
             Logger::log(sprintf("Ignoring %s (different frame)", $action));
             return;
         }
@@ -761,7 +792,8 @@ void drive(WebDriver driver);
      * @param action  Mouse action.
      * @param element The WebElement on which the click was called.
      */
-    protected function addMouseTriggerElement(MouseAction $action, WebElement $element) {
+    protected function addMouseTriggerElement(MouseAction $action, WebElement $element)
+    {
         if ($this->getIsDisabled()) {
             Logger::log(sprintf("Ignoring %s (disabled)", $action));
             return;
@@ -781,7 +813,9 @@ void drive(WebDriver driver);
         }
 
         if (!FrameChain::isSameFrameChain($driver->getFrameChain(),
-                /*(EyesWebDriverScreenshot)*/ $lastScreenshot->getFrameChain())) {
+            /*(EyesWebDriverScreenshot)*/
+            $lastScreenshot->getFrameChain())
+        ) {
             Logger::log(sprintf("Ignoring %s (different frame)", $action));
             return;
         }
@@ -789,7 +823,7 @@ void drive(WebDriver driver);
         // Get the element region which is intersected with the screenshot,
         // so we can calculate the correct cursor position.
         $elementRegion = $this->lastScreenshot->getIntersectedRegion
-            ($elementRegion, CoordinatesType::CONTEXT_RELATIVE);
+        ($elementRegion, CoordinatesType::CONTEXT_RELATIVE);
 
         $this->addMouseTriggerBase($action, $elementRegion, $elementRegion->getMiddleOffset());
     }
@@ -800,7 +834,8 @@ void drive(WebDriver driver);
      * @param control The control's context-relative region.
      * @param text    The trigger's text.
      */
-    protected function addTextTriggerControl($control, $text) {
+    protected function addTextTriggerControl($control, $text)
+    {
         if ($this->getIsDisabled()) {
             Logger::verbose(sprintf("Ignoring '%s' (disabled)", text));
             return;
@@ -812,7 +847,9 @@ void drive(WebDriver driver);
         }
 
         if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(),
-                /*(EyesWebDriverScreenshot) */$lastScreenshot->getFrameChain())) {
+            /*(EyesWebDriverScreenshot) */
+            $lastScreenshot->getFrameChain())
+        ) {
             Logger::log(sprintf("Ignoring '%s' (different frame)", $text));
             return;
         }
@@ -825,7 +862,8 @@ void drive(WebDriver driver);
      * @param element The element for which we sent keys.
      * @param text    The trigger's text.
      */
-    protected function addTextTriggerElement(WebElement $element, $text) {
+    protected function addTextTriggerElement(WebElement $element, $text)
+    {
         if ($this->getIsDisabled()) {
             Logger::log(spirntf("Ignoring '%s' (disabled)", $text));
             return;
@@ -850,11 +888,12 @@ void drive(WebDriver driver);
      * @param driver The driver to use for getting the viewport.
      * @return The viewport size of the current context.
      */
-    public function getViewportSize(WebDriver $driver = null) {
+    public function getViewportSize(WebDriver $driver = null)
+    {
         ArgumentGuard::notNull($this->driver, "driver");
-        if(!empty($driver)){
+        if (!empty($driver)) {
             return EyesSeleniumUtils::extractViewportSize($this->logger, $$this->driver);
-        }else{
+        } else {
             return $driver->getDefaultContentViewportSize();
         }
     }
@@ -865,8 +904,9 @@ void drive(WebDriver driver);
      *
      * {@inheritDoc}
      */
-    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size = null) {
-        if(!empty($driver)){
+    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size = null)
+    {
+        if (!empty($driver)) {
             ArgumentGuard::notNull($driver, "driver");
             EyesSeleniumUtils::setViewportSize(new Logger(), $driver, $size);
             return;
@@ -880,17 +920,20 @@ void drive(WebDriver driver);
         try {
             EyesSeleniumUtils::setViewportSize($this->logger, $this->driver, $size);
         } catch (EyesException $e) {
-        // Just in case the user catches this error
-        /*(EyesTargetLocator)*/ $this->driver->switchTo()->frames($originalFrame);
+            // Just in case the user catches this error
+            /*(EyesTargetLocator)*/
+            $this->driver->switchTo()->frames($originalFrame);
 
             throw new TestFailedException("Failed to set the viewport size", e);
         }
-        /*(EyesTargetLocator)*/ $this->driver->switchTo()->frames($originalFrame);
+        /*(EyesTargetLocator)*/
+        $this->driver->switchTo()->frames($originalFrame);
         $this->viewportSize = new RectangleSize($size->getWidth(), $size->getHeight());
     }
 
 
-    protected function getScreenshot() {
+    protected function getScreenshot()
+    {
 
         Logger::log("getScreenshot()");
 
@@ -907,9 +950,9 @@ void drive(WebDriver driver);
                 Logger::log("Check frame/element requested");
                 $algo = new FullPageCaptureAlgorithm($this->logger);
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $regionToCheck,
-                        $positionProvider, $positionProvider,
-                        $scaleProviderHandler->get(),
-                        $this->getWaitBeforeScreenshots(), $screenshotFactory);
+                    $positionProvider, $positionProvider,
+                    $scaleProviderHandler->get(),
+                    $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 Logger::log("Building screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
                     new RectangleSize($entireFrameOrElement->getWidth(), $entireFrameOrElement->getHeight()));
@@ -921,11 +964,12 @@ void drive(WebDriver driver);
                 $algo = new FullPageCaptureAlgorithm($this->logger);
                 $regionProvider = new RegionProvider();
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
-                        new ScrollPositionProvider($this->logger, $this->driver),
-                        $positionProvider, $scaleProviderHandler->get(),
-                        $regionProvidergetWaitBeforeScreenshots(), $screenshotFactory);
+                    new ScrollPositionProvider($this->logger, $this->driver),
+                    $positionProvider, $scaleProviderHandler->get(),
+                    $regionProvidergetWaitBeforeScreenshots(), $screenshotFactory);
 
-                /*(EyesTargetLocator)*/ $this->driver->switchTo()->frames($originalFrame);
+                /*(EyesTargetLocator)*/
+                $this->driver->switchTo()->frames($originalFrame);
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);
             } else {
                 Logger::verbose("Screenshot requested...");
@@ -946,7 +990,8 @@ void drive(WebDriver driver);
         }
     }
 
-    protected function getTitle() {
+    protected function getTitle()
+    {
         if (!$this->dontGetTitle) {
             try {
                 return $this->driver->getTitle();
@@ -959,7 +1004,8 @@ void drive(WebDriver driver);
         return "";
     }
 
-    protected function getInferredEnvironment() {
+    protected function getInferredEnvironment()
+    {
         $userAgent = $this->driver->getUserAgent();
         if ($this->userAgent != null) {
             return "useragent:" . $userAgent;
@@ -973,7 +1019,8 @@ void drive(WebDriver driver);
      *
      * This override also checks for mobile operating system.
      */
-    protected function getAppEnvironment() {
+    protected function getAppEnvironment()
+    {
 
         $appEnv = parent::getAppEnvironment();
         $underlyingDriver = $this->driver->getRemoteWebDriver();

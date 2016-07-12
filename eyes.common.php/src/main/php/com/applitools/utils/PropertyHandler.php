@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Encapsulates getter/setter behavior. (e.g., set only once etc.).
  */
-interface PropertyHandler {
+interface PropertyHandler
+{
     /**
      *
      * @param obj The object to set.

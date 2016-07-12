@@ -5,7 +5,8 @@
 //require "ArgumentGuard.php";
 //require "Logger.php";
 
-class MatchWindowTask {
+class MatchWindowTask
+{
 
     const MATCH_INTERVAL = 500; // Milliseconds
 
@@ -16,18 +17,20 @@ class MatchWindowTask {
 
 
     /**
-    * @param logger            A logger instance.
-    * @param serverConnector   Our gateway to the agent
-    * @param runningSession    The running session in which we should match the
-    *                          window
-    * @param retryTimeout      The default total time we tell the agent to ignore
-    *                          mismatches.
-    * @param appOutputProvider A callback for getting the application output
-    *                          when performing match
-    */
-    public function __construct(/*Logger logger, */ServerConnector $serverConnector,
+     * @param logger            A logger instance.
+     * @param serverConnector   Our gateway to the agent
+     * @param runningSession    The running session in which we should match the
+     *                          window
+     * @param retryTimeout      The default total time we tell the agent to ignore
+     *                          mismatches.
+     * @param appOutputProvider A callback for getting the application output
+     *                          when performing match
+     */
+    public function __construct(/*Logger logger, */
+        ServerConnector $serverConnector,
         RunningSession $runningSession, $retryTimeout,
-        AppOutputProvider $appOutputProvider) {
+        AppOutputProvider $appOutputProvider)
+    {
         ArgumentGuard::notNull($serverConnector, "serverConnector");
         ArgumentGuard::notNull($runningSession, "runningSession");
         ArgumentGuard::greaterThanOrEqualToZero($retryTimeout, "retryTimeout");
@@ -41,51 +44,55 @@ class MatchWindowTask {
     }
 
     /**
-    * Creates the match data and calls the server connector matchWindow method.
-    *
-    * @param userInputs     The user inputs related to the current appOutput.
-    * @param appOutput      The application output to be matched.
-    * @param tag            Optional tag to be associated with the match (can
-    *                       be {@code null}).
-    * @param ignoreMismatch Whether to instruct the server to ignore the
-    *                       match attempt in case of a mismatch.
-    * @return The match result.
-    */
-    protected function performMatch(/*Trigger[] */$userInputs,
-    AppOutputWithScreenshot $appOutput,
-    $tag, $ignoreMismatch) {
+     * Creates the match data and calls the server connector matchWindow method.
+     *
+     * @param userInputs     The user inputs related to the current appOutput.
+     * @param appOutput      The application output to be matched.
+     * @param tag            Optional tag to be associated with the match (can
+     *                       be {@code null}).
+     * @param ignoreMismatch Whether to instruct the server to ignore the
+     *                       match attempt in case of a mismatch.
+     * @return The match result.
+     */
+    protected function performMatch(/*Trigger[] */
+        $userInputs,
+        AppOutputWithScreenshot $appOutput,
+        $tag, $ignoreMismatch)
+    {
 
-    // Prepare match data.
-    $data = new MatchWindowData($userInputs, $appOutput->getAppOutput(), $tag, $ignoreMismatch,
-    new MatchWindowData.Options(tag, userInputs,ignoreMismatch, false, false, false));
+        // Prepare match data.
+        $data = new MatchWindowData($userInputs, $appOutput->getAppOutput(), $tag, $ignoreMismatch,
+            new MatchWindowData . Options(tag, userInputs, ignoreMismatch, false, false, false));
 
-    // Perform match.
-    return $this->serverConnector->matchWindow($this->runningSession, $data);
+        // Perform match.
+        return $this->serverConnector->matchWindow($this->runningSession, $data);
     }
 
     /**
-    * Repeatedly obtains an application snapshot and matches it with the next
-    * expected output, until a match is found or the timeout expires.
-    *
-    * @param userInputs                        User input preceding this match.
-    * @param lastScreenshot                    The last screenshot matched or
-    *                                          not ignored.
-    * @param regionProvider                    Window region to capture.
-    * @param tag                               Optional tag to be associated with
-    *                                          the match (can be {@code null}).
-    * @param shouldMatchWindowRunOnceOnTimeout Force a single match attempt at the
-    *                                          end of the match timeout.
-    * @param ignoreMismatch                    Whether to instruct the server to
-    *                                          ignore the match attempt in case
-    *                                          of a mismatch.
-    * @param retryTimeout                      The amount of time to retry
-    *                                          matching in milliseconds or a
-    *                                          negative value to use the default
-    *                                          retry timeout.
-    * @return Returns the results of the match
-    */
-    public function matchWindow(/*Trigger[]*/ $userInputs, EyesScreenshot $lastScreenshot,
-        RegionProvider $regionProvider, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout) {
+     * Repeatedly obtains an application snapshot and matches it with the next
+     * expected output, until a match is found or the timeout expires.
+     *
+     * @param userInputs                        User input preceding this match.
+     * @param lastScreenshot                    The last screenshot matched or
+     *                                          not ignored.
+     * @param regionProvider                    Window region to capture.
+     * @param tag                               Optional tag to be associated with
+     *                                          the match (can be {@code null}).
+     * @param shouldMatchWindowRunOnceOnTimeout Force a single match attempt at the
+     *                                          end of the match timeout.
+     * @param ignoreMismatch                    Whether to instruct the server to
+     *                                          ignore the match attempt in case
+     *                                          of a mismatch.
+     * @param retryTimeout                      The amount of time to retry
+     *                                          matching in milliseconds or a
+     *                                          negative value to use the default
+     *                                          retry timeout.
+     * @return Returns the results of the match
+     */
+    public function matchWindow(/*Trigger[]*/
+        $userInputs, EyesScreenshot $lastScreenshot,
+        RegionProvider $regionProvider, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout)
+    {
 
         //AppOutputWithScreenshot $appOutput;
         //MatchResult $matchResult;
@@ -147,15 +154,15 @@ class MatchWindowTask {
             if (!$matchResult->getAsExpected()) {
 
                 $appOutput = $appOutputProvider->getAppOutput($regionProvider,
-                $lastScreenshot);
+                    $lastScreenshot);
 
                 $matchResult = performMatch($userInputs, $appOutput, $tag,
-                $ignoreMismatch);
+                    $ignoreMismatch);
             }
         }
         $elapsedTime = (microtime() - $elapsedTimeStart) / 1000;
         Logger::log(sprintf("Completed in  %.2f seconds", $elapsedTime));
-        $matchResult->setScreenshot($appOutput.getScreenshot());
+        $matchResult->setScreenshot($appOutput . getScreenshot());
         return $matchResult;
     }
 }

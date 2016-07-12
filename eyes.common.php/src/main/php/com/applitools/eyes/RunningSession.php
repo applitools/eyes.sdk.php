@@ -1,38 +1,46 @@
 <?php
+
 /**
  * Encapsulates data for the session currently running in the agent.
  */
-class RunningSession {
+class RunningSession
+{
     private $isNewSession;
     private $id;
     private $url;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->isNewSession = false;
     }
 
-
-    public function getIsNewSession() {
+    public function getIsNewSession()
+    {
         return $this->isNewSession;
     }
 
-    public function setIsNewSession($isNewSession) {
+    public function setIsNewSession($isNewSession)
+    {
         $this->isNewSession = $isNewSession;
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function setId($id) {
+    public function setId($id)
+    {
         $this->id = $id;
     }
 
-    public function getUrl() {
+    public function getUrl()
+    {
         return $this->url;
     }
 
-    public function setUrl($url) {
+    public function setUrl($url)
+    {
         $this->url = $url;
     }
 }

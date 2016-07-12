@@ -1,8 +1,10 @@
 <?php
+
 /**
  * The list of possible scaling methods.
  */
-class ScaleMethod {
+class ScaleMethod
+{
     private $method;
 
     const SPEED = "SPEED";
@@ -10,17 +12,19 @@ class ScaleMethod {
     const ULTRA_QUALITY = "ULTRA_QUALITY";
 
 
-    public static function getDefault() {
+    public static function getDefault()
+    {
         $method = new self(self::SPEED);
         return $method;
     }
 
     function __construct($method)
     {
-        $this->method = constant('self::'.$method);
+        $this->method = constant('self::' . $method);
     }
 
-    public function getMethod() {
+    public function getMethod()
+    {
         return $this->method;
     }
 }

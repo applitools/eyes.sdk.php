@@ -8,7 +8,10 @@
  * We named this class EyesSeleniumUtils because there's a SeleniumUtils
  * class, and it caused collision.
  */
-public class EyesSeleniumUtils {
+public
+
+class EyesSeleniumUtils
+{
     // See Applitools WiKi for explanation.
     const JS_GET_VIEWPORT_SIZE =
         "var height = undefined;"
@@ -65,7 +68,8 @@ public class EyesSeleniumUtils {
      * @param coordinates The coordinates from which location is extracted.
      * @return The location relative to the entire page
      */
-    public static function getPageLocation(Coordinates $coordinates) {
+    public static function getPageLocation(Coordinates $coordinates)
+    {
         if ($coordinates == null) {
             return null;
         }
@@ -80,12 +84,13 @@ public class EyesSeleniumUtils {
      * @param coordinates The coordinates from which location is extracted.
      * @return The location relative to the viewport.
      */
-    public static function getViewportLocation(Coordinates $coordinates) {
-    if ($coordinates == null) {
-        return null;
-    }
+    public static function getViewportLocation(Coordinates $coordinates)
+    {
+        if ($coordinates == null) {
+            return null;
+        }
 
-    $p = $coordinates->inViewPort();
+        $p = $coordinates->inViewPort();
         return new Location($p->getX(), $p->getY());
     }
 
@@ -96,7 +101,8 @@ public class EyesSeleniumUtils {
      * @return {@code true} if the platform running the test is a mobile
      * platform. {@code false} otherwise.
      */
-    public static function isMobileDevice(WebDriver $driver) {
+    public static function isMobileDevice(WebDriver $driver)
+    {
         return $driver instanceof AppiumDriver;
     }
 
@@ -105,10 +111,12 @@ public class EyesSeleniumUtils {
      * @return {@code true} if this is a mobile device and is in landscape
      * orientation. {@code false} otherwise.
      */
-    public static function isLandscapeOrientation(WebDriver $driver) {
+    public static function isLandscapeOrientation(WebDriver $driver)
+    {
         // We can only find orientation for mobile devices.
         if (self::isMobileDevice($driver)) {
-            $appiumDriver = /*(AppiumDriver)*/ $driver;
+            $appiumDriver = /*(AppiumDriver)*/
+                $driver;
 
             try {
                 // We must be in native context in order to ask for orientation,
@@ -128,8 +136,8 @@ public class EyesSeleniumUtils {
 
                 return $orientation == ScreenOrientation::LANDSCAPE;
             } catch (Exception e) {
-            throw new EyesDriverOperationException(
-                "Failed to get orientation!", $e);
+                throw new EyesDriverOperationException(
+                    "Failed to get orientation!", $e);
             }
         }
 
@@ -142,17 +150,18 @@ public class EyesSeleniumUtils {
      * @param value The overflow value to set.
      * @return The previous overflow value (could be {@code null} if undefined).
      */
-    public static function setOverflow(JavascriptExecutor $executor, $value) {
+    public static function setOverflow(JavascriptExecutor $executor, $value)
+    {
         if ($value == null) {
             $script = "var origOverflow = document.documentElement.style.overflow; "
                 . "document.documentElement.style.overflow = undefined;"
                 . " return origOverflow";
         } else {
             $script = sprintf("var origOverflow = document.documentElement.style.overflow; " .
-                    "document.documentElement.style.overflow = \"%s\"; " .
-                    "return origOverflow", $value);
+                "document.documentElement.style.overflow = \"%s\"; " .
+                "return origOverflow", $value);
         }
-        return (string) $executor->executeScript($script);
+        return (string)$executor->executeScript($script);
     }
 
     /**
@@ -166,7 +175,8 @@ public class EyesSeleniumUtils {
      * @return The previous value of the overflow property (could be
      *          {@code null}).
      */
-    public static function hideScrollbars(JavascriptExecutor $executor, $stabilizationTimeout) {
+    public static function hideScrollbars(JavascriptExecutor $executor, $stabilizationTimeout)
+    {
         $originalOverflow = self::setOverflow($executor, "hidden");
         if ($stabilizationTimeout > 0) {
             try { //??????
@@ -183,9 +193,12 @@ public class EyesSeleniumUtils {
      * @param executor The executor to use.
      * @return The current scroll position of the current frame.
      */
-    public static function getCurrentScrollPosition(JavascriptExecutor $executor) {
+    public static function getCurrentScrollPosition(JavascriptExecutor $executor)
+    {
         //noinspection unchecked
-        /*List<Long> */$positionAsList = /*(List<Long>)*/ $executor->executeScript(self::JS_GET_CURRENT_SCROLL_POSITION);
+        /*List<Long> */
+        $positionAsList = /*(List<Long>)*/
+            $executor->executeScript(self::JS_GET_CURRENT_SCROLL_POSITION);
         return new Location($positionAsList->get(0)->intValue(), $positionAsList->get(1)->intValue());
     }
 
@@ -194,7 +207,8 @@ public class EyesSeleniumUtils {
      * @param executor The executor to use.
      * @param location The position to be set.
      */
-    public static function setCurrentScrollPosition(JavascriptExecutor $executor, Location $location) {
+    public static function setCurrentScrollPosition(JavascriptExecutor $executor, Location $location)
+    {
         $executor->executeScript(sprintf("window.scrollTo(%d,%d)", $location->getX(), $location->getY()));
     }
 
@@ -203,11 +217,14 @@ public class EyesSeleniumUtils {
      * @param executor The executor to use.
      * @return The size of the entire content.
      */
-    public static function getCurrentFrameContentEntireSize(JavascriptExecutor $executor) {
+    public static function getCurrentFrameContentEntireSize(JavascriptExecutor $executor)
+    {
         try {
             //noinspection unchecked
-            /*List<Long> */$esAsList =
-                /*(List<Long>)*/ $executor->executeScript(self::JS_GET_CONTENT_ENTIRE_SIZE);
+            /*List<Long> */
+            $esAsList =
+                /*(List<Long>)*/
+                $executor->executeScript(self::JS_GET_CONTENT_ENTIRE_SIZE);
             if ($esAsList->size() <= 0) {
                 throw new EyesDriverOperationException(
                     "Received empty value as frame's size");
@@ -225,9 +242,12 @@ public class EyesSeleniumUtils {
      * @param executor The executor to use.
      * @return The viewport size.
      */
-    public static function executeViewportSizeExtraction(JavascriptExecutor $executor) {
+    public static function executeViewportSizeExtraction(JavascriptExecutor $executor)
+    {
         //noinspection unchecked
-        /*List<Long> */$vsAsList = /*(List<Long>) */$executor->executeScript(self::JS_GET_VIEWPORT_SIZE);
+        /*List<Long> */
+        $vsAsList = /*(List<Long>) */
+            $executor->executeScript(self::JS_GET_VIEWPORT_SIZE);
         return new RectangleSize($vsAsList->get(0)->intValue(), $vsAsList->get(1)->intValue());
     }
 
@@ -236,12 +256,14 @@ public class EyesSeleniumUtils {
      * @param driver The web driver to use.
      * @return The viewport size of the current context.
      */
-    public static function extractViewportSize(Logger $logger, WebDriver $driver) {
+    public static function extractViewportSize(Logger $logger, WebDriver $driver)
+    {
         $logger->log("extractViewportSize()");
 
         try {
-            return executeViewportSizeExtraction(/*(JavascriptExecutor)*/ $driver);
-            } catch (Exception $ex) {
+            return executeViewportSizeExtraction(/*(JavascriptExecutor)*/
+                $driver);
+        } catch (Exception $ex) {
             $logger->verbose(sprintf("Failed to extract viewport size using Javascript: %s", $ex->getMessage()));
         }
         // If we failed to extract the viewport size using JS, will use the
@@ -259,7 +281,7 @@ public class EyesSeleniumUtils {
                 $height = $height2;
             }
         } catch (WebDriverException $e) {
-        // Not every WebDriver supports querying for orientation.
+            // Not every WebDriver supports querying for orientation.
         }
         Logger::log(sprintf("Done! Size %d x %d", $width, $height));
         return new RectangleSize($width, $height);
@@ -271,7 +293,8 @@ public class EyesSeleniumUtils {
      * @param driver The web driver to use.
      * @param size The size to set as the viepwort size.
      */
-    public static function setViewportSize(Logger $logger, WebDriver $driver, RectangleSize $size) {
+    public static function setViewportSize(Logger $logger, WebDriver $driver, RectangleSize $size)
+    {
         Logger::log("setViewportSize(" . $size . ")");
 
         ArgumentGuard::notNull($size, "size");
@@ -288,7 +311,8 @@ public class EyesSeleniumUtils {
 
         // If the viewport size is already the required size
         if ($size->getWidth() == $actualViewportSize->getWidth() &&
-            $size->getHeight() == $actualViewportSize->getHeight()) {
+            $size->getHeight() == $actualViewportSize->getHeight()
+        ) {
             Logger::log("Required size already set.");
             return;
         }
@@ -296,7 +320,7 @@ public class EyesSeleniumUtils {
         $browserSize = $driver->manage()->window()->getSize();
         Logger::log("Current browser size: " . $browserSize);
         $requiredBrowserSize = new Dimension($browserSize->width + ($size->getWidth() - $actualViewportSize->getWidth()),
-        $browserSize->height + ($size->getHeight() - $actualViewportSize->getHeight()));
+            $browserSize->height + ($size->getHeight() - $actualViewportSize->getHeight()));
         Logger::log("Trying to set browser size to: " . $requiredBrowserSize);
 
         $retriesLeft = RETRIES;
@@ -314,27 +338,27 @@ public class EyesSeleniumUtils {
         $actualViewportSize = extractViewportSize($logger, $driver);
         $logger::log("Current viewport size: " . $actualViewportSize);
         if (!actualViewportSize->equals($size)) {
-            // Additional attempt. This Solves the "maximized browser" bug
-            // (border size for maximized browser sometimes different than
-            // non-maximized, so the original browser size calculation is
-            // wrong).
-            Logger::log("Attempting one more time...");
-            $browserSize = $driver->manage()->window()->getSize();
-            $requiredBrowserSize = new Dimension($browserSize->width + ($size->getWidth() - $actualViewportSize->getWidth()),
-                $browserSize->height + ($size->getHeight() - $actualViewportSize->getHeight()));
+        // Additional attempt. This Solves the "maximized browser" bug
+        // (border size for maximized browser sometimes different than
+        // non-maximized, so the original browser size calculation is
+        // wrong).
+        Logger::log("Attempting one more time...");
+        $browserSize = $driver->manage()->window()->getSize();
+        $requiredBrowserSize = new Dimension($browserSize->width + ($size->getWidth() - $actualViewportSize->getWidth()),
+            $browserSize->height + ($size->getHeight() - $actualViewportSize->getHeight()));
 
-            Logger::log("Browser size: " . $browserSize);
-            Logger::log("Required browser size: " . $requiredBrowserSize);
+        Logger::log("Browser size: " . $browserSize);
+        Logger::log("Required browser size: " . $requiredBrowserSize);
 
-            $retriesLeft = RETRIES;
-            do {
-                $driver->manage()->window()->setSize($requiredBrowserSize);
-                GeneralUtils::sleep(SLEEP);
-                $actualViewportSize = self::extractViewportSize($logger, $driver);
-                Logger::log("Browser size: " . $driver->manage()->window()->getSize());
-                Logger::log("Viewport size: " . $actualViewportSize);
-            } while (--$retriesLeft > 0 && !$actualViewportSize->equals($size));
-        }
+        $retriesLeft = RETRIES;
+        do {
+            $driver->manage()->window()->setSize($requiredBrowserSize);
+            GeneralUtils::sleep(SLEEP);
+            $actualViewportSize = self::extractViewportSize($logger, $driver);
+            Logger::log("Browser size: " . $driver->manage()->window()->getSize());
+            Logger::log("Viewport size: " . $actualViewportSize);
+        } while (--$retriesLeft > 0 && !$actualViewportSize->equals($size));
+    }
 
         if (!$actualViewportSize->equals($size)) {
             throw new EyesException("Failed to set the viewport size.");
@@ -347,7 +371,8 @@ public class EyesSeleniumUtils {
      * @return {@code true} if the driver is an Android driver.
      * {@code false} otherwise.
      */
-    public static function isAndroid(WebDriver $driver) {
+    public static function isAndroid(WebDriver $driver)
+    {
         return $driver instanceof AndroidDriver;
     }
 
@@ -357,7 +382,8 @@ public class EyesSeleniumUtils {
      * @return {@code true} if the driver is an iOS driver.
      * {@code false} otherwise.
      */
-    public static function isIOS(WebDriver $driver) {
+    public static function isIOS(WebDriver $driver)
+    {
         return $driver instanceof IOSDriver;
     }
 
@@ -366,7 +392,8 @@ public class EyesSeleniumUtils {
      * @param driver The driver to get the platform version from.
      * @return The plaform version or {@code null} if it is undefined.
      */
-    public static function getPlatformVersion(HasCapabilities $driver) {
+    public static function getPlatformVersion(HasCapabilities $driver)
+    {
         $capabilities = $driver->getCapabilities();
         $platformVersionObj = $capabilities->getCapability(MobileCapabilityType::PLATFORM_VERSION);
 
@@ -377,8 +404,9 @@ public class EyesSeleniumUtils {
      * @param executor The executor to use.
      * @return The device pixel ratio.
      */
-    public static function getDevicePixelRatio(JavascriptExecutor $executor) {
-        return (float) $executor->executeScript("return window.devicePixelRatio")->toString();
+    public static function getDevicePixelRatio(JavascriptExecutor $executor)
+    {
+        return (float)$executor->executeScript("return window.devicePixelRatio")->toString();
     }
 
     /**
@@ -387,7 +415,9 @@ public class EyesSeleniumUtils {
      * @return The current documentElement transform values, according to
      * {@link #JS_TRANSFORM_KEYS}.
      */
-    public static /*Map<String, String>*/ function getCurrentTransform(JavascriptExecutor $executor) {
+    public static /*Map<String, String>*/
+    function getCurrentTransform(JavascriptExecutor $executor)
+    {
         $script = "return { ";
         for (String $key: JS_TRANSFORM_KEYS) { // ???????
             $script .= "'" . $key . "'" . ": document.documentElement.style['" . $key . "'],";
@@ -397,7 +427,8 @@ public class EyesSeleniumUtils {
         $script .= " }";
 
         //noinspection unchecked
-        return /*(Map<String, String>)*/ $executor->executeScript($script);
+        return /*(Map<String, String>)*/
+            $executor->executeScript($script);
 
     }
 
@@ -409,10 +440,13 @@ public class EyesSeleniumUtils {
      * @param transforms The transforms to set. Keys are used as style keys,
      *                   and values are the values for those styles.
      */
-    public static function setTransforms(JavascriptExecutor $executor, /*Map<String, String>*/ $transforms) {
+    public static function setTransforms(JavascriptExecutor $executor, /*Map<String, String>*/
+                                         $transforms)
+    {
 
         $script = "";
-        for (/*Map.Entry<String, String>*/ $entry : $transforms->entrySet()) { //??????
+        for (/*Map.Entry<String, String>*/
+            $entry : $transforms->entrySet()) { //??????
             $script .= "document.documentElement.style['" . $entry->getKey() . "'] = '" . $entry->getValue() . "';";
         }
         $executor->executeScript($script);
@@ -425,8 +459,11 @@ public class EyesSeleniumUtils {
      * @param executor The executor to use.
      * @param transform The transform value to set.
      */
-    public static function setTransform(JavascriptExecutor $executor, String $transform) {
-    /*Map<String, String>*/ $transforms = new /*HashMap<String, String>*/(JS_TRANSFORM_KEYS.length);
+    public static function setTransform(JavascriptExecutor $executor, String $transform)
+    {
+        /*Map<String, String>*/
+        $transforms = new /*HashMap<String, String>*/
+        (JS_TRANSFORM_KEYS . length);
 
         for (String key: JS_TRANSFORM_KEYS) {
             $transforms->put($key, $transform);
@@ -440,7 +477,8 @@ public class EyesSeleniumUtils {
      * @param executor The executor to use.
      * @param position The position to translate to.
      */
-    public static function translateTo(JavascriptExecutor $executor, Location $position) {
+    public static function translateTo(JavascriptExecutor $executor, Location $position)
+    {
         setTransform($executor, sprintf("translate(-%spx, -%spx)", $position->getX(), $position->getY()));
     }
 }

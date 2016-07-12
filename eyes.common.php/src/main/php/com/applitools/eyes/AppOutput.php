@@ -1,8 +1,10 @@
 <?php
+
 /**
  * An application output (title, image, etc).
  */
-class AppOutput {
+class AppOutput
+{
 
     /**
      * The title of the screen of the application being captured.
@@ -16,16 +18,19 @@ class AppOutput {
      *                     byte can be in either in compressed or
      *                     uncompressed form)
      */
-    public function __construct($title, $screenshot64) {
+    public function __construct($title, $screenshot64)
+    {
         $this->title = $title;
         $this->screenshot64 = $screenshot64;
     }
 
-    public function getTitle() {
+    public function getTitle()
+    {
         return $this->title;
     }
 
-    public function getScreenshot64() {
+    public function getScreenshot64()
+    {
         return $this->screenshot64;
     }
 }

@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Determines how detected failures are reported.
  */
-class FailureReports {
+class FailureReports
+{
     /**
      * Failures are reported immediately when they are detected.
      */

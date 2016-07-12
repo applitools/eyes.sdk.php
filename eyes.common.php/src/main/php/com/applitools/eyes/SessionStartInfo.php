@@ -1,9 +1,10 @@
 <?php
-/**
-* Encapsulates data required to start session using the Session API.
-*/
 
-class SessionStartInfo {
+/**
+ * Encapsulates data required to start session using the Session API.
+ */
+class SessionStartInfo
+{
     private $agentId;
     private $sessionType;
     private $appIdOrName;
@@ -16,12 +17,17 @@ class SessionStartInfo {
     private $parentBranchName;
     private $defaultMatchSettings;
 
-    public function __construct($agentId, /*SessionType*/ $sessionType,
-        $appIdOrName, $verId,
-        $scenarioIdOrName, /*BatchInfo*/ $batchInfo,
-        $envName, /*AppEnvironment*/ $environment,
-        /*ImageMatchSettings*/ $defaultMatchSettings,
-        $branchName, $parentBranchName) {
+    public function __construct($agentId, /*SessionType*/
+                                $sessionType,
+                                $appIdOrName, $verId,
+                                $scenarioIdOrName, /*BatchInfo*/
+                                $batchInfo,
+                                $envName, /*AppEnvironment*/
+                                $environment,
+        /*ImageMatchSettings*/
+                                $defaultMatchSettings,
+                                $branchName, $parentBranchName)
+    {
         /*ArgumentGuard.notNullOrEmpty(agentId, "agentId");
         ArgumentGuard.notNullOrEmpty(appIdOrName, "appIdOrName");
         ArgumentGuard.notNullOrEmpty(scenarioIdOrName, "scenarioIdOrName");
@@ -43,62 +49,73 @@ class SessionStartInfo {
         //huge mock/ should be deleted
 
 
-      /*  $this->appIdOrName = "App Id 1111";
-        $this->scenarioIdOrName = "Scenario Name 1111";
-        $this->branchName = "Branch name ";
-        $this->batchInfo = array("startedAt"=>date("Y-m-d\TH:i:s\Z"));
-        $this->environment = array(
-                "displaySize" => array(
-                    "width" => 1280,
-                    "height" => 800
-                )
-        );
-        $this->agentId = "mysdk/1.3";*/
+        /*  $this->appIdOrName = "App Id 1111";
+          $this->scenarioIdOrName = "Scenario Name 1111";
+          $this->branchName = "Branch name ";
+          $this->batchInfo = array("startedAt"=>date("Y-m-d\TH:i:s\Z"));
+          $this->environment = array(
+                  "displaySize" => array(
+                      "width" => 1280,
+                      "height" => 800
+                  )
+          );
+          $this->agentId = "mysdk/1.3";*/
 
 
     }
 
-    public function getAgentId() {
+    public function getAgentId()
+    {
         return $this->agentId;
     }
 
-    public function getSessionType() {
+    public function getSessionType()
+    {
         return $this->sessionType;
     }
 
-    public function getAppIdOrName() {
+    public function getAppIdOrName()
+    {
         return $this->appIdOrName;
     }
 
-    public function getVerId() {
+    public function getVerId()
+    {
         return $this->verId;
     }
 
-    public function getScenarioIdOrName() {
+    public function getScenarioIdOrName()
+    {
         return $this->scenarioIdOrName;
     }
 
-    public function getBatchInfo() {
-        return array("startedAt"=>$this->batchInfo->getStartedAt());
+    public function getBatchInfo()
+    {
+        return array("startedAt" => $this->batchInfo->getStartedAt());
     }
 
-    public function getEnvName() {
+    public function getEnvName()
+    {
         return $this->envName;
     }
 
-    public function getEnvironment() {
+    public function getEnvironment()
+    {
         return $this->environment;
     }
 
-    public function getBranchName() {
+    public function getBranchName()
+    {
         return $this->branchName;
     }
 
-    public function getParentBranchName() {
+    public function getParentBranchName()
+    {
         return $this->parentBranchName;
     }
 
-    public function getDefaultMatchSettings() {
+    public function getDefaultMatchSettings()
+    {
         return $this->defaultMatchSettings;
     }
 }

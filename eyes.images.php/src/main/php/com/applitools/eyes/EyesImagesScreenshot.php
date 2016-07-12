@@ -1,9 +1,11 @@
 <?php
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesScreenshot.php";
+
 /**
  * Encapsulates a screenshot taken by the images SDK.
  */
-class EyesImagesScreenshot extends EyesScreenshot {
+class EyesImagesScreenshot extends EyesScreenshot
+{
 
     // The screenshot region in coordinates relative to the "entire screen"
     // (e.g., relative to the default content in case of a web page).
@@ -16,7 +18,7 @@ class EyesImagesScreenshot extends EyesScreenshot {
      */
     public function __construct(BufferedImage $image = null, Location $location = null)
     {
-        if(!empty($image)){
+        if (!empty($image)) {
             if (empty($location)) {
                 $location = new Location(0, 0);
                 $rectangleSize = new RectangleSize($image->getWidth(), $image->getHeight());
@@ -26,7 +28,8 @@ class EyesImagesScreenshot extends EyesScreenshot {
     }
 
 
-    public function getSubScreenshot(Region $region, CoordinatesType $coordinatesType, $throwIfClipped) {
+    public function getSubScreenshot(Region $region, CoordinatesType $coordinatesType, $throwIfClipped)
+    {
 
         ArgumentGuard::notNull($region, "region");
         ArgumentGuard::notNull($coordinatesType, "coordinatesType");
@@ -36,8 +39,8 @@ class EyesImagesScreenshot extends EyesScreenshot {
 
         if ($subScreenshotRegion->isEmpty() || ($throwIfClipped && (!$subScreenshotRegion->getSize() == $region->getSize()))) {
             throw new OutOfBoundsException(sptintf(
-                    "Region [%s, (%s)] is out of screenshot bounds [%s]",
-                    $region, json_encode($coordinatesType), $bounds));
+                "Region [%s, (%s)] is out of screenshot bounds [%s]",
+                $region, json_encode($coordinatesType), $bounds));
         }
 
         $subScreenshotImage = ImageUtils::getImagePart($image, $subScreenshotRegion);
@@ -45,13 +48,14 @@ class EyesImagesScreenshot extends EyesScreenshot {
         // Notice that we need the bounds-relative coordinates as parameter
         // for new sub-screenshot.
         $relativeSubScreenshotRegion = convertRegionLocation($subScreenshotRegion,
-                                            CoordinatesType::SCREENSHOT_AS_IS, CoordinatesType::CONTEXT_RELATIVE);
+            CoordinatesType::SCREENSHOT_AS_IS, CoordinatesType::CONTEXT_RELATIVE);
 
         return new EyesImagesScreenshot($subScreenshotImage,
             $relativeSubScreenshotRegion->getLocation());
     }
 
-    protected function convertLocation(Location $location, CoordinatesType $from, CoordinatesType $to) {
+    protected function convertLocation(Location $location, CoordinatesType $from, CoordinatesType $to)
+    {
 
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($from, "from");
@@ -87,25 +91,27 @@ class EyesImagesScreenshot extends EyesScreenshot {
     }
 
     public function getLocationInScreenshot(Location $location,
-            CoordinatesType $coordinatesType){
+                                            CoordinatesType $coordinatesType)
+    {
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($coordinatesType, "coordinatesType");
 
         $location = convertLocation($location, $coordinatesType,
             CoordinatesType::CONTEXT_RELATIVE);
 
-        if (!bounds.contains(location)) {
+        if (!bounds . contains(location)) {
             throw new OutOfBoundsException(sprintf(
-                    "Location %s ('%s') is not visible in screenshot!", location,
-                    coordinatesType));
+                "Location %s ('%s') is not visible in screenshot!", location,
+                coordinatesType));
         }
 
         return $this->convertLocation($location, CoordinatesType::CONTEXT_RELATIVE, CoordinatesType::SCREENSHOT_AS_IS);
-}
+    }
 
     protected function getIntersectedRegion(Region $region,
-            CoordinatesType $originalCoordinatesType,
-            CoordinatesType $resultCoordinatesType) {
+                                            CoordinatesType $originalCoordinatesType,
+                                            CoordinatesType $resultCoordinatesType)
+    {
 
         ArgumentGuard::notNull($region, "region");
         ArgumentGuard::notNull($originalCoordinatesType, "coordinatesType");
@@ -127,7 +133,7 @@ class EyesImagesScreenshot extends EyesScreenshot {
         // The returned result should be in the coordinatesType given as
         // parameter.
         $intersectedRegion->setLocation(convertLocation($intersectedRegion->getLocation(),
-                CoordinatesType::CONTEXT_RELATIVE, $resultCoordinatesType));
+            CoordinatesType::CONTEXT_RELATIVE, $resultCoordinatesType));
 
         return $intersectedRegion;
     }

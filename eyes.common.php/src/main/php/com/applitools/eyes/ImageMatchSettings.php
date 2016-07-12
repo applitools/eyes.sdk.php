@@ -1,14 +1,17 @@
 <?php
 require "MatchLevel.php";
+
 /**
  * Encapsulates match settings for the a session.
  */
-class ImageMatchSettings {
+class ImageMatchSettings
+{
     private $matchLevel; //MatchLevel
     private $exact; //ExactMatchSettings
 
-    public function __construct(MatchLevel $matchLevel = null, ExactMatchSettings $exact = null) {
-        if(empty($matchLevel)){
+    public function __construct(MatchLevel $matchLevel = null, ExactMatchSettings $exact = null)
+    {
+        if (empty($matchLevel)) {
             $matchLevel = MatchLevel::STRICT;
         }
         $this->matchLevel = $matchLevel;
@@ -20,7 +23,8 @@ class ImageMatchSettings {
      *
      * @return The "strictness" level of the match.
      */
-    public function getMatchLevel() {
+    public function getMatchLevel()
+    {
         return $this->matchLevel;
     }
 
@@ -28,7 +32,8 @@ class ImageMatchSettings {
      *
      * @param matchLevel The "strictness" level of the match.
      */
-    public function setMatchLevel(MatchLevel $matchLevel) {
+    public function setMatchLevel(MatchLevel $matchLevel)
+    {
         $this->matchLevel = $matchLevel;
     }
 
@@ -36,7 +41,8 @@ class ImageMatchSettings {
      *
      * @return The parameters for the "Exact" match settings.
      */
-    public function getExact() {
+    public function getExact()
+    {
         return $this->exact;
     }
 
@@ -44,12 +50,14 @@ class ImageMatchSettings {
      *
      * @param exact The parameters for the "exact" match settings.
      */
-    public function setExact(ExactMatchSettings $exact) {
+    public function setExact(ExactMatchSettings $exact)
+    {
         $this->exact = $exact;
     }
 
-    public function toString() {
+    public function toString()
+    {
         return sprintf("Match level: %s, Exact match settings: %s",
-                $this->matchLevel, $this->exact);
+            $this->matchLevel, $this->exact);
     }
 }

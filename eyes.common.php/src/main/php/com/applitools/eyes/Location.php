@@ -4,11 +4,12 @@ require "ArgumentGuard.php";
 /**
  * A location in a two-dimensional plane.
  */
-class Location { //implements Cloneable just possible to clone?
+class Location
+{ //implements Cloneable just possible to clone?
     private $x;
     private $y;
 
-    const ZERO = new Location(0,0);
+    private $ZERO;
 
     /**
      * Creates a Location instance.
@@ -16,12 +17,15 @@ class Location { //implements Cloneable just possible to clone?
      * @param x The X coordinate of this location.
      * @param y The Y coordinate of this location.
      */
-    public function _construct($x, $y) {
+    public function __construct($x, $y)
+    {
+        $this->ZERO = new Location(0, 0);
         $this->x = $x;
         $this->y = $y;
     }
 
-    public function equals(Object $obj) {
+    public function equals(Object $obj)
+    {
         if ($this == $obj) {
             return true;
         }
@@ -30,11 +34,12 @@ class Location { //implements Cloneable just possible to clone?
             return false;
         }
 
-        $other = (Location) $obj; // ???? clone
+        $other = /*(Location)*/ $obj; // ???? clone
         return ($this->getX() == $other->getX()) && ($this->getY() == $other->getY());
     }
 
-    public function hashCode() {
+    public function hashCode()
+    {
         return $this->getX() + $this->getY();
     }
 
@@ -42,7 +47,8 @@ class Location { //implements Cloneable just possible to clone?
      * Creates a location from another location instance.
      * @param other A location instance from which to create the location.
      */
-    public function _construct(Location $other) {
+    public function __construct(Location $other)
+    {
         ArgumentGuard::notNull($other, "other");
 
         $this->x = $other->getX();
@@ -55,7 +61,8 @@ class Location { //implements Cloneable just possible to clone?
      * @param dx The amount to offset the x-coordinate.
      * @param dy The amount to offset the y-coordinate.
      */
-    public function offset($dx, $dy) {
+    public function offset($dx, $dy)
+    {
         $this->x += $dx;
         $this->y += $dy;
     }
@@ -65,7 +72,8 @@ class Location { //implements Cloneable just possible to clone?
      * <p>
      * @param amount The amount the offset.
      */
-    public function offset(Location $amount) {
+    public function offset(Location $amount)
+    {
         $this->x += $amount->getX();
         $this->y += $amount->getY();
     }
@@ -73,18 +81,21 @@ class Location { //implements Cloneable just possible to clone?
     /**
      * @return The X coordinate of this location.
      */
-    public function getX() {
+    public function getX()
+    {
         return $this->x;
     }
 
     /**
      * @return The Y coordinate of this location.
      */
-    public function getY() {
+    public function getY()
+    {
         return $this->y;
     }
 
-    public function toString() {
+    public function toString()
+    {
         return "(" . $this->x . ", " . $this->y . ")";
     }
 }

@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Encapsulates page/element positioning.
  */
-interface PositionProvider {
+interface PositionProvider
+{
     /**
      *
      * @return The current position, or {@code null} if position is not

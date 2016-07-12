@@ -1,12 +1,17 @@
 <?php
-interface ServerConnectorInterface {
+
+interface ServerConnectorInterface
+{
     public function setApiKey($apiKey);
+
     public function getApiKey();
 
     public function setServerUrl($serverUrl);
+
     public function getServerUrl();
 
     public function setProxy($proxySettings);
+
     public function getProxy();
 
     /**

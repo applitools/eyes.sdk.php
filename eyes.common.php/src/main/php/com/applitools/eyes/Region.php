@@ -4,21 +4,24 @@
 /**
  * Represents a region.
  */
-class Region {
+class Region
+{
     private $left;
     private $top;
     private $width;
     private $height;
     public static $empty;
 
-    protected function makeEmpty() {
+    protected function makeEmpty()
+    {
         $this->left = self::$empty->getLeft();
         $this->top = self::$empty->getTop();
         $this->width = self::$empty->getWidth();
         $this->height = self::$empty->getHeight();
     }
 
-    public function __construct($left, $top, $width, $height) {
+    public function __construct($left, $top, $width, $height)
+    {
         ArgumentGuard::greaterThanOrEqualToZero($width, "width");
         ArgumentGuard::greaterThanOrEqualToZero($height, "height");
         $this->empty = new Region(0, 0, 0, 0);
@@ -33,20 +36,22 @@ class Region {
      *
      * @return true if the region is empty, false otherwise.
      */
-    public function isEmpty() {
-        return $this.getLeft() == self::$empty->getLeft()
+    public function isEmpty()
+    {
+        return $this . getLeft() == self::$empty->getLeft()
         && $this->getTop() == self::$empty->getTop()
         && $this->getWidth() == self::$empty->getWidth()
         && $this->getHeight() == self::$empty->getHeight();
     }
 
-    public function equals(Object $obj) {
+    public function equals(Object $obj)
+    {
         if ($obj == null) {
             return false;
         }
 
         if (!($obj instanceof Region)) {
-            return  false;
+            return false;
         }
         $other = clone $obj; // clone????
 
@@ -56,7 +61,8 @@ class Region {
         && ($this->getHeight() == $other->getHeight());
     }
 
-    public function hashCode() {
+    public function hashCode()
+    {
         return ($this->left . $this->top . $this->width + $this->height);
     }
 
@@ -83,7 +89,8 @@ class Region {
      *
      * @return The (top,left) position of the current region.
      */
-    public function getLocation() {
+    public function getLocation()
+    {
         return new Location($this->left, $this->top);
     }
 
@@ -93,7 +100,8 @@ class Region {
      * @param dx The X axis offset.
      * @param dy The Y axis offset.
      */
-    public function offset($dx, $dy) {
+    public function offset($dx, $dy)
+    {
         $this->left += $dx;
         $this->top += $dy;
     }
@@ -102,7 +110,8 @@ class Region {
      *
      * @return The (top,left) position of the current region.
      */
-    public function getSize() {
+    public function getSize()
+    {
         return new RectangleSize($this->width, $this->height);
     }
 
@@ -110,7 +119,8 @@ class Region {
      * Set the (top,left) position of the current region
      * @param location The (top,left) position to set.
      */
-    public function setLocation(Location $location) {
+    public function setLocation(Location $location)
+    {
         ArgumentGuard::notNull(location, "location");
         $this->left = $location->getX();
         $this->top = $location->getY();
@@ -125,7 +135,8 @@ class Region {
      * returned.
      */
     private static function getSubRegionsWithFixedSize(
-                            Region $containerRegion, RectangleSize $subRegionSize) {
+        Region $containerRegion, RectangleSize $subRegionSize)
+    {
         ArgumentGuard::notNull($containerRegion, "containerRegion");
         ArgumentGuard::notNull($subRegionSize, "subRegionSize");
 
@@ -148,7 +159,8 @@ class Region {
         // If the requested size is greater or equal to the entire region size,
         // we return a copy of the region.
         if ($subRegionWidth == $containerRegion->width &&
-            $subRegionHeight == $containerRegion->height) {
+            $subRegionHeight == $containerRegion->height
+        ) {
             $subRegions->add(new Region($containerRegion));
             return $subRegions;
         }
@@ -164,12 +176,12 @@ class Region {
             }
 
             $currentLeft = $containerRegion->left;
-            while ($currentLeft <= $this->right) {
-                if ($currentLeft + $subRegionWidth > $this->right) {
-                    $currentLeft = ($this->right - $subRegionWidth) + 1;
+            while ($currentLeft <= $right) {
+                if ($currentLeft + $subRegionWidth > $right) {
+                    $currentLeft = ($right - $subRegionWidth) + 1;
                 }
 
-                $subRegions.add(new Region($currentLeft, $currentTop,
+                $subRegions-> add(new Region($currentLeft, $currentTop,
                     $subRegionWidth, $subRegionHeight));
 
                 $currentLeft += $subRegionWidth;
@@ -187,7 +199,8 @@ class Region {
      * maxSubRegionSize is equal or greater than the current region,
      * only a single region is returned.
      */
-    private static function getSubRegionsWithVaryingSize(Region $containerRegion, RectangleSize $maxSubRegionSize) {
+    private static function getSubRegionsWithVaryingSize(Region $containerRegion, RectangleSize $maxSubRegionSize)
+    {
         ArgumentGuard::notNull($containerRegion, "containerRegion");
         ArgumentGuard::notNull($maxSubRegionSize, "maxSubRegionSize");
         ArgumentGuard::greaterThanZero($maxSubRegionSize->getWidth(),
@@ -195,7 +208,9 @@ class Region {
         ArgumentGuard::greaterThanZero($maxSubRegionSize->getHeight(),
             "maxSubRegionSize.getHeight()");
 
-        /*List<Region>*/ $subRegions = new /*LinkedList<*/Region();
+        /*List<Region>*/
+        $subRegions = new /*LinkedList<*/
+        Region();
 
         $currentTop = $containerRegion->top;
         $bottom = $containerRegion->top + $containerRegion->height;
@@ -211,7 +226,9 @@ class Region {
             $currentLeft = $containerRegion->left;
             while ($currentLeft < $right) {
                 $currentRight = $currentLeft + $maxSubRegionSize->getWidth();
-                if ($currentRight > $right) { $currentRight = $right; }
+                if ($currentRight > $right) {
+                    $currentRight = $right;
+                }
 
                 $currentHeight = $currentBottom - $currentTop;
                 $currentWidth = $currentRight - $currentLeft;
@@ -238,21 +255,22 @@ class Region {
      * subRegionSize} is equal or greater than the current region,
      * only a single region is returned.
      */
-    public function getSubRegions(RectangleSize $subRegionSize, $isFixedSize) {
-    if ($isFixedSize) {
-        return getSubRegionsWithFixedSize($this, $subRegionSize);
-    }
+    public function getSubRegions(RectangleSize $subRegionSize, $isFixedSize)
+    {
+        if ($isFixedSize) {
+            return getSubRegionsWithFixedSize($this, $subRegionSize);
+        }
 
-    return getSubRegionsWithVaryingSize($this, $subRegionSize);
-}
+        return getSubRegionsWithVaryingSize($this, $subRegionSize);
+    }
 
     /**
      * See {@link #getSubRegions(RectangleSize, boolean)}.
      * {@code isFixedSize} defaults to {@code false}.
      */
-   /* public function getSubRegions(RectangleSize $subRegionSize) {
-        return $this->getSubRegions($subRegionSize, false);
-    }*/
+    /* public function getSubRegions(RectangleSize $subRegionSize) {
+         return $this->getSubRegions($subRegionSize, false);
+     }*/
 
     /**
      * Check if a region is contained within the current region.
@@ -262,7 +280,8 @@ class Region {
      *          false otherwise.
      */
 
-    public function contains(Region $other) {
+    public function contains(Region $other)
+    {
         $right = $this->left + $this->width;
         $otherRight = $other->getLeft() + $other->getWidth();
 
@@ -292,7 +311,8 @@ class Region {
      * @param other The region to check intersection with.
      * @return True if the regions are intersected, false otherwise.
      */
-    public function isIntersected(Region $other) {
+    public function isIntersected(Region $other)
+    {
         $right = $this->left + $this->width;
         $bottom = $this->top + $this->height;
 
@@ -302,9 +322,9 @@ class Region {
         $otherBottom = $otherTop + $other->getHeight();
 
         return ((($this->left <= $otherLeft && $otherLeft <= $right)
-                ||  ($otherLeft <= $this->left && $this->left <= $otherRight))
+                || ($otherLeft <= $this->left && $this->left <= $otherRight))
             && (($this->top <= $otherTop && $otherTop <= $bottom)
-                ||  ($otherTop <= $this->top && $this->top <= $otherBottom)));
+                || ($otherTop <= $this->top && $this->top <= $otherBottom)));
     }
 
     /**
@@ -312,7 +332,8 @@ class Region {
      * {@code other}
      * @param other The region with which to intersect.
      */
-    public function intersect(Region $other) {
+    public function intersect(Region $other)
+    {
 
         // If there's no intersection set this as the Empty region.
         if (!isIntersected($other)) {
@@ -328,7 +349,7 @@ class Region {
         $intersectionTop = ($this->top >= $otherTop) ? $this->top : $otherTop;
 
         // Now the width and height of the intersect
-        $right = $this>left + $this->width;
+        $right = $this > left + $this->width;
         $otherRight = $otherLeft + $other->getWidth();
         $intersectionRight = ($right <= $otherRight) ? $right : $otherRight;
         $intersectionWidth = $intersectionRight - $intersectionLeft;
@@ -346,30 +367,36 @@ class Region {
     }
 
 
-    public function getLeft() {
+    public function getLeft()
+    {
         return $this->left;
     }
 
-    public function getTop() {
+    public function getTop()
+    {
         return $this->top;
     }
 
-    public function getWidth() {
+    public function getWidth()
+    {
         return $this->width;
     }
 
-    public function getHeight() {
+    public function getHeight()
+    {
         return $this->height;
     }
 
-    public function getMiddleOffset() {
+    public function getMiddleOffset()
+    {
         $middleX = $this->width / 2;
         $middleY = $this->height / 2;
 
         return new Location($middleX, $middleY);
     }
 
-    public function toString() {
+    public function toString()
+    {
         return "(" . $this->left . ", " . $this->top . ") " . $this->width . "x" . $this->height;
     }
 }

@@ -1,8 +1,10 @@
 <?php
+
 /**
  * The extent in which two images match (or are expected to match).
  */
-class MatchLevel {
+class MatchLevel
+{
     /**
      * Images do not necessarily match.
      */

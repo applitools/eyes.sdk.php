@@ -1,7 +1,9 @@
 <?php
 require "ServerConnectorInterface.php";
 require "RunningSession.php";
-class ServerConnector implements ServerConnectorInterface{
+
+class ServerConnector implements ServerConnectorInterface
+{
 
     const TIMEOUT = 300000; // 5 Minutes
     const API_PATH = "/api/sessions/running";
@@ -26,10 +28,11 @@ class ServerConnector implements ServerConnectorInterface{
      * @param proxySettings The proxy settings to be used by the rest client.
      * If {@code null} then no proxy is set.
      */
-    public function setProxy($proxySettings) {
+    public function setProxy($proxySettings)
+    {
         $this->proxySettings = $proxySettings;
-            // After the server is updated we must make sure the endpoint refers
-            // to the correct path.
+        // After the server is updated we must make sure the endpoint refers
+        // to the correct path.
         //endPoint = endPoint.path(API_PATH);   ////????
     }
 
@@ -39,7 +42,8 @@ class ServerConnector implements ServerConnectorInterface{
      * or {@code null} if no proxy is set.
      */
 
-    public function getProxy() {
+    public function getProxy()
+    {
         return $this->ProxySettins;
     }
 
@@ -48,17 +52,19 @@ class ServerConnector implements ServerConnectorInterface{
      * Sets the current server URL used by the rest client.
      * @param serverUrl The URI of the rest server.
      */
-    public function setServerUrl($serverUrl) {
+    public function setServerUrl($serverUrl)
+    {
         $this->serverUrl = $serverUrl;
-            // After the server is updated we must make sure the endpoint refers
-            // to the correct path.
+        // After the server is updated we must make sure the endpoint refers
+        // to the correct path.
         //$this->endPoint = $this->serverUrl . self::API_PATH;   ////????????
     }
 
     /**
      * @return The URI of the eyes server.
      */
-    public function getServerUrl() {
+    public function getServerUrl()
+    {
         return $this->serverUrl;
     }
 
@@ -68,7 +74,8 @@ class ServerConnector implements ServerConnectorInterface{
      *
      * @param apiKey The api key to set.
      */
-    public function setApiKey($apiKey) {
+    public function setApiKey($apiKey)
+    {
         //ArgumentGuard.notNull(apiKey, "apiKey");
         $this->apiKey = $apiKey;
     }
@@ -76,17 +83,16 @@ class ServerConnector implements ServerConnectorInterface{
     /**
      * @return The currently set API key or {@code null} if no key is set.
      */
-    public function getApiKey() {
+    public function getApiKey()
+    {
         return $this->apiKey;
     }
-
 
 
     public function getTimeout()
     {
         // TODO: Implement getTimeout() method.
     }
-
 
 
     /**
@@ -99,7 +105,8 @@ class ServerConnector implements ServerConnectorInterface{
      *         session
      * @throws EyesException
      */
-    public function startSession($sessionStartInfo){
+    public function startSession($sessionStartInfo)
+    {
 
         //ArgumentGuard.notNull(sessionStartInfo, "sessionStartInfo");
 
@@ -125,31 +132,31 @@ class ServerConnector implements ServerConnectorInterface{
 
         try {
 
-                // since the web API requires a root property for this message
+            // since the web API requires a root property for this message
             //jsonMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true); ?????
             //$postData = jsonMapper.writeValueAsString(sessionStartInfo);
 
-                // returning the root property addition back to false (default)
+            // returning the root property addition back to false (default)
             //jsonMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         } catch (Exception $e) { ///use IOException
             throw new Exception("Failed to convert " .    //eyesException
-                    "sessionStartInfo into Json string!", $e);
+                "sessionStartInfo into Json string!", $e);
         }
 
         try {
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL,"https://eyessdk.applitools.com/api/sessions/running.json?apiKey=".$this->apiKey);
-                curl_setopt($ch, CURLOPT_POST, 1);
-                curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                        'Content-Type: application/json',
-                        'Content-Length: ' . strlen($params),
-                    )
-                );
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                $result = curl_exec ($ch);
-                $information = curl_getinfo($ch);
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "https://eyessdk.applitools.com/api/sessions/running.json?apiKey=" . $this->apiKey);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                    'Content-Type: application/json',
+                    'Content-Length: ' . strlen($params),
+                )
+            );
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $result = curl_exec($ch);
+            $information = curl_getinfo($ch);
             /*    $response = endPoint.queryParam("apiKey", apiKey).
                     accept(MediaType.APPLICATION_JSON).
                     entity(postData, MediaType.APPLICATION_JSON_TYPE).
@@ -159,17 +166,23 @@ class ServerConnector implements ServerConnectorInterface{
             throw $e;
         }
         $validStatusCodes = array('200', '201');
-        if(!in_array($information['http_code'],$validStatusCodes)){
+        if (!in_array($information['http_code'], $validStatusCodes)) {
             $runningSession = null;
-        }else{
+        } else {
             $result = json_decode($result, true);
             $runningSession = new RunningSession();
             $runningSession->setId($result['id']);
             //$runningSession->setId($result['id']);
         }
-echo "<pre>"; print_r($params); echo "</pre>";
-echo "<pre>"; print_r($sessionStartInfo->getEnvironment()->getDisplaySize()); echo "</pre>";
-echo "<pre>"; print_r($information); echo "</pre>";
+        echo "<pre>";
+        print_r($params);
+        echo "</pre>";
+        echo "<pre>";
+        print_r($sessionStartInfo->getEnvironment()->getDisplaySize());
+        echo "</pre>";
+        echo "<pre>";
+        print_r($information);
+        echo "</pre>";
 //die("Stop.Session should be started");
         // Ok, let's create the running session from the response
 
