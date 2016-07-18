@@ -4,6 +4,9 @@ require "StitchMode.php";
 require "MoveToRegionVisibilityStrategy.php";
 require "EyesWebDriver.php";
 require "FrameChain.php";
+require "ScrollPositionProvider.php";
+require "ImageRotation.php";
+require "EyesSeleniumUtils.php";
 
 /**
  * The main API gateway for the SDK.
@@ -12,7 +15,7 @@ class Eyes extends EyesBase
 {
 
     /*public interface WebDriverAction {
-    void drive(WebDriver driver);
+    void drive(WebDriver driver); //FIXME
     }*/
 
     const UNKNOWN_DEVICE_PIXEL_RATIO = 0;
@@ -66,6 +69,7 @@ class Eyes extends EyesBase
         $this->hideScrollbars = false;
         $this->devicePixelRatio = self::UNKNOWN_DEVICE_PIXEL_RATIO;
         $this->stitchMode = StitchMode::SCROLL;
+        $this->rotation = new ImageRotation(0);
         $this->waitBeforeScreenshots = self::DEFAULT_WAIT_BEFORE_SCREENSHOTS;
         $this->regionVisibilityStrategy = new MoveToRegionVisibilityStrategy($this->logger);
     }
@@ -250,15 +254,16 @@ class Eyes extends EyesBase
             Logger::verbose("Ignored");
             return $driver;
         }
-
         $this->openBase($appName, $testName, $viewportSize, $sessionType);
 
         ArgumentGuard::notNull($driver, "driver");
 
         if ($driver instanceof RemoteWebDriver) {
-            $this->driver = new EyesWebDriver($this->logger, $this, /*(RemoteWebDriver)*/ $driver);
+            $this->driver = new EyesWebDriver($this->logger, $this, /*(RemoteWebDriver)*/
+                $driver);
         } else if ($driver instanceof EyesWebDriver) {
-            $this->driver = /*(EyesWebDriver)*/ $driver;
+            $this->driver = /*(EyesWebDriver)*/
+                $driver;
         } else {
             $errMsg = "Driver is not a RemoteWebDriver (" . $driver->getClass()->getName() . ")";
             Logger::log($errMsg);
@@ -268,15 +273,14 @@ class Eyes extends EyesBase
 
         // Setting the correct position provider.
         switch ($this->getStitchMode()) {
-            case self::CSS:
+            case StitchMode::CSS:
                 $cssTranslatePositionnew = CssTranslatePositionProvider($this->logger, $this->driver);
                 $this->setPositionProvider($cssTranslatePositionnew);
                 break;
             default:
-                $scrollPositionnew = ScrollPositionProvider($this->logger, $this->driver);
+                $scrollPositionnew = new ScrollPositionProvider($this->logger, $this->driver);
                 $this->setPositionProvider($scrollPositionnew);
         }
-
         $this->driver->setRotation($this->rotation);
         return $this->driver;
     }
@@ -292,7 +296,7 @@ class Eyes extends EyesBase
      * @throws TestFailedException Thrown if a mismatch is detected and
      *                             immediate failure reports are enabled.
      */
-    public function checkWindow($matchTimeout, $tag)
+    public function checkWindow($tag, $matchTimeout = null)
     {
         if (empty($matchTimeout)) {
             $matchTimeout = self::USE_DEFAULT_MATCH_TIMEOUT;
@@ -353,7 +357,7 @@ class Eyes extends EyesBase
             $timeout = $deadline + self::RESPONSE_TIME_DEFAULT_DIFF_FROM_DEADLINE;
         }
         if (!empty($viewportSize)) {
-            $his->setViewportSize($driver, $viewportSize);
+            $this->setViewportSize($driver, $viewportSize);
         }
         $this->open($driver, $appName, $testName, SessionType::PROGRESSION);
         $runnableAction = null;
@@ -423,7 +427,7 @@ class Eyes extends EyesBase
             $matchTimeout
         );
         Logger::log("Done! trying to scroll back to original position..");
-        $this->regionVisibilityStrategy->returnToOriginalPosition($positionProvider); /// ????
+        $this->regionVisibilityStrategy->returnToOriginalPosition($this->positionProvider); /// ????
         Logger::log("Done!");
 
     }
@@ -491,7 +495,7 @@ class Eyes extends EyesBase
                 // This can happen in Appium for example.
                 Logger::log("Failed to set ContextBasedScaleProvider.");
                 Logger::log("Using FixedScaleProvider instead...");
-                $this->scaleProviderHandler->set(new FixedScaleProvider(1 / devicePixelRatio));
+                $this->scaleProviderHandler->set(new FixedScaleProvider(1 / $this->devicePixelRatio));
             }
             Logger::log("Done!");
         }
@@ -904,7 +908,7 @@ class Eyes extends EyesBase
      *
      * {@inheritDoc}
      */
-    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size = null)
+    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size)
     {
         if (!empty($driver)) {
             ArgumentGuard::notNull($driver, "driver");

@@ -8,8 +8,6 @@
  * We named this class EyesSeleniumUtils because there's a SeleniumUtils
  * class, and it caused collision.
  */
-public
-
 class EyesSeleniumUtils
 {
     // See Applitools WiKi for explanation.
@@ -135,7 +133,7 @@ class EyesSeleniumUtils
                 }
 
                 return $orientation == ScreenOrientation::LANDSCAPE;
-            } catch (Exception e) {
+            } catch (Exception $e) {
                 throw new EyesDriverOperationException(
                     "Failed to get orientation!", $e);
             }
@@ -181,7 +179,7 @@ class EyesSeleniumUtils
         if ($stabilizationTimeout > 0) {
             try { //??????
                 Thread::sleep($stabilizationTimeout);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException $e) {
                 // Nothing to do.
             }
         }
@@ -242,12 +240,11 @@ class EyesSeleniumUtils
      * @param executor The executor to use.
      * @return The viewport size.
      */
-    public static function executeViewportSizeExtraction(JavascriptExecutor $executor)
+    public static function executeViewportSizeExtraction(/*JavascriptExecutor*/ $executor) //FIXME
     {
         //noinspection unchecked
         /*List<Long> */
-        $vsAsList = /*(List<Long>) */
-            $executor->executeScript(self::JS_GET_VIEWPORT_SIZE);
+        $vsAsList = /*(List<Long>) */ $executor->executeScript(self::JS_GET_VIEWPORT_SIZE);
         return new RectangleSize($vsAsList->get(0)->intValue(), $vsAsList->get(1)->intValue());
     }
 
@@ -261,8 +258,7 @@ class EyesSeleniumUtils
         $logger->log("extractViewportSize()");
 
         try {
-            return executeViewportSizeExtraction(/*(JavascriptExecutor)*/
-                $driver);
+            return self::executeViewportSizeExtraction(/*(JavascriptExecutor)*/$driver);
         } catch (Exception $ex) {
             $logger->verbose(sprintf("Failed to extract viewport size using Javascript: %s", $ex->getMessage()));
         }
@@ -295,7 +291,7 @@ class EyesSeleniumUtils
      */
     public static function setViewportSize(Logger $logger, WebDriver $driver, RectangleSize $size)
     {
-        Logger::log("setViewportSize(" . $size . ")");
+        Logger::log("setViewportSize(" . json_encode($size) . ")");
 
         ArgumentGuard::notNull($size, "size");
 
@@ -304,10 +300,10 @@ class EyesSeleniumUtils
 
         // We move the window to (0,0) to have the best chance to be able to
         // set the viewport size as requested.
-        $driver->manage()->window()->setPosition(new Point(0, 0));
+        $driver->manage()->window()->setPosition(new WebDriverPoint(0, 0));
 
         $actualViewportSize = self::extractViewportSize($logger, $driver);
-        Logger::log("Initial viewport size:" . $actualViewportSize);
+        Logger::log("Initial viewport size:" . json_encode($actualViewportSize));
 
         // If the viewport size is already the required size
         if ($size->getWidth() == $actualViewportSize->getWidth() &&
@@ -318,7 +314,7 @@ class EyesSeleniumUtils
         }
 
         $browserSize = $driver->manage()->window()->getSize();
-        Logger::log("Current browser size: " . $browserSize);
+        Logger::log("Current browser size: " . json_encode($browserSize));
         $requiredBrowserSize = new Dimension($browserSize->width + ($size->getWidth() - $actualViewportSize->getWidth()),
             $browserSize->height + ($size->getHeight() - $actualViewportSize->getHeight()));
         Logger::log("Trying to set browser size to: " . $requiredBrowserSize);
@@ -329,7 +325,7 @@ class EyesSeleniumUtils
             GeneralUtils::sleep(SLEEP);
             $browserSize = $driver->manage()->window()->getSize();
             Logger::log("Current browser size: " . browserSize);
-        } while (--retriesLeft > 0 && !$browserSize->equals($requiredBrowserSize));
+        } while (--$retriesLeft > 0 && !$browserSize->equals($requiredBrowserSize));
 
         if (!$browserSize->equals($requiredBrowserSize)) {
             throw new EyesException("Failed to set browser size!");
@@ -337,7 +333,7 @@ class EyesSeleniumUtils
 
         $actualViewportSize = extractViewportSize($logger, $driver);
         $logger::log("Current viewport size: " . $actualViewportSize);
-        if (!actualViewportSize->equals($size)) {
+        if (!$actualViewportSize->equals($size)) {
         // Additional attempt. This Solves the "maximized browser" bug
         // (border size for maximized browser sometimes different than
         // non-maximized, so the original browser size calculation is
@@ -419,7 +415,7 @@ class EyesSeleniumUtils
     function getCurrentTransform(JavascriptExecutor $executor)
     {
         $script = "return { ";
-        for (String $key: JS_TRANSFORM_KEYS) { // ???????
+        foreach (JS_TRANSFORM_KEYS as $key) { // ???????
             $script .= "'" . $key . "'" . ": document.documentElement.style['" . $key . "'],";
         }
 
@@ -445,8 +441,7 @@ class EyesSeleniumUtils
     {
 
         $script = "";
-        for (/*Map.Entry<String, String>*/
-            $entry : $transforms->entrySet()) { //??????
+        foreach ($transforms->entrySet() as $entry) { //FIXME
             $script .= "document.documentElement.style['" . $entry->getKey() . "'] = '" . $entry->getValue() . "';";
         }
         $executor->executeScript($script);
@@ -461,11 +456,9 @@ class EyesSeleniumUtils
      */
     public static function setTransform(JavascriptExecutor $executor, String $transform)
     {
-        /*Map<String, String>*/
-        $transforms = new /*HashMap<String, String>*/
-        (JS_TRANSFORM_KEYS . length);
+        $transforms = array(); //FIXME
 
-        for (String key: JS_TRANSFORM_KEYS) {
+        foreach (JS_TRANSFORM_KEYS as $key) { //FIXME
             $transforms->put($key, $transform);
         }
 

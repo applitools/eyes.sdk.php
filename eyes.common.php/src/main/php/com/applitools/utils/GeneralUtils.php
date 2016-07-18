@@ -36,7 +36,7 @@ class GeneralUtils
         }
 
         return new String(baos.toByteArray());*/
-        echo "MOCK_MOCK";
+        echo "MOCK_MOCK"; //FIXME
         die();
     }
 
@@ -59,7 +59,7 @@ class GeneralUtils
          $formatter->setTimeZone(calendar.getTimeZone());
 
          return formatter.format(calendar.getTime());*/
-        echo "MOCK2_MOCK2";
+        echo "MOCK2_MOCK2";   //FIXME
         die();
     }
 
@@ -83,7 +83,7 @@ class GeneralUtils
         // http://www.coderanch.com/t/376467/java/java/Display-time-timezones
         formatter.setTimeZone(calendar.getTimeZone());
         return formatter.format(calendar.getTime());*/
-        echo "MOCK2_MOCK2";
+        echo "MOCK2_MOCK2";   //FIXME
         die();
     }
 
@@ -108,7 +108,7 @@ class GeneralUtils
          Calendar cal = Calendar.getInstance();
          cal.setTime(formatter.parse(dateTime));
          return cal;*/
-        echo "MOCK3_MOCK3";
+        echo "MOCK3_MOCK3";  //FIXME
         die();
     }
 
@@ -120,7 +120,7 @@ class GeneralUtils
     public static function sleep($milliseconds)
     {
         try {
-            echo "NEED TO SLEEP";
+            echo "NEED TO SLEEP";  //FIXME
             die();
             //  Thread.sleep($milliseconds);
         } catch (InterruptedException $ex) {
@@ -140,7 +140,7 @@ class GeneralUtils
           } catch (ParseException ex) {
               throw new RuntimeException(ex);
           }*/
-        echo "MOCK4_MOCK4";
+        echo "MOCK4_MOCK4";  //FIXME
         die();
     }
 
@@ -192,7 +192,7 @@ class GeneralUtils
          throw new EyesException("Failed to read text from resource: ", e);
          }
          return sb.toString();*/
-        echo "MOCK5_MOCK5";
+        echo "MOCK5_MOCK5"; //FIXME
         die();
     }
 }

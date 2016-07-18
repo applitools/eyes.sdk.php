@@ -1,8 +1,10 @@
 <?php
+
 /**
  * Represents a path to a frame, including their location and scroll.
  */
-class FrameChain /*implements Iterable<Frame>*/{
+class FrameChain /*implements Iterable<Frame>*/
+{
     private $logger; //Logger
     private $frames;
 
@@ -13,20 +15,23 @@ class FrameChain /*implements Iterable<Frame>*/{
      * @return True if both frame chains represent the same frame,
      *         false otherwise.
      */
-    public static function isSameFrameChain(FrameChain $c1, FrameChain $c2) {
-        $lc1 = $c1->frames->size();
-        $lc2 = $c2->frames->size();
+    public static function isSameFrameChain(FrameChain $c1, FrameChain $c2)
+    {
+        $lc1 = $c1->frames->count();
+        $lc2 = $c2->frames->count();
 
         // different chains size means different frames
         if ($lc1 != $lc2) {
             return false;
         }
 
-        /*Iterator<Frame>*/ $c1Iterator = $c1->iterator();
-        /*Iterator<Frame>*/ $c2Iterator = $c2->iterator();
+        /*Iterator<Frame>*/
+        $c1Iterator = $c1->iterator();
+        /*Iterator<Frame>*/
+        $c2Iterator = $c2->iterator();
 
         //noinspection ForLoopReplaceableByForEach
-        for($i = 0; $i<$lc1; ++$i) {
+        for ($i = 0; $i < $lc1; ++$i) {
             if (!$c1Iterator->next()->getId()->equals($c2Iterator->next()->getId())) {
                 return false;
             }
@@ -41,17 +46,22 @@ class FrameChain /*implements Iterable<Frame>*/{
      * @param other A frame chain from which the current frame chain will be
      *              created.
      */
-    public function __construct(Logger $logger, FrameChain $other = null) {
+    public function __construct(Logger $logger, FrameChain $other = null)
+    {
+        if(empty($this->frames) && !($this->frames instanceof ArrayIterator)){
+            $this->frames = new ArrayIterator();
+        }
         ArgumentGuard::notNull($logger, "logger");
         $this->logger = $logger;
-        if(empty($other)){
-            $this->frames = array();//new LinkedList<Frame>();
-        }else{
+        if (empty($other)) {
+            $this->frames = new ArrayIterator();
+        } else {
             $logger->verbose(sprintf("Frame chain copy constructor (size %d)", $other->size()));
+
             foreach ($other->frames as $otherFrame) {
-                $this->frames[] = new Frame($logger, $otherFrame->getReference(),
+                $this->frames->set(new Frame($logger, $otherFrame->getReference(),
                     $otherFrame->getId(), $otherFrame->getLocation(),
-                    $otherFrame->getSize(), $otherFrame->getParentScrollPosition());
+                    $otherFrame->getSize(), $otherFrame->getParentScrollPosition()));
             }
             $logger->verbose("Done!");
         }
@@ -61,14 +71,16 @@ class FrameChain /*implements Iterable<Frame>*/{
      *
      * @return The number of frames in the chain.
      */
-    public function size() {
-        return $this->frames->size();
+    public function size()
+    {
+        return $this->frames->count();
     }
 
     /**
      * Removes all current frames in the frame chain.
      */
-    public function clear() {
+    public function clear()
+    {
         $this->frames->clear();
     }
 
@@ -76,7 +88,8 @@ class FrameChain /*implements Iterable<Frame>*/{
      * Removes the last inserted frame element. Practically means we switched
      * back to the parent of the current frame
      */
-    public function pop() {
+    public function pop()
+    {
         $this->frames->remove($this->frames->size() - 1);
     }
 
@@ -84,7 +97,8 @@ class FrameChain /*implements Iterable<Frame>*/{
      * Appends a frame to the frame chain.
      * @param frame The frame to be added.
      */
-    public function push(Frame $frame) {
+    public function push(Frame $frame)
+    {
         $this->frames[] = frame;
     }
 
@@ -92,8 +106,9 @@ class FrameChain /*implements Iterable<Frame>*/{
      *
      * @return The location of the current frame in the page.
      */
-    public function getCurrentFrameOffset() {
-        $result = new Location(0 ,0);
+    public function getCurrentFrameOffset()
+    {
+        $result = new Location(0, 0);
         foreach ($this->frames as $frame) {
             $result->offset($frame->getLocation());
         }
@@ -104,8 +119,9 @@ class FrameChain /*implements Iterable<Frame>*/{
      *
      * @return The outermost frame's location, or NoFramesException.
      */
-    public function getDefaultContentScrollPosition() {
-        if ($this->frames->size() == 0) {
+    public function getDefaultContentScrollPosition()
+    {
+        if ($this->frames->count() == 0) {
             throw new NoFramesException("No frames in frame chain");
         }
         return new Location($this->frames->get(0)->getParentScrollPosition());
@@ -115,9 +131,10 @@ class FrameChain /*implements Iterable<Frame>*/{
      *
      * @return The size of the current frame.
      */
-    public function getCurrentFrameSize() {
+    public function getCurrentFrameSize()
+    {
         $this->logger->verbose("getCurrentFrameSize()");
-        $result = $this->frames->get($this->frames->size()-1)->getSize();
+        $result = $this->frames->get($this->frames->size() - 1)->getSize();
         $this->logger->verbose("Done!");
         return $result;
     }
@@ -126,21 +143,25 @@ class FrameChain /*implements Iterable<Frame>*/{
      *
      * @return An iterator to go over the frames in the chain.
      */
-    public /*Iterator<Frame>*/function iterator() {
-      /*  return new Iterator<Frame>() {
-            Iterator<Frame> framesIterator = frames.iterator();
-            public boolean hasNext() {
-                return framesIterator.hasNext();
-            }
+    public /*Iterator<Frame>*/
+    function iterator()
+    {
+        /*  return new Iterator<Frame>() {
+              Iterator<Frame> framesIterator = frames.iterator();
+              public boolean hasNext() {
+                  return framesIterator.hasNext();
+              }
 
-            public Frame next() {
-                return framesIterator.next();
-            }
+              public Frame next() {
+                  return framesIterator.next();
+              }
 
-            public void remove() {
-                throw new EyesException(
-                        "Remove is forbidden using the iterator!");
-            }
-        };*/ echo "MOCK4"; die();
+              public void remove() {
+                  throw new EyesException(
+                          "Remove is forbidden using the iterator!");
+              }
+          };*/
+        echo "MOCK4";  //FIXME
+        die();
     }
 }

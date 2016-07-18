@@ -1,5 +1,6 @@
 <?php
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ServerConnectorFactory.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/RectangleSize.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Logger.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/SessionStartInfo.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/AppEnvironment.php";
@@ -16,7 +17,7 @@ require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullS
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ImageMatchSettings.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/FailureReports.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullCutProvider.php";
-
+//require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Iterator.php";
 class EyesBase
 {
 
@@ -216,7 +217,7 @@ class EyesBase
     {
 
         //ATTENTION!!!!!!!!
-        //return '';   ///// temporary mock NEED TO SET ALL ENV
+        //return '';   ///// temporary mock NEED TO SET ALL ENV  //FIXME
         $appEnv = new AppEnvironment();
 
         // If hostOS isn't set, we'll try and extract and OS ourselves.
@@ -269,7 +270,7 @@ class EyesBase
     }
 
 
-    public function openBase($appName, $testName, RectangleSize $viewportSize = null, SessionType $sessionType = null)
+    public function openBase($appName, $testName, RectangleSize $viewportSize, SessionType $sessionType = null)
     {
 
         $this->logger->getLogHandler()->open();
@@ -289,7 +290,7 @@ class EyesBase
             ArgumentGuard::notNull($testName, "testName");
 
             $this->logger->log("Agent = " . $this->getFullAgentId());
-            $this->logger->verbose(sprintf("openBase('%s', '%s', '%s')", $appName, $testName, $viewportSize));
+            $this->logger->verbose(sprintf("openBase('%s', '%s', '%s')", $appName, $testName, json_encode($viewportSize)));
 
             if ($this->getApiKey() == null) {
                 $errMsg = "API key is missing! Please set it using setApiKey()";
@@ -329,6 +330,15 @@ class EyesBase
 
 
     /**
+     * @param positionProvider The position provider to be used.
+     */
+    protected function setPositionProvider(PositionProvider $positionProvider) {
+        $this->positionProvider = $positionProvider;
+    }
+
+
+
+/**
      *
      * @param method The method used to perform scaling.
      */
@@ -377,7 +387,6 @@ class EyesBase
         if ($tag == null) {
             $tag = "";
         }
-
         if ($this->runningSession == null) {
             Logger::log("No running session, calling start session..");
             $this->startSession();
@@ -427,6 +436,23 @@ class EyesBase
 
 
     /**
+     * Sets the batch in which context future tests will run or {@code null}
+     * if tests are to run standalone.
+     *
+     * @param batch The batch info to set.
+     */
+    public function setBatch(BatchInfo $batch) {
+        if ($this->isDisabled) {
+            $this->logger->verbose("Ignored");
+            return;
+        }
+
+        $this->logger->verbose("setBatch(" . json_encode($batch) . ")");
+
+        $this->batch = $batch;
+    }
+
+    /**
      * @return User inputs collected between {@code checkWindowBase}
      * invocations.
      */
@@ -446,8 +472,12 @@ class EyesBase
     protected function startSession()
     {
         Logger::log("startSession()");
+        if ($this->viewportSize == null) {
+            $this->viewportSize = $this->getViewportSize();
 
-        $this->setViewportSize($this->viewportSize);
+        } else {
+            $this->setViewportSize(null, $this->viewportSize); //FIXME
+        }
 
         if ($this->batch == null) {
             Logger::log("No batch set");
@@ -457,7 +487,7 @@ class EyesBase
             $testBatch = $this->batch;
         }
 
-        $appEnv = $this->getAppEnvironment(); ///////  need to check is it correct?
+        $appEnv = $this->getAppEnvironment(); ///////  need to check is it correct?  //FIXME
         Logger::log("Application environment is " . serialize($this->getAppEnvironment()));
 
         $sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,

@@ -1,5 +1,7 @@
 <?php
 require "EyesTouchScreen.php";
+require "OnWillSwitchSelenium.php";
+require "EyesTargetLocator.php";
 
 /**
  * An Eyes implementation of the interfaces implemented by
@@ -7,10 +9,10 @@ require "EyesTouchScreen.php";
  * Used so we'll be able to return the users an object with the same
  * functionality as {@link org.openqa.selenium.remote.RemoteWebDriver}.
  */
-class EyesWebDriver /*implements HasCapabilities, HasInputDevices,
+class EyesWebDriver implements WebDriver /*HasCapabilities, HasInputDevices,
         FindsByClassName, FindsByCssSelector, FindsById, FindsByLinkText,
         FindsByName, FindsByTagName, FindsByXPath, JavascriptExecutor,
-        SearchContext, TakesScreenshot, WebDriver, HasTouchScreen */
+        SearchContext, TakesScreenshot, HasTouchScreen */  //FIXME
 {
 
     private $logger; //Logger
@@ -96,7 +98,7 @@ class EyesWebDriver /*implements HasCapabilities, HasInputDevices,
             $touch = null;
         }
 
-        $logger->verbose("Driver session is " + getSessionId());
+        $logger->verbose("Driver session is " . $this->getSessionId());
     }
 
     public function getEyes()
@@ -148,7 +150,7 @@ class EyesWebDriver /*implements HasCapabilities, HasInputDevices,
         return $this->driver->getTitle();
     }
 
-    public function findElements(By $by)
+    public function findElements(WebDriverBy $by)
     {
         $foundWebElementsList = $this->driver->findElements($by); //List<WebElement>
 
@@ -172,11 +174,11 @@ class EyesWebDriver /*implements HasCapabilities, HasInputDevices,
         return $resultElementsList;
     }
 
-    public function findElement(By $by)
+    public function findElement(WebDriverBy $by)
     {
         $webElement = $this->driver->findElement($by);
         if ($webElement instanceof RemoteWebElement) {
-            $webElement = new EyesRemoteWebElement($logger, $this,
+            $webElement = new EyesRemoteWebElement($this->logger, $this,
                 /*(RemoteWebElement)*/
                 $webElement);
 
@@ -227,55 +229,13 @@ class EyesWebDriver /*implements HasCapabilities, HasInputDevices,
         return $this->driver->getWindowHandle();
     }
 
-    /*
+    
         public function switchTo() {
             $this->logger->verbose("switchTo()");
-            return new EyesTargetLocator(logger, this, driver.switchTo(),
-                    new EyesTargetLocator.OnWillSwitch() {
-                        public void willSwitchToFrame(
-                                EyesTargetLocator.TargetType targetType,
-                                WebElement targetFrame) {
-                            logger.verbose("willSwitchToFrame()");
-                            switch(targetType) {
-                                case DEFAULT_CONTENT:
-                                    logger.verbose("Default content.");
-                                    frameChain.clear();
-                                    break;
-                                case PARENT_FRAME:
-                                    logger.verbose("Parent frame.");
-                                    frameChain.pop();
-                                    break;
-                                default: // Switching into a frame
-                                    logger.verbose("Frame");
-
-                                    String frameId = ((EyesRemoteWebElement)
-                                            targetFrame).getId();
-                                    Point pl = targetFrame.getLocation();
-                                    Dimension ds = targetFrame.getSize();
-                                    // Get the frame's content location.
-                                    Location contentLocation = new
-                                            BordersAwareElementContentLocationProvider
-                                            ().getLocation(logger, targetFrame,
-                                            new Location(pl.getX(), pl.getY()));
-                                    frameChain.push(new Frame(logger, targetFrame,
-                                            frameId,
-                                            contentLocation,
-                                            new RectangleSize(ds.getWidth(),
-                                                    ds.getHeight()),
-                                            new ScrollPositionProvider(logger,
-                                                    driver).getCurrentPosition()));
-                            }
-                            logger.verbose("Done!");
-                        }
-
-                        public void willSwitchToWindow(String nameOrHandle) {
-                            logger.verbose("willSwitchToWindow()");
-                            frameChain.clear();
-                            logger.verbose("Done!");
-                        }
-                    });
+            $willSwitch = new OnWillSwitchSelenium();
+            return new EyesTargetLocator($this->logger, $this, $this->driver->switchTo(), $willSwitch);
         }
-    */
+    
     public function navigate()
     {
         return $this->driver->navigate();
@@ -298,82 +258,82 @@ class EyesWebDriver /*implements HasCapabilities, HasInputDevices,
 
     public function findElementByClassName($className)
     {
-        return $this->findElement(By::className($className));
+        return $this->findElement(WebDriverBy::className($className));
     }
 
     public function findElementsByClassName(String $className)
     {
-        return $this->findElements(By::className($className));
+        return $this->findElements(WebDriverBy::className($className));
     }
 
     public function findElementByCssSelector(String $cssSelector)
     {
-        return $this->findElement(By::cssSelector($cssSelector));
+        return $this->findElement(WebDriverBy::cssSelector($cssSelector));
     }
 
     public function findElementsByCssSelector(String $cssSelector)
     {
-        return $this->findElements(By::cssSelector($cssSelector));
+        return $this->findElements(WebDriverBy::cssSelector($cssSelector));
     }
 
     public function findElementById(String $id)
     {
-        return $this->findElement(By::id($id));
+        return $this->findElement(WebDriverBy::id($id));
     }
 
     public function findElementsById($id)
     {
-        return $this->findElements(By::id($id));
+        return $this->findElements(WebDriverBy::id($id));
     }
 
     public function findElementByLinkText($linkText)
     {
-        return $this->findElement(By::linkText($linkText));
+        return $this->findElement(WebDriverBy::linkText($linkText));
     }
 
     public function findElementsByLinkText($linkText)
     {
-        return $this->findElements(By::linkText($linkText));
+        return $this->findElements(WebDriverBy::linkText($linkText));
     }
 
     public function findElementByPartialLinkText($partialLinkText)
     {
-        return $this->findElement(By::partialLinkText($partialLinkText));
+        return $this->findElement(WebDriverBy::partialLinkText($partialLinkText));
     }
 
     public function findElementsByPartialLinkText($partialLinkText)
     {
-        return $this->findElements(By::partialLinkText($partialLinkText));
+        return $this->findElements(WebDriverBy::partialLinkText($partialLinkText));
     }
 
     public function findElementByName($name)
     {
-        return $this->findElement(By::name($name));
+        return $this->findElement(WebDriverBy::name($name));
     }
 
     public function findElementsByName($name)
     {
-        return $this->findElements(By::name($name));
+        return $this->findElements(WebDriverBy::name($name));
     }
 
     public function findElementByTagName($tagName)
     {
-        return $this->findElement(By::tagName($tagName));
+        return $this->findElement(WebDriverBy::tagName($tagName));
     }
 
     public function findElementsByTagName($tagName)
     {
-        return $this->findElements(By::tagName($tagName));
+        return $this->findElements(WebDriverBy::tagName($tagName));
     }
 
     public function findElementByXPath($path)
     {
-        return $this->findElement(By::xpath($path));
+        return $this->findElement(WebDriverBy::xpath($path));
     }
 
     public function findElementsByXPath($path)
     {
-        return $this->findElements(By::xpath($path));
+        return $this->findElements(WebDriverBy::xpath($path));
     }
 
     public function getCapabilities()
@@ -496,6 +456,18 @@ class EyesWebDriver /*implements HasCapabilities, HasInputDevices,
     private function getSessionId()
     {
         // extract remote web driver information
-        return $this->driver->getSessionId()->toString();
+        return $this->driver->getSessionId();
+    }
+    public function takeScreenshot($save_as = null)
+    {
+        // TODO: Implement takeScreenshot() method. //FIXME
+    }
+    public function execute($name, $params)
+    {
+        // TODO: Implement execute() method. //FIXME
+    }
+    public function wait($timeout_in_second = 30, $interval_in_millisecond = 250)
+    {
+        // TODO: Implement wait() method. //FIXME
     }
 }

@@ -19,8 +19,8 @@ class BatchInfo
      */
     public function __construct($name, $startedAt = null)
     {
-        //ArgumentGuard::notNull($startedAt, "startedAt");
-        $this->id = rand();
+        //ArgumentGuard::notNull($startedAt, "startedAt"); //FIXME
+        $this->id = rand(); //FIXME
         $this->name = $name;
         $this->startedAt = (empty($startedAt) ? date("Y-m-d\TH:i:s\Z") : $startedAt);
     }

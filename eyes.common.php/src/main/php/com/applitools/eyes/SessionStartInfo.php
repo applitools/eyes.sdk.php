@@ -46,7 +46,7 @@ class SessionStartInfo
         $this->branchName = $branchName;
         $this->parentBranchName = $parentBranchName;
 
-        //huge mock/ should be deleted
+        //huge mock/ should be deleted   //FIXME
 
 
         /*  $this->appIdOrName = "App Id 1111";

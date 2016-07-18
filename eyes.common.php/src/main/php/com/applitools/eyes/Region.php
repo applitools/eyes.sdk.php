@@ -12,6 +12,12 @@ class Region
     private $height;
     public static $empty;
 
+    public static function getEmpty()
+    {
+        self::$empty = new Region(0, 0, 0, 0);
+        return self::$empty;
+    }
+
     protected function makeEmpty()
     {
         $this->left = self::$empty->getLeft();
@@ -38,7 +44,7 @@ class Region
      */
     public function isEmpty()
     {
-        return $this . getLeft() == self::$empty->getLeft()
+        return $this->getLeft() == self::$empty->getLeft()
         && $this->getTop() == self::$empty->getTop()
         && $this->getWidth() == self::$empty->getWidth()
         && $this->getHeight() == self::$empty->getHeight();
