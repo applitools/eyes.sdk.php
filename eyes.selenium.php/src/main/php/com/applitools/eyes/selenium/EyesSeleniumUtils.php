@@ -240,12 +240,12 @@ class EyesSeleniumUtils
      * @param executor The executor to use.
      * @return The viewport size.
      */
-    public static function executeViewportSizeExtraction(/*JavascriptExecutor*/ $executor) //FIXME
+    public static function executeViewportSizeExtraction(JavascriptExecutor $executor) //FIXME
     {
         //noinspection unchecked
         /*List<Long> */
         $vsAsList = /*(List<Long>) */ $executor->executeScript(self::JS_GET_VIEWPORT_SIZE);
-        return new RectangleSize($vsAsList->get(0)->intValue(), $vsAsList->get(1)->intValue());
+        return new RectangleSize((int)$vsAsList[0], (int)$vsAsList[1]);
     }
 
     /**
@@ -295,8 +295,8 @@ class EyesSeleniumUtils
 
         ArgumentGuard::notNull($size, "size");
 
-        $SLEEP = 1000;
-        $RETRIES = 3;
+        $sleep = 1000;
+        $retries = 3;
 
         // We move the window to (0,0) to have the best chance to be able to
         // set the viewport size as requested.
@@ -315,24 +315,24 @@ class EyesSeleniumUtils
 
         $browserSize = $driver->manage()->window()->getSize();
         Logger::log("Current browser size: " . json_encode($browserSize));
-        $requiredBrowserSize = new Dimension($browserSize->width + ($size->getWidth() - $actualViewportSize->getWidth()),
-            $browserSize->height + ($size->getHeight() - $actualViewportSize->getHeight()));
-        Logger::log("Trying to set browser size to: " . $requiredBrowserSize);
+        $requiredBrowserSize = new WebDriverDimension($browserSize->getWidth() + ($size->getWidth() - $actualViewportSize->getWidth()),
+            $browserSize->getHeight() + ($size->getHeight() - $actualViewportSize->getHeight()));
+        Logger::log("Trying to set browser size to: " . json_encode($requiredBrowserSize));
 
-        $retriesLeft = RETRIES;
+        $retriesLeft = $retries;
         do {
             $driver->manage()->window()->setSize($requiredBrowserSize);
-            GeneralUtils::sleep(SLEEP);
+            GeneralUtils::sleep($sleep);
             $browserSize = $driver->manage()->window()->getSize();
-            Logger::log("Current browser size: " . browserSize);
+            Logger::log("Current browser size: " . json_encode($browserSize));
         } while (--$retriesLeft > 0 && !$browserSize->equals($requiredBrowserSize));
 
         if (!$browserSize->equals($requiredBrowserSize)) {
             throw new EyesException("Failed to set browser size!");
         }
 
-        $actualViewportSize = extractViewportSize($logger, $driver);
-        $logger::log("Current viewport size: " . $actualViewportSize);
+        $actualViewportSize = self::extractViewportSize($logger, $driver);
+        $logger::log("Current viewport size: " . json_encode($actualViewportSize));
         if (!$actualViewportSize->equals($size)) {
         // Additional attempt. This Solves the "maximized browser" bug
         // (border size for maximized browser sometimes different than
@@ -346,10 +346,10 @@ class EyesSeleniumUtils
         Logger::log("Browser size: " . $browserSize);
         Logger::log("Required browser size: " . $requiredBrowserSize);
 
-        $retriesLeft = RETRIES;
+        $retriesLeft = $retries;
         do {
             $driver->manage()->window()->setSize($requiredBrowserSize);
-            GeneralUtils::sleep(SLEEP);
+            GeneralUtils::sleep($sleep);
             $actualViewportSize = self::extractViewportSize($logger, $driver);
             Logger::log("Browser size: " . $driver->manage()->window()->getSize());
             Logger::log("Viewport size: " . $actualViewportSize);

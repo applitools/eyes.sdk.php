@@ -1,8 +1,4 @@
 <?php
-require "EyesException.php";
-require "ArgumentGuard.php";
-
-
 /**
  * General purpose utilities.
  */
@@ -120,9 +116,7 @@ class GeneralUtils
     public static function sleep($milliseconds)
     {
         try {
-            echo "NEED TO SLEEP";  //FIXME
-            die();
-            //  Thread.sleep($milliseconds);
+            sleep(/*$milliseconds/1000*/1);//FIXME
         } catch (InterruptedException $ex) {
             throw new RuntimeException("sleep interrupted", $ex);
         }

@@ -1011,7 +1011,7 @@ class Eyes extends EyesBase
     protected function getInferredEnvironment()
     {
         $userAgent = $this->driver->getUserAgent();
-        if ($this->userAgent != null) {
+        if ($userAgent != null) {
             return "useragent:" . $userAgent;
         }
 
@@ -1031,7 +1031,7 @@ class Eyes extends EyesBase
         // If hostOs isn't set, we'll try and extract and OS ourselves.
         if ($appEnv->getOs() == null) {
             Logger::log("No OS set, checking for mobile OS...");
-            if ($EyesSeleniumUtils->isMobileDevice($underlyingDriver)) {
+            if (EyesSeleniumUtils::isMobileDevice($underlyingDriver)) {
                 $platformName = null;
                 Logger::log("Mobile device detected! Checking device type..");
                 if (EyesSeleniumUtils::isAndroid($underlyingDriver)) {

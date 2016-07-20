@@ -13,6 +13,7 @@ require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/Inval
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Region.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/SimplePropertyHandler.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/SessionType.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/GeneralUtils.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullScaleProvider.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ImageMatchSettings.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/FailureReports.php";
@@ -247,10 +248,10 @@ class EyesBase
 
             $this->setIsOpen(false);
 
-            $this->lastScreenshot = null;   //!!!!!!!!!!
+            $this->lastScreenshot = null;   //FIXME
             $this->clearUserInputs();
 
-            if (empty($this->runningSession)) { //!!!!!!!!!
+            if (empty($this->runningSession)) { //FIXME
                 //logger.verbose("Closed");
                 return;
             }
@@ -264,7 +265,7 @@ class EyesBase
                 //logger.log("Failed to abort server session: " + ex.getMessage());
             }
         } finally {
-            $this->runningSession = null; /// !!!!!
+            $this->runningSession = null; /// FIXME
             //logger.getLogHandler().close();
         }
     }
@@ -395,7 +396,7 @@ class EyesBase
             $appOutputProvider = new AppOutputProvider();
 
             $matchWindowTask = new MatchWindowTask(
-            //$logger,
+                $this->logger,
                 $this->serverConnector,
                 $this->runningSession,
                 $this->matchTimeout,
@@ -403,7 +404,7 @@ class EyesBase
                 $appOutputProvider
             );
         }
-
+//echo "OOOOOO"; print_r($matchWindowTask); die();
         Logger::log("Calling match window...");
         $result = $matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider, $tag,
             $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);

@@ -2,6 +2,7 @@
 require "EyesTouchScreen.php";
 require "OnWillSwitchSelenium.php";
 require "EyesTargetLocator.php";
+require "AppiumJsCommandExtractor.php";
 
 /**
  * An Eyes implementation of the interfaces implemented by
@@ -9,9 +10,9 @@ require "EyesTargetLocator.php";
  * Used so we'll be able to return the users an object with the same
  * functionality as {@link org.openqa.selenium.remote.RemoteWebDriver}.
  */
-class EyesWebDriver implements WebDriver /*HasCapabilities, HasInputDevices,
+class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, HasInputDevices,
         FindsByClassName, FindsByCssSelector, FindsById, FindsByLinkText,
-        FindsByName, FindsByTagName, FindsByXPath, JavascriptExecutor,
+        FindsByName, FindsByTagName, FindsByXPath,
         SearchContext, TakesScreenshot, HasTouchScreen */  //FIXME
 {
 
@@ -341,31 +342,31 @@ class EyesWebDriver implements WebDriver /*HasCapabilities, HasInputDevices,
         return $this->driver->getCapabilities();
     }
 
-    public function executeScript($script, $args)
+    public function executeScript($script, array $args = array())
     {
 
         // Appium commands are sometimes sent as Javascript
-        if (AppiumJsCommandExtractor::isAppiumJsCommand($script)) {
+        /*if (AppiumJsCommandExtractor::isAppiumJsCommand($script)) {
             $trigger = AppiumJsCommandExtractor::extractTrigger($this->elementsIds,
                 $this->driver->manage()->window()->getSize(), $script, $args);
 
             if ($trigger != null) {
                 // TODO - Daniel, additional type of triggers
                 if ($trigger instanceof MouseTrigger) {
-                    $mt = /*(MouseTrigger)*/
+                    $mt = //(MouseTrigger)
                         clone $trigger;
                     $this->eyes->addMouseTrigger($mt->getMouseAction(),
                         $mt->getControl(), $mt->getLocation());
                 }
             }
-        }
+        }*/ //FIXME
         $this->logger->verbose("Execute script...");
         $result = $this->driver->executeScript($script, $args);
         $this->logger->verbose("Done!");
         return $result;
     }
 
-    public function executeAsyncScript($script, $args)
+    public function executeAsyncScript($script, array $args = array())
     {
 
         // Appium commands are sometimes sent as Javascript
