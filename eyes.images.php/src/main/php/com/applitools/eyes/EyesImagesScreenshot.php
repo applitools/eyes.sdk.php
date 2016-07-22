@@ -1,6 +1,4 @@
 <?php
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesScreenshot.php";
-
 /**
  * Encapsulates a screenshot taken by the images SDK.
  */

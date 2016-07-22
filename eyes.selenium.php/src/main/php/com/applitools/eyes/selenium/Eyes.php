@@ -32,7 +32,7 @@ class Eyes extends EyesBase
     // Milliseconds
     const DEFAULT_WAIT_BEFORE_SCREENSHOTS = 100;
 
-    private $driver; //EyesWebDriver
+    protected $driver; //EyesWebDriver FIXME
     private $dontGetTitle;
 
 
@@ -657,7 +657,7 @@ class Eyes extends EyesBase
         Logger::log("Switching to parent frame according to frames path..");
         $parentFramePath = $framePath->length; //new String[framePath.length-1];
 
-//???????
+//??????? //FIXME
 //        System.arraycopy(framePath, 0, parentFramePath, 0,
 //            parentFramePath.length);
 //        ((EyesTargetLocator)(driver.switchTo())).frames(parentFramePath);
@@ -782,7 +782,7 @@ class Eyes extends EyesBase
         }
 
         if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), /*(EyesWebDriverScreenshot) */
-            $this->lastScreenshot . getFrameChain())
+            $this->lastScreenshot->getFrameChain())
         ) {
             Logger::log(sprintf("Ignoring %s (different frame)", $action));
             return;

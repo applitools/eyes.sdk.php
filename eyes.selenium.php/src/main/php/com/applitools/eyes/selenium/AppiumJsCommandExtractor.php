@@ -11,7 +11,7 @@ class AppiumJsCommandExtractor {
      * @param script The script to test whether it's an Appium command.
      * @return True if the script is an Appium command, false otherwise.
      */
-    public static function isAppiumJsCommand($script) { echo "OOOOOOOOOO"; print_r($script); die();
+    public static function isAppiumJsCommand($script) {
         return $script->startsWith(COMMAND_PREFIX);
     }
 

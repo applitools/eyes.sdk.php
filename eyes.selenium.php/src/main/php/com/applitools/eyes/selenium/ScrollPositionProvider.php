@@ -49,7 +49,7 @@ class ScrollPositionProvider implements PositionProvider
     public function getEntireSize()
     {
         $result = EyesSeleniumUtils::getCurrentFrameContentEntireSize($this->executor);
-        $this->logger->verbose(sprintf("Entire size: %s", $result));
+        $this->logger->verbose(sprintf("Entire size: %s", json_encode($result)));
         return $result;
     }
 

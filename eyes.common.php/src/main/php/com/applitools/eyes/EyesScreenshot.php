@@ -5,8 +5,8 @@
 abstract class EyesScreenshot {
     protected $image;// BufferedImage
 
-    public function __construct(BufferedImage $image) {
-        ArgumentGuard::notNull($image, "image");
+    public function __construct(BufferedImage $image = null) { //FIXME
+        //ArgumentGuard::notNull($image, "image"); //FIXME
         $this->image = $image;
     }
 
@@ -27,8 +27,7 @@ abstract class EyesScreenshot {
     *                        fully contained in the screenshot.
     * @return A screenshot instance containing the given region.
     */
-    public function getSubScreenshot(Region $region, CoordinatesType $coordinatesType, $throwIfClipped){
-    }//should be abstract
+    public abstract function getSubScreenshot(Region $region, CoordinatesType $coordinatesType, $throwIfClipped);
 
     /**
     * Converts a location's coordinates with the {@code from} coordinates type
@@ -40,8 +39,7 @@ abstract class EyesScreenshot {
     * @return A new location which is the transformation of {@code location} to
     * the {@code to} coordinates type.
     */
-    protected function convertLocation(Location $location, CoordinatesType $from, CoordinatesType $to){
-    } //abstract
+    protected abstract function convertLocation(Location $location, CoordinatesType $from, CoordinatesType $to);
 
     /**
     * Calculates the location in the screenshot of the location given as
@@ -54,8 +52,7 @@ abstract class EyesScreenshot {
     * @throws com.applitools.eyes.OutOfBoundsException If the location is
     * not inside the frame's region in the screenshot.
     */
-    public function getLocationInScreenshot(Location $location, CoordinatesType $coordinatesType){
-    }// abstract.
+    public abstract function getLocationInScreenshot(Location $location, CoordinatesType $coordinatesType);
 
 
     protected abstract function getIntersectedRegion(Region $region,

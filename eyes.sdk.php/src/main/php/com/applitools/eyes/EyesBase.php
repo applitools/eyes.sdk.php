@@ -6,8 +6,10 @@ require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Se
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/AppEnvironment.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/BatchInfo.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ArgumentGuard.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesScreenshot.php";
 require "../../eyes/eyes.php/eyes.images.php/src/main/php/com/applitools/eyes/EyesImagesScreenshot.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProvider.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProviderRedeclared.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/MatchWindowTask.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/InvalidPositionProvider.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Region.php";
@@ -83,7 +85,7 @@ class EyesBase
         $this->saveNewTests = true;
         $this->saveFailedTests = false;
         $this->agentId = null;
-        $this->lastScreenshot = null;
+
     }
 
     /**
@@ -371,7 +373,7 @@ class EyesBase
      * @throws com.applitools.eyes.TestFailedException Thrown if a mismatch is
      *          detected and immediate failure reports are enabled.
      */
-    public function checkWindowBase($regionProvider, $tag = null, $ignoreMismatch = null, $retryTimeout = null)
+    public function checkWindowBase($regionProvider, $tag = "", $ignoreMismatch = null, $retryTimeout = null)
     {
         if ($this->getIsDisabled()) {
             Logger::log("Ignored");
@@ -379,21 +381,19 @@ class EyesBase
             $result->setAsExpected(true);
             return $result;
         }
-
-        //ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
+require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
+$this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver); //FIXME
+        ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
 
         Logger::log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
 
-        if ($tag == null) {
-            $tag = "";
-        }
         if ($this->runningSession == null) {
             Logger::log("No running session, calling start session..");
             $this->startSession();
             Logger::log("Done!");
 
-            $appOutputProvider = new AppOutputProvider();
+            $appOutputProviderRedeclared = new AppOutputProviderRedeclared($this);
 
             $matchWindowTask = new MatchWindowTask(
                 $this->logger,
@@ -401,13 +401,13 @@ class EyesBase
                 $this->runningSession,
                 $this->matchTimeout,
                 // A callback which will call getAppOutput
-                $appOutputProvider
+                $appOutputProviderRedeclared //FIXME
             );
         }
-//echo "OOOOOO"; print_r($matchWindowTask); die();
+
         Logger::log("Calling match window...");
-        $result = $matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider, $tag,
-            $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
+        $result = $matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
+            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
         Logger::log("MatchWindow Done!");
 
         if (!$result->getAsExpected()) {
@@ -418,13 +418,13 @@ class EyesBase
 
             $shouldMatchWindowRunOnceOnTimeout = true;
 
-            if (!$this->runningSession . getIsNewSession()) {
+            if (!$this->runningSession->getIsNewSession()) {
                 Logger::log(sprintf("Mismatch! (%s)", $tag));
             }
 
             if ($this->getFailureReports() == "FailureReports::IMMEDIATE") {
                 throw new TestFailedException(sprintf("Mismatch found in '%s' of '%s'",
-                    $sessionStartInfo->getScenarioIdOrName(), $sessionStartInfo->getAppIdOrName()));
+                    $this->sessionStartInfo->getScenarioIdOrName(), $this->sessionStartInfo->getAppIdOrName()));
             }
         } else { // Match successful
             clearUserInputs();
@@ -435,6 +435,38 @@ class EyesBase
         return $result;
     }
 
+
+    /**
+     * @param regionProvider      A callback for getting the region of the
+     *                            screenshot which will be set in the
+     *                            application output.
+     * @param lastScreenshot      Previous application screenshot (used for
+     *                            compression) or {@code null} if not available.
+     * @return The updated app output and screenshot.
+     */
+    private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot) {
+
+        $this->logger->verbose("getting screenshot...");
+            // Getting the screenshot (abstract function implemented by each SDK).
+        $screenshot = $this->getScreenshot();
+        $this->logger->verbose("Done getting screenshot!");
+
+        // Cropping by region if necessary
+        $region = $this->regionProvider->getRegion();
+        if (!$region->isEmpty()) {
+            $screenshot = $screenshot->getSubScreenshot($region,
+            $regionProvider->getCoordinatesType(), false);
+        }
+
+        $this->logger->verbose("Compressing screenshot...");
+        $compressResult = $this->compressScreenshot64($screenshot, $lastScreenshot);
+        $this->logger->verbose("Done! Getting title...");
+        $title = $this->getTitle();
+        $this->logger->verbose("Done!");
+        $result = new AppOutputWithScreenshot(new AppOutput($title, $compressResult), $screenshot);
+        $this->logger->verbose("Done!");
+        return $result;
+    }
 
     /**
      * Sets the batch in which context future tests will run or {@code null}
@@ -494,10 +526,10 @@ class EyesBase
         $sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
             $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $appEnv,
             $this->defaultMatchSettings, $this->branchName, $this->parentBranchName);
-//echo "ddddddddd"; print_r($sessionStartInfo); die();
+
         Logger::log("Starting server session...");
         $this->runningSession = $this->serverConnector->startSession($sessionStartInfo);
-//print_r($this->runningSession); die();
+
         Logger::log("Server session ID is " . $this->runningSession->getId());
 
         $testInfo = "'" . $this->testName . "' of '" . $this->getAppName() . "' " . serialize($appEnv);

@@ -223,14 +223,14 @@ class EyesSeleniumUtils
             $esAsList =
                 /*(List<Long>)*/
                 $executor->executeScript(self::JS_GET_CONTENT_ENTIRE_SIZE);
-            if ($esAsList->size() <= 0) {
+            if (count($esAsList) <= 0) {
                 throw new EyesDriverOperationException(
                     "Received empty value as frame's size");
             }
-            $result = new RectangleSize($esAsList->get(0)->intValue(), $esAsList->get(1)->intValue());
+            $result = new RectangleSize((int)$esAsList[0], (int)$esAsList[1]);
         } catch (WebDriverException $e) {
             throw new EyesDriverOperationException(
-                "Got exception while trying to extract entire size!", e);
+                "Got exception while trying to extract entire size!", $e);
         }
         return $result;
     }

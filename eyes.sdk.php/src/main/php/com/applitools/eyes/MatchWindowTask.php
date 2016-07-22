@@ -2,8 +2,9 @@
 /*
 * Applitools SDK for Selenium integration.
 */
-//require "ArgumentGuard.php";
-//require "Logger.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/MatchWindowData.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Options.php";
+
 
 class MatchWindowTask
 {
@@ -26,7 +27,7 @@ class MatchWindowTask
      * @param appOutputProvider A callback for getting the application output
      *                          when performing match
      */
-    public function __construct(/*Logger logger, */
+    public function __construct(Logger $logger,
         ServerConnector $serverConnector,
         RunningSession $runningSession, $retryTimeout,
         AppOutputProvider $appOutputProvider)
@@ -62,7 +63,7 @@ class MatchWindowTask
 
         // Prepare match data.
         $data = new MatchWindowData($userInputs, $appOutput->getAppOutput(), $tag, $ignoreMismatch,
-            new MatchWindowData . Options(tag, userInputs, ignoreMismatch, false, false, false));
+            new Options($tag, $userInputs, $ignoreMismatch, false, false, false));
 
         // Perform match.
         return $this->serverConnector->matchWindow($this->runningSession, $data);
@@ -89,8 +90,7 @@ class MatchWindowTask
      *                                          retry timeout.
      * @return Returns the results of the match
      */
-    public function matchWindow(/*Trigger[]*/
-        $userInputs, EyesScreenshot $lastScreenshot,
+    public function matchWindow(/*Trigger[]*/$userInputs, EyesScreenshot $lastScreenshot,
         RegionProvider $regionProvider, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout)
     {
 
@@ -114,7 +114,7 @@ class MatchWindowTask
             }
 
             // Getting the screenshot.
-            $appOutput = $appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
+            $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
 
             $matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch);
 
@@ -127,7 +127,7 @@ class MatchWindowTask
 
             // We intentionally start the timer after(!) taking the screenshot,
             // so less time is "wasted" on the transfer of the image.
-            $appOutput = $appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
+            $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
 
             // Start the retry timer.
             $start = microtime();
@@ -142,7 +142,7 @@ class MatchWindowTask
                 // Wait before trying again.
                 GeneralUtils::sleep(MATCH_INTERVAL);
 
-                $appOutput = $appOutputProvider->getAppOutput($regionProvider, lastScreenshot);
+                $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, lastScreenshot);
 
                 // Notice the ignoreMismatch here is true
                 $matchResult = $this->performMatch($userInputs, $appOutput, $tag, true);
@@ -153,7 +153,7 @@ class MatchWindowTask
             // if we're here because we haven't found a match yet, try once more
             if (!$matchResult->getAsExpected()) {
 
-                $appOutput = $appOutputProvider->getAppOutput($regionProvider,
+                $appOutput = $this->appOutputProvider->getAppOutput($regionProvider,
                     $lastScreenshot);
 
                 $matchResult = performMatch($userInputs, $appOutput, $tag,

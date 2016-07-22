@@ -409,7 +409,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
 
         $this->logger->verbose("Extracting viewport size...");
         $this->defaultContentViewportSize = EyesSeleniumUtils::extractViewportSize($this->logger, $this);
-        $this->logger->verbose("Done! Viewport size: " . $this->defaultContentViewportSize);
+        $this->logger->verbose("Done! Viewport size: " . json_encode($this->defaultContentViewportSize));
 
         if ($currentFrames->size() > 0) {
             $locator = $this->switchTo();
