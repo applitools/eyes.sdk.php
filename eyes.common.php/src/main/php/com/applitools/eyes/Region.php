@@ -26,16 +26,37 @@ class Region
         $this->height = self::$empty->getHeight();
     }
 
-    public function __construct($left, $top, $width, $height)
+    public function __construct($left = null, $top = null, $width = null, $height = null,
+                                Location $location = null, RectangleSize $size = null,
+                                Region $other = null) //FIXME 3 construct's merged
     {
-        ArgumentGuard::greaterThanOrEqualToZero($width, "width");
-        ArgumentGuard::greaterThanOrEqualToZero($height, "height");
-        $this->empty = new Region(0, 0, 0, 0);
+        if($left !== null && $top !== null && $width !== null && $height !== null){
+            ArgumentGuard::greaterThanOrEqualToZero($width, "width");
+            ArgumentGuard::greaterThanOrEqualToZero($height, "height");
+            //$this->empty = new Region(0, 0, 0, 0); //FIXME
 
-        $this->left = $left;
-        $this->top = $top;
-        $this->width = $width;
-        $this->height = $height;
+            $this->left = $left;
+            $this->top = $top;
+            $this->width = $width;
+            $this->height = $height;
+        }
+        else if($location !== null && $size !== null){
+            ArgumentGuard::notNull($location, "location");
+            ArgumentGuard::notNull($size, "size");
+
+            $this->left = $location->getX();
+            $this->top = $location->getY();
+            $this->width = $size->getWidth();
+            $this->height = $size->getHeight();
+        }
+        else if ($other ==! null){
+            ArgumentGuard::notNull($other, "other");
+
+            $this->left = $other->getLeft();
+            $this->top = $other->getTop();
+            $this->width = $other->getWidth();
+            $this->height = $other->getHeight();
+        }
     }
 
     /**
@@ -71,25 +92,6 @@ class Region
     {
         return ($this->left . $this->top . $this->width + $this->height);
     }
-
-    /*public function __construct(Location $location, RectangleSize $size) {
-        ArgumentGuard::notNull($location, "location");
-        ArgumentGuard::notNull($size, "size");
-
-        $this->left = $location->getX();
-        $this->top = $location->getY();
-        $this->width = $size->getWidth();
-        $this->height = $size->getHeight();
-    }
-
-    public function __construct(Region $other) {
-        ArgumentGuard::notNull($other, "other");
-
-        $this->left = $other->getLeft();
-        $this->top = $other->getTop();
-        $this->width = $other->getWidth();
-        $this->height = $other->getHeight();
-    }*/
 
     /**
      *
@@ -305,7 +307,7 @@ class Region
      * @return True if the location is contained within this region,
      *          false otherwise.
      */
-    /*public function contains(Location $location) {
+    /*public function contains(Location $location) {               //FIXME
         return $location->getX() >= $this->left
         && $location->getX() <= ($this->left + $this->width)
         && $location->getY() >= $this->top
@@ -342,11 +344,10 @@ class Region
     {
 
         // If there's no intersection set this as the Empty region.
-        if (!isIntersected($other)) {
+        if (!$this->isIntersected($other)) {
             $this->makeEmpty();
             return;
         }
-
         // The regions intersect. So let's first find the left & top values
         $otherLeft = $other->getLeft();
         $otherTop = $other->getTop();
@@ -355,11 +356,10 @@ class Region
         $intersectionTop = ($this->top >= $otherTop) ? $this->top : $otherTop;
 
         // Now the width and height of the intersect
-        $right = $this > left + $this->width;
+        $right = $this->left + $this->width;
         $otherRight = $otherLeft + $other->getWidth();
         $intersectionRight = ($right <= $otherRight) ? $right : $otherRight;
         $intersectionWidth = $intersectionRight - $intersectionLeft;
-
         $bottom = $this->top + $this->height;
         $otherBottom = $otherTop + $other->getHeight();
         $intersectionBottom = ($bottom <= $otherBottom) ? $bottom : $otherBottom;
@@ -369,7 +369,6 @@ class Region
         $this->top = $intersectionTop;
         $this->width = $intersectionWidth;
         $this->height = $intersectionHeight;
-
     }
 
 

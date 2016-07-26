@@ -10,7 +10,7 @@ class AppOutputWithScreenshot
     private $appOutput; //AppOutput
     private $screenshot; //EyesScreenshot
 
-    public function __construct(AppOutput $appOutput, EyesScreenshot $screenshot = null) //FIXME
+    public function __construct(AppOutput $appOutput, EyesScreenshot $screenshot)
     {
         $this->appOutput = $appOutput;
         $this->screenshot = $screenshot;

@@ -6,12 +6,18 @@ require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Se
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/AppEnvironment.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/BatchInfo.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ArgumentGuard.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ImageUtils.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesScreenshot.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Location.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/BufferedImage.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesException.php";
 require "../../eyes/eyes.php/eyes.images.php/src/main/php/com/applitools/eyes/EyesImagesScreenshot.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProvider.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProviderRedeclared.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/MatchWindowTask.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/InvalidPositionProvider.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/ImageProvider.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/EyesScreenshotFactory.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Region.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/SimplePropertyHandler.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/SessionType.php";
@@ -24,7 +30,7 @@ require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullC
 class EyesBase
 {
 
-    const SEQUENTIAL = "aaa";  ///Session type ???
+    const SEQUENTIAL = "aaa";  ///Session type FIXME
     const DEFAULT_MATCH_TIMEOUT = 2; // Seconds
     const USE_DEFAULT_TIMEOUT = -1;
 
@@ -48,7 +54,7 @@ class EyesBase
     private $userInputs = array(); //new ArrayDeque<Trigger>();
     private $shouldMatchWindowRunOnceOnTimeout;
     private $lastScreenshot;
-    private $scaleProviderHandler; //PropertyHandler<ScaleProvider>
+    protected $scaleProviderHandler; //PropertyHandler<ScaleProvider>
     private $cutProviderHandler; //PropertyHandler<CutProvider>
 
 
@@ -382,7 +388,7 @@ class EyesBase
             return $result;
         }
 require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
-$this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver); //FIXME
+$this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, new BufferedImage(10,10,10)); //FIXME
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
 

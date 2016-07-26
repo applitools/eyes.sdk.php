@@ -67,7 +67,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
      *                                   location in the screenshot.
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
-                                BufferedImage $image = null/*FIXME*/, ScreenshotType $screenshotType = null,
+                                BufferedImage $image, ScreenshotType $screenshotType = null,
                                 Location $frameLocationInScreenshot = null,
                                 RectangleSize $entireFrameSize = null)
     {
@@ -143,11 +143,12 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 }
             }
             $this->frameLocationInScreenshot = $frameLocationInScreenshot;
-
             $logger->verbose("Calculating frame window..");
-            $this->frameWindow = new Region($frameLocationInScreenshot, $frameSize);
-            $this->frameWindow->intersect(new Region(0, 0, $image->getWidth(),
-                $image->getHeight()));
+            $this->frameWindow = new Region(null, null, null, null,
+                                        $frameLocationInScreenshot, $frameSize);
+
+            $this->frameWindow->intersect(new Region(/*FIXME*/0, 0, $image->getWidth(), $image->getHeight()));
+
             if ($this->frameWindow->getWidth() <= 0 ||
                 $this->frameWindow->getHeight() <= 0
             ) {
@@ -403,15 +404,14 @@ class EyesWebDriverScreenshot extends EyesScreenshot
 
         $elementRegion = new Region($pl->getX(), $pl->getY(), $ds->getWidth(), $ds->getHeight());
 
-            // Since the element coordinates are in context relative
+        // Since the element coordinates are in context relative
         $elementRegion = $this->getIntersectedRegion($elementRegion,
-        CoordinatesType::CONTEXT_RELATIVE);
+            CoordinatesType::CONTEXT_RELATIVE);
 
-        if (!$elementRegion->isEmpty())
-        {
-        $elementRegion = $this->convertRegionLocation($elementRegion,
-        CoordinatesType::CONTEXT_RELATIVE,
-        CoordinatesType::SCREENSHOT_AS_IS);
+        if (!$elementRegion->isEmpty()) {
+            $elementRegion = $this->convertRegionLocation($elementRegion,
+                CoordinatesType::CONTEXT_RELATIVE,
+                CoordinatesType::SCREENSHOT_AS_IS);
         }
 
         return $elementRegion;

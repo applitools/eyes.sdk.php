@@ -26,7 +26,7 @@ class ScrollPositionProvider implements PositionProvider
         } catch (WebDriverException $e) {
             throw new EyesDriverOperationException("Failed to extract current scroll position!");
         }
-        $this->logger->verbose(sprintf("Current position: %s", $result));
+        $this->logger->verbose(sprintf("Current position: %s", json_encode($result)));
         return $result;
     }
 

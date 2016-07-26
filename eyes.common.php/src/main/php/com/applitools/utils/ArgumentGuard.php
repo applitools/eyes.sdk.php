@@ -12,7 +12,7 @@ class ArgumentGuard
      */
     public static function notNull($param, $paramName)
     {
-        if (null == $param) {
+        if (null === $param) { //FIXME
             throw new Exception($paramName . " is null");// IllegalArgumentException
         }
     }

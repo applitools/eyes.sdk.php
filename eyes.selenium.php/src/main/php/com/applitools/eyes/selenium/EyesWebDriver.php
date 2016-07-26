@@ -427,17 +427,17 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return new FrameChain($this->logger, $this->frameChain);
     }
 
-    public function getScreenshotAs(/*OutputType<X>*/
-        $xOutputType)
+    public function getScreenshotAs(/*OutputType<X>*/$xOutputType)
     {
-        // Get the image as base64.
+      /*  // Get the image as base64.    FIXME
         $screenshot64 = $this->driver->getScreenshotAs(OutputType::BASE64);
         $screenshot = ImageUtils::imageFromBase64($screenshot64);
         $screenshot = $this->normalizeRotation($this->logger, $this->driver, $screenshot, $this->rotation);
 
         // Return the image in the requested format.
         $screenshot64 = ImageUtils::base64FromImage($screenshot);
-        return $xOutputType->convertFromBase64Png($screenshot64);
+        return $xOutputType->convertFromBase64Png($screenshot64);*/
+        return $this->driver->takeScreenshot();
     }
 
     public function getUserAgent()

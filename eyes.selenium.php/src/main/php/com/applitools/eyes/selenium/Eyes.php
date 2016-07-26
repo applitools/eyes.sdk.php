@@ -7,6 +7,10 @@ require "FrameChain.php";
 require "ScrollPositionProvider.php";
 require "ImageRotation.php";
 require "EyesSeleniumUtils.php";
+require "ScreenshotType.php";
+require "ContextBasedScaleProvider.php";
+require "TakesScreenshotImageProvider.php";
+require "EyesWebDriverScreenshotFactory.php";
 
 /**
  * The main API gateway for the SDK.
@@ -519,7 +523,7 @@ class Eyes extends EyesBase
             $this->updateScalingParams();
 
             Logger::log("Getting screenshot as base64..");
-            $screenshot64 = $this->driver->getScreenshotAs(OutputType::BASE64);
+            $screenshot64 = $this->driver->getScreenshotAs(/*OutputType:: FIXME*/"BASE64");
             Logger::log("Done! Creating image object...");
             $screenshotImage = ImageUtils::imageFromBase64($screenshot64); //BufferedImage instance
             $screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
@@ -693,7 +697,7 @@ class Eyes extends EyesBase
             $eyesElement = /*(EyesRemoteWebElement)*/
                 $element;
         } else {
-            $eyesElement = new EyesRemoteWebElement($this->logger, $driver, /*(RemoteWebElement)*/
+            $eyesElement = new EyesRemoteWebElement($this->logger, $this->driver, /*(RemoteWebElement)*/
                 $element);
         }
 
@@ -894,11 +898,13 @@ class Eyes extends EyesBase
      */
     public function getViewportSize(WebDriver $driver = null)
     {
-        ArgumentGuard::notNull($this->driver, "driver");
+
         if (!empty($driver)) {
+            ArgumentGuard::notNull($this->driver, "driver");
             return EyesSeleniumUtils::extractViewportSize($this->logger, $$this->driver);
         } else {
-            return $driver->getDefaultContentViewportSize();
+            ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
+            return $this->driver->getDefaultContentViewportSize();
         }
     }
 
@@ -936,7 +942,7 @@ class Eyes extends EyesBase
     }
 
 
-    protected function getScreenshot()
+    public function getScreenshot()
     {
 
         Logger::log("getScreenshot()");
@@ -950,17 +956,17 @@ class Eyes extends EyesBase
         try {
             $imageProvider = new TakesScreenshotImageProvider($this->logger, $this->driver);
             $screenshotFactory = new EyesWebDriverScreenshotFactory($this->logger, $this->driver);
-            if (checkFrameOrElement) {
+            if ($this->checkFrameOrElement) {
                 Logger::log("Check frame/element requested");
                 $algo = new FullPageCaptureAlgorithm($this->logger);
-                $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $regionToCheck,
-                    $positionProvider, $positionProvider,
-                    $scaleProviderHandler->get(),
+                $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
+                    $this->positionProvider, $this->positionProvider,
+                    $this->scaleProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 Logger::log("Building screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
                     new RectangleSize($entireFrameOrElement->getWidth(), $entireFrameOrElement->getHeight()));
-            } else if ($forceFullPageScreenshot) {
+            } else if ($this->forceFullPageScreenshot) {
                 Logger::log("Full page screenshot requested.");
                 // Save the current frame path.
                 $originalFrame = $this->driver->getFrameChain();
@@ -969,26 +975,26 @@ class Eyes extends EyesBase
                 $regionProvider = new RegionProvider();
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
                     new ScrollPositionProvider($this->logger, $this->driver),
-                    $positionProvider, $scaleProviderHandler->get(),
-                    $regionProvidergetWaitBeforeScreenshots(), $screenshotFactory);
+                    $this->positionProvider, $this->scaleProviderHandler->get(),
+                    $this->getWaitBeforeScreenshots(), $screenshotFactory);
 
                 /*(EyesTargetLocator)*/
                 $this->driver->switchTo()->frames($originalFrame);
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);
             } else {
                 Logger::verbose("Screenshot requested...");
-                $screenshot64 = $this->driver->getScreenshotAs(OutputType::BASE64);
+                $screenshot64 = $this->driver->getScreenshotAs(/*OutputType:: FIXME*/"BASE64");
                 Logger::log("Done! Creating image object...");
                 $screenshotImage = ImageUtils::imageFromBase64($screenshot64);
                 Logger::log("Done!");
-                $screenshotImage = $scaleProviderHandler->get()->scaleImage($screenshotImage);
+                $screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
                 Logger::verbose("Creating screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
             }
             Logger::verbose("Done!");
             return $result;
         } finally {
-            if ($hideScrollbars) {
+            if ($this->hideScrollbars) {
                 EyesSeleniumUtils::setOverflow($this->driver, $originalOverflow);
             }
         }

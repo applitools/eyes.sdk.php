@@ -197,7 +197,7 @@ class EyesSeleniumUtils
         /*List<Long> */
         $positionAsList = /*(List<Long>)*/
             $executor->executeScript(self::JS_GET_CURRENT_SCROLL_POSITION);
-        return new Location($positionAsList->get(0)->intValue(), $positionAsList->get(1)->intValue());
+        return new Location((int)$positionAsList[0], (int)$positionAsList[1]);
     }
 
     /**
@@ -402,7 +402,7 @@ class EyesSeleniumUtils
      */
     public static function getDevicePixelRatio(JavascriptExecutor $executor)
     {
-        return (float)$executor->executeScript("return window.devicePixelRatio")->toString();
+        return (float)$executor->executeScript("return window.devicePixelRatio");
     }
 
     /**
@@ -454,7 +454,7 @@ class EyesSeleniumUtils
      * @param executor The executor to use.
      * @param transform The transform value to set.
      */
-    public static function setTransform(JavascriptExecutor $executor, String $transform)
+    public static function setTransform(JavascriptExecutor $executor, $transform)
     {
         $transforms = array(); //FIXME
 

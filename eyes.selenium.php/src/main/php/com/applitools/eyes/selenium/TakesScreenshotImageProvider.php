@@ -1,0 +1,21 @@
+<?php
+/**
+ * An image provider based on WebDriver's {@link TakesScreenshot} interface.
+ */
+class TakesScreenshotImageProvider implements ImageProvider {
+
+    private $logger; //Logger
+    private $tsInstance; //TakesScreenshot
+
+    public function __construct(Logger $logger, /*TakesScreenshot FIXME*/$tsInstance) {
+        $this->logger = $logger;
+        $this->tsInstance = $tsInstance;
+    }
+
+    public function getImage() {
+        $this->logger->verbose("Getting screenshot as base64...");
+        $screenshot64 = $this->tsInstance->getScreenshotAs(OutputType::BASE64);
+        $this->logger->verbose("Done getting base64! Creating BufferedImage..");
+        return ImageUtils::imageFromBase64($screenshot64);
+    }
+}
