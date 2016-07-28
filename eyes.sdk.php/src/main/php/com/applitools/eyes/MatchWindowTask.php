@@ -140,9 +140,9 @@ class MatchWindowTask
             while (($retry < $retryTimeout) && !$matchResult->getAsExpected()) {
 
                 // Wait before trying again.
-                GeneralUtils::sleep(MATCH_INTERVAL);
+                GeneralUtils::sleep(self::MATCH_INTERVAL);
 
-                $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, lastScreenshot);
+                $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
 
                 // Notice the ignoreMismatch here is true
                 $matchResult = $this->performMatch($userInputs, $appOutput, $tag, true);

@@ -20,16 +20,16 @@ class AppOutputProviderRedeclared implements AppOutputProvider
         $this->eyes->logger->verbose("Done getting screenshot!");
 
         // Cropping by region if necessary
-        $region = $this->eyes->regionProvider->getRegion();
-        if (!$region->isEmpty()) {
+        $region = $regionProvider->getRegion();
+        if (!empty($region)) {
             $screenshot = $screenshot->getSubScreenshot($region,
                 $regionProvider->getCoordinatesType(), false);
         }
 
         $this->eyes->logger->verbose("Compressing screenshot...");
-        $compressResult = $this->compressScreenshot64($screenshot, $lastScreenshot);
+        $compressResult = $this->eyes->compressScreenshot64($screenshot, $lastScreenshot);
         $this->eyes->logger->verbose("Done! Getting title...");
-        $title = $this->getTitle();
+        $title = $this->eyes->getTitle();
         $this->eyes->logger->verbose("Done!");
         $result = new AppOutputWithScreenshot(new AppOutput($title, $compressResult), $screenshot);
         $this->eyes->logger->verbose("Done!");

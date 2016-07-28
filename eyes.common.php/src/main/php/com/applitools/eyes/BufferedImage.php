@@ -22,4 +22,9 @@ class BufferedImage //FIXME
     {
         return $this->height;
     }
+
+    public function getRaster()
+    {
+        
+    }
 }

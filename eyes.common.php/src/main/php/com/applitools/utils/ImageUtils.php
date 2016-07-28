@@ -10,7 +10,7 @@ class ImageUtils {
      * @return The PNG bytes representation of the image.
      */
     public static function encodeAsPng(BufferedImage $image) {
-
+return "somestring"; //FIXME
         ArgumentGuard::notNull($image, "image");
         $pngBytesStream = new ByteArrayOutputStream();
 
@@ -83,7 +83,9 @@ class ImageUtils {
         ArgumentGuard::notNullOrEmpty($image64, "image64");
 
         // Get the image bytes
-        $imageBytes = Base64::decodeBase64($image64.getBytes(Charset::forName("UTF-8")));
+        //FIXME need to check
+        //$imageBytes = Base64::decodeBase64($image64.getBytes(Charset::forName("UTF-8")));
+        $imageBytes = base64_decode($image64);
         return self::imageFromBytes($imageBytes);
     }
 
@@ -109,12 +111,15 @@ class ImageUtils {
      */
     public static function imageFromBytes($imageBytes){
         try {
-            $screenshotStream = new ByteArrayInputStream($imageBytes);
-            $image = ImageIO::read($screenshotStream);
-            $screenshotStream->close();
+            $image = base64_decode($imageBytes);//FIXME
+            //$screenshotStream = new ByteArrayInputStream($imageBytes);
+            //$image = ImageIO::read($screenshotStream);
+            //$screenshotStream->close();
         } catch (IOException $e) {
             throw new EyesException("Failed to create buffered image!", $e);
         }
+        //FIXME mock
+        $image = new BufferedImage(10,10,10);
         return $image;
     }
 

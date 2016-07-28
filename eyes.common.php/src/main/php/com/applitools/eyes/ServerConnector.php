@@ -131,7 +131,7 @@ class ServerConnector implements ServerConnectorInterface
 
 
         try {
-
+//FIXME
             // since the web API requires a root property for this message
             //jsonMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true); ?????
             //$postData = jsonMapper.writeValueAsString(sessionStartInfo);
@@ -199,9 +199,86 @@ class ServerConnector implements ServerConnectorInterface
         return $runningSession;
     }
 
+    /**
+     * Matches the current window (held by the WebDriver) to the expected
+     * window.
+     *
+     * @param runningSession The current agent's running session.
+     * @param matchData Encapsulation of a capture taken from the application.
+     * @return The results of the window matching.
+     * @throws EyesException For invalid status codes, or response parsing
+     * failed.
+     */
     public function matchWindow(RunningSession $runningSession, MatchWindowData $matchData)
     {
-        // TODO: Implement matchWindow() method.
+        ArgumentGuard::notNull($runningSession, "runningSession");
+        ArgumentGuard::notNull($matchData, "data");
+//FIXME
+return new MatchResult();        
+        $validStatusCodes = array();
+
+        // since we rather not add an empty "tag" param
+        $runningSessionsEndpoint = $this->endPoint->path($runningSession->getId());
+
+        // Serializing data into JSON (we'll treat it as binary later).
+        // IMPORTANT This serializes everything EXCEPT for the screenshot (which
+        // we'll add later).
+        try {
+            $jsonData = json_encode($matchData);
+        } catch (IOException $e) {
+            throw new EyesException("Failed to serialize data for matchWindow!", $e);
+        }
+
+        // Convert the JSON to binary.
+        $jsonToBytesConverter = new ByteArrayOutputStream();
+        try {
+            $jsonToBytesConverter->write(
+                $jsonData->getBytes(DEFAULT_CHARSET_NAME));
+            $jsonToBytesConverter->flush();
+            $jsonBytes = $jsonToBytesConverter->toByteArray();
+        } catch (IOException $e) {
+            throw new EyesException("Failed create binary data from JSON!", $e);
+        }
+
+        // Getting the screenshot's bytes (notice this can be either
+        // compressed/uncompressed form).
+        $screenshot = json_decode(
+        $matchData->getAppOutput()->getScreenshot64());
+
+        // Ok, let's create the request data
+        $requestOutputStream = new ByteArrayOutputStream();
+        $requestDos = new DataOutputStream($requestOutputStream);
+        try {
+            $requestDos->writeInt($jsonBytes->length);
+            $requestDos->flush();
+            $requestOutputStream->write($jsonBytes);
+            $requestOutputStream->write($screenshot);
+            $requestOutputStream->flush();
+
+            // Ok, get the data bytes
+            $requestData = $requestOutputStream->toByteArray();
+
+            // Release the streams
+            $requestDos->close();
+        } catch (IOException $e) {
+            throw new EyesException("Failed send check window request!", $e);
+        }
+
+        // Sending the request
+        $response = $runningSessionsEndpoint->queryParam("apiKey", $this->apiKey)->
+            request(MediaType::APPLICATION_JSON).
+            post(Entity::entity($requestData,
+                    MediaType::APPLICATION_OCTET_STREAM));
+
+        // Ok, let's create the running session from the response
+        $validStatusCodes = new ArrayList<>(1);
+        $validStatusCodes->add(Response::Status/*.OK.getStatusCode()*/);
+
+        $result = parseResponseWithJsonData($response, $validStatusCodes,
+                MatchResult::class);
+
+        return $result;
+
     }
 
     public function stopSession(RunningSession $runningSession, $isAborted, $save)

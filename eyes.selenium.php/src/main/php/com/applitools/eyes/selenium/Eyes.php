@@ -1000,7 +1000,7 @@ class Eyes extends EyesBase
         }
     }
 
-    protected function getTitle()
+    public function getTitle()
     {
         if (!$this->dontGetTitle) {
             try {

@@ -7,10 +7,13 @@ require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Ap
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/BatchInfo.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ArgumentGuard.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ImageUtils.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ImageDeltaCompressor.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesScreenshot.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Location.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/BufferedImage.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesException.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/AppOutput.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/MatchResult.php";
 require "../../eyes/eyes.php/eyes.images.php/src/main/php/com/applitools/eyes/EyesImagesScreenshot.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProvider.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProviderRedeclared.php";
@@ -472,6 +475,35 @@ $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver
         $result = new AppOutputWithScreenshot(new AppOutput($title, $compressResult), $screenshot);
         $this->logger->verbose("Done!");
         return $result;
+    }
+
+    /**
+     * Compresses a given screenshot.
+     *
+     * @param screenshot     The screenshot to compress.
+     * @param lastScreenshot The previous screenshot, or null.
+     * @return A base64 encoded compressed screenshot.
+     */
+    public function compressScreenshot64(EyesScreenshot $screenshot,
+        EyesScreenshot $lastScreenshot) {
+
+        ArgumentGuard::notNull($screenshot, "screenshot");
+
+        $screenshotImage = $screenshot->getImage();
+        $uncompressed = ImageUtils::encodeAsPng($screenshotImage);
+
+        $source = ($lastScreenshot != null) ?
+        $lastScreenshot->getImage() : null;
+
+            // Compressing the screenshot
+        try {
+        $compressedScreenshot = 'sobe byte string';/* FIXME ImageDeltaCompressor::compressByRawBlocks(
+            $screenshotImage, $uncompressed, $source);*/
+        } catch (IOException $e) {
+            throw new EyesException("Failed to compress screenshot!", $e);
+        }
+
+        return base64_encode($compressedScreenshot); //FIXME just need to check
     }
 
     /**

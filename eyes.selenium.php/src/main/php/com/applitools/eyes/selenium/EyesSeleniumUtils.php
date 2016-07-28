@@ -295,8 +295,8 @@ class EyesSeleniumUtils
 
         ArgumentGuard::notNull($size, "size");
 
-        $sleep = 1000;
-        $retries = 3;
+        $sleep = 1/*000*/;
+        $retries = 2/*3*/;
 
         // We move the window to (0,0) to have the best chance to be able to
         // set the viewport size as requested.

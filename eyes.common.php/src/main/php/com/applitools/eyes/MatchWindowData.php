@@ -27,7 +27,7 @@ class MatchWindowData
                                 $tag, $ignoreMismatch, Options $options)
     {
 
-        ArgumentGuard::notNull(userInputs, "userInputs");
+        ArgumentGuard::notNull($userInputs, "userInputs");
 
         $this->userInputs = $userInputs;
         $this->appOutput = $appOutput;

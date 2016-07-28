@@ -344,7 +344,6 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
 
     public function executeScript($script, array $args = array())
     {
-
         // Appium commands are sometimes sent as Javascript
         /*if (AppiumJsCommandExtractor::isAppiumJsCommand($script)) {
             $trigger = AppiumJsCommandExtractor::extractTrigger($this->elementsIds,
@@ -397,7 +396,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         $this->logger->verbose("getDefaultContentViewportSize()");
 
         if ($this->defaultContentViewportSize != null && !$forceQuery) {
-            $this->logger->verbose("Using cached viewport size: " . $this->defaultContentViewportSize);
+            $this->logger->verbose("Using cached viewport size: " . json_encode($this->defaultContentViewportSize));
             return $this->defaultContentViewportSize;
         }
 

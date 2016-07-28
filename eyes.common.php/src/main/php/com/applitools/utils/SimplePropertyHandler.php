@@ -22,6 +22,6 @@ class SimplePropertyHandler implements PropertyHandler
      */
     public function get()
     {
-        return $obj;
+        return $this->obj;
     }
 }
