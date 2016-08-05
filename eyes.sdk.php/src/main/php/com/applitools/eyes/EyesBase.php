@@ -34,7 +34,7 @@ class EyesBase
 {
 
     const SEQUENTIAL = "aaa";  ///Session type FIXME
-    const DEFAULT_MATCH_TIMEOUT = 2; // Seconds
+    const DEFAULT_MATCH_TIMEOUT = 5; // Seconds
     const USE_DEFAULT_TIMEOUT = -1;
 
     private $isDisabled;
@@ -151,7 +151,7 @@ class EyesBase
      */
     public function setApiKey($apiKey)
     {
-        //ArgumentGuard.notNull(apiKey, "apiKey");
+        ArgumentGuard::notNull($apiKey, "apiKey");
         $this->serverConnector->setApiKey($apiKey);
     }
 
@@ -390,8 +390,11 @@ class EyesBase
             $result->setAsExpected(true);
             return $result;
         }
-require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
-$this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, new BufferedImage(10,10,10)); //FIXME
+        //FIXME
+        require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
+        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, new BufferedImage(10,10,10)); //FIXME
+
+
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
 
@@ -416,10 +419,10 @@ $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver
 
         Logger::log("Calling match window...");
         $result = $matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
-            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
+           $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
         Logger::log("MatchWindow Done!");
-
-        if (!$result->getAsExpected()) {
+        //FIXME result is empty. But screenshot was added
+        /*  if (!$result->getAsExpected()) {
             if (!$ignoreMismatch) {
                 $this->clearUserInputs();
                 $this->lastScreenshot = $result->getScreenshot();
@@ -441,7 +444,7 @@ $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver
         }
 
         Logger::log("Done!");
-        return $result;
+        return $result;*/
     }
 
 
@@ -590,14 +593,14 @@ $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver
      * @throws NewTestException    if this is a new test was found and throwEx
      *                             is true.
      */
-    public function close($throwEx)
+    public function close($throwEx = true)
     {
         try {
             if ($this->isDisabled) {
-                logger::log("Ignored");
+                $this->logger->verbose("Ignored");
                 return null;
             }
-            Logger::verbose(sprintf("close(%b)", $throwEx));
+            $this->logger->verbose(sprintf("close(%b)", $throwEx));
             ArgumentGuard::isValidState($this->isOpen, "Eyes not open");
 
             $this->isOpen = false;
@@ -606,20 +609,20 @@ $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver
             //$this->clearUserInputs();
 
             if ($this->runningSession == null) {
-                Logger::log("Server session was not started");
-                Logger::log("--- Empty test ended.");
+                $this->logger->verbose("Server session was not started");
+                $this->logger->verbose("--- Empty test ended.");
                 return new TestResults();
             }
 
             $isNewSession = $this->runningSession->getIsNewSession();
             $sessionResultsUrl = $this->runningSession->getUrl();
 
-            Logger::log("Ending server session...");
+            $this->logger->verbose("Ending server session...");
             $save = ($isNewSession && $this->saveNewTests) || (!$isNewSession && $this->saveFailedTests);
-            Logger::verbose("Automatically save test? " + $save);
+            $this->logger->verbose("Automatically save test? " + $save);
             $results = $this->serverConnector->stopSession($this->runningSession, false, $save);
-
-            $results->setNew($isNewSession);
+//FIXME session was closed but not returned  expected class.
+            /*$results->setNew($isNewSession);
             $results->setUrl($sessionResultsUrl);
             Logger::verbose($results->toString());
 
@@ -648,13 +651,13 @@ $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver
             }
             // Test passed
             Logger::log("--- Test passed. See details at " . $sessionResultsUrl);
-            return $results;
+            return $results;*/
         } finally {
             // Making sure that we reset the running session even if an
             // exception was thrown during close.
             $this->runningSession = null;
             $this->currentAppName = null;
-            Logger::getLogHandler()->close();
+            //$this->log->getLogHandler->close();
         }
     }
 }

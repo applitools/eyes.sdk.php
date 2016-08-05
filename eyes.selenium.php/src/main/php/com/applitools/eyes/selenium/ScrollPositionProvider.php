@@ -6,7 +6,7 @@ class ScrollPositionProvider implements PositionProvider
     protected $logger; //Logger
     protected $executor; //JavascriptExecutor
 
-    public function __construct(Logger $logger, /*JavascriptExecutor MOCK_ATTENTION */$executor) //FIXME
+    public function __construct(Logger $logger, JavascriptExecutor $executor)
     {
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($executor, "executor");
@@ -52,14 +52,13 @@ class ScrollPositionProvider implements PositionProvider
         $this->logger->verbose(sprintf("Entire size: %s", json_encode($result)));
         return $result;
     }
-
+    
     public function getState(){
         return new ScrollPositionMemento($this->getCurrentPosition());
     }
 
     public function restoreState(PositionMemento $state) {
-        $s = /*(ScrollPositionMemento)*/clone $state;
-        $location = new Location($s->getX(), $s->getY());
-        $this->setPosition($location);
+        $s = /*(ScrollPositionMemento) */$state;
+        $this->setPosition(new Location($s->getX(), $s->getY()));
     }
 }

@@ -10,6 +10,8 @@
  */
 class EyesSeleniumUtils
 {
+    const SLEEP = 1000;
+    const RETRIES = 3;
     // See Applitools WiKi for explanation.
     const JS_GET_VIEWPORT_SIZE =
         "var height = undefined;"
@@ -295,9 +297,6 @@ class EyesSeleniumUtils
 
         ArgumentGuard::notNull($size, "size");
 
-        $sleep = 1/*000*/;
-        $retries = 2/*3*/;
-
         // We move the window to (0,0) to have the best chance to be able to
         // set the viewport size as requested.
         $driver->manage()->window()->setPosition(new WebDriverPoint(0, 0));
@@ -319,10 +318,10 @@ class EyesSeleniumUtils
             $browserSize->getHeight() + ($size->getHeight() - $actualViewportSize->getHeight()));
         Logger::log("Trying to set browser size to: " . json_encode($requiredBrowserSize));
 
-        $retriesLeft = $retries;
+        $retriesLeft = self::RETRIES;
         do {
             $driver->manage()->window()->setSize($requiredBrowserSize);
-            GeneralUtils::sleep($sleep);
+            GeneralUtils::sleep(self::SLEEP);
             $browserSize = $driver->manage()->window()->getSize();
             Logger::log("Current browser size: " . json_encode($browserSize));
         } while (--$retriesLeft > 0 && !$browserSize->equals($requiredBrowserSize));
@@ -346,10 +345,10 @@ class EyesSeleniumUtils
         Logger::log("Browser size: " . $browserSize);
         Logger::log("Required browser size: " . $requiredBrowserSize);
 
-        $retriesLeft = $retries;
+        $retriesLeft = self::RETRIES;
         do {
             $driver->manage()->window()->setSize($requiredBrowserSize);
-            GeneralUtils::sleep($sleep);
+            GeneralUtils::sleep(self::SLEEP);
             $actualViewportSize = self::extractViewportSize($logger, $driver);
             Logger::log("Browser size: " . $driver->manage()->window()->getSize());
             Logger::log("Viewport size: " . $actualViewportSize);
@@ -454,7 +453,7 @@ class EyesSeleniumUtils
      * @param executor The executor to use.
      * @param transform The transform value to set.
      */
-    public static function setTransform(JavascriptExecutor $executor, $transform)
+    public static function setTransform(JavascriptExecutor $executor, String $transform)
     {
         $transforms = array(); //FIXME
 

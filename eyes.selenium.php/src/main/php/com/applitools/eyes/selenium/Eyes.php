@@ -11,6 +11,7 @@ require "ScreenshotType.php";
 require "ContextBasedScaleProvider.php";
 require "TakesScreenshotImageProvider.php";
 require "EyesWebDriverScreenshotFactory.php";
+require "EyesDriverOperationException.php";
 
 /**
  * The main API gateway for the SDK.
@@ -956,6 +957,11 @@ class Eyes extends EyesBase
         try {
             $imageProvider = new TakesScreenshotImageProvider($this->logger, $this->driver);
             $screenshotFactory = new EyesWebDriverScreenshotFactory($this->logger, $this->driver);
+
+
+
+
+
             if ($this->checkFrameOrElement) {
                 Logger::log("Check frame/element requested");
                 $algo = new FullPageCaptureAlgorithm($this->logger);
@@ -983,11 +989,12 @@ class Eyes extends EyesBase
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);
             } else {
                 Logger::verbose("Screenshot requested...");
-                $screenshot64 = $this->driver->getScreenshotAs(/*OutputType:: FIXME*/"BASE64");
+                $screenshot64 = $this->driver->getScreenshotAs("BASE64"/*OutputType:: FIXME it's not base 64*/);
                 Logger::log("Done! Creating image object...");
-                $screenshotImage = ImageUtils::imageFromBase64($screenshot64);
+                $screenshotImage = $screenshot64;//FIXME ImageUtils::imageFromBase64($screenshot64);
                 Logger::log("Done!");
-                $screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
+                //FIXME
+                //$screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
                 Logger::verbose("Creating screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
             }

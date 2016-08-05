@@ -15,12 +15,14 @@ class ServerConnector implements ServerConnectorInterface
     private $proxySettings;
     private $serverUrl;
     private $logger;
+    private $ch;
 
-    public function __construct($logger, $sdkName, $serverUrl)
+    public function __construct(Logger $logger, $sdkName, $serverUrl)
     {
         $this->logger = $logger;
         $this->sdkName = $sdkName;
         $this->serverUrl = $serverUrl;
+        $this->endPoint = $serverUrl.self::API_PATH;
     }
 
     /**
@@ -57,7 +59,7 @@ class ServerConnector implements ServerConnectorInterface
         $this->serverUrl = $serverUrl;
         // After the server is updated we must make sure the endpoint refers
         // to the correct path.
-        //$this->endPoint = $this->serverUrl . self::API_PATH;   ////????????
+        $this->endPoint = $this->serverUrl . self::API_PATH;
     }
 
     /**
@@ -108,14 +110,14 @@ class ServerConnector implements ServerConnectorInterface
     public function startSession($sessionStartInfo)
     {
 
-        //ArgumentGuard.notNull(sessionStartInfo, "sessionStartInfo");
+        ArgumentGuard::notNull($sessionStartInfo, "sessionStartInfo");
 
-        $postData;
+      /*  $postData;
         $response;
         $statusCode;
         $validStatusCodes = array();
         $isNewSession;
-        $runningSession;
+        $runningSession;*/
 
         $params = [
             'startInfo' => [
@@ -129,7 +131,7 @@ class ServerConnector implements ServerConnectorInterface
         ];
         $params = json_encode($params);
 
-
+/*
         try {
 //FIXME
             // since the web API requires a root property for this message
@@ -142,27 +144,27 @@ class ServerConnector implements ServerConnectorInterface
             throw new Exception("Failed to convert " .    //eyesException
                 "sessionStartInfo into Json string!", $e);
         }
-
+*/
         try {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, "https://eyessdk.applitools.com/api/sessions/running.json?apiKey=" . $this->apiKey);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            $this->ch = curl_init();
+            curl_setopt($this->ch, CURLOPT_URL, "https://eyessdk.applitools.com/api/sessions/running.json?apiKey=" . $this->apiKey);
+            curl_setopt($this->ch, CURLOPT_POST, 1);
+            curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, $params);
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
                     'Content-Type: application/json',
                     'Content-Length: ' . strlen($params),
                 )
             );
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $result = curl_exec($ch);
-            $information = curl_getinfo($ch);
+            curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+            $result = curl_exec($this->ch);
+            $information = curl_getinfo($this->ch);
             /*    $response = endPoint.queryParam("apiKey", apiKey).
                     accept(MediaType.APPLICATION_JSON).
                     entity(postData, MediaType.APPLICATION_JSON_TYPE).
                     post(ClientResponse.class);*/
         } catch (Exception $e) {  //RuntimeException
-            Logger::log("startSession(): Server request failed: " + $e->getMessage());
+            $this->logger->verbose("startSession(): Server request failed: " . $e->getMessage());
             throw $e;
         }
         $validStatusCodes = array('200', '201');
@@ -174,16 +176,7 @@ class ServerConnector implements ServerConnectorInterface
             $runningSession->setId($result['id']);
             //$runningSession->setId($result['id']);
         }
-        echo "<pre>";
-        print_r($params);
-        echo "</pre>";
-        echo "<pre>";
-        print_r($sessionStartInfo->getEnvironment()->getDisplaySize());
-        echo "</pre>";
-        echo "<pre>";
-        print_r($information);
-        echo "</pre>";
-//die("Stop.Session should be started");
+
         // Ok, let's create the running session from the response
 
         //validStatusCodes.add(ClientResponse.Status.OK.getStatusCode());
@@ -214,16 +207,15 @@ class ServerConnector implements ServerConnectorInterface
         ArgumentGuard::notNull($runningSession, "runningSession");
         ArgumentGuard::notNull($matchData, "data");
 //FIXME
-return new MatchResult();        
         $validStatusCodes = array();
 
         // since we rather not add an empty "tag" param
-        $runningSessionsEndpoint = $this->endPoint->path($runningSession->getId());
-
+        //FIXME need to use ->path, not concatenation "."
+        $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json";
         // Serializing data into JSON (we'll treat it as binary later).
         // IMPORTANT This serializes everything EXCEPT for the screenshot (which
         // we'll add later).
-        try {
+       /* try {  FIXME
             $jsonData = json_encode($matchData);
         } catch (IOException $e) {
             throw new EyesException("Failed to serialize data for matchWindow!", $e);
@@ -248,8 +240,8 @@ return new MatchResult();
         // Ok, let's create the request data
         $requestOutputStream = new ByteArrayOutputStream();
         $requestDos = new DataOutputStream($requestOutputStream);
-        try {
-            $requestDos->writeInt($jsonBytes->length);
+        */ try {
+          /*  $requestDos->writeInt($jsonBytes->length);
             $requestDos->flush();
             $requestOutputStream->write($jsonBytes);
             $requestOutputStream->write($screenshot);
@@ -259,11 +251,37 @@ return new MatchResult();
             $requestData = $requestOutputStream->toByteArray();
 
             // Release the streams
-            $requestDos->close();
+            $requestDos->close();*/
+
+            $params = [
+                'appOutput' => [
+                    "title" => $matchData->getAppOutput()->getTitle(),
+                    "screenshot64" => base64_encode($matchData->getAppOutput()->getScreenshot64()->getImage())
+                ],
+                "tag" => $matchData->getTag(),
+                "ignoreMismatch" => false,
+            ];
+            $params = json_encode($params);
+
+
+            curl_setopt($this->ch, CURLOPT_URL,"https://eyessdk.applitools.com/api/sessions/running/".$runningSession->getId().".json?apiKey=".$this->apiKey);
+            curl_setopt($this->ch, CURLOPT_POST, 1);
+            curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, $params);
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
+                    'Content-Type: application/json',
+                    'Content-Length: ' . strlen($params),
+                )
+            );
+
+            curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($this->ch);
+        //$information = curl_getinfo($this->ch);
+
         } catch (IOException $e) {
             throw new EyesException("Failed send check window request!", $e);
         }
-
+/*
         // Sending the request
         $response = $runningSessionsEndpoint->queryParam("apiKey", $this->apiKey)->
             request(MediaType::APPLICATION_JSON).
@@ -272,18 +290,38 @@ return new MatchResult();
 
         // Ok, let's create the running session from the response
         $validStatusCodes = new ArrayList<>(1);
-        $validStatusCodes->add(Response::Status/*.OK.getStatusCode()*/);
+        $validStatusCodes->add(Response::Status/*.OK.getStatusCode());
 
         $result = parseResponseWithJsonData($response, $validStatusCodes,
                 MatchResult::class);
 
-        return $result;
+        return $result;*/
 
     }
 
     public function stopSession(RunningSession $runningSession, $isAborted, $save)
     {
-        // TODO: Implement stopSession() method.
+        ArgumentGuard::notNull($runningSession, "runningSession");
+        //FIXME code not related to Java. need to implement enother 
+
+        curl_setopt($this->ch, CURLOPT_URL,"https://eyessdk.applitools.com/api/sessions/running/".$runningSession->getId().".json?isAborted=false&updateBaseline=false&apiKey=".$this->apiKey);
+        curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+            )
+        );
+        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+
+        $server_output = curl_exec ($this->ch);
+        $information = curl_getinfo($this->ch);
+        if($information['http_code'] == 200){
+            $this->logger->verbose("stopSession(): status 200. Session was stopped");
+        }else{
+            $this->logger->verbose("stopSession(): status ".$information['http_code'] . ". Need to check");
+        }
+        curl_close ($this->ch);
+
     }
 
 }

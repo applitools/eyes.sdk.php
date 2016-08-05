@@ -25,8 +25,9 @@ class Logger
 
     public static function verbose($string)
     {
-        var_dump($string);
-        echo "<br>";
+        echo $string."\r\n";
+       // var_dump($string);
+       // echo "<br>";
     }
     /**
      * Sets the log handler.

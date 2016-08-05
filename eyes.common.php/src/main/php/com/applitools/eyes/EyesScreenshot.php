@@ -5,8 +5,8 @@
 abstract class EyesScreenshot {
     protected $image;// BufferedImage
 
-    public function __construct(BufferedImage $image = null) { //FIXME
-        //ArgumentGuard::notNull($image, "image"); //FIXME
+    public function __construct(/*BufferedImage */$image = null) { //FIXME
+        ArgumentGuard::notNull($image, "image"); //FIXME
         $this->image = $image;
     }
 

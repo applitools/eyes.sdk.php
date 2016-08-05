@@ -37,10 +37,10 @@ class MatchWindowTask
         ArgumentGuard::greaterThanOrEqualToZero($retryTimeout, "retryTimeout");
         ArgumentGuard::notNull($appOutputProvider, "appOutputProvider");
 
-        //this.logger = logger;
+        $this->logger = $logger;
         $this->serverConnector = $serverConnector;
         $this->runningSession = $runningSession;
-        $this->defaultRetryTimeout = $retryTimeout * 1000;
+        $this->defaultRetryTimeout = $retryTimeout/* 1000*/;
         $this->appOutputProvider = $appOutputProvider;
     }
 
@@ -60,11 +60,9 @@ class MatchWindowTask
         AppOutputWithScreenshot $appOutput,
         $tag, $ignoreMismatch)
     {
-
         // Prepare match data.
         $data = new MatchWindowData($userInputs, $appOutput->getAppOutput(), $tag, $ignoreMismatch,
             new Options($tag, $userInputs, $ignoreMismatch, false, false, false));
-
         // Perform match.
         return $this->serverConnector->matchWindow($this->runningSession, $data);
     }
@@ -103,7 +101,7 @@ class MatchWindowTask
 
         Logger::log(sprintf("retryTimeout = %d", $retryTimeout));
 
-        $elapsedTimeStart = microtime();
+        $elapsedTimeStart = microtime(true);
 
         // If the wait to load time is 0, or "run once" is true,
         // we perform a single check window.
@@ -130,15 +128,14 @@ class MatchWindowTask
             $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
 
             // Start the retry timer.
-            $start = microtime();
+            $start = microtime(true);
 
             $matchResult = $this->performMatch($userInputs, $appOutput, $tag, true);
 
-            $retry = microtime() - $start;
+            $retry = microtime(true) - $start;
 
             // The match retry loop.
-            while (($retry < $retryTimeout) && !$matchResult->getAsExpected()) {
-
+            /* FIXME need to retry while (($retry < $retryTimeout) && !$matchResult->getAsExpected()) {
                 // Wait before trying again.
                 GeneralUtils::sleep(self::MATCH_INTERVAL);
 
@@ -147,22 +144,23 @@ class MatchWindowTask
                 // Notice the ignoreMismatch here is true
                 $matchResult = $this->performMatch($userInputs, $appOutput, $tag, true);
 
-                $retry = microtime() - $start;
-            }
+                $retry = microtime(true) - $start;
+            }*/
 
             // if we're here because we haven't found a match yet, try once more
-            if (!$matchResult->getAsExpected()) {
+            /* FIXME if (!$matchResult->getAsExpected()) {
 
                 $appOutput = $this->appOutputProvider->getAppOutput($regionProvider,
                     $lastScreenshot);
 
-                $matchResult = performMatch($userInputs, $appOutput, $tag,
+                $matchResult = $this->performMatch($userInputs, $appOutput, $tag,
                     $ignoreMismatch);
-            }
+            }*/
         }
-        $elapsedTime = (microtime() - $elapsedTimeStart) / 1000;
+
+       /* $elapsedTime = (microtime(true) - $elapsedTimeStart);
         Logger::log(sprintf("Completed in  %.2f seconds", $elapsedTime));
-        $matchResult->setScreenshot($appOutput . getScreenshot());
-        return $matchResult;
+        $matchResult->setScreenshot($appOutput/* FIXME now output is a string ->getScreenshot());
+        return $matchResult;*/
     }
 }

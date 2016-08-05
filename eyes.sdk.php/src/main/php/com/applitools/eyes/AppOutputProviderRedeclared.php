@@ -27,9 +27,11 @@ class AppOutputProviderRedeclared implements AppOutputProvider
         }
 
         $this->eyes->logger->verbose("Compressing screenshot...");
-        $compressResult = $this->eyes->compressScreenshot64($screenshot, $lastScreenshot);
+        //FIXME
+        $compressResult = $screenshot;
+        //$compressResult = $this->eyes->compressScreenshot64($screenshot, $lastScreenshot);
         $this->eyes->logger->verbose("Done! Getting title...");
-        $title = $this->eyes->getTitle();
+        $title = "";  //FIXME  $title = $this->eyes->getTitle();
         $this->eyes->logger->verbose("Done!");
         $result = new AppOutputWithScreenshot(new AppOutput($title, $compressResult), $screenshot);
         $this->eyes->logger->verbose("Done!");

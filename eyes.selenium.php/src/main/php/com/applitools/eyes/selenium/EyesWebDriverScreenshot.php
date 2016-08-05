@@ -67,7 +67,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
      *                                   location in the screenshot.
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
-                                BufferedImage $image, ScreenshotType $screenshotType = null,
+                                /* FIXME BufferedImage */$image, ScreenshotType $screenshotType = null,
                                 Location $frameLocationInScreenshot = null,
                                 RectangleSize $entireFrameSize = null)
     {
@@ -117,7 +117,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             }
             $scrollPosition = $sp;
 
-            if ($screenshotType == null) {
+            /*if ($screenshotType == null) { //FIXME image is a string
                 if ($image->getWidth() <= $viewportSize->getWidth()
                     && $image->getHeight() <= $viewportSize->getHeight()
                 ) {
@@ -125,7 +125,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 } else {
                     $screenshotType = ScreenshotType::ENTIRE_FRAME;
                 }
-            }
+            } */
             $this->screenshotType = $screenshotType;
 
             // This is used for frame related calculations.
@@ -144,20 +144,19 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             }
             $this->frameLocationInScreenshot = $frameLocationInScreenshot;
             $logger->verbose("Calculating frame window..");
-            $this->frameWindow = new Region(null, null, null, null,
+            /* FIXME $this->frameWindow = new Region(null, null, null, null,
                                         $frameLocationInScreenshot, $frameSize);
 
-            $this->frameWindow->intersect(new Region(/*FIXME*/0, 0, $image->getWidth(), $image->getHeight()));
+            //FIXME
+            //$this->frameWindow->intersect(new Region(/*FIXME0, 0, $image->getWidth(), $image->getHeight()));
 
             if ($this->frameWindow->getWidth() <= 0 ||
                 $this->frameWindow->getHeight() <= 0
             ) {
                 throw new EyesException("Got empty frame window for screenshot!");
-            }
-
+            }*/
             $logger->verbose("Done!");
         }
-
     }
 
     /**
