@@ -256,7 +256,7 @@ class Eyes extends EyesBase
     {
 
         if ($this->getIsDisabled()) {
-            Logger::verbose("Ignored");
+            $this->logger->verbose("Ignored");
             return $driver;
         }
         $this->openBase($appName, $testName, $viewportSize, $sessionType);
@@ -271,7 +271,7 @@ class Eyes extends EyesBase
                 $driver;
         } else {
             $errMsg = "Driver is not a RemoteWebDriver (" . $driver->getClass()->getName() . ")";
-            Logger::log($errMsg);
+            $this->logger->log($errMsg);
             throw new EyesException($errMsg);
         }
         $this->devicePixelRatio = self::UNKNOWN_DEVICE_PIXEL_RATIO;
@@ -308,11 +308,11 @@ class Eyes extends EyesBase
         }
 
         if ($this->getIsDisabled()) {
-            Logger::log(sprintf("CheckWindow(%d, '%s'): Ignored", $matchTimeout, $tag));
+            $this->logger->log(sprintf("CheckWindow(%d, '%s'): Ignored", $matchTimeout, $tag));
             return;
         }
 
-        Logger::log(sprintf("CheckWindow(%d, '%s')", $matchTimeout, $tag));
+        $this->logger->log(sprintf("CheckWindow(%d, '%s')", $matchTimeout, $tag));
         $regionProvider = new RegionProvider();
         parent::checkWindowBase($regionProvider, $tag, false, $matchTimeout);
     }
@@ -376,17 +376,17 @@ class Eyes extends EyesBase
         $regionProvider = new RegionProvider();
         $result = parent::testResponseTimeBase($regionProvider, $runnableAction, $deadline, $timeout, 5000);
 
-        Logger::log("Checking if deadline was exceeded...");
+        $this->logger->log("Checking if deadline was exceeded...");
         $deadlineExceeded = true;
         if ($result != null) {
             $tao = /*TimedAppOutput*/
                 $result->getMatchWindowData()->getAppOutput();
             $resultElapsed = $tao->getElapsed();
             $deadlineMs = $deadline * 1000;
-            Logger::log(sprintf("Deadline: %d, Elapsed time for match: %d", $deadlineMs, $resultElapsed));
+            $this->logger->log(sprintf("Deadline: %d, Elapsed time for match: %d", $deadlineMs, $resultElapsed));
             $deadlineExceeded = $resultElapsed > $deadlineMs;
         }
-        Logger::log("Deadline exceeded? " + $deadlineExceeded);
+        $this->logger->log("Deadline exceeded? " + $deadlineExceeded);
 
         $this->closeResponseTime($deadlineExceeded);
     }
@@ -408,7 +408,7 @@ class Eyes extends EyesBase
     {
 
         if ($this->getIsDisabled()) {
-            Logger::log(sprintf("CheckRegion([%s], %d, '%s'): Ignored",
+            $this->logger->log(sprintf("CheckRegion([%s], %d, '%s'): Ignored",
                 $region, $matchTimeout, $tag));
             return;
         }
@@ -421,7 +421,7 @@ class Eyes extends EyesBase
 
         ArgumentGuard::notNull($region, "region");
 
-        Logger::log(sprintf("CheckRegion([%s], %d, '%s')", $region,
+        $this->logger->log(sprintf("CheckRegion([%s], %d, '%s')", $region,
             $matchTimeout, $tag));
 
         $regionProvider = RegionProvider();
@@ -431,9 +431,9 @@ class Eyes extends EyesBase
             false,
             $matchTimeout
         );
-        Logger::log("Done! trying to scroll back to original position..");
+        $this->logger->log("Done! trying to scroll back to original position..");
         $this->regionVisibilityStrategy->returnToOriginalPosition($this->positionProvider); /// ????
-        Logger::log("Done!");
+        $this->logger->log("Done!");
 
     }
 
@@ -460,7 +460,7 @@ class Eyes extends EyesBase
         $frameIndex, By $selector, $matchTimeout = null, $tag = null, $stitchContent = null)
     {
         if ($this->getIsDisabled()) {
-            Logger::log(sprintf("CheckRegionInFrame(%d, selector, %d, '%s'): Ignored", $frameIndex, $matchTimeout, $tag));
+            $this->logger->log(sprintf("CheckRegionInFrame(%d, selector, %d, '%s'): Ignored", $frameIndex, $matchTimeout, $tag));
             return;
         }
         if (empty($matchTimeout)) {
@@ -482,14 +482,14 @@ class Eyes extends EyesBase
     protected function updateScalingParams()
     {
         if ($this->devicePixelRatio == self::UNKNOWN_DEVICE_PIXEL_RATIO) {
-            Logger::log("Trying to extract device pixel ratio...");
+            $this->logger->log("Trying to extract device pixel ratio...");
             try {
                 $this->devicePixelRatio = EyesSeleniumUtils::getDevicePixelRatio($this->driver);
             } catch (Exception $e) {
-                Logger::log("Failed to extract device pixel ratio! Using default.");
+                $this->logger->log("Failed to extract device pixel ratio! Using default.");
                 $this->devicePixelRatio = self::DEFAULT_DEVICE_PIXEL_RATIO;
             }
-            Logger::log(sprintf("Device pixel ratio: %f", $this->devicePixelRatio));
+            $this->logger->log(sprintf("Device pixel ratio: %f", $this->devicePixelRatio));
 
             Logger::log("Setting scale provider..");
             try {
@@ -498,11 +498,11 @@ class Eyes extends EyesBase
                     $this->getScaleMethod(), $this->devicePixelRatio));
             } catch (Exception $e) {
                 // This can happen in Appium for example.
-                Logger::log("Failed to set ContextBasedScaleProvider.");
-                Logger::log("Using FixedScaleProvider instead...");
+                $this->logger->log("Failed to set ContextBasedScaleProvider.");
+                $this->logger->log("Using FixedScaleProvider instead...");
                 $this->scaleProviderHandler->set(new FixedScaleProvider(1 / $this->devicePixelRatio));
             }
-            Logger::log("Done!");
+            $this->logger->log("Done!");
         }
     }
 
@@ -516,21 +516,21 @@ class Eyes extends EyesBase
     protected function checkCurrentFrame($matchTimeout, $tag)
     {
         try {
-            Logger::log(sprintf("CheckCurrentFrame(%d, '%s')", $matchTimeout, $tag));
+            $this->logger->log(sprintf("CheckCurrentFrame(%d, '%s')", $matchTimeout, $tag));
 
             $this->checkFrameOrElement = true;
 
             // FIXME - Scaling should be handled in a single place instead
             $this->updateScalingParams();
 
-            Logger::log("Getting screenshot as base64..");
+            $this->logger->log("Getting screenshot as base64..");
             $screenshot64 = $this->driver->getScreenshotAs(/*OutputType:: FIXME*/"BASE64");
-            Logger::log("Done! Creating image object...");
+            $this->logger->log("Done! Creating image object...");
             $screenshotImage = ImageUtils::imageFromBase64($screenshot64); //BufferedImage instance
             $screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
-            Logger::log("Done! Building required object...");
+            $this->logger->log("Done! Building required object...");
             $screenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
-            Logger::log("Done!");
+            $this->logger->log("Done!");
 
             $regionToCheck = new RegionProvider(); /*{
             public Region getRegion() {
@@ -563,7 +563,7 @@ class Eyes extends EyesBase
     public function checkFrame($frameNameOrIdOrIndex, $matchTimeout, $tag)
     {
         if ($this->getIsDisabled()) {
-            Logger::log(sprintf("CheckFrame(%s, %d, '%s'): Ignored",
+            $this->logger->log(sprintf("CheckFrame(%s, %d, '%s'): Ignored",
                 $frameNameOrIdOrIndex, $matchTimeout, $tag));
             return;
         }
@@ -573,19 +573,19 @@ class Eyes extends EyesBase
 
         ArgumentGuard::notNull($frameNameOrIdOrIndex, "frameNameOrId");
 
-        Logger::log(sprintf("CheckFrame(%s, %d, '%s')",
+        $this->logger->log(sprintf("CheckFrame(%s, %d, '%s')",
             $frameNameOrIdOrIndex, $matchTimeout, $tag));
 
-        Logger::log("Switching to frame with name/id/index: " . $frameNameOrIdOrIndex .
+        $this->logger->log("Switching to frame with name/id/index: " . $frameNameOrIdOrIndex .
             " ...");
         $this->driver->switchTo()->frame($frameNameOrIdOrIndex);
-        Logger::log("Done.");
+        $this->logger->log("Done.");
 
         $this->checkCurrentFrame($matchTimeout, $tag);
 
-        Logger::log("Switching back to parent frame");
+        $this->logger->log("Switching back to parent frame");
         $this->driver->switchTo()->parentFrame();
-        Logger::log("Done!");
+        $this->logger->log("Done!");
     }
 
     /**
@@ -647,7 +647,7 @@ class Eyes extends EyesBase
                                            $stitchContent = false)
     {
         if ($this->getIsDisabled()) {
-            Logger::log(sprintf("checkRegionInFrame(framePath, selector, %d, '%s'): Ignored", $matchTimeout, $tag));
+            $this->logger->log(sprintf("checkRegionInFrame(framePath, selector, %d, '%s'): Ignored", $matchTimeout, $tag));
             return;
         }
         if (empty($matchTimeout)) {
@@ -655,11 +655,11 @@ class Eyes extends EyesBase
         }
         ArgumentGuard::notNull($framePath, "framePath");
         ArgumentGuard::greaterThanZero($framePath['length'], "framePath.length");
-        Logger::log(sprintf("checkFrame(framePath, %d, '%s')", $matchTimeout, $tag));
+        $this->logger->log(sprintf("checkFrame(framePath, %d, '%s')", $matchTimeout, $tag));
         $originalFrameChain = $this->driver->getFrameChain();
         // We'll switch into the PARENT frame of the frame we want to check,
         // and call check frame.
-        Logger::log("Switching to parent frame according to frames path..");
+        $this->logger->log("Switching to parent frame according to frames path..");
         $parentFramePath = $framePath->length; //new String[framePath.length-1];
 
 //??????? //FIXME
@@ -668,14 +668,14 @@ class Eyes extends EyesBase
 //        ((EyesTargetLocator)(driver.switchTo())).frames(parentFramePath);
 //???????
 
-        Logger::log("Done! Calling checkRegionInFrame..");
+        $this->logger->log("Done! Calling checkRegionInFrame..");
         checkRegionInFrame($framePath/*[framePath.length - 1]*/, $selector,
             $matchTimeout, $tag, $stitchContent);
-        Logger::log("Done! switching back to default content..");
+        $this->logger->log("Done! switching back to default content..");
         $this->driver->switchTo()->defaultContent();
-        Logger::log("Done! Switching into the original frame..");
+        $this->logger->log("Done! Switching into the original frame..");
 //???????        ((EyesTargetLocator)(driver.switchTo())).frames(originalFrameChain);
-        Logger::log("Done!");
+        $this->logger->log("Done!");
     }
 
     /**
@@ -726,7 +726,7 @@ class Eyes extends EyesBase
                 $d->getWidth() - $borderLeftWidth - $borderRightWidth,
                 $d->getHeight() - $borderTopWidth - $borderBottomWidth);
 
-            Logger::log("Element region: " + $elementRegion);
+            $this->logger->log("Element region: " + $elementRegion);
 
             $regionToCheck = new RegionProvider();/* {
                 public Region getRegion() {
@@ -775,13 +775,13 @@ class Eyes extends EyesBase
     protected function addMouseTriggerCursor(MouseAction $action, Region $control, Location $cursor)
     {
         if ($this->getIsDisabled()) {
-            Logger::log(sprintf("Ignoring %s (disabled)", $action));
+            $this->logger->log(sprintf("Ignoring %s (disabled)", $action));
             return;
         }
 
         // Triggers are actually performed on the previous window.
         if ($this->lastScreenshot == null) {
-            Logger::log(sprintf("Ignoring %s (no screenshot)",
+            $this->logger->log(sprintf("Ignoring %s (no screenshot)",
                 $action));
             return;
         }
@@ -789,7 +789,7 @@ class Eyes extends EyesBase
         if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), /*(EyesWebDriverScreenshot) */
             $this->lastScreenshot->getFrameChain())
         ) {
-            Logger::log(sprintf("Ignoring %s (different frame)", $action));
+            $this->logger->log(sprintf("Ignoring %s (different frame)", $action));
             return;
         }
         $this->addMouseTriggerBase($action, $control, $cursor);
@@ -804,7 +804,7 @@ class Eyes extends EyesBase
     protected function addMouseTriggerElement(MouseAction $action, WebElement $element)
     {
         if ($this->getIsDisabled()) {
-            Logger::log(sprintf("Ignoring %s (disabled)", $action));
+            $this->logger->log(sprintf("Ignoring %s (disabled)", $action));
             return;
         }
 
@@ -817,7 +817,7 @@ class Eyes extends EyesBase
 
         // Triggers are actually performed on the previous window.
         if ($this->lastScreenshot == null) {
-            Logger::log(sprintf("Ignoring %s (no screenshot)", $action));
+            $this->logger->log(sprintf("Ignoring %s (no screenshot)", $action));
             return;
         }
 
@@ -825,7 +825,7 @@ class Eyes extends EyesBase
             /*(EyesWebDriverScreenshot)*/
             $lastScreenshot->getFrameChain())
         ) {
-            Logger::log(sprintf("Ignoring %s (different frame)", $action));
+            $this->logger->log(sprintf("Ignoring %s (different frame)", $action));
             return;
         }
 
@@ -846,12 +846,12 @@ class Eyes extends EyesBase
     protected function addTextTriggerControl($control, $text)
     {
         if ($this->getIsDisabled()) {
-            Logger::verbose(sprintf("Ignoring '%s' (disabled)", text));
+            $this->logger->verbose(sprintf("Ignoring '%s' (disabled)", text));
             return;
         }
 
         if ($this->lastScreenshot == null) {
-            Logger::log(sprintf("Ignoring '%s' (no screenshot)", $text));
+            $this->logger->log(sprintf("Ignoring '%s' (no screenshot)", $text));
             return;
         }
 
@@ -859,7 +859,7 @@ class Eyes extends EyesBase
             /*(EyesWebDriverScreenshot) */
             $lastScreenshot->getFrameChain())
         ) {
-            Logger::log(sprintf("Ignoring '%s' (different frame)", $text));
+            $this->logger->log(sprintf("Ignoring '%s' (different frame)", $text));
             return;
         }
         $this->addTextTriggerBase($control, $text);
@@ -874,7 +874,7 @@ class Eyes extends EyesBase
     protected function addTextTriggerElement(WebElement $element, $text)
     {
         if ($this->getIsDisabled()) {
-            Logger::log(spirntf("Ignoring '%s' (disabled)", $text));
+            $this->logger->log(spirntf("Ignoring '%s' (disabled)", $text));
             return;
         }
 
@@ -946,7 +946,7 @@ class Eyes extends EyesBase
     public function getScreenshot()
     {
 
-        Logger::log("getScreenshot()");
+        $this->logger->log("getScreenshot()");
 
         $this->updateScalingParams();
 
@@ -963,17 +963,17 @@ class Eyes extends EyesBase
 
 
             if ($this->checkFrameOrElement) {
-                Logger::log("Check frame/element requested");
+                $this->logger->log("Check frame/element requested");
                 $algo = new FullPageCaptureAlgorithm($this->logger);
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
                     $this->positionProvider, $this->positionProvider,
                     $this->scaleProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
-                Logger::log("Building screenshot object...");
+                $this->logger->log("Building screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
                     new RectangleSize($entireFrameOrElement->getWidth(), $entireFrameOrElement->getHeight()));
             } else if ($this->forceFullPageScreenshot) {
-                Logger::log("Full page screenshot requested.");
+                $this->logger->log("Full page screenshot requested.");
                 // Save the current frame path.
                 $originalFrame = $this->driver->getFrameChain();
                 $this->driver->switchTo()->defaultContent();
@@ -988,17 +988,17 @@ class Eyes extends EyesBase
                 $this->driver->switchTo()->frames($originalFrame);
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);
             } else {
-                Logger::verbose("Screenshot requested...");
+                $this->logger->verbose("Screenshot requested...");
                 $screenshot64 = $this->driver->getScreenshotAs("BASE64"/*OutputType:: FIXME it's not base 64*/);
-                Logger::log("Done! Creating image object...");
+                $this->logger->log("Done! Creating image object...");
                 $screenshotImage = $screenshot64;//FIXME ImageUtils::imageFromBase64($screenshot64);
-                Logger::log("Done!");
+                $this->logger->log("Done!");
                 //FIXME
                 //$screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
-                Logger::verbose("Creating screenshot object...");
+                $this->logger->verbose("Creating screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
             }
-            Logger::verbose("Done!");
+            $this->logger->verbose("Done!");
             return $result;
         } finally {
             if ($this->hideScrollbars) {
@@ -1013,7 +1013,7 @@ class Eyes extends EyesBase
             try {
                 return $this->driver->getTitle();
             } catch (Exception $ex) {
-                Logger::log("failed (" . $ex->getMessage() . ")");
+                $this->logger->log("failed (" . $ex->getMessage() . ")");
                 $this->dontGetTitle = true;
             }
         }
@@ -1043,18 +1043,18 @@ class Eyes extends EyesBase
         $underlyingDriver = $this->driver->getRemoteWebDriver();
         // If hostOs isn't set, we'll try and extract and OS ourselves.
         if ($appEnv->getOs() == null) {
-            Logger::log("No OS set, checking for mobile OS...");
+            $this->logger->log("No OS set, checking for mobile OS...");
             if (EyesSeleniumUtils::isMobileDevice($underlyingDriver)) {
                 $platformName = null;
-                Logger::log("Mobile device detected! Checking device type..");
+                $this->logger->log("Mobile device detected! Checking device type..");
                 if (EyesSeleniumUtils::isAndroid($underlyingDriver)) {
-                    Logger::log("Android detected.");
+                    $this->logger->log("Android detected.");
                     $platformName = "Android";
                 } else if (EyesSeleniumUtils::isIOS($underlyingDriver)) {
-                    Logger::log("iOS detected.");
+                    $this->logger->log("iOS detected.");
                     $platformName = "iOS";
                 } else {
-                    Logger::log("Unknown device type.");
+                    $this->logger->log("Unknown device type.");
                 }
                 // We only set the OS if we identified the device type.
                 if ($platformName != null) {
@@ -1068,16 +1068,16 @@ class Eyes extends EyesBase
                         }
                     }
 
-                    Logger::log("Setting OS: " . $os);
+                    $this->logger->log("Setting OS: " . $os);
                     $appEnv->setOs($os);
-                    Logger::verbose("Setting scale method for mobile.");
+                    $this->logger->verbose("Setting scale method for mobile.");
                     $this->setScaleMethod(ScaleMethod::QUALITY);
                 }
             } else {
-                Logger::log("No mobile OS detected.");
+                $this->logger->log("No mobile OS detected.");
             }
         }
-        Logger::log("Done!");
+        $this->logger->log("Done!");
         return $appEnv;
     }
 }

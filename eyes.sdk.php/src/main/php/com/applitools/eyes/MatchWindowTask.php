@@ -64,7 +64,7 @@ class MatchWindowTask
         $data = new MatchWindowData($userInputs, $appOutput->getAppOutput(), $tag, $ignoreMismatch,
             new Options($tag, $userInputs, $ignoreMismatch, false, false, false));
         // Perform match.
-        return $this->serverConnector->matchWindow($this->runningSession, $data);
+        /*return*/ $this->serverConnector->matchWindow($this->runningSession, $data);
     }
 
     /**
@@ -91,15 +91,11 @@ class MatchWindowTask
     public function matchWindow(/*Trigger[]*/$userInputs, EyesScreenshot $lastScreenshot,
         RegionProvider $regionProvider, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout)
     {
-
-        //AppOutputWithScreenshot $appOutput;
-        //MatchResult $matchResult;
-
         if ($retryTimeout < 0) {
             $retryTimeout = $this->defaultRetryTimeout;
         }
 
-        Logger::log(sprintf("retryTimeout = %d", $retryTimeout));
+        $this->logger->log(sprintf("retryTimeout = %d", $retryTimeout));
 
         $elapsedTimeStart = microtime(true);
 
@@ -130,12 +126,13 @@ class MatchWindowTask
             // Start the retry timer.
             $start = microtime(true);
 
-            $matchResult = $this->performMatch($userInputs, $appOutput, $tag, true);
+            $this->performMatch($userInputs, $appOutput, $tag, true);
 
             $retry = microtime(true) - $start;
-
+echo "UUUUUUUUUUUUUu->".$retry."------".$retryTimeout."----------";
             // The match retry loop.
-            /* FIXME need to retry while (($retry < $retryTimeout) && !$matchResult->getAsExpected()) {
+            while ($retry < $retryTimeout) {
+                echo "UUUUUUUUUUUUUu->".$retry."------".$retryTimeout."----------";
                 // Wait before trying again.
                 GeneralUtils::sleep(self::MATCH_INTERVAL);
 
@@ -145,7 +142,7 @@ class MatchWindowTask
                 $matchResult = $this->performMatch($userInputs, $appOutput, $tag, true);
 
                 $retry = microtime(true) - $start;
-            }*/
+            }
 
             // if we're here because we haven't found a match yet, try once more
             /* FIXME if (!$matchResult->getAsExpected()) {
@@ -157,10 +154,9 @@ class MatchWindowTask
                     $ignoreMismatch);
             }*/
         }
-
-       /* $elapsedTime = (microtime(true) - $elapsedTimeStart);
-        Logger::log(sprintf("Completed in  %.2f seconds", $elapsedTime));
-        $matchResult->setScreenshot($appOutput/* FIXME now output is a string ->getScreenshot());
-        return $matchResult;*/
+        $elapsedTime = (microtime(true) - $elapsedTimeStart);
+        $this->logger->log(sprintf("Completed in  %.2f seconds", $elapsedTime));
+        //$matchResult->setScreenshot($appOutput/* FIXME now output is a string ->getScreenshot());
+        //return $matchResult; //FIXME no return
     }
 }

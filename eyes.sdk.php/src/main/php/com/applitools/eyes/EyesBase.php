@@ -227,9 +227,6 @@ class EyesBase
      */
     protected function getAppEnvironment()
     {
-
-        //ATTENTION!!!!!!!!
-        //return '';   ///// temporary mock NEED TO SET ALL ENV  //FIXME
         $appEnv = new AppEnvironment();
 
         // If hostOS isn't set, we'll try and extract and OS ourselves.
@@ -263,21 +260,21 @@ class EyesBase
             $this->clearUserInputs();
 
             if (empty($this->runningSession)) { //FIXME
-                //logger.verbose("Closed");
+                $this->logger->verbose("Closed");
                 return;
             }
 
-            //logger.verbose("Aborting server session...");
+            $this->logger->verbose("Aborting server session...");
             try {
                 // When aborting we do not save the test.
                 $this->serverConnector->stopSession($this->runningSession, true, false);
-                //logger.log("--- Test aborted.");
+                $this->logger->log("--- Test aborted.");
             } catch (EyesException $ex) {
-                //logger.log("Failed to abort server session: " + ex.getMessage());
+                $this->logger->log("Failed to abort server session: " . $ex->getMessage());
             }
         } finally {
             $this->runningSession = null; /// FIXME
-            //logger.getLogHandler().close();
+            $this->logger->getLogHandler()->close();
         }
     }
 
@@ -385,7 +382,7 @@ class EyesBase
     public function checkWindowBase($regionProvider, $tag = "", $ignoreMismatch = null, $retryTimeout = null)
     {
         if ($this->getIsDisabled()) {
-            Logger::log("Ignored");
+            $this->logger->log("Ignored");
             $result = new MatchResult();
             $result->setAsExpected(true);
             return $result;
@@ -398,12 +395,12 @@ class EyesBase
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
 
-        Logger::log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
+        $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
 
         if ($this->runningSession == null) {
-            Logger::log("No running session, calling start session..");
+            $this->logger->log("No running session, calling start session..");
             $this->startSession();
-            Logger::log("Done!");
+            $this->logger->log("Done!");
 
             $appOutputProviderRedeclared = new AppOutputProviderRedeclared($this);
 
@@ -417,10 +414,10 @@ class EyesBase
             );
         }
 
-        Logger::log("Calling match window...");
+        $this->logger->log("Calling match window...");
         $result = $matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
-        Logger::log("MatchWindow Done!");
+        $this->logger->log("MatchWindow Done!");
         //FIXME result is empty. But screenshot was added
         /*  if (!$result->getAsExpected()) {
             if (!$ignoreMismatch) {
@@ -545,7 +542,7 @@ class EyesBase
      */
     protected function startSession()
     {
-        Logger::log("startSession()");
+        $this->logger->log("startSession()");
         if ($this->viewportSize == null) {
             $this->viewportSize = $this->getViewportSize();
 
@@ -554,31 +551,31 @@ class EyesBase
         }
 
         if ($this->batch == null) {
-            Logger::log("No batch set");
+            $this->logger->log("No batch set");
             $testBatch = new BatchInfo(null);
         } else {
-            Logger::log("Batch is " . $this->batch);
+            $this->logger->log("Batch is " . $this->batch);
             $testBatch = $this->batch;
         }
 
         $appEnv = $this->getAppEnvironment(); ///////  need to check is it correct?  //FIXME
-        Logger::log("Application environment is " . serialize($this->getAppEnvironment()));
+        $this->logger->log("Application environment is " . serialize($this->getAppEnvironment()));
 
         $sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
             $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $appEnv,
             $this->defaultMatchSettings, $this->branchName, $this->parentBranchName);
 
-        Logger::log("Starting server session...");
+        $this->logger->log("Starting server session...");
         $this->runningSession = $this->serverConnector->startSession($sessionStartInfo);
 
-        Logger::log("Server session ID is " . $this->runningSession->getId());
+        $this->logger->log("Server session ID is " . $this->runningSession->getId());
 
         $testInfo = "'" . $this->testName . "' of '" . $this->getAppName() . "' " . serialize($appEnv);
         if ($this->runningSession->getIsNewSession()) {
-            Logger::log("--- New test started - " . $testInfo);
+            $this->logger->log("--- New test started - " . $testInfo);
             $shouldMatchWindowRunOnceOnTimeout = true;
         } else {
-            Logger::log("--- Test started - " . $testInfo);
+            $this->logger->log("--- Test started - " . $testInfo);
             $shouldMatchWindowRunOnceOnTimeout = false;
         }
     }
@@ -619,7 +616,7 @@ class EyesBase
 
             $this->logger->verbose("Ending server session...");
             $save = ($isNewSession && $this->saveNewTests) || (!$isNewSession && $this->saveFailedTests);
-            $this->logger->verbose("Automatically save test? " + $save);
+            $this->logger->verbose("Automatically save test? " . $save);
             $results = $this->serverConnector->stopSession($this->runningSession, false, $save);
 //FIXME session was closed but not returned  expected class.
             /*$results->setNew($isNewSession);
@@ -661,5 +658,3 @@ class EyesBase
         }
     }
 }
-
-?>

@@ -174,7 +174,6 @@ class ServerConnector implements ServerConnectorInterface
             $result = json_decode($result, true);
             $runningSession = new RunningSession();
             $runningSession->setId($result['id']);
-            //$runningSession->setId($result['id']);
         }
 
         // Ok, let's create the running session from the response
@@ -206,53 +205,9 @@ class ServerConnector implements ServerConnectorInterface
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
         ArgumentGuard::notNull($matchData, "data");
-//FIXME
-        $validStatusCodes = array();
-
-        // since we rather not add an empty "tag" param
-        //FIXME need to use ->path, not concatenation "."
+        //FIXME code not related to Java.
         $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json";
-        // Serializing data into JSON (we'll treat it as binary later).
-        // IMPORTANT This serializes everything EXCEPT for the screenshot (which
-        // we'll add later).
-       /* try {  FIXME
-            $jsonData = json_encode($matchData);
-        } catch (IOException $e) {
-            throw new EyesException("Failed to serialize data for matchWindow!", $e);
-        }
-
-        // Convert the JSON to binary.
-        $jsonToBytesConverter = new ByteArrayOutputStream();
         try {
-            $jsonToBytesConverter->write(
-                $jsonData->getBytes(DEFAULT_CHARSET_NAME));
-            $jsonToBytesConverter->flush();
-            $jsonBytes = $jsonToBytesConverter->toByteArray();
-        } catch (IOException $e) {
-            throw new EyesException("Failed create binary data from JSON!", $e);
-        }
-
-        // Getting the screenshot's bytes (notice this can be either
-        // compressed/uncompressed form).
-        $screenshot = json_decode(
-        $matchData->getAppOutput()->getScreenshot64());
-
-        // Ok, let's create the request data
-        $requestOutputStream = new ByteArrayOutputStream();
-        $requestDos = new DataOutputStream($requestOutputStream);
-        */ try {
-          /*  $requestDos->writeInt($jsonBytes->length);
-            $requestDos->flush();
-            $requestOutputStream->write($jsonBytes);
-            $requestOutputStream->write($screenshot);
-            $requestOutputStream->flush();
-
-            // Ok, get the data bytes
-            $requestData = $requestOutputStream->toByteArray();
-
-            // Release the streams
-            $requestDos->close();*/
-
             $params = [
                 'appOutput' => [
                     "title" => $matchData->getAppOutput()->getTitle(),
@@ -275,34 +230,25 @@ class ServerConnector implements ServerConnectorInterface
             );
 
             curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($this->ch);
-        //$information = curl_getinfo($this->ch);
+            $response = curl_exec($this->ch);
+            $information = curl_getinfo($this->ch);
 
+
+            $validStatusCodes = array('200', '201');
+            if (in_array($information['http_code'], $validStatusCodes)) {
+                $this->logger->verbose("matchWindow(): Server request success.");
+            }else{
+                $this->logger->verbose("matchWindow(): Server request failed. Code: " . $information['http_code']);
+            }
         } catch (IOException $e) {
             throw new EyesException("Failed send check window request!", $e);
         }
-/*
-        // Sending the request
-        $response = $runningSessionsEndpoint->queryParam("apiKey", $this->apiKey)->
-            request(MediaType::APPLICATION_JSON).
-            post(Entity::entity($requestData,
-                    MediaType::APPLICATION_OCTET_STREAM));
-
-        // Ok, let's create the running session from the response
-        $validStatusCodes = new ArrayList<>(1);
-        $validStatusCodes->add(Response::Status/*.OK.getStatusCode());
-
-        $result = parseResponseWithJsonData($response, $validStatusCodes,
-                MatchResult::class);
-
-        return $result;*/
-
     }
 
     public function stopSession(RunningSession $runningSession, $isAborted, $save)
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
-        //FIXME code not related to Java. need to implement enother 
+        //FIXME code not related to Java.
 
         curl_setopt($this->ch, CURLOPT_URL,"https://eyessdk.applitools.com/api/sessions/running/".$runningSession->getId().".json?isAborted=false&updateBaseline=false&apiKey=".$this->apiKey);
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
@@ -315,8 +261,9 @@ class ServerConnector implements ServerConnectorInterface
 
         $server_output = curl_exec ($this->ch);
         $information = curl_getinfo($this->ch);
-        if($information['http_code'] == 200){
-            $this->logger->verbose("stopSession(): status 200. Session was stopped");
+        $validStatusCodes = array('200', '201');
+        if (in_array($information['http_code'], $validStatusCodes)) {
+            $this->logger->verbose("stopSession(): Session was stopped");
         }else{
             $this->logger->verbose("stopSession(): status ".$information['http_code'] . ". Need to check");
         }

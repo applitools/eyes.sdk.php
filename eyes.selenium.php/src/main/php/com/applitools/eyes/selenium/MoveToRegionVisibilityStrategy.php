@@ -18,17 +18,17 @@ class MoveToRegionVisibilityStrategy implements RegionVisibilityStrategy
 
     public function moveToRegion(PositionProvider $positionProvider, Location $location)
     {
-        Logger::log("Getting current position state..");
+        $this->logger->log("Getting current position state..");
         $this->originalPosition = $positionProvider->getState();
-        Logger::log("Done! Setting position..");
+        $this->logger->log("Done! Setting position..");
         $positionProvider->setPosition($location);
-        Logger::log("Done!");
+        $this->logger->log("Done!");
     }
 
     public function returnToOriginalPosition(PositionProvider $positionProvider)
     {
-        Logger::verbose("Returning to original position...");
+        $this->logger->verbose("Returning to original position...");
         $positionProvider->restoreState($this->originalPosition);
-        Logger::log("Done!");
+        $this->logger->log("Done!");
     }
 }
