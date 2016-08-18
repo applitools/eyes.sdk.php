@@ -254,7 +254,6 @@ class Eyes extends EyesBase
     public function open(WebDriver $driver, $appName, $testName,
                          RectangleSize $viewportSize = null, SessionType $sessionType = null)
     {
-
         if ($this->getIsDisabled()) {
             $this->logger->verbose("Ignored");
             return $driver;
@@ -902,7 +901,7 @@ class Eyes extends EyesBase
 
         if (!empty($driver)) {
             ArgumentGuard::notNull($this->driver, "driver");
-            return EyesSeleniumUtils::extractViewportSize($this->logger, $$this->driver);
+            return EyesSeleniumUtils::extractViewportSize($this->logger, $this->driver);
         } else {
             ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
             return $this->driver->getDefaultContentViewportSize();

@@ -266,7 +266,7 @@ class EyesSeleniumUtils
         }
         // If we failed to extract the viewport size using JS, will use the
         // window size instead.
-        Logger::log("Using window size as viewport size.");
+        $this->logger->log("Using window size as viewport size.");
         $windowSize = $driver->manage()->window()->getSize();
         $width = $windowSize->getWidth();
         $height = $windowSize->getHeight();

@@ -97,11 +97,35 @@ class EyesBase
 
     }
 
+
+    /**
+     * @param hostOS The host OS running the AUT.
+     */
+    public function setHostOS($hostOS) {
+
+        $this->logger->log("Host OS: " . $hostOS);
+
+        if(empty($hostOS)) {
+            $this->hostOS = null;
+        }
+        else {
+            $this->hostOS = $hostOS->trim();
+        }
+    }
+
+    /**
+     * @return get the host OS running the AUT.
+     */
+    public function getHostOS() {
+        return $this->hostOS;
+    }
+
+
     /**
      * @return The base agent id of the SDK.
      */
     protected function getBaseAgentId()
-    {//should be abstract
+    {//should be abstract FIXME
         return "mysdk/1.3";
     }
 
@@ -243,6 +267,32 @@ class EyesBase
         return $appEnv;
     }
 
+
+    /**
+     * Superseded by {@link #setHostOS(String)} and {@link #setHostApp
+     * (String)}.
+     * Sets the OS (e.g., Windows) and application (e.g., Chrome) that host the
+     * application under test.
+     *
+     * @param hostOS  The name of the OS hosting the application under test or
+     *                {@code null} to auto-detect.
+     * @param hostApp The name of the application hosting the application under
+     *                test or {@code null} to auto-detect.
+     */
+    public function setAppEnvironment($hostOS, $hostApp) {
+        if ($this->isDisabled) {
+        $this->logger->verbose("Ignored");
+            return;
+        }
+
+        $this->logger->log("Warning: SetAppEnvironment is deprecated! Please use " +
+            "'setHostOS' and 'setHostApp'");
+
+        $this->logger->verbose("setAppEnvironment(" . $hostOS . ", " . $hostApp . ")");
+        $this->setHostOS($hostOS);
+        $this->setHostApp($hostApp);
+    }
+
     /**
      * If a test is running, aborts it. Otherwise, does nothing.
      */
@@ -329,7 +379,6 @@ class EyesBase
             $this->scaleProviderHandler->set($scaleProvider);
             $this->setScaleMethod(ScaleMethod::getDefault());
             $this->isOpen = true;
-
         } catch (EyesException $e) {
             $this->logger->log(sprintf("%s", $e->getMessage()));
             $this->logger->getLogHandler()->close();
@@ -413,7 +462,6 @@ class EyesBase
                 $appOutputProviderRedeclared //FIXME
             );
         }
-
         $this->logger->log("Calling match window...");
         $result = $matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
@@ -472,6 +520,7 @@ class EyesBase
         $this->logger->verbose("Done! Getting title...");
         $title = $this->getTitle();
         $this->logger->verbose("Done!");
+
         $result = new AppOutputWithScreenshot(new AppOutput($title, $compressResult), $screenshot);
         $this->logger->verbose("Done!");
         return $result;

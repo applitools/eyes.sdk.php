@@ -124,7 +124,14 @@ class ServerConnector implements ServerConnectorInterface
                 "appIdOrName" => $sessionStartInfo->getAppIdOrName(),
                 "scenarioIdOrName" => $sessionStartInfo->getScenarioIdOrName(),
                 "batchInfo" => $sessionStartInfo->getBatchInfo(),
-                "environment" => ["displaySize" => $sessionStartInfo->getEnvironment()->getDisplaySize()],
+                "environment" => [
+                    "inferred" =>  $sessionStartInfo->getEnvironment()->getInferred(),
+                    "displaySize" => [
+                        "width" => $sessionStartInfo->getEnvironment()->getDisplaySize()->getWidth(),
+                        "height" => $sessionStartInfo->getEnvironment()->getDisplaySize()->getHeight()
+                    ]
+                ],
+
                 "matchLevel" => "Strict",
                 "agentId" => $sessionStartInfo->getAgentId()
             ]

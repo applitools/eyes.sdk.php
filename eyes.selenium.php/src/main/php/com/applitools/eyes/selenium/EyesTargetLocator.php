@@ -131,7 +131,6 @@ class EyesTargetLocator implements WebDriverTargetLocator {
                 $this->logger->verbose("Done!");
             }
         }
-
         $this->logger->verbose("Done switching into nested frames!");
         return $this->driver;
     }

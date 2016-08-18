@@ -13,20 +13,17 @@ class AppEnvironment
     /**
      * Creates a new AppEnvironment instance.
      */
-    public function __construct($inferred = null)
+    public function __construct($os = null, $hostingApp = null, RectangleSize $displaySize = null, $inferred = null)
     {
-        $this->inferred = $inferred;
-    }
+        if(!empty($os) && !empty($hostingApp) && !empty($displaySize)){
+            $this->setOs($os);
+            $this->setHostingApp($hostingApp);
+            $this->setDisplaySize($displaySize);
+        }
+        else if (!empty($inferred)){
+            $this->setInferred($inferred);
+        }
 
-
-    /**
-     * Creates a new AppEnvironment instance.
-     */
-    public function AppEnvironment($os, $hostingApp, $displaySize/*RectangleSize*/)
-    {
-        $this->setOs($os);
-        $this->setHostingApp($hostingApp);
-        $this->setDisplaySize($displaySize);
     }
 
     /**

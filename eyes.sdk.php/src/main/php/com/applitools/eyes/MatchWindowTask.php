@@ -129,10 +129,8 @@ class MatchWindowTask
             $this->performMatch($userInputs, $appOutput, $tag, true);
 
             $retry = microtime(true) - $start;
-echo "UUUUUUUUUUUUUu->".$retry."------".$retryTimeout."----------";
             // The match retry loop.
             while ($retry < $retryTimeout) {
-                echo "UUUUUUUUUUUUUu->".$retry."------".$retryTimeout."----------";
                 // Wait before trying again.
                 GeneralUtils::sleep(self::MATCH_INTERVAL);
 
