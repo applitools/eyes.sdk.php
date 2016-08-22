@@ -180,7 +180,9 @@ class ServerConnector implements ServerConnectorInterface
         } else {
             $result = json_decode($result, true);
             $runningSession = new RunningSession();
+            //FIXME
             $runningSession->setId($result['id']);
+            $runningSession->setUrl($result['url']);
         }
 
         // Ok, let's create the running session from the response
@@ -272,11 +274,13 @@ class ServerConnector implements ServerConnectorInterface
         if (in_array($information['http_code'], $validStatusCodes)) {
             $this->logger->verbose("stopSession(): Session was stopped");
         }else{
-            $this->logger->verbose("stopSession(): status ".$information['http_code'] . ". Need to check");
+            $this->logger->verbose("stopSession(): status ".$information['http_code'] . ". Need to check. Closing was failed");
         }
         curl_close ($this->ch);
-
+        //FIXME may be need to use parseResponseWithJsonData for preparing result
+        return new TestResults(json_decode($server_output, true));
     }
+
 
 }
 

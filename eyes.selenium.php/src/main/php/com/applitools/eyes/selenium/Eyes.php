@@ -57,14 +57,14 @@ class Eyes extends EyesBase
      *
      * @param serverUrl  The Eyes server URL.
      */
-    public function __construct($serverUrl)
+    public function __construct($serverUrl = null)
     {
 
-        /*
-    public Eyes() {
-        this(getDefaultServerUrl());
-    }
-         * */
+
+        if(empty($serverUrl)){
+            $serverUrl = $this->getDefaultServerUrl();
+        }
+
         parent::__construct($serverUrl);
 
         $this->checkFrameOrElement = false;

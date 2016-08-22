@@ -14,6 +14,7 @@ require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Bu
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesException.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/AppOutput.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/MatchResult.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/TestResults.php";
 require "../../eyes/eyes.php/eyes.images.php/src/main/php/com/applitools/eyes/EyesImagesScreenshot.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProvider.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProviderRedeclared.php";
@@ -29,6 +30,9 @@ require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullS
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ImageMatchSettings.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/FailureReports.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullCutProvider.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/TestFailedException.php";
+
+
 //require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Iterator.php";
 class EyesBase
 {
@@ -101,14 +105,14 @@ class EyesBase
     /**
      * @param hostOS The host OS running the AUT.
      */
-    public function setHostOS($hostOS) {
+    public function setHostOS($hostOS)
+    {
 
         $this->logger->log("Host OS: " . $hostOS);
 
-        if(empty($hostOS)) {
+        if (empty($hostOS)) {
             $this->hostOS = null;
-        }
-        else {
+        } else {
             $this->hostOS = $hostOS->trim();
         }
     }
@@ -116,7 +120,8 @@ class EyesBase
     /**
      * @return get the host OS running the AUT.
      */
-    public function getHostOS() {
+    public function getHostOS()
+    {
         return $this->hostOS;
     }
 
@@ -267,9 +272,28 @@ class EyesBase
         return $appEnv;
     }
 
-
     /**
-     * Superseded by {@link #setHostOS(String)} and {@link #setHostApp
+     * Sets the current server URL used by the rest client.
+     * @param serverUrl The URI of the rest server, or {@code null} to use
+     *                  the default server.
+     */
+
+    public function setServerUrl($serverUrl)
+    {
+        if ($serverUrl == null) {
+            $this->serverConnector->setServerUrl($this->getDefaultServerUrl());
+        } else {
+            $this->serverConnector->setServerUrl($serverUrl);
+        }
+    }
+
+    public static function getDefaultServerUrl()
+    {
+        return "https://eyessdk.applitools.com";
+    }
+
+
+    /** Superseded by {@link #setHostOS(String)} and {@link #setHostApp
      * (String)}.
      * Sets the OS (e.g., Windows) and application (e.g., Chrome) that host the
      * application under test.
@@ -279,9 +303,10 @@ class EyesBase
      * @param hostApp The name of the application hosting the application under
      *                test or {@code null} to auto-detect.
      */
-    public function setAppEnvironment($hostOS, $hostApp) {
+    public function setAppEnvironment($hostOS, $hostApp)
+    {
         if ($this->isDisabled) {
-        $this->logger->verbose("Ignored");
+            $this->logger->verbose("Ignored");
             return;
         }
 
@@ -353,9 +378,9 @@ class EyesBase
 
             if ($this->getApiKey() == null) {
                 $errMsg = "API key is missing! Please set it using setApiKey()";
-                        $this->logger->log($errMsg);
-                        throw new EyesException($errMsg);
-                    }
+                $this->logger->log($errMsg);
+                throw new EyesException($errMsg);
+            }
 
             $this->logger->log(sprintf("Eyes server URL is '%s'", $this->serverConnector->getServerUrl()));
             $this->logger->verbose(sprintf("Timeout = '%d'", $this->serverConnector->getTimeout()));
@@ -368,8 +393,8 @@ class EyesBase
                 $this->abortIfNotClosed();
                 $errMsg = "A test is already running";
                 $this->logger->log($errMsg);
-                    throw new EyesException($errMsg);
-                }
+                throw new EyesException($errMsg);
+            }
 
             $this->currentAppName = $appName != null ? $appName : $this->appName;
             $this->testName = $testName;
@@ -390,25 +415,26 @@ class EyesBase
     /**
      * @param positionProvider The position provider to be used.
      */
-    protected function setPositionProvider(PositionProvider $positionProvider) {
+    protected function setPositionProvider(PositionProvider $positionProvider)
+    {
         $this->positionProvider = $positionProvider;
     }
 
 
-
-/**
+    /**
      *
      * @param method The method used to perform scaling.
      */
-    protected function setScaleMethod($method) {
+    protected function setScaleMethod($method)
+    {
         ArgumentGuard::notNull($method, "method");
         $this->scaleMethod = $method;
     }
 
-    protected function getScaleMethod() {
+    protected function getScaleMethod()
+    {
         return $this->scaleMethod;
     }
-
 
 
     /**
@@ -438,7 +464,7 @@ class EyesBase
         }
         //FIXME
         require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
-        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, new BufferedImage(10,10,10)); //FIXME
+        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, new BufferedImage(10, 10, 10)); //FIXME
 
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
@@ -464,7 +490,7 @@ class EyesBase
         }
         $this->logger->log("Calling match window...");
         $result = $matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
-           $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
+            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
         $this->logger->log("MatchWindow Done!");
         //FIXME result is empty. But screenshot was added
         /*  if (!$result->getAsExpected()) {
@@ -501,10 +527,11 @@ class EyesBase
      *                            compression) or {@code null} if not available.
      * @return The updated app output and screenshot.
      */
-    private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot) {
+    private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot)
+    {
 
         $this->logger->verbose("getting screenshot...");
-            // Getting the screenshot (abstract function implemented by each SDK).
+        // Getting the screenshot (abstract function implemented by each SDK).
         $screenshot = $this->getScreenshot();
         $this->logger->verbose("Done getting screenshot!");
 
@@ -512,7 +539,7 @@ class EyesBase
         $region = $this->regionProvider->getRegion();
         if (!$region->isEmpty()) {
             $screenshot = $screenshot->getSubScreenshot($region,
-            $regionProvider->getCoordinatesType(), false);
+                $regionProvider->getCoordinatesType(), false);
         }
 
         $this->logger->verbose("Compressing screenshot...");
@@ -534,7 +561,8 @@ class EyesBase
      * @return A base64 encoded compressed screenshot.
      */
     public function compressScreenshot64(EyesScreenshot $screenshot,
-        EyesScreenshot $lastScreenshot) {
+                                         EyesScreenshot $lastScreenshot)
+    {
 
         ArgumentGuard::notNull($screenshot, "screenshot");
 
@@ -542,11 +570,11 @@ class EyesBase
         $uncompressed = ImageUtils::encodeAsPng($screenshotImage);
 
         $source = ($lastScreenshot != null) ?
-        $lastScreenshot->getImage() : null;
+            $lastScreenshot->getImage() : null;
 
-            // Compressing the screenshot
+        // Compressing the screenshot
         try {
-        $compressedScreenshot = 'sobe byte string';/* FIXME ImageDeltaCompressor::compressByRawBlocks(
+            $compressedScreenshot = 'sobe byte string';/* FIXME ImageDeltaCompressor::compressByRawBlocks(
             $screenshotImage, $uncompressed, $source);*/
         } catch (IOException $e) {
             throw new EyesException("Failed to compress screenshot!", $e);
@@ -561,7 +589,8 @@ class EyesBase
      *
      * @param batch The batch info to set.
      */
-    public function setBatch(BatchInfo $batch) {
+    public function setBatch(BatchInfo $batch)
+    {
         if ($this->isDisabled) {
             $this->logger->verbose("Ignored");
             return;
@@ -610,13 +639,12 @@ class EyesBase
         $appEnv = $this->getAppEnvironment(); ///////  need to check is it correct?  //FIXME
         $this->logger->log("Application environment is " . serialize($this->getAppEnvironment()));
 
-        $sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
+        $this->sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
             $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $appEnv,
             $this->defaultMatchSettings, $this->branchName, $this->parentBranchName);
 
         $this->logger->log("Starting server session...");
-        $this->runningSession = $this->serverConnector->startSession($sessionStartInfo);
-
+        $this->runningSession = $this->serverConnector->startSession($this->sessionStartInfo);
         $this->logger->log("Server session ID is " . $this->runningSession->getId());
 
         $testInfo = "'" . $this->testName . "' of '" . $this->getAppName() . "' " . serialize($appEnv);
@@ -627,6 +655,7 @@ class EyesBase
             $this->logger->log("--- Test started - " . $testInfo);
             $shouldMatchWindowRunOnceOnTimeout = false;
         }
+
     }
 
 
@@ -659,7 +688,6 @@ class EyesBase
                 $this->logger->verbose("--- Empty test ended.");
                 return new TestResults();
             }
-
             $isNewSession = $this->runningSession->getIsNewSession();
             $sessionResultsUrl = $this->runningSession->getUrl();
 
@@ -667,28 +695,28 @@ class EyesBase
             $save = ($isNewSession && $this->saveNewTests) || (!$isNewSession && $this->saveFailedTests);
             $this->logger->verbose("Automatically save test? " . $save);
             $results = $this->serverConnector->stopSession($this->runningSession, false, $save);
-//FIXME session was closed but not returned  expected class.
-            /*$results->setNew($isNewSession);
+
+            $results->setNew($isNewSession);
             $results->setUrl($sessionResultsUrl);
-            Logger::verbose($results->toString());
+            $this->logger->verbose($results->toString());
 
             if (!$isNewSession && (0 < $results->getMismatches() || 0 < $results->getMissing())) {
 
-                Logger::log("--- Failed test ended. See details at " . sessionResultsUrl);
+                Logger::log("--- Failed test ended. See details at " . $sessionResultsUrl);
 
                 if ($throwEx) {
                     $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                         . "' of '" . $this->sessionStartInfo->getAppIdOrName() . "'. See details at " . $sessionResultsUrl;
-                    throw new TestFailedException($results, $message);
+                    throw new /*FIXME TestFailed*/Exception(/*$results, */$message/*, $throwEx*/);
                 }
                 return $results;
             }
 
             if ($isNewSession) {
                 $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
-                Logger::log("--- New test ended. " . $instructions);
-                if (throwEx) {
-                    $message = "'" . sessionStartInfo . getScenarioIdOrName()
+                $this->logger->verbose("--- New test ended. " . $instructions);
+                if ($throwEx) {
+                    $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                         . "' of '" . $this->sessionStartInfo->getAppIdOrName()
                         . "'. " . $instructions;
                     throw new NewTestException($results, $message);
@@ -696,14 +724,16 @@ class EyesBase
                 return $results;
             }
             // Test passed
-            Logger::log("--- Test passed. See details at " . $sessionResultsUrl);
-            return $results;*/
+            $this->logger->verbose("--- Test passed. See details at " . $sessionResultsUrl);
+            return $results;
         } finally {
             // Making sure that we reset the running session even if an
             // exception was thrown during close.
             $this->runningSession = null;
             $this->currentAppName = null;
-            //$this->log->getLogHandler->close();
+            $this->logger->getLogHandler()->close();
         }
+        echo "KOKOKOKOK";
+        die();
     }
 }
