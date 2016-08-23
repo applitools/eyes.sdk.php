@@ -1,5 +1,5 @@
 <?php
-require "FixedCutProvider.php";
+//require "FixedCutProvider.php";
 /**
  * A cut provider which does nothing.
  */

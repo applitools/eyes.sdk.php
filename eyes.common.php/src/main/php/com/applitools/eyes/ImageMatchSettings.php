@@ -1,5 +1,5 @@
 <?php
-require "MatchLevel.php";
+//require "MatchLevel.php";
 
 /**
  * Encapsulates match settings for the a session.

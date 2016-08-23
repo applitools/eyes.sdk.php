@@ -1,5 +1,5 @@
 <?php
-require "RegionVisibilityStrategy.php";
+//require "RegionVisibilityStrategy.php";
 
 /**
  * An implementation of {@link RegionVisibilityStrategy}, which tries to move

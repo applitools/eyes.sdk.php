@@ -1,5 +1,5 @@
 <?php
-require "FixedScaleProvider.php";
+//require "FixedScaleProvider.php";
 
 /**
  * A scale provider which does nothing.

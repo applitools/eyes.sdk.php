@@ -1,6 +1,6 @@
 <?php
-require "AppOutputWithScreenshot.php";
-require "RegionProvider.php";
+/*require "AppOutputWithScreenshot.php";
+require "RegionProvider.php";*/
 
 interface AppOutputProvider
 {

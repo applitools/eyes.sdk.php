@@ -1,5 +1,5 @@
 <?php
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/OnWillSwitch.php";
+//require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/OnWillSwitch.php";
 
 class OnWillSwitchSelenium implements OnWillSwitch{
     public function willSwitchToFrame(TargetType $targetType, WebElement $targetFrame) {

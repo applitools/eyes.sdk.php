@@ -1,5 +1,5 @@
 <?php
-require "NullLogHandler.php";
+//require "NullLogHandler.php";
 
 class Logger
 {

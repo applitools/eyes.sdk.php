@@ -1,5 +1,5 @@
 <?php
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ServerConnectorFactory.php";
+/*require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ServerConnectorFactory.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/RectangleSize.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Logger.php";
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/SessionStartInfo.php";
@@ -30,7 +30,7 @@ require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullS
 require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ImageMatchSettings.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/FailureReports.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullCutProvider.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/TestFailedException.php";
+require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/TestFailedException.php";*/
 
 
 //require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Iterator.php";
@@ -463,7 +463,7 @@ class EyesBase
             return $result;
         }
         //FIXME
-        require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
+        //require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
         $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, new BufferedImage(10, 10, 10)); //FIXME
 
 

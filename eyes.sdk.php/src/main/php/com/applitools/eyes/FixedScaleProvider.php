@@ -1,6 +1,6 @@
 <?php
-require "ScaleProvider.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ScaleMethod.php";
+/*require "ScaleProvider.php";
+require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ScaleMethod.php";*/
 
 /**
  * Scale provider based on a fixed scale ratio.

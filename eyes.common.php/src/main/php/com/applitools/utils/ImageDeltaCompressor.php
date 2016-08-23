@@ -1,5 +1,5 @@
 <?php
-require "CompareAndCopyBlockChannelDataResult.php";
+//require "CompareAndCopyBlockChannelDataResult.php";
 /*
  * Applitools SDK for Selenium integration.
  */

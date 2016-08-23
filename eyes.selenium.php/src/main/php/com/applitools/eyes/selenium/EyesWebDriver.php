@@ -1,8 +1,8 @@
 <?php
-require "EyesTouchScreen.php";
+/*require "EyesTouchScreen.php";
 require "OnWillSwitchSelenium.php";
 require "EyesTargetLocator.php";
-require "AppiumJsCommandExtractor.php";
+require "AppiumJsCommandExtractor.php";*/
 
 /**
  * An Eyes implementation of the interfaces implemented by
