@@ -14,5 +14,13 @@
   },
   "require-dev": {
     "phpunit/phpunit": "3.7.*"
-  }
+  },
+  "autoload": {
+    "classmap": [
+        "eyes.sdk.php",
+        "eyes.common.php",
+        "eyes.images.php",
+        "eyes.selenium.php"
+    ]   
+   }
 }
