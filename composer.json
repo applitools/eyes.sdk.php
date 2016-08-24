@@ -1,9 +1,9 @@
-
 {
   "name": "applitools/eyes.sdk.php",
   "description": "A php sdk for Applitools",
   "keywords": ["webdriver", "Applitools", "php"],
   "homepage": "https://github.com/applitools/eyes.sdk.php",
+  "version": "0.1.0",
   "type": "library",
   "license": "Apache-2.0",
   "support": {
