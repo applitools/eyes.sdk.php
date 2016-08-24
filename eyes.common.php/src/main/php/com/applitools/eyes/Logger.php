@@ -5,7 +5,7 @@ class Logger
 {
     private $logHandler;
 
-    public function Logger() {
+    public function __construct() {
         $this->logHandler = new NullLogHandler(); // Default.
     }
 
