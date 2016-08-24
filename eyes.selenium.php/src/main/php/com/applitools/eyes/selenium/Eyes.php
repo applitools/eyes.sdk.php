@@ -82,7 +82,7 @@ class Eyes extends EyesBase
 
     public function getBaseAgentId()
     {
-        return "eyes.selenium.java/2.50";
+        return "eyes.selenium.php/0.1";
     }
 
     /**
