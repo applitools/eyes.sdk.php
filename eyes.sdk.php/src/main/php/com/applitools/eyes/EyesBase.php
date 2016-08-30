@@ -32,7 +32,6 @@ require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/Failu
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullCutProvider.php";
 require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/TestFailedException.php";*/
 
-
 //require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Iterator.php";
 class EyesBase
 {
@@ -62,7 +61,7 @@ class EyesBase
     private $shouldMatchWindowRunOnceOnTimeout;
     private $lastScreenshot;
     protected $scaleProviderHandler; //PropertyHandler<ScaleProvider>
-    private $cutProviderHandler; //PropertyHandler<CutProvider>
+    protected $cutProviderHandler; //PropertyHandler<CutProvider>
 
 
     public function __construct($serverUrl)

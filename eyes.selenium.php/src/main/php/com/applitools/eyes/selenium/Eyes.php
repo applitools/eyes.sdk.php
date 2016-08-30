@@ -934,7 +934,7 @@ class Eyes extends EyesBase
             /*(EyesTargetLocator)*/
             $this->driver->switchTo()->frames($originalFrame);
 
-            throw new TestFailedException("Failed to set the viewport size", e);
+            throw new /*TestFailed FIXME*/Exception("Failed to set the viewport size"/*, $e*/);
         }
         /*(EyesTargetLocator)*/
         $this->driver->switchTo()->frames($originalFrame);
@@ -978,9 +978,32 @@ class Eyes extends EyesBase
                 $this->driver->switchTo()->defaultContent();
                 $algo = new FullPageCaptureAlgorithm($this->logger);
                 $regionProvider = new RegionProvider();
+
+
+
+
+              /*  BufferedImage fullPageImage = algo.getStitchedRegion
+                    (imageProvider,
+                        new RegionProvider() {
+                            public Region getRegion() {
+                                return Region.EMPTY;
+                            }
+
+                            public CoordinatesType getCoordinatesType() {
+                                return null;
+                            }
+                        },
+                        new ScrollPositionProvider(logger, this.driver),
+                        positionProvider, scaleProviderHandler.get(),
+                                cutProviderHandler.get(),
+                        getWaitBeforeScreenshots(), screenshotFactory);
+                */
+
+
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
                     new ScrollPositionProvider($this->logger, $this->driver),
                     $this->positionProvider, $this->scaleProviderHandler->get(),
+                    $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
 
                 /*(EyesTargetLocator)*/

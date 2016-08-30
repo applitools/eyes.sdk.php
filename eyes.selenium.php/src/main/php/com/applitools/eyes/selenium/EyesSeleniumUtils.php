@@ -179,8 +179,8 @@ class EyesSeleniumUtils
     {
         $originalOverflow = self::setOverflow($executor, "hidden");
         if ($stabilizationTimeout > 0) {
-            try { //??????
-                Thread::sleep($stabilizationTimeout);
+            try { //?????? FIXME need to check
+                GeneralUtils::sleep($stabilizationTimeout);
             } catch (InterruptedException $e) {
                 // Nothing to do.
             }
@@ -324,15 +324,15 @@ class EyesSeleniumUtils
             GeneralUtils::sleep(self::SLEEP);
             $browserSize = $driver->manage()->window()->getSize();
             Logger::log("Current browser size: " . json_encode($browserSize));
-        } while (--$retriesLeft > 0 && !$browserSize->equals($requiredBrowserSize));
+        } while (--$retriesLeft > 0 && $browserSize != $requiredBrowserSize);
 
-        if (!$browserSize->equals($requiredBrowserSize)) {
+        if ($browserSize != $requiredBrowserSize) {
             throw new EyesException("Failed to set browser size!");
         }
 
         $actualViewportSize = self::extractViewportSize($logger, $driver);
         $logger::log("Current viewport size: " . json_encode($actualViewportSize));
-        if (!$actualViewportSize->equals($size)) {
+        if ($actualViewportSize != $size) {
         // Additional attempt. This Solves the "maximized browser" bug
         // (border size for maximized browser sometimes different than
         // non-maximized, so the original browser size calculation is
@@ -352,10 +352,10 @@ class EyesSeleniumUtils
             $actualViewportSize = self::extractViewportSize($logger, $driver);
             Logger::log("Browser size: " . $driver->manage()->window()->getSize());
             Logger::log("Viewport size: " . $actualViewportSize);
-        } while (--$retriesLeft > 0 && !$actualViewportSize->equals($size));
+        } while (--$retriesLeft > 0 && !$actualViewportSize != $size);
     }
 
-        if (!$actualViewportSize->equals($size)) {
+        if ($actualViewportSize != $size) {
             throw new EyesException("Failed to set the viewport size.");
         }
     }
