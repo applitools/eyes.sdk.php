@@ -79,7 +79,7 @@ return "somestring"; //FIXME
      * @throws com.applitools.eyes.EyesException If there was a problem
      * creating the {@code BufferedImage} instance.
      */
-    public static function imageFromBase64($image64){
+   /* public static function imageFromBase64($image64){
         ArgumentGuard::notNullOrEmpty($image64, "image64");
 
         // Get the image bytes
@@ -87,7 +87,7 @@ return "somestring"; //FIXME
         //$imageBytes = Base64::decodeBase64($image64.getBytes(Charset::forName("UTF-8")));
         $imageBytes = base64_decode($image64);
         return self::imageFromBytes($imageBytes);
-    }
+    }*/
 
     /**
      *
@@ -111,15 +111,12 @@ return "somestring"; //FIXME
      */
     public static function imageFromBytes($imageBytes){
         try {
-            $image = base64_decode($imageBytes);//FIXME
-            //$screenshotStream = new ByteArrayInputStream($imageBytes);
-            //$image = ImageIO::read($screenshotStream);
-            //$screenshotStream->close();
+            //FIXME need to check
+            $image = new Gregwar\Image\Image();
+            $image->setResource(imagecreatefromstring($imageBytes));
         } catch (IOException $e) {
             throw new EyesException("Failed to create buffered image!", $e);
         }
-        //FIXME mock
-        $image = new BufferedImage(10,10,10);
         return $image;
     }
 
@@ -215,14 +212,14 @@ return "somestring"; //FIXME
      * @return If the scale ratio != 1, returns a new scaled image,
      * otherwise, returns the original image.
      */
-    public static function scaleImage(BufferedImage $image, ScaleMethod $scaleMethod, $scaleRatio) {
+    public static function scaleImage(Gregwar\Image\Image $image, ScaleMethod $scaleMethod, $scaleRatio) {
         ArgumentGuard::notNull($image, "image");
         ArgumentGuard::greaterThanZero($scaleRatio, "scaleRatio");
 
         if ($scaleRatio == 1) {
             return $image;
         }
-
+//FIXME need to check if not scale method
         $scaledWidth = (int) Math::ceil($image->getWidth() * $scaleRatio);
         // doesn't really matter, scale is according to the image width anyways.
         $scaledHeight = (int) Math::ceil($image->getHeight() * $scaleRatio);

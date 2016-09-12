@@ -45,14 +45,14 @@ class ContextBasedScaleProvider implements ScaleProvider {
         return $this->scaleRatio;
     }
 
-    public function scaleImage(BufferedImage $image) {
+    public function scaleImage(Gregwar\Image\Image $image) {
         // First time an image is given we determine the scale ratio.
+
         if ($this->scaleRatio == self::UNKNOWN_SCALE_RATIO) {
 
-            $imageWidth = $image->getWidth();
+            $imageWidth = $image->width();
             $viewportWidth = $this->viewportSize->getWidth();
             $dcesWidth = $this->topLevelContextEntireSize->getWidth();
-
             // If the image's width is the same as the viewport's width or the
             // top level context's width, no scaling is necessary.
             if ((($imageWidth >= $viewportWidth - self::ALLOWED_VS_DEVIATION)

@@ -27,7 +27,7 @@ abstract class EyesScreenshot {
     *                        fully contained in the screenshot.
     * @return A screenshot instance containing the given region.
     */
-    public abstract function getSubScreenshot(Region $region, CoordinatesType $coordinatesType, $throwIfClipped);
+    public abstract function getSubScreenshot(Region $region, /*CoordinatesType FIXME*/$coordinatesType, $throwIfClipped);
 
     /**
     * Converts a location's coordinates with the {@code from} coordinates type
@@ -56,8 +56,8 @@ abstract class EyesScreenshot {
 
 
     protected abstract function getIntersectedRegion(Region $region,
-    CoordinatesType $originalCoordinatesType,
-    CoordinatesType $resultCoordinatesType);
+    /*CoordinatesType */$originalCoordinatesType,
+    /*CoordinatesType */$resultCoordinatesType);
 
     /**
     * Get the intersection of the given region with the screenshot.
@@ -81,7 +81,7 @@ abstract class EyesScreenshot {
     * @return A new region which is the transformation of {@code region} to
     * the {@code to} coordinates type.
     */
-    protected function convertRegionLocation(Region $region, CoordinatesType $from, CoordinatesType $to) {
+    public function convertRegionLocation(Region $region, /*CoordinatesType */$from, /*CoordinatesType */$to) {
         ArgumentGuard::notNull($region, "region");
 
         if ($region->isEmpty()) {
@@ -91,7 +91,7 @@ abstract class EyesScreenshot {
         ArgumentGuard::notNull($from, "from");
         ArgumentGuard::notNull($to, "to");
 
-        $updatedLocation = convertLocation($region->getLocation(), $from, $to);
+        $updatedLocation = $this->convertLocation($region->getLocation(), $from, $to);
 
         return new Region($updatedLocation, $region->getSize());
     }

@@ -8,7 +8,7 @@ class Location
     private $x;
     private $y;
 
-    private $ZERO;
+    //private $ZERO;
 
     /**
      * Creates a Location instance.
@@ -32,6 +32,9 @@ class Location
         }
     }
 
+    public static function getZero(){ //FIXME instead of self::ZERO
+        return new Location(0, 0);
+    }
     public function equals(/*Object */$obj)
     {
         if ($this == $obj) {

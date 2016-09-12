@@ -1,24 +1,20 @@
-/*
- * Applitools software.
- */
-package com.applitools.eyes;
-
+<?php
 /**
  * Encapsulates the type of coordinates used by the region provider.
  */
-public enum CoordinatesType {
+class CoordinatesType {
     /**
      * The coordinates should be used "as is" on the screenshot image.
      * Regardless of the current context.
      */
-    SCREENSHOT_AS_IS,
+    const SCREENSHOT_AS_IS = "SCREENSHOT_AS_IS";
 
     /**
      * The coordinates should be used "as is" within the current context. For
      * example, if we're inside a frame, the coordinates are "as is",
      * but within the current frame's viewport.
      */
-    CONTEXT_AS_IS,
+    const CONTEXT_AS_IS = "CONTEXT_AS_IS";
 
     /**
      * Coordinates are relative to the context. For example, if we are in
@@ -27,5 +23,5 @@ public enum CoordinatesType {
      * an element's region, we will need to calculate their respective "as
      * is" coordinates.
      */
-    CONTEXT_RELATIVE
+    const CONTEXT_RELATIVE = "CONTEXT_RELATIVE";
 }

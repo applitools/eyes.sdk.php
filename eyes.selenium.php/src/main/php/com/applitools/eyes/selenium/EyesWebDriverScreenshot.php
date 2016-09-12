@@ -177,11 +177,10 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         return new FrameChain($this->logger, $this->frameChain);
     }
 
-    public function getSubScreenshot(Region $region, CoordinatesType $coordinatesType, $throwIfClipped)
+    public function getSubScreenshot(Region $region, /*CoordinatesType FIXME*/$coordinatesType, $throwIfClipped)
     {
-
         $this->logger->verbose(sprintf("getSubScreenshot([%s], %s, %b)",
-            $region, $coordinatesType, $throwIfClipped));
+            json_encode($region), json_encode($coordinatesType), json_encode($throwIfClipped)));
 
         ArgumentGuard::notNull($region, "region");
         ArgumentGuard::notNull($coordinatesType, "coordinatesType");
@@ -343,11 +342,11 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     }
 
     public function getIntersectedRegion(Region $region,
-                                         CoordinatesType $originalCoordinatesType,
-                                         CoordinatesType $resultCoordinatesType)
+                                         /*CoordinatesType */$originalCoordinatesType,
+                                         /*CoordinatesType */$resultCoordinatesType)
     {
         if ($region->isEmpty()) {
-            return new Region($region);
+            return new Region('','','','','','',$region);
         }
 
         $intersectedRegion = $this->convertRegionLocation($region,

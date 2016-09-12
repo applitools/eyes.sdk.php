@@ -310,7 +310,6 @@ class Eyes extends EyesBase
             $this->logger->log(sprintf("CheckWindow(%d, '%s'): Ignored", $matchTimeout, $tag));
             return;
         }
-
         $this->logger->log(sprintf("CheckWindow(%d, '%s')", $matchTimeout, $tag));
         $regionProvider = new RegionProvider();
         parent::checkWindowBase($regionProvider, $tag, false, $matchTimeout);
@@ -403,21 +402,20 @@ class Eyes extends EyesBase
      * @throws TestFailedException Thrown if a mismatch is detected and
      *                             immediate failure reports are enabled.
      */
-    public function checkRegion(Region $region, $matchTimeout = null, $tag = null, $stitchContent = null, $selector = null)
+    public function checkRegion(Region $region, $matchTimeout = null, $tag = null/*, $stitchContent = null, $selector = null*/)
     {
-
         if ($this->getIsDisabled()) {
             $this->logger->log(sprintf("CheckRegion([%s], %d, '%s'): Ignored",
                 $region, $matchTimeout, $tag));
             return;
         }
-
+/*
         if ($stitchContent) {
             $this->checkElement($selector);
         } else {
-            $this->checkRegion($selector);
+            $this->checkElemetRegion($selector);
         }
-
+*/
         ArgumentGuard::notNull($region, "region");
 
         $this->logger->log(sprintf("CheckRegion([%s], %d, '%s')", $region,
@@ -436,6 +434,45 @@ class Eyes extends EyesBase
 
     }
 
+    /**
+     * Takes a snapshot of the application under test and matches a region of
+     * a specific element with the expected region output.
+     *
+     * @param element      The element which represents the region to check.
+     * @param matchTimeout The amount of time to retry matching.
+     *                     (Milliseconds)
+     * @param tag          An optional tag to be associated with the snapshot.
+     * @throws TestFailedException if a mismatch is detected and
+     *                             immediate failure reports are enabled
+     */
+    public function checkElementRegion(WebElement $element, $matchTimeout, $tag) {
+        if ($this->getIsDisabled()) {
+            $this->logger->verbose(sprintf("CheckRegion(element, %d, '%s'): Ignored",
+            $matchTimeout, $tag));
+            return;
+        }
+
+        ArgumentGuard::notNull($element, "element");
+
+        $this->logger->verbose(sprintf("CheckRegion(element, %d, '%s')",
+                $matchTimeout, $tag));
+
+        // If needed, scroll to the top/left of the element (additional help
+        // to make sure it's visible).
+        $locationAsPoint = $element->getLocation();
+        $this->regionVisibilityStrategy->moveToRegion($this->positionProvider,
+                    new Location($locationAsPoint->getX(), $locationAsPoint->getY()));
+        $fullregion = new FullRegionProvider();
+                parent::checkWindowBase(
+                $fullregion,
+                $tag,
+                false,
+                $matchTimeout
+        );
+        $this->logger->verbose("Done! trying to scroll back to original position..");
+        $regionVisibilityStrategy->returnToOriginalPosition($positionProvider);
+        $this->logger->verbose("Done!");
+    }
 
     /**
      * Switches into the given frame, takes a snapshot of the application under
@@ -957,10 +994,6 @@ class Eyes extends EyesBase
             $imageProvider = new TakesScreenshotImageProvider($this->logger, $this->driver);
             $screenshotFactory = new EyesWebDriverScreenshotFactory($this->logger, $this->driver);
 
-
-
-
-
             if ($this->checkFrameOrElement) {
                 $this->logger->log("Check frame/element requested");
                 $algo = new FullPageCaptureAlgorithm($this->logger);
@@ -980,8 +1013,6 @@ class Eyes extends EyesBase
                 $regionProvider = new RegionProvider();
 
 
-
-
               /*  BufferedImage fullPageImage = algo.getStitchedRegion
                     (imageProvider,
                         new RegionProvider() {
@@ -998,8 +1029,6 @@ class Eyes extends EyesBase
                                 cutProviderHandler.get(),
                         getWaitBeforeScreenshots(), screenshotFactory);
                 */
-
-
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
                     new ScrollPositionProvider($this->logger, $this->driver),
                     $this->positionProvider, $this->scaleProviderHandler->get(),

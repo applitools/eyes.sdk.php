@@ -6,13 +6,19 @@
  */
 class RegionProvider
 {
+    protected $region; //FIXME absent in java
+    public function __construct()
+    {//FIXME absent in java
+        $this->region = Region::getEmpty();
+    }
+
     /**
      *
      * @return A region with "as is" viewport coordinates.
      */
     public function getRegion()
-    {
-        return null;
+    {//FIXME
+        return $this->region;
     }
 
     /**

@@ -220,7 +220,7 @@ class ServerConnector implements ServerConnectorInterface
             $params = [
                 'appOutput' => [
                     "title" => $matchData->getAppOutput()->getTitle(),
-                    "screenshot64" => base64_encode($matchData->getAppOutput()->getScreenshot64()->getImage())
+                    "screenshot64" => base64_encode(file_get_contents($matchData->getAppOutput()->getScreenshot64()->getImage()->cacheFile('png', 100 , true)))
                 ],
                 "tag" => $matchData->getTag(),
                 "ignoreMismatch" => false,

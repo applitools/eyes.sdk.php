@@ -36,7 +36,7 @@ class ScrollPositionProvider implements PositionProvider
      */
     public function setPosition(Location $location)
     {
-        $this->logger->verbose(sprintf("Scrolling to %s", $location));
+        $this->logger->verbose(sprintf("Scrolling to %s", json_encode($location)));
         EyesSeleniumUtils::setCurrentScrollPosition($this->executor, $location);
         $this->logger->verbose("Done scrolling!");
     }

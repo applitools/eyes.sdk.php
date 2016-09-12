@@ -3,5 +3,5 @@
  * Encapsulates the instantiation of an EyesScreenshot object.
  */
 interface EyesScreenshotFactory {
-    function makeScreenshot(BufferedImage $image);
+    function makeScreenshot(Gregwar\Image\Image $image);
 }

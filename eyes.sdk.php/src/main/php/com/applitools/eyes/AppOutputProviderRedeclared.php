@@ -21,7 +21,7 @@ class AppOutputProviderRedeclared implements AppOutputProvider
 
         // Cropping by region if necessary
         $region = $regionProvider->getRegion();
-        if (!empty($region)) {
+        if (!empty($region->isEmpty)) {
             $screenshot = $screenshot->getSubScreenshot($region,
                 $regionProvider->getCoordinatesType(), false);
         }

@@ -16,5 +16,5 @@ interface ScaleProvider
      * @param image The image to scale.
      * @return A new scaled image.
      */
-    function scaleImage(BufferedImage $image);
+    // FIXME need to use Gregwar\Image\Image function scaleImage($image);
 }

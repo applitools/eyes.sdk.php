@@ -463,7 +463,7 @@ class EyesBase
         }
         //FIXME
         //require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
-        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, new BufferedImage(10, 10, 10)); //FIXME
+        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, new BufferedImage(15, 16, 17)); //FIXME
 
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
@@ -732,7 +732,5 @@ class EyesBase
             $this->currentAppName = null;
             $this->logger->getLogHandler()->close();
         }
-        echo "KOKOKOKOK";
-        die();
     }
 }

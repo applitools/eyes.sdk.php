@@ -217,8 +217,9 @@ class Region
             "maxSubRegionSize.getHeight()");
 
         /*List<Region>*/
-        $subRegions = new /*LinkedList<*/
-        Region();
+        $subRegions = array();
+        $subRegions[] = new /*LinkedList<*/Region();
+
 
         $currentTop = $containerRegion->top;
         $bottom = $containerRegion->top + $containerRegion->height;
@@ -230,7 +231,6 @@ class Region
             if ($currentBottom > $bottom) {
                 $currentBottom = $bottom;
             }
-
             $currentLeft = $containerRegion->left;
             while ($currentLeft < $right) {
                 $currentRight = $currentLeft + $maxSubRegionSize->getWidth();
@@ -241,8 +241,8 @@ class Region
                 $currentHeight = $currentBottom - $currentTop;
                 $currentWidth = $currentRight - $currentLeft;
 
-                $subRegions->add(new Region($currentLeft, $currentTop,
-                    $currentWidth, $currentHeight));
+                $subRegions[] = new Region($currentLeft, $currentTop,
+                    $currentWidth, $currentHeight);
 
                 $currentLeft += $maxSubRegionSize->getWidth();
             }
@@ -263,13 +263,13 @@ class Region
      * subRegionSize} is equal or greater than the current region,
      * only a single region is returned.
      */
-    public function getSubRegions(RectangleSize $subRegionSize, $isFixedSize)
+    public function getSubRegions(RectangleSize $subRegionSize, $isFixedSize = false)
     {
         if ($isFixedSize) {
             return getSubRegionsWithFixedSize($this, $subRegionSize);
         }
 
-        return getSubRegionsWithVaryingSize($this, $subRegionSize);
+        return $this->getSubRegionsWithVaryingSize($this, $subRegionSize);
     }
 
     /**
