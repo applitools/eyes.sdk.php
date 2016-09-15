@@ -214,13 +214,19 @@ class ServerConnector implements ServerConnectorInterface
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
         ArgumentGuard::notNull($matchData, "data");
+        //FIXME need to refactor
+        if($matchData->getAppOutput()->getScreenshot64()->getImage() instanceof Gregwar\Image\Image){
+            $image = base64_encode(file_get_contents($matchData->getAppOutput()->getScreenshot64()->getImage()->cacheFile('png', 100 , true)));
+        } else {
+            $image = base64_encode($matchData->getAppOutput()->getScreenshot64()->getImage());
+        }
         //FIXME code not related to Java.
         $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json";
         try {
             $params = [
                 'appOutput' => [
                     "title" => $matchData->getAppOutput()->getTitle(),
-                    "screenshot64" => base64_encode(file_get_contents($matchData->getAppOutput()->getScreenshot64()->getImage()->cacheFile('png', 100 , true)))
+                    "screenshot64" => $image
                 ],
                 "tag" => $matchData->getTag(),
                 "ignoreMismatch" => false,
