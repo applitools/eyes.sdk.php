@@ -463,7 +463,8 @@ class EyesBase
         }
         //FIXME
         //require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
-        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, new BufferedImage(15, 16, 17)); //FIXME
+        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver,
+            Gregwar\Image\Image::create(0, 0)); //FIXME
 
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");

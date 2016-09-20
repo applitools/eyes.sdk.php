@@ -113,10 +113,10 @@ class GeneralUtils
      *
      * @param milliseconds The number of milliseconds to sleep.
      */
-    public static function sleep($milliseconds)
+    public static function sleep($microseconds)
     {
         try {
-            sleep($milliseconds/1000);//FIXME
+            usleep($microseconds);
         } catch (InterruptedException $ex) {
             throw new RuntimeException("sleep interrupted", $ex);
         }

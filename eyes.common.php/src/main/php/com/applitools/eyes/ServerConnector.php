@@ -215,8 +215,12 @@ class ServerConnector implements ServerConnectorInterface
         ArgumentGuard::notNull($runningSession, "runningSession");
         ArgumentGuard::notNull($matchData, "data");
         //FIXME need to refactor
+
+
         if($matchData->getAppOutput()->getScreenshot64()->getImage() instanceof Gregwar\Image\Image){
-            $image = base64_encode(file_get_contents($matchData->getAppOutput()->getScreenshot64()->getImage()->cacheFile('png', 100 , true)));
+            $imageName = tempnam(sys_get_temp_dir(),"merged_image_").".png";
+            $matchData->getAppOutput()->getScreenshot64()->getImage()->save($imageName,"png",100);
+            $image = base64_encode(file_get_contents($imageName));
         } else {
             $image = base64_encode($matchData->getAppOutput()->getScreenshot64()->getImage());
         }

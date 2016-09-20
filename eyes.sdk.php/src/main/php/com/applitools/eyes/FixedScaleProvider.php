@@ -40,7 +40,7 @@ class FixedScaleProvider implements ScaleProvider
      *
      * {@inheritDoc}
      */
-    public function scaleImage(BufferedImage $image)
+    public function scaleImage(Gregwar\Image\Image $image)
     {
         return ImageUtils::scaleImage($image, $this->scaleMethod, $this->scaleRatio);
     }

@@ -67,7 +67,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
      *                                   location in the screenshot.
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
-                                /* FIXME BufferedImage */$image, ScreenshotType $screenshotType = null,
+                                /*Gregwar\Image\Image*/ $image = null, ScreenshotType $screenshotType = null,
                                 Location $frameLocationInScreenshot = null,
                                 RectangleSize $entireFrameSize = null)
     {

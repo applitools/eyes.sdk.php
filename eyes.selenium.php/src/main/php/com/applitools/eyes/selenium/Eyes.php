@@ -34,8 +34,8 @@ class Eyes extends EyesBase
     // Seconds
     const RESPONSE_TIME_DEFAULT_DIFF_FROM_DEADLINE = 20;
 
-    // Milliseconds
-    const DEFAULT_WAIT_BEFORE_SCREENSHOTS = 100;
+    // Microseconds
+    const DEFAULT_WAIT_BEFORE_SCREENSHOTS = 100000;
 
     protected $driver; //EyesWebDriver FIXME
     private $dontGetTitle;
@@ -278,8 +278,8 @@ class Eyes extends EyesBase
         // Setting the correct position provider.
         switch ($this->getStitchMode()) {
             case StitchMode::CSS:
-                $cssTranslatePositionnew = CssTranslatePositionProvider($this->logger, $this->driver);
-                $this->setPositionProvider($cssTranslatePositionnew);
+                $cssTranslatePositionNew = new CssTranslatePositionProvider($this->logger, $this->driver);
+                $this->setPositionProvider($cssTranslatePositionNew);
                 break;
             default:
                 $scrollPositionnew = new ScrollPositionProvider($this->logger, $this->driver);
@@ -1034,7 +1034,6 @@ class Eyes extends EyesBase
                     $this->positionProvider, $this->scaleProviderHandler->get(),
                     $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
-
                 /*(EyesTargetLocator)*/
                 $this->driver->switchTo()->frames($originalFrame);
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);

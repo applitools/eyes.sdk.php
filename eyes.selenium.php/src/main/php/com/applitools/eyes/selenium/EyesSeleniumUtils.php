@@ -60,7 +60,7 @@ class EyesSeleniumUtils
         . "var totalHeight = Math.max(maxDocElementHeight, maxBodyHeight); "
         . "return [totalWidth, totalHeight];";
 
-    const JS_TRANSFORM_KEYS = array("transform", "-webkit-transform");
+    const JS_TRANSFORM_KEYS = '["transform","-webkit-transform"]';
 
     /**
      * Extracts the location relative to the entire page from the coordinates
@@ -410,11 +410,10 @@ class EyesSeleniumUtils
      * @return The current documentElement transform values, according to
      * {@link #JS_TRANSFORM_KEYS}.
      */
-    public static /*Map<String, String>*/
-    function getCurrentTransform(JavascriptExecutor $executor)
+    public static function getCurrentTransform(JavascriptExecutor $executor)
     {
         $script = "return { ";
-        foreach (JS_TRANSFORM_KEYS as $key) { // ???????
+        foreach (json_decode(self::JS_TRANSFORM_KEYS) as $key) { // ???????
             $script .= "'" . $key . "'" . ": document.documentElement.style['" . $key . "'],";
         }
 
@@ -435,13 +434,11 @@ class EyesSeleniumUtils
      * @param transforms The transforms to set. Keys are used as style keys,
      *                   and values are the values for those styles.
      */
-    public static function setTransforms(JavascriptExecutor $executor, /*Map<String, String>*/
-                                         $transforms)
+    public static function setTransforms(JavascriptExecutor $executor, $transforms)
     {
-
         $script = "";
-        foreach ($transforms->entrySet() as $entry) { //FIXME
-            $script .= "document.documentElement.style['" . $entry->getKey() . "'] = '" . $entry->getValue() . "';";
+        foreach ($transforms as $key=>$entry) {
+            $script .= "document.documentElement.style['" . $key . "'] = '" . $entry . "';";
         }
         $executor->executeScript($script);
     }
@@ -453,12 +450,12 @@ class EyesSeleniumUtils
      * @param executor The executor to use.
      * @param transform The transform value to set.
      */
-    public static function setTransform(JavascriptExecutor $executor, String $transform)
+    public static function setTransform(JavascriptExecutor $executor, $transform)
     {
-        $transforms = array(); //FIXME
+        $transforms = array();
 
-        foreach (JS_TRANSFORM_KEYS as $key) { //FIXME
-            $transforms->put($key, $transform);
+        foreach (json_decode(self::JS_TRANSFORM_KEYS) as $key) {
+            $transforms[$key] = $transform;
         }
 
         self::setTransforms($executor, $transforms);
@@ -471,6 +468,6 @@ class EyesSeleniumUtils
      */
     public static function translateTo(JavascriptExecutor $executor, Location $position)
     {
-        setTransform($executor, sprintf("translate(-%spx, -%spx)", $position->getX(), $position->getY()));
+        self::setTransform($executor, sprintf("translate(-%spx, -%spx)", $position->getX(), $position->getY()));
     }
 }

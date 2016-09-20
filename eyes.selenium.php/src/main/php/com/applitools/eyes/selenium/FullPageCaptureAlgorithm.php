@@ -133,7 +133,7 @@ class FullPageCaptureAlgorithm {
         $partImageSize =
                 new RectangleSize($image->width(),
                         max($image->height() - self::MAX_SCROLL_BAR_SIZE,
-                                /*self::MIN_SCREENSHOT_PART_HEIGHT*/300)); //FIXME
+                                self::MIN_SCREENSHOT_PART_HEIGHT));
 
         $this->logger->verbose(sprintf("Total size: %s, image part size: %s",
                 json_encode($entireSize), json_encode($partImageSize)));
@@ -151,15 +151,14 @@ class FullPageCaptureAlgorithm {
 
         $this->logger->verbose("Done! Adding initial screenshot..");
         // Starting with the screenshot we already captured at (0,0).
-        //$initialPart = $image->getData();
         $initialPart = clone $image;
         $this->logger->verbose(sprintf("Initial part:(0,0)[%d x %d]",
                 $initialPart->width(), $initialPart->height()));
-        $stitchedImage->merge($initialPart,0,0); $stitchedImage->save("bbbbbb.jpg");
+        $stitchedImage->merge($initialPart,0,0);
         //$stitchedImage->getRaster()->setRect(0, 0, $initialPart); FIXME need to check
         $this->logger->verbose("Done!");
 
-        $lastSuccessfulLocation = new Location(0, 0);
+        $lastSuccessfulLocation = new Location(0, $initialPart->height());
         $lastSuccesfulPartSize = new RectangleSize($initialPart->width(),
                 $initialPart->height());
 
@@ -174,7 +173,6 @@ class FullPageCaptureAlgorithm {
             if ($partRegion->getLeft() == 0 && $partRegion->getTop() == 0) {
                 continue;
             }
-
             $this->logger->verbose(sprintf("Taking screenshot for %s",
                     json_encode($partRegion)));
             // Set the position to the part's top/left.
@@ -182,6 +180,7 @@ class FullPageCaptureAlgorithm {
             // Giving it time to stabilize.
             GeneralUtils::sleep($waitBeforeScreenshots);
             // Screen size may cause the scroll to only reach part of the way.
+
             $currentPosition = $positionProvider->getCurrentPosition();
             $this->logger->verbose(sprintf("Set position to %s",
                     json_encode($currentPosition)));
@@ -189,7 +188,6 @@ class FullPageCaptureAlgorithm {
             // Actually taking the screenshot.
             $this->logger->verbose("Getting image...");
             $partImage = $imageProvider->getImage();
-
             // FIXME - scaling should be refactored
             $partImage = $scaleProvider->scaleImage($partImage);
 
@@ -211,6 +209,7 @@ class FullPageCaptureAlgorithm {
 
             $lastSuccessfulLocation = $currentPosition;
         }
+        
         if ($partImage != null) {
             $lastSuccesfulPartSize = new RectangleSize($partImage->width(),
                     $partImage->height());
@@ -223,9 +222,9 @@ class FullPageCaptureAlgorithm {
 
         // If the actual image size is smaller than the extracted size, we
         // crop the image.
-        $actualImageWidth = $lastSuccessfulLocation->getX() .
+        $actualImageWidth = $lastSuccessfulLocation->getX() +
                 $lastSuccesfulPartSize->getWidth();
-        $actualImageHeight = $lastSuccessfulLocation->getY() .
+        $actualImageHeight = $lastSuccessfulLocation->getY() +
                 $lastSuccesfulPartSize->getHeight();
         $this->logger->verbose("Extracted entire size: " . json_encode($entireSize));
         $this->logger->verbose("Actual stitched size: " . $actualImageWidth . "x" .
@@ -238,7 +237,7 @@ class FullPageCaptureAlgorithm {
                     new Region(0, 0, $actualImageWidth, $actualImageHeight));
             $this->logger->verbose("Done!");
         }
-
+        $stitchedImage->save("bbbb.jpg");
         return $stitchedImage;
     }
 }
