@@ -9,7 +9,7 @@ class ImageUtils {
      * @param image The image to encode.
      * @return The PNG bytes representation of the image.
      */
-    public static function encodeAsPng(BufferedImage $image) {
+    public static function encodeAsPng(Gregwar\Image\Image $image) {
 return "somestring"; //FIXME
         ArgumentGuard::notNull($image, "image");
         $pngBytesStream = new ByteArrayOutputStream();
@@ -94,7 +94,7 @@ return "somestring"; //FIXME
      * @param image The image from which to get its base64 representation.
      * @return The base64 representation of the image (bytes encoded as PNG).
      */
-    public static function base64FromImage(BufferedImage $image) {
+    public static function base64FromImage(Gregwar\Image\Image $image) {
         ArgumentGuard::notNull($image, "image");
 
         $imageBytes = self::encodeAsPng($image);
@@ -127,7 +127,7 @@ return "somestring"; //FIXME
      * @param region The region which should be copied from the image.
      * @return The part of the image.
      */
-    public static function getImagePart(BufferedImage $image, Region $region) {
+    public static function getImagePart(Gregwar\Image\Image $image, Region $region) {
         ArgumentGuard::notNull($image, "image");
 
         // Get the clipped region as a BufferedImage.
@@ -147,7 +147,7 @@ return "somestring"; //FIXME
      * @param deg The degrees by which to rotate the image.
      * @return A rotated image.
      */
-    public static function rotateImage(BufferedImage $image, double $deg) {
+    public static function rotateImage(Gregwar\Image\Image $image, $deg) {
         ArgumentGuard::notNull($image, "image");
 
         $radians = Math::toRadians($deg);
@@ -193,9 +193,9 @@ return "somestring"; //FIXME
      *                    See {@link BufferedImage#getType()}.
      * @return A copy of the {@code src} of the requested type.
      */
-    public static function copyImageWithType(BufferedImage $src, $updatedType) {
+    public static function copyImageWithType(Gregwar\Image\Image $src, $updatedType) {
         ArgumentGuard::notNull($src, "src");
-        $result = new BufferedImage($src->getWidth(),
+        $result = new Gregwar\Image\Image($src->getWidth(),
                 $src->getHeight(), $updatedType);
         $g2 = $result->createGraphics();
         $g2->drawRenderedImage($src, null);
@@ -245,7 +245,7 @@ return "somestring"; //FIXME
      * @param regionToCrop The region to crop from the image.
      * @return A new image without the cropped region.
      */
-    public static function cropImage(BufferedImage $image,
+    public static function cropImage(Gregwar\Image\Image $image,
                                           Region $regionToCrop) {
         $croppedImage = Scalr::crop($image, $regionToCrop->getLeft(),
                 $regionToCrop->getTop(), regionToCrop.getWidth(),

@@ -214,16 +214,11 @@ class ServerConnector implements ServerConnectorInterface
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
         ArgumentGuard::notNull($matchData, "data");
-        //FIXME need to refactor
+        
+        $imageName = tempnam(sys_get_temp_dir(),"merged_image_").".png";
+        $matchData->getAppOutput()->getScreenshot64()->getImage()->save($imageName,"png",100);
+        $image = base64_encode(file_get_contents($imageName));
 
-
-        if($matchData->getAppOutput()->getScreenshot64()->getImage() instanceof Gregwar\Image\Image){
-            $imageName = tempnam(sys_get_temp_dir(),"merged_image_").".png";
-            $matchData->getAppOutput()->getScreenshot64()->getImage()->save($imageName,"png",100);
-            $image = base64_encode(file_get_contents($imageName));
-        } else {
-            $image = base64_encode($matchData->getAppOutput()->getScreenshot64()->getImage());
-        }
         //FIXME code not related to Java.
         $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json";
         try {

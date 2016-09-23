@@ -114,8 +114,8 @@
      * @throws java.io.IOException If there was a problem reading/writing
      * from/to the streams which are created during the process.
      */
-    public static function compressByRawBlocks(BufferedImage $target,
-            $targetEncoded, BufferedImage $source, $blockSize = 30 ){
+    public static function compressByRawBlocks(Gregwar\Image\Image $target,
+            $targetEncoded, Gregwar\Image\Image $source, $blockSize = 30 ){
 //FIXME need to find suitable solution depends on "BufferedImage"
         // If there's no image to compare to, or the images are in different
         // sizes, we simply return the encoded target.

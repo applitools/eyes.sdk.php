@@ -40,7 +40,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
      */
     public static function normalizeRotation(Logger $logger,
                                              WebDriver $driver,
-                                             BufferedImage $image,
+                                             Gregwar\Image\Image $image,
                                              ImageRotation $rotation)
     {
         ArgumentGuard::notNull($driver, "driver");
@@ -428,6 +428,8 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
 
     public function getScreenshotAs(/*OutputType<X>*/$xOutputType)
     {
+        $image64 = $this->driver->takeScreenshot();
+        $screenshot64 = ImageUtils::imageFromBytes($image64);
       /*  // Get the image as base64.    FIXME
         $screenshot64 = $this->driver->getScreenshotAs(OutputType::BASE64);
         $screenshot = ImageUtils::imageFromBase64($screenshot64);
@@ -436,7 +438,8 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         // Return the image in the requested format.
         $screenshot64 = ImageUtils::base64FromImage($screenshot);
         return $xOutputType->convertFromBase64Png($screenshot64);*/
-        return $this->driver->takeScreenshot();
+
+        return $screenshot64;
     }
 
     public function getUserAgent()

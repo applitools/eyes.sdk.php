@@ -14,7 +14,7 @@ class EyesImagesScreenshot extends EyesScreenshot
      * @param location The top/left coordinates of the screenshot in context
      *                 relative coordinates type.
      */
-    public function __construct(BufferedImage $image = null, Location $location = null)
+    public function __construct(Gregwar\Image\Image $image = null, Location $location = null)
     {
         if (!empty($image)) {
             if (empty($location)) {

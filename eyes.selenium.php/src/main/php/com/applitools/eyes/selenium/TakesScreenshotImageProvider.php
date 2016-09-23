@@ -17,7 +17,6 @@ class TakesScreenshotImageProvider implements ImageProvider {
         $screenshot64 = $this->tsInstance->getScreenshotAs(/*OutputType:: FIXME*/"BASE64");
         $this->logger->verbose("Done getting base64! Creating BufferedImage..");
         //FIXME don't need to convert from base64. Image was got
-
-        return ImageUtils::imageFromBytes($screenshot64);
+        return $screenshot64;
     }
 }

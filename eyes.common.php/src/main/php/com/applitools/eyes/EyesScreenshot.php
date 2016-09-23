@@ -3,9 +3,9 @@
 * Base class for handling screenshots.
 */
 abstract class EyesScreenshot {
-    protected $image;// BufferedImage
+    protected $image;
 
-    public function __construct(/*BufferedImage */$image = null) { //FIXME
+    public function __construct(Gregwar\Image\Image $image = null) { //FIXME
         ArgumentGuard::notNull($image, "image"); //FIXME
         $this->image = $image;
     }

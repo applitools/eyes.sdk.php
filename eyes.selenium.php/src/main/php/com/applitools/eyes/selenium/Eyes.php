@@ -562,7 +562,7 @@ class Eyes extends EyesBase
             $this->logger->log("Getting screenshot as base64..");
             $screenshot64 = $this->driver->getScreenshotAs(/*OutputType:: FIXME*/"BASE64");
             $this->logger->log("Done! Creating image object...");
-            $screenshotImage = ImageUtils::imageFromBase64($screenshot64); //BufferedImage instance
+            $screenshotImage = ImageUtils::imageFromBase64($screenshot64);
             $screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
             $this->logger->log("Done! Building required object...");
             $screenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);

@@ -71,7 +71,6 @@ class FullPageCaptureAlgorithm {
 
         $this->logger->verbose("Getting top/left image...");
         $image = $imageProvider->getImage();
-
         // FIXME - scaling should be refactored
         $image = $scaleProvider->scaleImage($image);
 
@@ -237,7 +236,6 @@ class FullPageCaptureAlgorithm {
                     new Region(0, 0, $actualImageWidth, $actualImageHeight));
             $this->logger->verbose("Done!");
         }
-        $stitchedImage->save("bbbb.jpg");
         return $stitchedImage;
     }
 }
