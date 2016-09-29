@@ -62,7 +62,7 @@ Getting started
 			$eyes->setApiKey('---YOUR APPLITOOLS API KEY---');
 			$eyes->setHideScrollbars(true);
 			$eyes->setStitchMode("CSS");
-        		$eyes->setForceFullPageScreenshot(true);
+			$eyes->setForceFullPageScreenshot(true);
 			$appName = 'Example_app_name';
 			$testName = 'Example_test_name';
 			$eyes->open($this->webDriver, $appName, $testName, new RectangleSize(1024, 500));
