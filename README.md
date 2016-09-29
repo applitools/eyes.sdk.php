@@ -41,12 +41,12 @@ Getting started
 	<?php
 	class SomeTest extends PHPUnit_Framework_TestCase
 	{
-		protected $url = 'http://codeception.com'; //Example url
+		protected $url = 'http://php.net'; //Example url
 		protected $webDriver;
 		   
 		public function setUp()
 		{
-			$capabilities = array(\WebDriverCapabilityType::BROWSER_NAME => 'firefox');
+			$capabilities = array(\WebDriverCapabilityType::BROWSER_NAME => 'chrome');
 			$this->webDriver = RemoteWebDriver::create('http://localhost:4444/wd/hub', $capabilities);
 		}
 		   
@@ -60,9 +60,12 @@ Getting started
 			$this->webDriver->get($this->url);
 			$eyes = new Eyes();
 			$eyes->setApiKey('---YOUR APPLITOOLS API KEY---');
+			$eyes->setHideScrollbars(true);
+			$eyes->setStitchMode("CSS");
+        		$eyes->setForceFullPageScreenshot(true);
 			$appName = 'Example_app_name';
 			$testName = 'Example_test_name';
-			$eyes->open($this->webDriver, $appName, $testName, new RectangleSize(1024, 768));
+			$eyes->open($this->webDriver, $appName, $testName, new RectangleSize(1024, 500));
 			$eyes->checkWindow("Example_tag_name");
 			$eyes->close();
 		}
