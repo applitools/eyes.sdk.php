@@ -186,16 +186,15 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         ArgumentGuard::notNull($coordinatesType, "coordinatesType");
 
         // We calculate intersection based on as-is coordinates.
-        $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
+/*          $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
             $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
-
+*/ $asIsSubScreenshotRegion = $region;//FIXME
         if ($asIsSubScreenshotRegion->isEmpty() ||
-            ($throwIfClipped && !$asIsSubScreenshotRegion->getSize()->equals(
-                    $region->getSize()))
+            ($throwIfClipped && ($asIsSubScreenshotRegion->getSize() != $region->getSize()))
         ) {
-            throw new OutOfBoundsException(sprintf(
+            throw new /*OutOfBounds*/Exception(sprintf(
                 "Region [%s, (%s)] is out of screenshot bounds [%s]",
-                $region, $coordinatesType, $this->frameWindow));
+                json_encode($region), $coordinatesType, $this->frameWindow));
         }
 
         $subScreenshotImage = ImageUtils::getImagePart($this->image, $asIsSubScreenshotRegion);
@@ -203,7 +202,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         // The frame location in the sub screenshot is the negative of the
         // context-as-is location of the region.
         $contextAsIsRegionLocation =
-            convertLocation($asIsSubScreenshotRegion->getLocation(),
+            $this->convertLocation($asIsSubScreenshotRegion->getLocation(),
                 CoordinatesType::SCREENSHOT_AS_IS,
                 CoordinatesType::CONTEXT_AS_IS);
 
@@ -219,14 +218,14 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     }
 
     public function convertLocation(Location $location,
-                                    CoordinatesType $from, CoordinatesType $to)
+                                    /*CoordinatesType*/ $from, /*CoordinatesType*/ $to)
     {
 
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($from, "from");
         ArgumentGuard::notNull($to, "to");
 
-        $result = new Location($location);
+        $result = new Location(null, null, $location);
 
         if ($from == $to) {
             return $result;
@@ -260,14 +259,14 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         }
 
         switch ($from) {
-            case CONTEXT_AS_IS:
+            case CoordinatesType::CONTEXT_AS_IS:
                 switch ($to) {
                     case CONTEXT_RELATIVE:
                         $result->offset($this->scrollPosition->getX(),
                             $this->scrollPosition->getY());
                         break;
 
-                    case SCREENSHOT_AS_IS:
+                    case CoordinatesType::SCREENSHOT_AS_IS:
                         $result->offset($this->frameLocationInScreenshot->getX(),
                             $this->frameLocationInScreenshot->getY());
                         break;
@@ -277,9 +276,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 }
                 break;
 
-            case CONTEXT_RELATIVE:
+            case CoordinatesType::CONTEXT_RELATIVE:
                 switch ($to) {
-                    case SCREENSHOT_AS_IS:
+                    case CoordinatesType::SCREENSHOT_AS_IS:
                         // First, convert context-relative to context-as-is.
                         $result->offset(-$this->scrollPosition->getX(),
                             -$this->scrollPosition->getY());
@@ -288,7 +287,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                             $this->frameLocationInScreenshot->getY());
                         break;
 
-                    case CONTEXT_AS_IS:
+                    case CoordinatesType::CONTEXT_AS_IS:
                         $result->offset(-$this->scrollPosition->getX(),
                             -$this->scrollPosition->getY());
                         break;
@@ -298,9 +297,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 }
                 break;
 
-            case SCREENSHOT_AS_IS:
+            case CoordinatesType::SCREENSHOT_AS_IS:
                 switch ($to) {
-                    case CONTEXT_RELATIVE:
+                    case CoordinatesType::CONTEXT_RELATIVE:
                         // First convert to context-as-is.
                         $result->offset(-$this->frameLocationInScreenshot->getX(),
                             -$this->frameLocationInScreenshot->getY());
@@ -309,7 +308,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                             $this->scrollPosition->getY());
                         break;
 
-                    case CONTEXT_AS_IS:
+                    case CoordinatesType::CONTEXT_AS_IS:
                         $result->offset(-$this->frameLocationInScreenshot->getX(),
                             -$this->frameLocationInScreenshot->getY());
                         break;
@@ -355,15 +354,15 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         switch ($originalCoordinatesType) {
             // If the request was context based, we intersect with the frame
             // window.
-            case CONTEXT_AS_IS:
-            case CONTEXT_RELATIVE:
+            case CoordinatesType::CONTEXT_AS_IS:
+            case CoordinatesType::CONTEXT_RELATIVE:
                 $intersectedRegion->intersect($this->frameWindow);
                 break;
 
             // If the request is screenshot based, we intersect with the image
-            case SCREENSHOT_AS_IS:
+            case CoordinatesType::SCREENSHOT_AS_IS:
                 $intersectedRegion->intersect(new Region(0, 0,
-                    $this->image->getWidth(), $this->image->getHeight()));
+                    $this->image->width(), $this->image->height()));
                 break;
 
             default:

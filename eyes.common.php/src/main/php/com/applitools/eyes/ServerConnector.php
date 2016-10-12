@@ -218,9 +218,9 @@ class ServerConnector implements ServerConnectorInterface
         $imageName = tempnam(sys_get_temp_dir(),"merged_image_").".png";
         $matchData->getAppOutput()->getScreenshot64()->getImage()->save($imageName,"png",100);
         $image = base64_encode(file_get_contents($imageName));
-
         //FIXME code not related to Java.
-        $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json";
+        $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json?apiKey=".$this->apiKey;
+
         try {
             $params = [
                 'appOutput' => [
@@ -228,12 +228,12 @@ class ServerConnector implements ServerConnectorInterface
                     "screenshot64" => $image
                 ],
                 "tag" => $matchData->getTag(),
-                "ignoreMismatch" => false,
+                "ignoreMismatch" => $matchData->getIgnoreMismatch(),
             ];
             $params = json_encode($params);
 
 
-            curl_setopt($this->ch, CURLOPT_URL,"https://eyessdk.applitools.com/api/sessions/running/".$runningSession->getId().".json?apiKey=".$this->apiKey);
+            curl_setopt($this->ch, CURLOPT_URL, $runningSessionsEndpoint);
             curl_setopt($this->ch, CURLOPT_POST, 1);
             curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $params);
@@ -254,9 +254,16 @@ class ServerConnector implements ServerConnectorInterface
             }else{
                 $this->logger->verbose("matchWindow(): Server request failed. Code: " . $information['http_code']);
             }
+            $result = new MatchResult();
+            if(!empty($response)){
+                $res = json_decode($response);
+                $result->setAsExpected($res->asExpected == "true" ? true : false);
+            }
+
         } catch (IOException $e) {
             throw new EyesException("Failed send check window request!", $e);
         }
+        return $result;
     }
 
     public function stopSession(RunningSession $runningSession, $isAborted, $save)

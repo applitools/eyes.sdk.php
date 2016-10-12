@@ -55,7 +55,7 @@ class MatchWindowTask
      *                       match attempt in case of a mismatch.
      * @return The match result.
      */
-    protected function performMatch(/*Trigger[] */
+    protected function performMatch(
         $userInputs,
         AppOutputWithScreenshot $appOutput,
         $tag, $ignoreMismatch)
@@ -64,7 +64,7 @@ class MatchWindowTask
         $data = new MatchWindowData($userInputs, $appOutput->getAppOutput(), $tag, $ignoreMismatch,
             new Options($tag, $userInputs, $ignoreMismatch, false, false, false));
         // Perform match.
-        /*return*/ $this->serverConnector->matchWindow($this->runningSession, $data);
+        return $this->serverConnector->matchWindow($this->runningSession, $data);
     }
 
     /**
@@ -101,6 +101,7 @@ class MatchWindowTask
 
         // If the wait to load time is 0, or "run once" is true,
         // we perform a single check window.
+
         if (0 == $retryTimeout || $shouldMatchWindowRunOnceOnTimeout) {
 
             if ($shouldMatchWindowRunOnceOnTimeout) {
@@ -126,11 +127,11 @@ class MatchWindowTask
             // Start the retry timer.
             $start = microtime(true);
 
-            $this->performMatch($userInputs, $appOutput, $tag, true);
+            $matchResult = $this->performMatch($userInputs, $appOutput, $tag, true);
 
             $retry = microtime(true) - $start;
             // The match retry loop.
-            while ($retry < $retryTimeout) {
+            while ($retry < $retryTimeout && !$matchResult->getAsExpected()) {
                 // Wait before trying again.
                 GeneralUtils::sleep(self::MATCH_INTERVAL);
 
@@ -138,23 +139,21 @@ class MatchWindowTask
 
                 // Notice the ignoreMismatch here is true
                 $matchResult = $this->performMatch($userInputs, $appOutput, $tag, true);
-
                 $retry = microtime(true) - $start;
             }
-
             // if we're here because we haven't found a match yet, try once more
-            /* FIXME if (!$matchResult->getAsExpected()) {
+            if (!$matchResult->getAsExpected()) {
 
                 $appOutput = $this->appOutputProvider->getAppOutput($regionProvider,
                     $lastScreenshot);
 
                 $matchResult = $this->performMatch($userInputs, $appOutput, $tag,
                     $ignoreMismatch);
-            }*/
+            }
         }
         $elapsedTime = (microtime(true) - $elapsedTimeStart);
         $this->logger->log(sprintf("Completed in  %.2f seconds", $elapsedTime));
-        //$matchResult->setScreenshot($appOutput/* FIXME now output is a string ->getScreenshot());
-        //return $matchResult; //FIXME no return
+        $matchResult->setScreenshot($appOutput/* FIXME now output is a string ->getScreenshot()*/);
+        return $matchResult;
     }
 }

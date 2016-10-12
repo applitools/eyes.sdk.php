@@ -42,8 +42,10 @@ class CssTranslatePositionProvider implements PositionProvider {
                 EyesSeleniumUtils::getCurrentTransform($this->executor));
     }
 
-    public function restoreState(PositionMemento $state) {
-        EyesSeleniumUtils::setTransforms($this->executor,
-                /*((CssTranslatePositionMemento)*/$state->getTransform());
+    public function restoreState(PositionMemento $state = null) {
+        if(empty($state)){
+            $state = new CssTranslatePositionMemento(); //FIXME need to check
+        }
+        EyesSeleniumUtils::setTransforms($this->executor, $state->getTransform());
     }
 }

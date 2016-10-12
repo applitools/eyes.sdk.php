@@ -57,8 +57,10 @@ class ScrollPositionProvider implements PositionProvider
         return new ScrollPositionMemento($this->getCurrentPosition());
     }
 
-    public function restoreState(PositionMemento $state) {
-        $s = /*(ScrollPositionMemento) */$state;
+    public function restoreState(PositionMemento $state = null) {
+        if(empty($state)){
+            $s = new ScrollPositionMemento(new Location(0,0));  //FIXME need to check
+        }
         $this->setPosition(new Location($s->getX(), $s->getY()));
     }
 }

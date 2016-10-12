@@ -12,6 +12,7 @@ class AppOutputProviderRedeclared implements AppOutputProvider
     public function getAppOutput(RegionProvider $regionProvider_, EyesScreenshot $lastScreenshot_){
         return $this->getAppOutputWithScreenshot($regionProvider_, $lastScreenshot_);
     }
+
 //FIXME this functionality from EyesBase
     private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot) {
         $this->eyes->logger->verbose("getting screenshot...");
@@ -21,7 +22,8 @@ class AppOutputProviderRedeclared implements AppOutputProvider
 
         // Cropping by region if necessary
         $region = $regionProvider->getRegion();
-        if (!empty($region->isEmpty)) {
+
+        if (!$region->isEmpty()) {
             $screenshot = $screenshot->getSubScreenshot($region,
                 $regionProvider->getCoordinatesType(), false);
         }

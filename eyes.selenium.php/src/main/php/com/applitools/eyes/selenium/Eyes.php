@@ -418,10 +418,11 @@ class Eyes extends EyesBase
 */
         ArgumentGuard::notNull($region, "region");
 
-        $this->logger->log(sprintf("CheckRegion([%s], %d, '%s')", $region,
+        $this->logger->log(sprintf("CheckRegion([%s], %d, '%s')", json_encode($region),
             $matchTimeout, $tag));
 
-        $regionProvider = RegionProvider();
+        $regionProvider = new RegionProvider($region);
+        $regionProvider->setCoordinatesType(CoordinatesType::SCREENSHOT_AS_IS); //FIXME need to check
         parent::checkWindowBase(
             $regionProvider,
             $tag,

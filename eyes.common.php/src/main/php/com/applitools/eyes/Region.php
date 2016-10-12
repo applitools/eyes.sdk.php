@@ -65,13 +65,13 @@ class Region
      */
     public function isEmpty()
     {
-        return $this->getLeft() == self::$empty->getLeft()
-        && $this->getTop() == self::$empty->getTop()
-        && $this->getWidth() == self::$empty->getWidth()
-        && $this->getHeight() == self::$empty->getHeight();
+        return $this->left == self::getEmpty()->left
+        && $this->top == self::getEmpty()->top
+        && $this->width == self::getEmpty()->width
+        && $this->height == self::getEmpty()->height;
     }
 
-    public function equals(Object $obj)
+    public function equals($obj)
     {
         if ($obj == null) {
             return false;

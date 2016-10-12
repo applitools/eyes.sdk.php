@@ -14,6 +14,7 @@ class MoveToRegionVisibilityStrategy implements RegionVisibilityStrategy
     public function __construct(Logger $logger)
     {
         $this->logger = $logger;
+        $this->originalPosition = null;
     }
 
     public function moveToRegion(PositionProvider $positionProvider, Location $location)

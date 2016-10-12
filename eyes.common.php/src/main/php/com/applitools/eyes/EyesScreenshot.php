@@ -39,7 +39,7 @@ abstract class EyesScreenshot {
     * @return A new location which is the transformation of {@code location} to
     * the {@code to} coordinates type.
     */
-    protected abstract function convertLocation(Location $location, CoordinatesType $from, CoordinatesType $to);
+    protected abstract function convertLocation(Location $location, /*CoordinatesType*/ $from, /*CoordinatesType*/ $to);
 
     /**
     * Calculates the location in the screenshot of the location given as

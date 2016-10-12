@@ -10,7 +10,7 @@
 class MatchResult
 {
 
-    private $asExpected;
+    private $asExpected = false;
     private $windowId;
     private $screenshot; //EyesScreenshot
 

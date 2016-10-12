@@ -116,7 +116,7 @@ class GeneralUtils
     public static function sleep($microseconds)
     {
         try {
-            usleep($microseconds);
+            usleep((int)$microseconds);
         } catch (InterruptedException $ex) {
             throw new RuntimeException("sleep interrupted", $ex);
         }

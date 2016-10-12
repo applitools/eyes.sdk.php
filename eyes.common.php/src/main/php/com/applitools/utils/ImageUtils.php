@@ -131,13 +131,15 @@ return "somestring"; //FIXME
         ArgumentGuard::notNull($image, "image");
 
         // Get the clipped region as a BufferedImage.
-        $imagePart = $image->getSubimage($region->getLeft(),
+        /*$imagePart =*/ $image->/*getSubimage*/crop($region->getLeft(),
             $region->getTop(), $region->getWidth(), $region->getHeight());
         // IMPORTANT We copy the image this way because just using getSubImage
         // created a later problem (maybe an actual Java bug): the pixels
         // weren't what they were supposed to be.
-        $imagePartBytes = self::encodeAsPng($imagePart);
-        return self::imageFromBytes($imagePartBytes);
+//FIXME        $imagePartBytes = self::encodeAsPng($imagePart);
+//FIXME        return self::imageFromBytes($imagePartBytes);
+        return $image;
+
     }
 
     /**

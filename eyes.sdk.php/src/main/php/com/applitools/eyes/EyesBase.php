@@ -1,39 +1,5 @@
 <?php
-/*require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ServerConnectorFactory.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/RectangleSize.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Logger.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/SessionStartInfo.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/AppEnvironment.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/BatchInfo.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ArgumentGuard.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ImageUtils.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/ImageDeltaCompressor.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesScreenshot.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Location.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/BufferedImage.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/EyesException.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/AppOutput.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/MatchResult.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/TestResults.php";
-require "../../eyes/eyes.php/eyes.images.php/src/main/php/com/applitools/eyes/EyesImagesScreenshot.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProvider.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/AppOutputProviderRedeclared.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/MatchWindowTask.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/InvalidPositionProvider.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/ImageProvider.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/EyesScreenshotFactory.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Region.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/SimplePropertyHandler.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/SessionType.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/utils/GeneralUtils.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullScaleProvider.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/ImageMatchSettings.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/FailureReports.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/NullCutProvider.php";
-require "../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/TestFailedException.php";*/
-
-//require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Iterator.php";
-class EyesBase
+abstract class EyesBase
 {
 
     const SEQUENTIAL = "aaa";  ///Session type FIXME
@@ -124,14 +90,332 @@ class EyesBase
         return $this->hostOS;
     }
 
+    /**
+     * @return The application name running the AUT.
+     */
+    public function getHostApp() {
+        return $this->hostApp;
+    }
+
+    /**
+     * @param hostApp The application running the AUT (e.g., Chrome).
+     */
+    public function setHostApp($hostApp) {
+        $this->logger->log("Host App: " . $hostApp);
+
+        if ($hostApp == null || $hostApp->isEmpty()) {
+            $this->hostApp = null;
+        } else {
+            $this->hostApp = $hostApp;
+        }
+    }
+
+    /**
+     * Sets the branch in which the baseline for subsequent test runs resides.
+     * If the branch does not already exist it will be created under the
+     * specified parent branch (see {@link #setParentBranchName}).
+     * Changes to the baseline or model of a branch do not propagate to other
+     * branches.
+     *
+     * @param branchName Branch name or {@code null} to specify the default
+     *                   branch.
+     */
+    public function setBranchName($branchName) {
+        $this->branchName = $branchName;
+    }
+
+    /**
+     *
+     * @return The current branch (see {@link #setBranchName(String)}).
+     */
+    public function getBranchName() {
+        return $this->branchName;
+    }
+
+    /**
+     * Sets the branch under which new branches are created. (see {@link
+     * #setBranchName(String)}.
+     *
+     * @param branchName Branch name or {@code null} to specify the default
+     *                   branch.
+     */
+    public function setParentBranchName($branchName) {
+        $this->parentBranchName = $branchName;
+    }
+
+    /**
+     *
+     * @return The name of the current parent branch under which new branches
+     * will be created. (see {@link #setParentBranchName(String)}).
+     */
+    public function getParentBranchName() {
+        return $this->parentBranchName;
+    }
+
+    /**
+     * @return The currently set position provider.
+     */
+    protected function getPositionProvider() {
+        return $this->positionProvider;
+    }
+
+    /**
+     *
+     * @return The current proxy settings used by the server connector,
+     * or {@code null} if no proxy is set.
+     */
+    public function getProxy() {
+        return $this->serverConnector->getProxy();
+    }
+
+    /**
+     * Sets the proxy settings to be used by the rest client.
+     * @param proxySettings The proxy settings to be used by the rest client.
+     * If {@code null} then no proxy is set.
+     */
+    public function setProxy(ProxySettings $proxySettings) {
+        $this->serverConnector->setProxy($proxySettings);
+    }
+
+    /**
+     * @param failureReports The failure reports setting.
+     * @see FailureReports
+     */
+    public function setFailureReports(FailureReports $failureReports) {
+        $this->failureReports = $failureReports;
+    }
+
+    /**
+     * @return the failure reports setting.
+     */
+    public function getFailureReports() {
+        return $this->failureReports;
+    }
+
+    /**
+     * Updates the match settings to be used for the session.
+     *
+     * @param defaultMatchSettings The match settings to be used for the
+     *                             session.
+     */
+    public function setDefaultMatchSettings(ImageMatchSettings $defaultMatchSettings) {
+        ArgumentGuard::notNull($defaultMatchSettings, "defaultMatchSettings");
+        $this->defaultMatchSettings = $defaultMatchSettings;
+    }
+
+    /**
+     *
+     * @return The match settings used for the session.
+     */
+    public function getDefaultMatchSettings() {
+        return $this->defaultMatchSettings;
+    }
+
+    /**
+     * This function is deprecated. Please use
+     * {@link #setDefaultMatchSettings} instead.
+     * <p>
+     * The test-wide match level to use when checking application screenshot
+     * with the expected output.
+     *
+     * @param matchLevel The match level setting.
+     * @see com.applitools.eyes.MatchLevel
+     */
+    public function setMatchLevel(MatchLevel $matchLevel) {
+        $this->defaultMatchSettings->setMatchLevel($matchLevel);
+    }
+
+    /**
+     * @deprecated  Please use{@link #getDefaultMatchSettings} instead.
+     * @return The test-wide match level.
+     */
+    public function getMatchLevel() {
+        return $this->defaultMatchSettings->getMatchLevel();
+    }
+    
+    /**
+     * @return The maximum time in seconds {@link #checkWindowBase
+     * (RegionProvider, String, boolean, int)} waits for a match.
+     */
+    public function getMatchTimeout() {
+        return $this->matchTimeout;
+    }
+
+    /**
+     * Sets the maximal time (in seconds) a match operation tries to perform
+     * a match.
+     *
+     * @param seconds Total number of seconds to wait for a match.
+     */
+    public function setMatchTimeout($seconds) {
+        if ($this->getIsDisabled()) {
+            $this->logger->verbose("Ignored");
+            return;
+        }
+
+        $this->logger->verbose("setMatchTimeout(" . $seconds . ")");
+        ArgumentGuard::greaterThanOrEqualToZero($seconds, "seconds");
+
+        $this->matchTimeout = $seconds;
+
+        $this->logger->log("Match timeout set to " . $seconds . " second(s)");
+    }
+
+    /**
+     * Adds a mouse trigger.
+     *
+     * @param action  Mouse action.
+     * @param control The control on which the trigger is activated
+     *                (location is relative to the window).
+     * @param cursor  The cursor's position relative to the control.
+     */
+    protected function addMouseTriggerBase(MouseAction $action, Region $control, Location $cursor) {
+        if ($this->getIsDisabled()) {
+            $this->logger->verbose(sprintf("Ignoring %s (disabled)", $action));
+            return;
+        }
+
+        ArgumentGuard::notNull($action, "action");
+        ArgumentGuard::notNull($control, "control");
+        ArgumentGuard::notNull($cursor, "cursor");
+
+        // Triggers are actually performed on the previous window.
+        if ($this->lastScreenshot == null) {
+            $this->logger->verbose(sprintf("Ignoring %s (no screenshot)", $action));
+            return;
+        }
+
+        // Getting the location of the cursor in the screenshot
+        $cursorInScreenshot = new Location($cursor);
+        // First we need to getting the cursor's coordinates relative to the
+        // context (and not to the control).
+        $cursorInScreenshot->offset($control->getLocation());
+        try {
+            $cursorInScreenshot = $this->lastScreenshot->getLocationInScreenshot(
+                $cursorInScreenshot, CoordinatesType::CONTEXT_RELATIVE);
+        } catch (OutOfBoundsException $e) {
+            $this->logger->verbose(sprintf("Ignoring %s (out of bounds)", $action));
+            return;
+        }
+
+        $controlScreenshotIntersect = $this->lastScreenshot->getIntersectedRegion($control,
+        CoordinatesType::CONTEXT_RELATIVE,
+        CoordinatesType::SCREENSHOT_AS_IS);
+
+        // If the region is NOT empty, we'll give the coordinates relative to
+        // the control.
+        if (!$controlScreenshotIntersect->isEmpty()) {
+            $l = $controlScreenshotIntersect->getLocation();
+            $cursorInScreenshot->offset(-$l->getX(), -$l->getY());
+        }
+
+        $trigger = new MouseTrigger($action, $controlScreenshotIntersect, $cursorInScreenshot);
+        addUserInput($trigger);
+
+        $this->logger->verbose(sprintf("Added %s", $trigger));
+    }
+
+    /**
+     * Adds a text trigger.
+     *
+     * @param control The control's position relative to the window.
+     * @param text    The trigger's text.
+     */
+    protected function addTextTriggerBase(Region $control, $text) {
+        if ($this->getIsDisabled()) {
+            $this->logger->verbose(sprintf("Ignoring '%s' (disabled)", $text));
+            return;
+        }
+
+        ArgumentGuard::notNull($control, "control");
+        ArgumentGuard::notNull($text, "text");
+
+        // We don't want to change the objects we received.
+        $control = new Region($control);
+
+        if ($this->lastScreenshot == null) {
+            $this->logger->verbose(sprintf("Ignoring '%s' (no screenshot)", $text));
+            return;
+        }
+
+        $control = $this->lastScreenshot->getIntersectedRegion($control,
+                CoordinatesType::CONTEXT_RELATIVE,
+                CoordinatesType::SCREENSHOT_AS_IS);
+        if ($control->isEmpty()) {
+            $this->logger->verbose(sprintf("Ignoring '%s' (out of bounds)", $text));
+            return;
+        }
+
+        $trigger = new TextTrigger($control, $text);
+        $this->addUserInput($trigger);
+
+        $this->logger->verbose(sprintf("Added %s", $trigger));
+    }
+
+    /**
+     * Adds a trigger to the current list of user inputs.
+     *
+     * @param trigger The trigger to add to the user inputs list.
+     */
+    protected function addUserInput(Trigger $trigger) {
+        if ($this->isDisabled) {
+            return;
+        }
+        ArgumentGuard::notNull($trigger, "trigger");
+        $this->userInputs->add($trigger);
+    }
+
+
+    /**
+     * Clears the user inputs list.
+     */
+    protected function clearUserInputs() {
+        if ($this->isDisabled) {
+            return;
+        }
+        //$this->userInputs->clear();//FIXME need to check
+    }
+
+    /**
+     * @return User inputs collected between {@code checkWindowBase}
+     * invocations.
+     */
+    protected function getUserInputs()
+    {
+        if ($this->isDisabled) {
+            return null;
+        }
+        return $this->userInputs;
+    }
+
+
+    /**
+     * @param baselineName If specified, determines the baseline to compare
+     *                     with and disables automatic baseline inference.
+     */
+    public function setBaselineName($baselineName) {
+        $this->logger->log("Baseline name: " . $baselineName);
+        
+        if($baselineName == null || $baselineName->isEmpty()) {
+            $this->baselineName = null;
+        }
+        else {
+            $this->baselineName = $baselineName;
+        }
+    }
+    
+    /**
+     * @return The baseline name, if specified.
+     */
+    public function getBaselineName() {
+        return $this->baselineName;
+    }
+
 
     /**
      * @return The base agent id of the SDK.
      */
-    protected function getBaseAgentId()
-    {//should be abstract FIXME
-        return "mysdk/1.3";
-    }
+    protected abstract function getBaseAgentId();
 
     /**
      * @return The full agent id composed of both the base agent id and the
@@ -139,12 +423,11 @@ class EyesBase
      */
     protected function getFullAgentId()
     {
-        return $this->getBaseAgentId();
-        /*String agentId = getAgentId();
-        if (agentId == null) {
-            return getBaseAgentId();
+        $agentId = $this->getAgentId();
+        if ($agentId == null) {
+            return $this->getBaseAgentId();
         }
-        return String.format("%s [%s]", agentId, getBaseAgentId());*/
+        return sprintf("%s [%s]", $agentId, $this->getBaseAgentId());
     }
 
     /**
@@ -184,6 +467,22 @@ class EyesBase
     }
 
     /**
+     * @return The currently set log handler.
+     */
+    public function getLogHandler() {
+        return $this->logger->getLogHandler();
+    }
+
+    /**
+     * Sets a handler of log messages generated by this API.
+     *
+     * @param logHandler Handles log messages generated by this API.
+     */
+    public function setLogHandler(LogHandler $logHandler) {
+        $this->logger->setLogHandler($logHandler);
+    }
+
+    /**
      * @return Whether a session is open.
      */
     public function getIsOpen()
@@ -197,32 +496,14 @@ class EyesBase
     }
 
     /**
-     * Clears the user inputs list.
-     */
-    protected function clearUserInputs()
-    {
-        if ($this->getIsDisabled()) {
-            return;
-        }
-        //userInputs.clear();
-    }
-
-
-    /**
      * @return The viewport size of the AUT.
      */
-    protected function getViewportSize()
-    { //should be abstract in this class
-        return $this->viewportSize;
-    }
+    protected abstract function getViewportSize();
 
     /**
      * @param size The required viewport size.
      */
-    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size)
-    { //should be abstract in this class
-        $this->viewportSize = $size;
-    }
+    protected abstract function setViewportSize(WebDriver $driver = null, RectangleSize $size); //FIXME need to check parameters
 
     /**
      *
@@ -234,6 +515,14 @@ class EyesBase
     }
 
     /**
+     *
+     * @param appName The name of the application under test.
+     */
+    public function setAppName($appName) {
+        $this->appName = $appName;
+    }
+
+    /**
      * @return The inferred environment string
      * or {@code null} if none is available. The inferred string is in the
      * format "source:info" where source is either "useragent" or "pos".
@@ -242,11 +531,7 @@ class EyesBase
      * the format "process-name;os-name" where "process-name" is the name of the
      * main module of the executed process and "os-name" is the OS name.
      */
-    protected function getInferredEnvironment()
-    {
-        return "";
-    }  /// Should be abstract
-
+    abstract protected function getInferredEnvironment();
 
     /**
      * Application environment is the environment (e.g., the host OS) which
@@ -276,7 +561,6 @@ class EyesBase
      * @param serverUrl The URI of the rest server, or {@code null} to use
      *                  the default server.
      */
-
     public function setServerUrl($serverUrl)
     {
         if ($serverUrl == null) {
@@ -284,6 +568,19 @@ class EyesBase
         } else {
             $this->serverConnector->setServerUrl($serverUrl);
         }
+    }
+
+    /**
+     * @return An updated screenshot.
+     */
+    protected abstract function getScreenshot();
+
+    /**
+     *
+     * @return The URI of the eyes server.
+     */
+    public function getServerUrl() {
+        return $this->serverConnector->getServerUrl();
     }
 
     public static function getDefaultServerUrl()
@@ -435,7 +732,69 @@ class EyesBase
         return $this->scaleMethod;
     }
 
+    /**
+     * Manually set the scale ratio for the images being validated.
+     * @param scaleRatio The scale ratio to use, or {@code null} to reset
+     *                   back to automatic scaling.
+     */
+    public function setScaleRatio($scaleRatio) {//double
+        if ($scaleRatio != null) {
+            $this->scaleProviderHandler = array();
+            $this->scaleProviderHandler[] = new ReadOnlyPropertyHandler(//FIXME need to check
+            $this->logger, new FixedScaleProvider($scaleRatio));
+        } else { //FIXME need to check
+            $this->scaleProviderHandler = array();
+            $this->scaleProviderHandler[] = new NullScaleProvider();
+        }
+    }
 
+    /**
+     *
+     * @return The ratio used to scale the images being validated.
+     */
+    public function getScaleRatio() {
+        return $this->scaleProviderHandler->get()->getScaleRatio(); //FIXME need to check array
+    }
+
+    /**
+     * Set whether or not failed tests are saved by default.
+     *
+     * @param saveFailedTests True if failed tests should be saved by
+     *                        default, false otherwise.
+     */
+    public function setSaveFailedTests($saveFailedTests) {
+        $this->saveFailedTests = $saveFailedTests;
+    }
+
+    /**
+     * Set whether or not new tests are saved by default.
+     *
+     * @param saveNewTests True if new tests should be saved by default.
+     *                     False otherwise.
+     */
+    public function setSaveNewTests($saveNewTests) {
+        $this->saveNewTests = $saveNewTests;
+    }
+
+    /**
+     * @return The current title of of the AUT.
+     */
+    protected abstract function getTitle();
+
+    /**
+     * @return True if failed tests are saved by default.
+     */
+    public function getSaveFailedTests() {
+        return $this->saveFailedTests;
+    }
+    
+    /**
+     * @return True if new tests are saved by default.
+     */
+    public function getSaveNewTests() {
+        return $this->saveNewTests;
+    }
+    
     /**
      * Takes a snapshot of the application under test and matches it with the
      * expected output.
@@ -453,7 +812,7 @@ class EyesBase
      * @throws com.applitools.eyes.TestFailedException Thrown if a mismatch is
      *          detected and immediate failure reports are enabled.
      */
-    public function checkWindowBase($regionProvider, $tag = "", $ignoreMismatch = null, $retryTimeout = null)
+    public function checkWindowBase($regionProvider, $tag = "", $ignoreMismatch = false, $retryTimeout = null)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log("Ignored");
@@ -469,7 +828,7 @@ class EyesBase
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
-
+echo "AAAAAAAAAAAAAAAAA-"; print_r($ignoreMismatch); echo "-AAAAAAAAAAAAAAAAAAA /r/n";
         $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
 
         if ($this->runningSession == null) {
@@ -479,7 +838,7 @@ class EyesBase
 
             $appOutputProviderRedeclared = new AppOutputProviderRedeclared($this);
 
-            $matchWindowTask = new MatchWindowTask(
+            $this->matchWindowTask = new MatchWindowTask(
                 $this->logger,
                 $this->serverConnector,
                 $this->runningSession,
@@ -489,33 +848,33 @@ class EyesBase
             );
         }
         $this->logger->log("Calling match window...");
-        $result = $matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
+        $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
             $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
         $this->logger->log("MatchWindow Done!");
-        //FIXME result is empty. But screenshot was added
-        /*  if (!$result->getAsExpected()) {
+
+        if (!$result->getAsExpected()) {
             if (!$ignoreMismatch) {
                 $this->clearUserInputs();
                 $this->lastScreenshot = $result->getScreenshot();
             }
 
-            $shouldMatchWindowRunOnceOnTimeout = true;
+            $this->shouldMatchWindowRunOnceOnTimeout = true;
 
             if (!$this->runningSession->getIsNewSession()) {
                 Logger::log(sprintf("Mismatch! (%s)", $tag));
             }
 
             if ($this->getFailureReports() == "FailureReports::IMMEDIATE") {
-                throw new TestFailedException(sprintf("Mismatch found in '%s' of '%s'",
+                throw new /*TestFailed*/Exception(sprintf("Mismatch found in '%s' of '%s'",
                     $this->sessionStartInfo->getScenarioIdOrName(), $this->sessionStartInfo->getAppIdOrName()));
             }
         } else { // Match successful
-            clearUserInputs();
+            $this->clearUserInputs();
             $this->lastScreenshot = $result->getScreenshot();
         }
 
-        Logger::log("Done!");
-        return $result;*/
+        $this->logger->log("Done!");
+        return $result;
     }
 
 
@@ -537,6 +896,7 @@ class EyesBase
 
         // Cropping by region if necessary
         $region = $this->regionProvider->getRegion();
+
         if (!$region->isEmpty()) {
             $screenshot = $screenshot->getSubScreenshot($region,
                 $regionProvider->getCoordinatesType(), false);
@@ -551,6 +911,60 @@ class EyesBase
         $result = new AppOutputWithScreenshot(new AppOutput($title, $compressResult), $screenshot);
         $this->logger->verbose("Done!");
         return $result;
+    }
+
+    /**
+     * @return The user given agent id of the SDK.
+     */
+    public function getAgentId() {
+        return $this->agentId;
+    }
+
+    /**
+     * Sets the user given agent id of the SDK. {@code null} is referred to
+     * as no id.
+     *
+     * @param agentId The agent ID to set.
+     */
+    public function setAgentId($agentId) {
+        $this->agentId = $agentId;
+    }
+
+    /**
+     * Sets the batch in which context future tests will run or {@code null}
+     * if tests are to run standalone.
+     *
+     * @param batch The batch info to set.
+     */
+    public function setBatch(BatchInfo $batch) {
+        if ($this->isDisabled) {
+            $this->logger->verbose("Ignored");
+            return;
+        }
+        $this->logger->verbose("setBatch(" . json_encode($batch) . ")");
+        $this->batch = $batch;
+    }
+
+    /**
+     * @return The currently set batch info.
+     */
+    public function getBatch() {
+        return $this->batch;
+    }
+
+    /**
+     * Manually set the the sizes to cut from an image before it's validated.
+     *
+     * @param cutProvider the provider doing the cut. If {@code null}, Eyes
+     *                     would automatically infer if cutting is needed.
+     */
+    public function setImageCut(CutProvider $cutProvider) {
+        if ($cutProvider != null) {
+            $this->cutProviderHandler[] = new ReadOnlyPropertyHandler($this->logger, $cutProvider);
+        } else {
+            $this->cutProviderHandler = array(); //FIXME need to check
+            $this->cutProviderHandler[] = new NullCutProvider();
+        }
     }
 
     /**
@@ -583,36 +997,87 @@ class EyesBase
         return base64_encode($compressedScreenshot); //FIXME just need to check
     }
 
+
     /**
-     * Sets the batch in which context future tests will run or {@code null}
-     * if tests are to run standalone.
+     * Runs a timing test.
      *
-     * @param batch The batch info to set.
+     * @param regionProvider    Returns the region to check or the empty
+     *                          rectangle to check the entire window.
+     * @param action            An action to run in parallel to starting the
+     *                          test, or {@code null} if no such action is
+     *                          required.
+     * @param deadline          The expected amount of time until finding a
+     *                          match. (Seconds)
+     * @param timeout           The maximum amount of time to retry matching.
+     *                          (Seconds)
+     * @param matchInterval     The interval for testing for a match.
+     *                          (Milliseconds)
+     * @return The earliest match found, or {@code null} if no match was found.
      */
-    public function setBatch(BatchInfo $batch)
-    {
-        if ($this->isDisabled) {
+    protected function testResponseTimeBase(
+        RegionProvider $regionProvider, Runnable $action, $deadline, $timeout, $matchInterval) {
+
+        if ($this->getIsDisabled()) {
             $this->logger->verbose("Ignored");
-            return;
-        }
-
-        $this->logger->verbose("setBatch(" . json_encode($batch) . ")");
-
-        $this->batch = $batch;
-    }
-
-    /**
-     * @return User inputs collected between {@code checkWindowBase}
-     * invocations.
-     */
-    protected function getUserInputs()
-    {
-        if ($this->isDisabled) {
             return null;
         }
-        /*result = new Trigger[userInputs.size()];
-                return userInputs.toArray(result);*/
-        return $this->userInputs;
+
+        ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
+        ArgumentGuard::notNull($regionProvider, "regionProvider");
+        ArgumentGuard::greaterThanZero($deadline, "deadline");
+        ArgumentGuard::greaterThanZero($timeout, "timeout");
+        ArgumentGuard::greaterThanZero($matchInterval, "matchInterval");
+
+        $this->logger->verbose(sprintf(
+                "testResponseTimeBase(regionProvider, %d, %d, %d)",
+                $deadline, $timeout, $matchInterval));
+
+        if ($this->runningSession == null) {
+            $this->logger->verbose("No running session, calling start session..");
+            $this->startSession();
+            $this->logger->verbose("Done!");
+        }
+
+        //If there's an action to do
+        $actionThread = null;
+        if ($action != null) {
+            $this->logger->verbose("Starting webdriver action.");
+            $actionThread = new Thread($action);
+            $actionThread->start();
+        }
+
+        $startTime = System::currentTimeMillis(); // microtime()??
+
+        // A callback which will call getAppOutput
+        $appOutputProvider = new AppOutputProviderRedeclared(); //FIXME need to check
+
+        if ($this->runningSession->getIsNewSession()) {
+            ResponseTimeAlgorithm::runNewProgressionSession($this->logger,
+                $this->serverConnector, $this->runningSession, $appOutputProvider,
+                $regionProvider, $startTime, $deadline);
+            // Since there's never a match for a new session..
+            $result = null;
+        } else {
+            $result =
+                ResponseTimeAlgorithm::runProgressionSessionForExistingBaseline(
+                    $this->logger, $this->serverConnector, $this->runningSession,
+                    $appOutputProvider, $regionProvider, $startTime,
+                    $deadline, $timeout, $matchInterval);
+        }
+
+        if ($actionThread != null) {
+            // FIXME - Replace join with wait to according to the parameters
+            $this->logger->verbose("Making sure 'action' thread had finished...");
+            try {
+                $actionThread->join(30000);
+            } catch (InterruptedException $e) {
+                $this->logger->verbose(
+                    "Got interrupted while waiting for 'action' to finish!");
+            }
+        }
+
+        $this->logger->verbose("Done!");
+        return $result;
     }
 
     /**
@@ -650,10 +1115,10 @@ class EyesBase
         $testInfo = "'" . $this->testName . "' of '" . $this->getAppName() . "' " . serialize($appEnv);
         if ($this->runningSession->getIsNewSession()) {
             $this->logger->log("--- New test started - " . $testInfo);
-            $shouldMatchWindowRunOnceOnTimeout = true;
+            $this->shouldMatchWindowRunOnceOnTimeout = true;
         } else {
             $this->logger->log("--- Test started - " . $testInfo);
-            $shouldMatchWindowRunOnceOnTimeout = false;
+            $this->shouldMatchWindowRunOnceOnTimeout = false;
         }
 
     }
@@ -681,7 +1146,7 @@ class EyesBase
             $this->isOpen = false;
 
             $lastScreenshot = null;
-            //$this->clearUserInputs();
+            $this->clearUserInputs();
 
             if ($this->runningSession == null) {
                 $this->logger->verbose("Server session was not started");
@@ -719,7 +1184,7 @@ class EyesBase
                     $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                         . "' of '" . $this->sessionStartInfo->getAppIdOrName()
                         . "'. " . $instructions;
-                    throw new NewTestException($results, $message);
+                    throw new /*NewTest*/Exception($results, $message);
                 }
                 return $results;
             }
@@ -731,6 +1196,82 @@ class EyesBase
             // exception was thrown during close.
             $this->runningSession = null;
             $this->currentAppName = null;
+            $this->logger->getLogHandler()->close();
+        }
+    }
+
+
+    /**
+     * Ends the test.
+     *
+     * @param isDeadlineExceeded If {@code true} the test will fail (unless
+     *                           it's a new test).
+     * @throws TestFailedException
+     * @throws NewTestException
+     */
+    protected function closeResponseTime($isDeadlineExceeded) {
+        try {
+            if ($this->isDisabled) {
+            $this->logger->verbose("Ignored");
+        }
+
+        $this->logger->verbose(sprintf("closeResponseTime(%b)",
+                $isDeadlineExceeded));
+        ArgumentGuard::isValidState($this->isOpen, "Eyes not open");
+
+        $isOpen = false;
+
+        if ($this->runningSession == null) {
+            $this->logger->verbose("Server session was not started");
+            $this->logger->log("--- Empty test ended.");
+            return;
+        }
+
+        $isNewSession = $this->runningSession->getIsNewSession();
+        $sessionResultsUrl = $this->runningSession->getUrl();
+
+        $this->logger->verbose("Ending server session...");
+        $save = ($isNewSession && $this->saveNewTests);
+
+        $this->logger->verbose("Automatically save test? " . $save ? "Yes" : "No");
+        $results = $this->serverConnector->stopSession($this->runningSession, false, $save);
+
+        $results->setNew($isNewSession);
+        $results->setUrl($sessionResultsUrl);
+        $this->logger->verbose(json_encode($results));
+
+        if ($isDeadlineExceeded && !$isNewSession) {
+
+            $this->logger->log("--- Failed test ended. See details at "
+                   . $sessionResultsUrl);
+
+            $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
+                    . "' of '"
+                    . $this->sessionStartInfo->getAppIdOrName()
+                    . "'. See details at " . $sessionResultsUrl;
+                throw new /*TestFailed*/Exception($results, $message);
+        }
+
+        if ($isNewSession) {
+            $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
+
+            $this->logger->log("--- New test ended. " . $instructions);
+
+            $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
+                    . "' of '" . $this->sessionStartInfo
+                    . $this->getAppIdOrName()
+                    . "'. " . $instructions;
+                throw new /*NewTest*/Exception($results, $message);
+        }
+
+        // Test passed
+        $this->logger->log("--- Test passed. See details at " . $sessionResultsUrl);
+
+        } finally {
+            // Making sure that we reset the running session even if an
+            // exception was thrown during close.
+            $runningSession = null;
+            $currentAppName = null;
             $this->logger->getLogHandler()->close();
         }
     }
