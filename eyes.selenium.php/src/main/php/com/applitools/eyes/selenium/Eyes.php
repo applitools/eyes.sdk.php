@@ -1,17 +1,4 @@
 <?php
-/*require '../../eyes/eyes.php/eyes.sdk.php/src/main/php/com/applitools/eyes/EyesBase.php';
-require "StitchMode.php";
-require "MoveToRegionVisibilityStrategy.php";
-require "EyesWebDriver.php";
-require "FrameChain.php";
-require "ScrollPositionProvider.php";
-require "ImageRotation.php";
-require "EyesSeleniumUtils.php";
-require "ScreenshotType.php";
-require "ContextBasedScaleProvider.php";
-require "TakesScreenshotImageProvider.php";
-require "EyesWebDriverScreenshotFactory.php";
-require "EyesDriverOperationException.php";*/
 
 /**
  * The main API gateway for the SDK.

@@ -1,5 +1,5 @@
 <?php
-//require "LogHandler.php";
+
 /**
  * Ignores all log messages.
  */

@@ -1,5 +1,4 @@
 <?php
-//require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Trigger.php";
 /*
  * Applitools SDK for Selenium integration.
  */

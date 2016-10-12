@@ -828,7 +828,6 @@ abstract class EyesBase
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
-echo "AAAAAAAAAAAAAAAAA-"; print_r($ignoreMismatch); echo "-AAAAAAAAAAAAAAAAAAA /r/n";
         $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
 
         if ($this->runningSession == null) {

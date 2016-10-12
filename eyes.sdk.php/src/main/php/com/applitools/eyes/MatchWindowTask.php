@@ -2,8 +2,7 @@
 /*
 * Applitools SDK for Selenium integration.
 */
-/*require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/MatchWindowData.php";
-require "../../eyes/eyes.php/eyes.common.php/src/main/php/com/applitools/eyes/Options.php";*/
+
 
 
 class MatchWindowTask

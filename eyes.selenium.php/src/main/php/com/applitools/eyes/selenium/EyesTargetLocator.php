@@ -1,5 +1,5 @@
 <?php
-//require "TargetType.php";
+
 /**
  * Wraps a target locator so we can keep track of which frames have been
  * switched to.

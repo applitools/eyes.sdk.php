@@ -1,6 +1,4 @@
 <?php
-/*require "ServerConnectorInterface.php";
-require "RunningSession.php";*/
 
 class ServerConnector implements ServerConnectorInterface
 {

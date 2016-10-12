@@ -1,5 +1,4 @@
 <?php
-//require "CutProvider.php";
 /**
  * Cut provider based on fixed cut values.
  */

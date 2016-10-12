@@ -332,7 +332,7 @@ class EyesSeleniumUtils
 
         $actualViewportSize = self::extractViewportSize($logger, $driver);
         $logger::log("Current viewport size: " . json_encode($actualViewportSize));
-        if ($actualViewportSize != $size) { //echo "AAAAAAAAAAFFFFFFFFFFFFFF"; die();
+        if ($actualViewportSize != $size) {
             // Additional attempt. This Solves the "maximized browser" bug
             // (border size for maximized browser sometimes different than
             // non-maximized, so the original browser size calculation is

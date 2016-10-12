@@ -1,5 +1,4 @@
 <?php
-//require "NullLogHandler.php";
 
 class Logger
 {
@@ -26,8 +25,6 @@ class Logger
     public static function verbose($string)
     {
         echo $string."\r\n";
-       // var_dump($string);
-       // echo "<br>";
     }
     /**
      * Sets the log handler.

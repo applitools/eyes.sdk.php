@@ -1,5 +1,4 @@
 <?php
-//require "PositionProvider.php";
 
 /**
  * An implementation of {@link PositionProvider} which throws an exception

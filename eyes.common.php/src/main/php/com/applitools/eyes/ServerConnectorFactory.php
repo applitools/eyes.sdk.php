@@ -1,5 +1,4 @@
 <?php
-//require "ServerConnector.php";
 /**
  * Encapsulates creation of a conenctivity provider.
  */
