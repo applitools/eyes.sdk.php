@@ -12,9 +12,8 @@
   },
   "require": {
     "php": ">=5.6.0",
-    "phpunit/phpunit": "5.0.*",
     "facebook/webdriver": "dev-master",
-    "phpunit/phpunit-selenium": "^3.0"
+    "gregwar/image": "2.*"
   },
   "autoload": {
     "classmap": [
