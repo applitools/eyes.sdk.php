@@ -1096,7 +1096,7 @@ abstract class EyesBase
             $this->logger->log("No batch set");
             $testBatch = new BatchInfo(null);
         } else {
-            $this->logger->log("Batch is " . $this->batch);
+            $this->logger->log("Batch is " . json_encode($this->batch));
             $testBatch = $this->batch;
         }
 
