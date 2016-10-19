@@ -245,6 +245,17 @@ class Eyes extends EyesBase
             $this->logger->verbose("Ignored");
             return $driver;
         }
+        if(empty($viewportSize)){
+            if(empty($driver)){
+                //FIXME need to extract  EyesSeleniumUtils::extractViewportSize
+            } else { //FIXME need to optimize code
+                $viewportSize = new RectangleSize(
+                    $driver->manage()->window()->getSize()->getWidth(),
+                    $driver->manage()->window()->getSize()->getHeight()
+                );
+            }
+        }
+
         $this->openBase($appName, $testName, $viewportSize, $sessionType);
 
         ArgumentGuard::notNull($driver, "driver");
@@ -423,6 +434,28 @@ class Eyes extends EyesBase
     }
 
     /**
+     * Takes a snapshot of the application under test and matches a region
+     * specified by the given selector with the expected region output.
+     *
+     * @param selector     Selects the region to check.
+     * @param matchTimeout The amount of time to retry matching.
+     *                     (Milliseconds)
+     * @param tag          An optional tag to be associated with the screenshot.
+     * @throws TestFailedException if a mismatch is detected and
+     *                             immediate failure reports are enabled
+     */
+    public function checkRegionBySelector(WebDriverBy $selector, $matchTimeout = null, $tag) {
+
+    if ($this->getIsDisabled()) {
+        $this->logger->log(sprintf("CheckRegion(selector, %d, '%s'): Ignored",
+        $matchTimeout, $tag));
+        return;
+    }
+
+    checkRegion($this->driver->findElement($selector), $matchTimeout, $tag);
+    }
+
+    /**
      * Takes a snapshot of the application under test and matches a region of
      * a specific element with the expected region output.
      *
@@ -433,7 +466,7 @@ class Eyes extends EyesBase
      * @throws TestFailedException if a mismatch is detected and
      *                             immediate failure reports are enabled
      */
-    public function checkElementRegion(WebElement $element, $matchTimeout, $tag) {
+    public function checkRegionByElement(WebElement $element, $matchTimeout, $tag) {
         if ($this->getIsDisabled()) {
             $this->logger->verbose(sprintf("CheckRegion(element, %d, '%s'): Ignored",
             $matchTimeout, $tag));

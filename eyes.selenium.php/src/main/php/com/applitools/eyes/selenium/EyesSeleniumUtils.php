@@ -259,17 +259,18 @@ class EyesSeleniumUtils
     {
         $logger->log("extractViewportSize()");
 
-        try {
-            return self::executeViewportSizeExtraction(/*(JavascriptExecutor)*/$driver);
+      /*  try { FIXME need to test. Have sme problems with JS extractor
+            return self::executeViewportSizeExtraction($driver);
         } catch (Exception $ex) {
             $logger->verbose(sprintf("Failed to extract viewport size using Javascript: %s", $ex->getMessage()));
-        }
+        }*/
         // If we failed to extract the viewport size using JS, will use the
         // window size instead.
         Logger::log("Using window size as viewport size.");
         $windowSize = $driver->manage()->window()->getSize();
         $width = $windowSize->getWidth();
         $height = $windowSize->getHeight();
+
         try {
             if (EyesSeleniumUtils::isLandscapeOrientation($driver) && $height > $width) {
                 //noinspection SuspiciousNameCombination
@@ -302,6 +303,7 @@ class EyesSeleniumUtils
         $driver->manage()->window()->setPosition(new WebDriverPoint(0, 0));
 
         $actualViewportSize = self::extractViewportSize($logger, $driver);
+
         Logger::log("Initial viewport size:" . json_encode($actualViewportSize));
 
         // If the viewport size is already the required size
