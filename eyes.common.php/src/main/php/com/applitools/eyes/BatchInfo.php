@@ -65,4 +65,8 @@ class BatchInfo
     {
         return "'" . $this->name . "' - " . $this->startedAt;
     }
+
+    public function getAsArray(){
+        return get_object_vars($this);
+    }
 }
