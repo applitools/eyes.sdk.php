@@ -183,17 +183,8 @@ class ServerConnector implements ServerConnectorInterface
             $runningSession->setUrl($result['url']);
         }
 
-        // Ok, let's create the running session from the response
-
-        //validStatusCodes.add(ClientResponse.Status.OK.getStatusCode());
-        //validStatusCodes.add(ClientResponse.Status.CREATED.getStatusCode());
-
-        //$runningSession = parseResponseWithJsonData(response, validStatusCodes, RunningSession.class);
-
-        // If this is a new session, we set this flag.
-        //statusCode = response.getStatus();
-        //isNewSession = (statusCode == ClientResponse.Status.CREATED.getStatusCode());
-        //runningSession.setIsNewSession(isNewSession);
+        $isNewSession = $information['http_code'] == 201 ? true : false;
+        $runningSession->setIsNewSession($isNewSession);
 
         return $runningSession;
     }
@@ -268,8 +259,7 @@ class ServerConnector implements ServerConnectorInterface
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
         //FIXME code not related to Java.
-
-        curl_setopt($this->ch, CURLOPT_URL,"https://eyessdk.applitools.com/api/sessions/running/".$runningSession->getId().".json?isAborted=false&updateBaseline=false&apiKey=".$this->apiKey);
+        curl_setopt($this->ch, CURLOPT_URL,"https://eyessdk.applitools.com/api/sessions/running/".$runningSession->getId().".json?isAborted=false&updateBaseline=".($runningSession->getIsNewSession()?"true":"false")."&apiKey=".$this->apiKey);
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
