@@ -444,15 +444,14 @@ class Eyes extends EyesBase
      * @throws TestFailedException if a mismatch is detected and
      *                             immediate failure reports are enabled
      */
-    public function checkRegionBySelector(WebDriverBy $selector, $matchTimeout = null, $tag) {
+    public function checkElementBySelector(WebDriverBy $selector, $matchTimeout = null, $tag) {
 
-    if ($this->getIsDisabled()) {
-        $this->logger->log(sprintf("CheckRegion(selector, %d, '%s'): Ignored",
-        $matchTimeout, $tag));
-        return;
-    }
-
-    checkRegion($this->driver->findElement($selector), $matchTimeout, $tag);
+        if ($this->getIsDisabled()) {
+            $this->logger->log(sprintf("CheckRegion(selector, %d, '%s'): Ignored",
+            $matchTimeout, $tag));
+            return;
+        }
+        $this->checkElement($this->driver->findElement($selector), $matchTimeout, $tag);
     }
 
     /**
@@ -746,14 +745,14 @@ class Eyes extends EyesBase
      * @throws TestFailedException if a mismatch is detected and
      *                             immediate failure reports are enabled
      */
-    protected function checkElement(WebElement $element, $matchTimeout = null, $tag = null)
+    protected function checkElement(WebDriverElement $element, $matchTimeout = null, $tag = null)
     {
         $originalOverflow = null;
 
         // Since the element might already have been found using EyesWebDriver.
         if ($element instanceof EyesRemoteWebElement) {
             $eyesElement = /*(EyesRemoteWebElement)*/
-                $element;
+                 clone $element;
         } else {
             $eyesElement = new EyesRemoteWebElement($this->logger, $this->driver, /*(RemoteWebElement)*/
                 $element);
@@ -762,14 +761,17 @@ class Eyes extends EyesBase
         $originalPositionProvider = $this->getPositionProvider();
         try {
             $this->checkFrameOrElement = true;
-            $this->setPositionProvider(new ElementPositionProvider($this->logger, $driver,
+            $this->setPositionProvider(new ElementPositionProvider($this->logger, $this->driver,
                 $element));
 
             // Set overflow to "hidden".
+
+            //FIXME $eyesElement->setOverflow("hidden");
+
             $originalOverflow = $eyesElement->getOverflow();
-            $eyesElement->setOverflow("hidden");
 
             $p = $eyesElement->getLocation();
+
             $d = $element->getSize();
 
             $borderLeftWidth = $eyesElement->getBorderLeftWidth();
@@ -783,17 +785,12 @@ class Eyes extends EyesBase
                 $d->getWidth() - $borderLeftWidth - $borderRightWidth,
                 $d->getHeight() - $borderTopWidth - $borderBottomWidth);
 
-            $this->logger->log("Element region: " + $elementRegion);
+            $this->logger->log("Element region: " . json_encode($elementRegion));
 
-            $regionToCheck = new RegionProvider();/* {
-                public Region getRegion() {
-                    return elementRegion;
-                }
-
-                public CoordinatesType getCoordinatesType() {
-                    return CoordinatesType.CONTEXT_RELATIVE;
-                }
-            };*/
+            $this->regionToCheck = new RegionProvider();
+            $this->regionToCheck->setRegion($elementRegion);
+            $this->regionToCheck->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
+            
             parent::checkWindowBase(
             /*new RegionProvider() {
                     public Region getRegion() {
@@ -804,7 +801,7 @@ class Eyes extends EyesBase
                         return null;
                     }
                 }*/
-                $regionToCheck,
+                $this->regionToCheck,
                 $tag,
                 false,
                 $matchTimeout
@@ -816,7 +813,7 @@ class Eyes extends EyesBase
 
             $checkFrameOrElement = false;
             $this->setPositionProvider($originalPositionProvider);
-            $regionToCheck = null;
+            $this->regionToCheck = null;
         }
     }
 
@@ -1020,11 +1017,11 @@ class Eyes extends EyesBase
                 $algo = new FullPageCaptureAlgorithm($this->logger);
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
                     $this->positionProvider, $this->positionProvider,
-                    $this->scaleProviderHandler->get(),
+                    $this->scaleProviderHandler->get(), $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 $this->logger->log("Building screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
-                    new RectangleSize($entireFrameOrElement->getWidth(), $entireFrameOrElement->getHeight()));
+                    null, null, new RectangleSize($entireFrameOrElement->width(), $entireFrameOrElement->height()));
             } else if ($this->forceFullPageScreenshot) {
                 $this->logger->log("Full page screenshot requested.");
                 // Save the current frame path.

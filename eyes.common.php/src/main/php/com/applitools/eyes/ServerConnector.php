@@ -183,8 +183,9 @@ class ServerConnector implements ServerConnectorInterface
             $runningSession->setUrl($result['url']);
         }
 
-        $isNewSession = $information['http_code'] == 201 ? true : false;
-        $runningSession->setIsNewSession($isNewSession);
+        if($information['http_code'] == 201){
+            $runningSession->setIsNewSession(true);
+        }
 
         return $runningSession;
     }

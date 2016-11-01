@@ -67,7 +67,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
      *                                   location in the screenshot.
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
-                                Gregwar\Image\Image $image = null, ScreenshotType $screenshotType = null,
+                                Gregwar\Image\Image $image = null, /*ScreenshotType*/ $screenshotType = null,
                                 Location $frameLocationInScreenshot = null,
                                 RectangleSize $entireFrameSize = null)
     {
@@ -115,7 +115,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             } catch (EyesDriverOperationException $e) {
                 $sp = new Location(0, 0);
             }
-            $scrollPosition = $sp;
+            $this->scrollPosition = $sp;
 
             /*if ($screenshotType == null) { //FIXME image is a string
                 if ($image->getWidth() <= $viewportSize->getWidth()

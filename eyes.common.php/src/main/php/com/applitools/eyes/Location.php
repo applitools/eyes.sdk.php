@@ -24,8 +24,8 @@ class Location
             $this->x = $other->getX();
             $this->y = $other->getY();
         }else{
-            ArgumentGuard::notNull($x, "x");
-            ArgumentGuard::notNull($y, "y");
+            //ArgumentGuard::notNull($x, "x"); //FIXME need to check
+            //ArgumentGuard::notNull($y, "y");
             //$this->ZERO = new Location(0, 0);
             $this->x = $x;
             $this->y = $y;
