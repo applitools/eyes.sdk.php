@@ -66,21 +66,25 @@ class FullPageCaptureAlgorithm {
         if ($currentPosition->getX() != 0 || $currentPosition->getY() != 0) {
             $originProvider->restoreState($originalPosition);
             throw new EyesException(
-                    "Couldn't set position to the to the top/left corner!");
+                    "Couldn't set position to the top/left corner!");
         }
 
         $this->logger->verbose("Getting top/left image...");
-        $image = $imageProvider->getImage();
+        $this->image = $imageProvider->getImage();
+
         // FIXME - scaling should be refactored
-        $image = $scaleProvider->scaleImage($image);
+        $this->image = $scaleProvider->scaleImage($this->image);
 
         // FIXME - cropping should be overlaid, so a single cut provider will only handle a single part of the image.
-        $image = $cutProvider->cut($image);
+
+        $this->image = $cutProvider->cut($this->image);
 
         $this->logger->verbose("Done! Creating screenshot object...");
         // We need the screenshot to be able to convert the region to
         // screenshot coordinates.
-        $screenshot = $screenshotFactory->makeScreenshot($image);
+
+        $screenshot = $screenshotFactory->makeScreenshot($this->image);
+
         $this->logger->verbose("Done! Getting region in screenshot...");
 
         $regionInScreenshot = $screenshot->convertRegionLocation(
@@ -94,13 +98,13 @@ class FullPageCaptureAlgorithm {
         // the screenshot (e.g., when body width/height are set to 100%, and
         // an internal div is set to value which is larger than the viewport).
         $regionInScreenshot->intersect(
-                new Region(0, 0, $image->width(),
-                $image->height()));
+                new Region(0, 0, $this->image->width(),
+                    $this->image->height()));
         $this->logger->verbose("Region after intersect: " . json_encode($regionInScreenshot));
 
-        if (!$regionInScreenshot->isEmpty()) {
-            $image = ImageUtils::getImagePart($image, $regionInScreenshot);
-        }
+        /*if (!$regionInScreenshot->isEmpty()) {  FIXME do not crop image before full screenshot be prepared
+            $this->image = ImageUtils::getImagePart($this->image, $regionInScreenshot);
+        }*/
 
         try {
             $entireSize = $positionProvider->getEntireSize();
@@ -110,18 +114,17 @@ class FullPageCaptureAlgorithm {
                     "WARNING: Failed to extract entire size of region context"
                             + $e->getMessage());
             $this->logger->log("Using image size instead: "
-                    . $this->image->getWidth() . "x" . $image->getHeight());
-            $entireSize = new RectangleSize($image->getWidth(), $image->getHeight());
+                    . $this->image->width() . "x" . $this->image->height());
+            $entireSize = new RectangleSize($this->image->width(), $this->image->height());
         }
-
+/*
         // Notice that this might still happen even if we used
         // "getImagePart", since "entirePageSize" might be that of a frame.
-        if ($image->width() >= $entireSize->getWidth() &&
-                $image->height() >= $entireSize->getHeight()) {
+        if ($this->image->width() >= $entireSize->getWidth() &&
+            $this->image->height() >= $entireSize->getHeight()) {
             $originProvider->restoreState($originalPosition);
-
-            return $image;
-        }
+            return $this->image;
+        }*/
 
         // These will be used for storing the actual stitched size (it is
         // sometimes less than the size extracted via "getEntireSize").
@@ -130,8 +133,8 @@ class FullPageCaptureAlgorithm {
         // in order to eliminate duplicate bottom scroll bars, as well as fixed
         // position footers.
         $partImageSize =
-                new RectangleSize($image->width(),
-                        max($image->height() - self::MAX_SCROLL_BAR_SIZE,
+                new RectangleSize($this->image->width(),
+                        max($this->image->height() - self::MAX_SCROLL_BAR_SIZE,
                                 self::MIN_SCREENSHOT_PART_HEIGHT));
 
         $this->logger->verbose(sprintf("Total size: %s, image part size: %s",
@@ -150,7 +153,7 @@ class FullPageCaptureAlgorithm {
 
         $this->logger->verbose("Done! Adding initial screenshot..");
         // Starting with the screenshot we already captured at (0,0).
-        $initialPart = clone $image;
+        $initialPart = clone $this->image;
         $this->logger->verbose(sprintf("Initial part:(0,0)[%d x %d]",
                 $initialPart->width(), $initialPart->height()));
         $stitchedImage->merge($initialPart,0,0);

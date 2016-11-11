@@ -50,9 +50,13 @@ class ElementPositionProvider implements PositionProvider {
      */
     public function getEntireSize() {
         $this->logger->verbose("getEntireSize()");
+        //Don't have possibility to get whole page.
+        //But can get region size that contains current element
+        $location = $this->element->getLocation();
+        $size = $this->element->getSize();
 
-        $result = new RectangleSize($this->element->getScrollWidth(),
-                $this->element->getScrollHeight());
+        $result = new RectangleSize($location->getX() + $size->getWidth(),
+            $location->getY() + $size->getHeight());
 
         $this->logger->verbose(sprintf("Entire size: %s", json_encode($result)));
         return $result;
@@ -63,7 +67,6 @@ class ElementPositionProvider implements PositionProvider {
     }
 
     public function restoreState(PositionMemento $state) {
-        //s = (ElementPositionMemento) state;
         $this->setPosition(new Location($state->getX(), $state->getY()));
     }
 }

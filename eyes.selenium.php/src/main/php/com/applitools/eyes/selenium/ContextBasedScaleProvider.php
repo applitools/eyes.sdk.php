@@ -59,11 +59,11 @@ class ContextBasedScaleProvider implements ScaleProvider {
                         && ($imageWidth <= $viewportWidth + self::ALLOWED_VS_DEVIATION))
                     || (($imageWidth >= $dcesWidth - self::ALLOWED_DCES_DEVIATION)
                         && $imageWidth <= $dcesWidth + self::ALLOWED_DCES_DEVIATION)) {
-                $scaleRatio = 1;
+                $this->scaleRatio = 1;
             } else {
-                $scaleRatio = 1 / $this->devicePixelRatio;
+                $this->scaleRatio = 1 / $this->devicePixelRatio;
             }
         }
-        return ImageUtils::scaleImage($image, $this->scaleMethod, $scaleRatio);
+        return ImageUtils::scaleImage($image, $this->scaleMethod, $this->scaleRatio);
     }
 }

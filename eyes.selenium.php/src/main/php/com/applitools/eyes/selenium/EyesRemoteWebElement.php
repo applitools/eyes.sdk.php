@@ -18,10 +18,12 @@ class EyesRemoteWebElement extends RemoteWebElement {
             "}"*/;
 
     const JS_GET_SCROLL_LEFT =
-            "return arguments[0].scrollLeft;";
+            //"return arguments[0].scrollLeft;";
+            "return window.pageXOffset;";
 
     const JS_GET_SCROLL_TOP =
-            "return arguments[0].scrollTop;";
+            //"return arguments[0].scrollTop;";
+            "return window.pageYOffset;";
 
     const JS_GET_SCROLL_WIDTH =
             "return arguments[0].scrollWidth;";
@@ -30,11 +32,10 @@ class EyesRemoteWebElement extends RemoteWebElement {
             "return arguments[0].scrollHeight;";
 
     const JS_SCROLL_TO_FORMATTED_STR =
-            "arguments[0].scrollLeft = %d;" +
-            "arguments[0].scrollTop = %d;";
+            "window.scrollTo(%s, %s);";
 
     const JS_GET_OVERFLOW =
-        "str = JSON.stringify(arguments); alert(str);";
+            "str = JSON.stringify(arguments); alert(str);";
             //"return arguments.innerHTML;";
 
     const JS_SET_OVERFLOW_FORMATTED_STR =
@@ -118,33 +119,32 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * @return The value of the scrollLeft property of the element.
      */
     public function getScrollLeft() {
-        return 0;/*$this->eyesDriver->executeScript(self::JS_GET_SCROLL_LEFT,
-                $this)->toString()*/ //FIXME 0 returned;
+        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_LEFT);
     }
 
     /**
      * @return The value of the scrollTop property of the element.
      */
     public function getScrollTop() {
-        return 0;/*$this->eyesDriver->executeScript(self::JS_GET_SCROLL_TOP,
-                $this)->toString()*/ //FIXME 0 returned;
+        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_TOP);
+
     }
 
     /**
      * @return The value of the scrollWidth property of the element.
      */
-    public function getScrollWidth() {
-        return 0/*$this->eyesDriver->executeScript(self::JS_GET_SCROLL_WIDTH,
-                $this)->toString()*/; //FIXME
-    }
+    /*public function getScrollWidth() {
+        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_WIDTH,
+                $this)->toString();
+    }*/
 
     /**
      * @return The value of the scrollHeight property of the element.
      */
-    public function getScrollHeight() {
-        return 0/*$this->eyesDriver->executeScript(self::JS_GET_SCROLL_HEIGHT,
-                $this)->toString()*/; //FIXME
-    }
+    /*public function getScrollHeight() {
+        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_HEIGHT,
+                $this)->toString();
+    }*/
 
     /**
      * @return The width of the left border.
@@ -184,7 +184,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
      */
     public function scrollTo(Location $location) {
         $this->eyesDriver->executeScript(sprintf(self::JS_SCROLL_TO_FORMATTED_STR,
-                $location->getX(), $location->getY())/*, $this*/); //FIXME need to scroll
+                $location->getX(), $location->getY()));
     }
 
     /**
@@ -226,8 +226,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
         $this->webElement->setParent($parent);
     }
 
-    protected function execute($command, /*Map<String, ?> */$parameters) {
-
+    public function execute($command, /*Map<String, ?> */$parameters = array()) {
         try { //FIXME need to check
             return $this->eyesDriver->getRemoteWebDriver()->execute($command, $parameters);
         } catch (Exception $e) {
@@ -411,9 +410,8 @@ class EyesRemoteWebElement extends RemoteWebElement {
         // there's no problem). So, we copied the code from the Selenium
         // client and instead of using "rawPoint.get(...).intValue()" we
         // return the double value, and use "ceil".
-        $elementId = $this->getId();
         $response = $this->execute(DriverCommand::GET_ELEMENT_LOCATION,
-            array(":id"=>$elementId));//ImmutableMap::of("id", $elementId));
+            array(":id"=>$this->getId()));//ImmutableMap::of("id", $elementId));
         //$rawPoint = $response->getValue();
         $x = ceil($response["x"]);
         $y = ceil($response["y"]);
@@ -432,7 +430,6 @@ class EyesRemoteWebElement extends RemoteWebElement {
         $elementId = $this->getId();
         $response = $this->execute(DriverCommand::GET_ELEMENT_SIZE,
             array(":id"=>$elementId));//ImmutableMap::of("id", elementId));
-        //        print_r($response); die();
         //$rawSize = $response->getValue();
         $width = ceil($response["width"]);
         $height = ceil($response["height"]);

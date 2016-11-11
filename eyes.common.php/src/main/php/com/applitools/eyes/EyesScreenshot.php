@@ -92,7 +92,6 @@ abstract class EyesScreenshot {
         ArgumentGuard::notNull($to, "to");
 
         $updatedLocation = $this->convertLocation($region->getLocation(), $from, $to);
-
-        return new Region($updatedLocation, $region->getSize());
+        return new Region(null, null, null, null, $updatedLocation, $region->getSize());
     }
 }

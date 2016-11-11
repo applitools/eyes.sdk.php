@@ -132,13 +132,13 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             if ($frameLocationInScreenshot == null) {
                 if ($this->frameChain->size() > 0) {
                     $frameLocationInScreenshot =
-                        calcFrameLocationInScreenshot($logger, $this->frameChain,
+                        $this->calcFrameLocationInScreenshot($logger, $this->frameChain,
                             $this->screenshotType);
                 } else {
                     $frameLocationInScreenshot = new Location(0, 0);
                     if ($this->screenshotType == ScreenshotType::VIEWPORT) {
-                        $frameLocationInScreenshot->offset(-$scrollPosition->getX(),
-                            -$scrollPosition->getY());
+                        $frameLocationInScreenshot->offset(-$this->scrollPosition->getX(),
+                            -$this->scrollPosition->getY());
                     }
                 }
             }

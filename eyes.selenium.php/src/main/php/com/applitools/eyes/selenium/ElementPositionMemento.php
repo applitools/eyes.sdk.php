@@ -10,7 +10,7 @@ class ElementPositionMemento extends PositionMemento {
      * @param l The current location to be saved.
      */
     public function __construct(Location $l) {
-        $this->position = new Location($l);
+        $this->position = new Location($l->getX(),$l->getY());
     }
 
     public function getX() {

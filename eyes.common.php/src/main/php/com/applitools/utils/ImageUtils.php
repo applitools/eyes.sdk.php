@@ -130,16 +130,10 @@ return "somestring"; //FIXME
     public static function getImagePart(Gregwar\Image\Image $image, Region $region) {
         ArgumentGuard::notNull($image, "image");
 
-        // Get the clipped region as a BufferedImage.
-        /*$imagePart =*/ $image->/*getSubimage*/crop($region->getLeft(),
+        $image->crop($region->getLeft(),
             $region->getTop(), $region->getWidth(), $region->getHeight());
-        // IMPORTANT We copy the image this way because just using getSubImage
-        // created a later problem (maybe an actual Java bug): the pixels
-        // weren't what they were supposed to be.
-//FIXME        $imagePartBytes = self::encodeAsPng($imagePart);
-//FIXME        return self::imageFromBytes($imagePartBytes);
-        return $image;
 
+        return $image;
     }
 
     /**
