@@ -1,6 +1,6 @@
 <?php
 class MouseAction {
-    const Click = "Clock";
+    const Click = "Click";
     const RightClick = "RightClick";
     const DoubleClick = "DoubleClick";
     const Move = "Move";

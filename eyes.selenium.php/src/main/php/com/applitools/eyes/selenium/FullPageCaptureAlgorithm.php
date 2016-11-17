@@ -190,18 +190,16 @@ class FullPageCaptureAlgorithm {
             // Actually taking the screenshot.
             $this->logger->verbose("Getting image...");
             $partImage = $imageProvider->getImage();
-            // FIXME - scaling should be refactored
             $partImage = $scaleProvider->scaleImage($partImage);
 
             // FIXME - cropping should be overlaid (see previous comment re cropping)
             $partImage = $cutProvider->cut($partImage);
 
             $this->logger->verbose("Done!");
-
-            if (!$regionInScreenshot->isEmpty()) {
+           /* if (!$regionInScreenshot->isEmpty()) {
                 $partImage = ImageUtils::getImagePart($partImage,
                         $regionInScreenshot);
-            }
+            }*/
             // Stitching the current part.
             $this->logger->verbose("Stitching part into the image container...");
             //$stitchedImage->getRaster()->setRect($currentPosition->getX(),
@@ -211,7 +209,7 @@ class FullPageCaptureAlgorithm {
 
             $lastSuccessfulLocation = $currentPosition;
         }
-        
+
         if ($partImage != null) {
             $lastSuccesfulPartSize = new RectangleSize($partImage->width(),
                     $partImage->height());
@@ -220,7 +218,6 @@ class FullPageCaptureAlgorithm {
         $this->logger->verbose("Stitching done!");
         $positionProvider->restoreState($originalStitchedState);
         $originProvider->restoreState($originalPosition);
-
 
         // If the actual image size is smaller than the extracted size, we
         // crop the image.

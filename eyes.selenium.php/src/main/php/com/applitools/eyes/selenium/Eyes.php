@@ -160,7 +160,7 @@ class Eyes extends EyesBase
                     break;
                 default:
                     $posProvider = new ScrollPositionProvider($this->logger, $this->driver);
-                    setPositionProvider($posProvider);
+                    $this->setPositionProvider($posProvider);
             }
         }
     }
@@ -1015,8 +1015,15 @@ class Eyes extends EyesBase
             if ($this->checkFrameOrElement) {
                 $this->logger->log("Check frame/element requested");
                 $algo = new FullPageCaptureAlgorithm($this->logger);
+
+                if($this->getStitchMode() == "CSS"){
+                    $originProvider = new CssTranslatePositionProvider($this->logger, $this->driver);
+                }else{
+                    $originProvider = $this->positionProvider;
+                }
+
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
-                    $this->positionProvider, $this->positionProvider,
+                    $this->positionProvider, $originProvider,
                     $this->scaleProviderHandler->get(), $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 $this->logger->log("Building screenshot object...");
