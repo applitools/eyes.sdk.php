@@ -112,7 +112,7 @@ class FullPageCaptureAlgorithm {
         } catch (EyesDriverOperationException $e) {
             $this->logger->log(
                     "WARNING: Failed to extract entire size of region context"
-                            + $e->getMessage());
+                            . $e->getMessage());
             $this->logger->log("Using image size instead: "
                     . $this->image->width() . "x" . $this->image->height());
             $entireSize = new RectangleSize($this->image->width(), $this->image->height());

@@ -444,7 +444,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         try {
             $userAgent = $this->driver->executeScript(
                 "return navigator.userAgent");
-            $this->logger->verbose("user agent: " + $userAgent);
+            $this->logger->verbose("user agent: " . $userAgent);
         } catch (Exception $e) {
             $this->logger->verbose("Failed to obtain user-agent string");
             $userAgent = null;

@@ -192,7 +192,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         if ($asIsSubScreenshotRegion->isEmpty() ||
             ($throwIfClipped && ($asIsSubScreenshotRegion->getSize() != $region->getSize()))
         ) {
-            throw new /*OutOfBounds*/Exception(sprintf(
+            throw new OutOfBoundsException(sprintf(
                 "Region [%s, (%s)] is out of screenshot bounds [%s]",
                 json_encode($region), $coordinatesType, $this->frameWindow));
         }
@@ -325,7 +325,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     }
 
     public function getLocationInScreenshot(Location $location,
-                                            CoordinatesType $coordinatesType)/* throws OutOfBoundsException FIXME*/
+                                            CoordinatesType $coordinatesType)
     {
 
         $location = $this->convertLocation($location, $coordinatesType,

@@ -266,7 +266,7 @@ class EyesSeleniumUtils
         }*/
         // If we failed to extract the viewport size using JS, will use the
         // window size instead.
-        Logger::log("Using window size as viewport size.");
+        $logger->log("Using window size as viewport size.");
         $windowSize = $driver->manage()->window()->getSize();
         $width = $windowSize->getWidth();
         $height = $windowSize->getHeight();
@@ -282,7 +282,7 @@ class EyesSeleniumUtils
         } catch (WebDriverException $e) {
             // Not every WebDriver supports querying for orientation.
         }
-        Logger::log(sprintf("Done! Size %d x %d", $width, $height));
+        $logger->log(sprintf("Done! Size %d x %d", $width, $height));
         return new RectangleSize($width, $height);
     }
 
@@ -294,7 +294,7 @@ class EyesSeleniumUtils
      */
     public static function setViewportSize(Logger $logger, WebDriver $driver, RectangleSize $size)
     {
-        Logger::log("setViewportSize(" . json_encode($size) . ")");
+        $logger->log("setViewportSize(" . json_encode($size) . ")");
 
         ArgumentGuard::notNull($size, "size");
 
@@ -304,28 +304,28 @@ class EyesSeleniumUtils
 
         $actualViewportSize = self::extractViewportSize($logger, $driver);
 
-        Logger::log("Initial viewport size:" . json_encode($actualViewportSize));
+        $logger->log("Initial viewport size:" . json_encode($actualViewportSize));
 
         // If the viewport size is already the required size
         if ($size->getWidth() == $actualViewportSize->getWidth() &&
             $size->getHeight() == $actualViewportSize->getHeight()
         ) {
-            Logger::log("Required size already set.");
+            $logger->log("Required size already set.");
             return;
         }
 
         $browserSize = $driver->manage()->window()->getSize();
-        Logger::log("Current browser size: " . json_encode($browserSize));
+        $logger->log("Current browser size: " . json_encode($browserSize));
         $requiredBrowserSize = new WebDriverDimension($browserSize->getWidth() + ($size->getWidth() - $actualViewportSize->getWidth()),
             $browserSize->getHeight() + ($size->getHeight() - $actualViewportSize->getHeight()));
-        Logger::log("Trying to set browser size to: " . json_encode($requiredBrowserSize));
+        $logger->log("Trying to set browser size to: " . json_encode($requiredBrowserSize));
 
         $retriesLeft = self::RETRIES;
         do {
             $driver->manage()->window()->setSize($requiredBrowserSize);
             GeneralUtils::sleep(self::SLEEP);
             $browserSize = $driver->manage()->window()->getSize();
-            Logger::log("Current browser size: " . json_encode($browserSize));
+            $logger->log("Current browser size: " . json_encode($browserSize));
         } while (--$retriesLeft > 0 && $browserSize != $requiredBrowserSize);
 
         if ($browserSize != $requiredBrowserSize) {
@@ -333,27 +333,27 @@ class EyesSeleniumUtils
         }
 
         $actualViewportSize = self::extractViewportSize($logger, $driver);
-        $logger::log("Current viewport size: " . json_encode($actualViewportSize));
+        $logger->log("Current viewport size: " . json_encode($actualViewportSize));
         if ($actualViewportSize != $size) {
             // Additional attempt. This Solves the "maximized browser" bug
             // (border size for maximized browser sometimes different than
             // non-maximized, so the original browser size calculation is
             // wrong).
-            Logger::log("Attempting one more time...");
+            $logger->log("Attempting one more time...");
             $browserSize = $driver->manage()->window()->getSize();
             $requiredBrowserSize = new WebDriverDimension($browserSize->getWidth() + ($size->getWidth() - $actualViewportSize->getWidth()),
                 $browserSize->getHeight() + ($size->getHeight() - $actualViewportSize->getHeight()));
 
-            Logger::log("Browser size: " . json_encode($browserSize));
-            Logger::log("Required browser size: " . json_encode($requiredBrowserSize));
+            $logger->log("Browser size: " . json_encode($browserSize));
+            $logger->log("Required browser size: " . json_encode($requiredBrowserSize));
 
             $retriesLeft = self::RETRIES;
             do {
                 $driver->manage()->window()->setSize($requiredBrowserSize);
                 GeneralUtils::sleep(self::SLEEP);
                 $actualViewportSize = self::extractViewportSize($logger, $driver);
-                Logger::log("Browser size: " . json_encode($driver->manage()->window()->getSize()));
-                Logger::log("Viewport size: " . json_encode($actualViewportSize));
+                $logger->log("Browser size: " . json_encode($driver->manage()->window()->getSize()));
+                $logger->log("Viewport size: " . json_encode($actualViewportSize));
             } while (--$retriesLeft > 0 && !$actualViewportSize != $size);
         }
 

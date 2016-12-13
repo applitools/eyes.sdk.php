@@ -490,7 +490,7 @@ class Eyes extends EyesBase
                 $matchTimeout
         );
         $this->logger->verbose("Done! trying to scroll back to original position..");
-        $regionVisibilityStrategy->returnToOriginalPosition($positionProvider);
+        $this->regionVisibilityStrategy->returnToOriginalPosition($this->positionProvider);
         $this->logger->verbose("Done!");
     }
 
@@ -547,7 +547,7 @@ class Eyes extends EyesBase
             }
             $this->logger->log(sprintf("Device pixel ratio: %f", $this->devicePixelRatio));
 
-            Logger::log("Setting scale provider..");
+            $this->logger->log("Setting scale provider..");
             try {
                 $this->scaleProviderHandler->set(new ContextBasedScaleProvider(
                     $this->positionProvider->getEntireSize(), $this->getViewportSize(),
@@ -973,7 +973,7 @@ class Eyes extends EyesBase
     {
         if (!empty($driver)) {
             ArgumentGuard::notNull($driver, "driver");
-            EyesSeleniumUtils::setViewportSize(new Logger(), $driver, $size);
+            EyesSeleniumUtils::setViewportSize(new Logger(new PrintLogHandler()), $driver, $size);
             return;
         }
 
@@ -989,7 +989,7 @@ class Eyes extends EyesBase
             /*(EyesTargetLocator)*/
             $this->driver->switchTo()->frames($originalFrame);
 
-            throw new /*TestFailed FIXME*/Exception("Failed to set the viewport size"/*, $e*/);
+            throw new TestFailedException("Failed to set the viewport size"/*, $e*/);
         }
         /*(EyesTargetLocator)*/
         $this->driver->switchTo()->frames($originalFrame);

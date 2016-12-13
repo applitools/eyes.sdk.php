@@ -37,29 +37,6 @@ class GeneralUtils
     }
 
     /**
-     * Formats date and time as represented by a calendar instance to an ISO
-     * 8601 string.
-     *
-     * @param calendar The date and time which we would like to format.
-     * @return An ISO8601 formatted string representing the input date and time.
-     */
-    public static function toISO8601DateTime(Calendar $calendar)
-    {
-        /* ArgumentGuard::notNull($calendar, "calendar");
-
-         SimpleDateFormat $formatter = new SimpleDateFormat(DATE_FORMAT_ISO8601, Locale.US);
-
-         // For the string to be formatted correctly you MUST also set
-         // the time zone in the formatter! See:
-         // http://www.coderanch.com/t/376467/java/java/Display-time-timezones
-         $formatter->setTimeZone(calendar.getTimeZone());
-
-         return formatter.format(calendar.getTime());*/
-        echo "MOCK2_MOCK2";   //FIXME
-        die();
-    }
-
-    /**
      * Formats date and time as represented by a calendar instance to an TFC
      * 1123 string.
      *

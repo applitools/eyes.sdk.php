@@ -34,13 +34,13 @@ abstract class EyesBase
     {
 
         if ($this->getIsDisabled()) {
-            $this->userInputs = null;
+            $this->userInputs = array();
             return;
         }
 
         ArgumentGuard::notNull($serverUrl, "serverUrl");
 
-        $this->logger = new Logger();
+        $this->logger = new Logger(new PrintLogHandler());
 
         $this->scaleProviderHandler = new SimplePropertyHandler();
         $scaleProvider = new NullScaleProvider();
@@ -362,7 +362,7 @@ abstract class EyesBase
             return;
         }
         ArgumentGuard::notNull($trigger, "trigger");
-        $this->userInputs->add($trigger);
+        $this->userInputs[] = $trigger;
     }
 
 
@@ -373,7 +373,7 @@ abstract class EyesBase
         if ($this->isDisabled) {
             return;
         }
-        //$this->userInputs->clear();//FIXME need to check
+        $this->userInputs = array();
     }
 
     /**
@@ -503,7 +503,7 @@ abstract class EyesBase
     /**
      * @param size The required viewport size.
      */
-    protected abstract function setViewportSize(WebDriver $driver = null, RectangleSize $size); //FIXME need to check parameters
+    protected abstract function setViewportSize(WebDriver $driver = null, RectangleSize $size);
 
     /**
      *
@@ -627,10 +627,10 @@ abstract class EyesBase
 
             $this->setIsOpen(false);
 
-            $this->lastScreenshot = null;   //FIXME
+            $this->lastScreenshot = null;
             $this->clearUserInputs();
 
-            if (empty($this->runningSession)) { //FIXME
+            if (empty($this->runningSession)) {
                 $this->logger->verbose("Closed");
                 return;
             }
@@ -644,7 +644,7 @@ abstract class EyesBase
                 $this->logger->log("Failed to abort server session: " . $ex->getMessage());
             }
         } finally {
-            $this->runningSession = null; /// FIXME
+            $this->runningSession = null;
             $this->logger->getLogHandler()->close();
         }
     }
@@ -737,14 +737,14 @@ abstract class EyesBase
      * @param scaleRatio The scale ratio to use, or {@code null} to reset
      *                   back to automatic scaling.
      */
-    public function setScaleRatio($scaleRatio) {//double
+    public function setScaleRatio($scaleRatio) {
         if ($scaleRatio != null) {
-            $this->scaleProviderHandler = array();
-            $this->scaleProviderHandler[] = new ReadOnlyPropertyHandler(//FIXME need to check
+            $this->scaleProviderHandler = new ReadOnlyPropertyHandler(
             $this->logger, new FixedScaleProvider($scaleRatio));
-        } else { //FIXME need to check
-            $this->scaleProviderHandler = array();
-            $this->scaleProviderHandler[] = new NullScaleProvider();
+        } else {
+            $this->scaleProviderHandler = new SimplePropertyHandler();
+            $this->scaleProviderHandler->set(new NullScaleProvider());
+
         }
     }
 
@@ -753,7 +753,7 @@ abstract class EyesBase
      * @return The ratio used to scale the images being validated.
      */
     public function getScaleRatio() {
-        return $this->scaleProviderHandler->get()->getScaleRatio(); //FIXME need to check array
+        return $this->scaleProviderHandler->get()->getScaleRatio();
     }
 
     /**
@@ -843,7 +843,7 @@ abstract class EyesBase
                 $this->runningSession,
                 $this->matchTimeout,
                 // A callback which will call getAppOutput
-                $appOutputProviderRedeclared //FIXME
+                $appOutputProviderRedeclared
             );
         }
         $this->logger->log("Calling match window...");
@@ -860,7 +860,7 @@ abstract class EyesBase
             $this->shouldMatchWindowRunOnceOnTimeout = true;
 
             if (!$this->runningSession->getIsNewSession()) {
-                Logger::log(sprintf("Mismatch! (%s)", $tag));
+                $this->logger->log(sprintf("Mismatch! (%s)", $tag));
             }
 
             if ($this->getFailureReports() == "FailureReports::IMMEDIATE") {
@@ -959,10 +959,10 @@ abstract class EyesBase
      */
     public function setImageCut(CutProvider $cutProvider) {
         if ($cutProvider != null) {
-            $this->cutProviderHandler[] = new ReadOnlyPropertyHandler($this->logger, $cutProvider);
+            $this->cutProviderHandler = new ReadOnlyPropertyHandler($this->logger, $cutProvider);
         } else {
-            $this->cutProviderHandler = array(); //FIXME need to check
-            $this->cutProviderHandler[] = new NullCutProvider();
+            $this->cutProviderHandler = new SimplePropertyHandler();
+            $this->cutProviderHandler->set(new NullCutProvider());
         }
     }
 
@@ -1085,11 +1085,11 @@ abstract class EyesBase
     protected function startSession()
     {
         $this->logger->log("startSession()");
+
         if ($this->viewportSize == null) {
             $this->viewportSize = $this->getViewportSize();
-
         } else {
-            $this->setViewportSize(null, $this->viewportSize); //FIXME
+            $this->setViewportSize(null, $this->viewportSize);
         }
 
         if ($this->batch == null) {
@@ -1100,7 +1100,8 @@ abstract class EyesBase
             $testBatch = $this->batch;
         }
 
-        $appEnv = $this->getAppEnvironment(); ///////  need to check is it correct?  //FIXME
+        $appEnv = $this->getAppEnvironment();
+
         $this->logger->log("Application environment is " . serialize($this->getAppEnvironment()));
 
         $this->sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
@@ -1166,7 +1167,7 @@ abstract class EyesBase
 
             if (!$isNewSession && (0 < $results->getMismatches() || 0 < $results->getMissing())) {
 
-                Logger::log("--- Failed test ended. See details at " . $sessionResultsUrl);
+                $this->logger->log("--- Failed test ended. See details at " . $sessionResultsUrl);
 
                 if ($throwEx) {
                     $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()

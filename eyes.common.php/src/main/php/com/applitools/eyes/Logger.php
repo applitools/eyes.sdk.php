@@ -2,16 +2,20 @@
 
 class Logger
 {
-    private $logHandler;
+    private $logHandler; //LogHandler
 
-    public function __construct() {
-        $this->logHandler = new NullLogHandler(); // Default.
+    public function __construct($handler = null) {
+        if(empty($handler)){
+            $this->logHandler = new NullLogHandler();
+        }else{
+            $this->logHandler = $handler;
+        }
+
     }
 
-    public static function log($string)
-    {
-        var_dump($string);
-        echo "<br>";
+    public function log($message)
+    { $aa = $this->getPrefix() . $message;
+        $this->logHandler->onMessage(false, $aa);
     }
 
 
@@ -22,9 +26,9 @@ class Logger
         return $this->logHandler;
     }
 
-    public static function verbose($string)
+    public function verbose($message)
     {
-        echo $string."\r\n";
+        $this->logHandler->onMessage(true, $this->getPrefix() . $message);
     }
     /**
      * Sets the log handler.
@@ -36,4 +40,38 @@ class Logger
         ArgumentGuard::notNull($handler, "handler");
         $this->logHandler = $handler;
     }
+
+    /**
+     *
+     * @return The name of the method which called the logger, if possible,
+     * or an empty string.
+     */
+    private function getPrefix() {
+
+
+        $deb = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+        $prefix = "";
+        if(count($deb) >= 3){
+            $prefix = "caller->" . $deb[2]['function'];
+        }
+
+        return $prefix;
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

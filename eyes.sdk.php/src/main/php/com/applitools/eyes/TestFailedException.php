@@ -4,7 +4,7 @@
  * Indicates that a test did not pass (i.e., test either failed or is a new
  * test).
  */
-class TestFailedException /*extends AssertionError FIXME*/ {
+class TestFailedException extends AssertionError {
 
     private $testResults = null; //TestResults
 

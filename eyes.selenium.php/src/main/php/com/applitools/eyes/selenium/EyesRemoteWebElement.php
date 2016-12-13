@@ -230,7 +230,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
         try { //FIXME need to check
             return $this->eyesDriver->getRemoteWebDriver()->execute($command, $parameters);
         } catch (Exception $e) {
-            throw new /*Eyes*/Exception("Failed to invoke 'execute' method!", $e);
+            throw new EyesException("Failed to invoke 'execute' method!", $e);
         }
 
     }
@@ -331,7 +331,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     public function findElementsById($using) {
-        return $this->wrapElements($this->webElement.findElementsById($using));
+        return $this->wrapElements($this->webElement->findElementsById($using));
     }
 
     public function findElementByLinkText($using) {
@@ -347,7 +347,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     public function findElementsByName($using) {
-        return $this->wrapElements($this->webElement.findElementsByName($using));
+        return $this->wrapElements($this->webElement->findElementsByName($using));
     }
 
     public function findElementByClassName($using) {
@@ -363,31 +363,31 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     public function findElementsByCssSelector($using) {
-        return wrapElements($this->webElement.findElementsByCssSelector($using));
+        return $this->wrapElements($this->webElement->findElementsByCssSelector($using));
     }
 
     public function findElementByXPath($using) {
-        return wrapElement($this->webElement.findElementByXPath($using));
+        return $this->wrapElement($this->webElement->findElementByXPath($using));
     }
 
     public function findElementsByXPath($using) {
-        return wrapElements($this->webElement->findElementsByXPath($using));
+        return $this->wrapElements($this->webElement->findElementsByXPath($using));
     }
 
     public function findElementByPartialLinkText($using) {
-        return wrapElement($this->webElement->findElementByPartialLinkText($using));
+        return $this->wrapElement($this->webElement->findElementByPartialLinkText($using));
     }
 
     public function findElementsByPartialLinkText($using) {
-        return wrapElements($this->webElement->findElementsByPartialLinkText($using));
+        return $this->wrapElements($this->webElement->findElementsByPartialLinkText($using));
     }
 
     public function findElementByTagName($using) {
-        return wrapElement($this->webElement->findElementByTagName($using));
+        return $this->wrapElement($this->webElement->findElementByTagName($using));
     }
 
     public function findElementsByTagName($using) {
-        return wrapElements($this->webElement->findElementsByTagName($using));
+        return $this->wrapElements($this->webElement->findElementsByTagName($using));
     }
 
     public function equals($obj) {

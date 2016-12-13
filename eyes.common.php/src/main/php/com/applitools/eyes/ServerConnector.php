@@ -168,7 +168,7 @@ class ServerConnector implements ServerConnectorInterface
                     accept(MediaType.APPLICATION_JSON).
                     entity(postData, MediaType.APPLICATION_JSON_TYPE).
                     post(ClientResponse.class);*/
-        } catch (Exception $e) {  //RuntimeException
+        } catch (RuntimeException $e) {
             $this->logger->verbose("startSession(): Server request failed: " . $e->getMessage());
             throw $e;
         }
