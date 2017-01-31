@@ -577,18 +577,26 @@ class Eyes extends EyesBase
             $this->checkFrameOrElement = true;
 
             // FIXME - Scaling should be handled in a single place instead
-            $this->updateScalingParams();
-
+//FIXME meed to test print_r($this->driver->getFrameChain())            $this->updateScalingParams();
             $this->logger->log("Getting screenshot as base64..");
-            $screenshot64 = $this->driver->getScreenshotAs(/*OutputType:: FIXME*/"BASE64");
+            $screenshot64 = $this->driver->getScreenshotAs(/*OutputType::*/"BASE64");
+
             $this->logger->log("Done! Creating image object...");
-            $screenshotImage = ImageUtils::imageFromBase64($screenshot64);
+
+            $screenshotImage = /*FIXME ned to check ImageUtils::imageFromBase64(*/$screenshot64/*)*/;
             $screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
+
             $this->logger->log("Done! Building required object...");
+
             $screenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
+
             $this->logger->log("Done!");
 
-            $regionToCheck = new RegionProvider(); /*{
+            $this->regionToCheck = new RegionProvider($screenshot->getFrameWindow());
+
+            $this->regionToCheck->setCoordinatesType(CoordinatesType::SCREENSHOT_AS_IS);
+
+            /*{FIXME need to check
             public Region getRegion() {
                     return screenshot.getFrameWindow();
                 }
@@ -597,11 +605,10 @@ class Eyes extends EyesBase
                     return CoordinatesType.SCREENSHOT_AS_IS;
                 }
             };*/
-
-            parent::checkWindowBase($regionToCheck, $tag, false, $matchTimeout);
+            parent::checkWindowBase($this->regionToCheck, $tag, false, $matchTimeout);
         } finally {
-            $$this->checkFrameOrElement = false;
-            $regionToCheck = null;
+            $this->checkFrameOrElement = false;
+            $this->regionToCheck = null;
         }
     }
 
@@ -630,17 +637,23 @@ class Eyes extends EyesBase
         ArgumentGuard::notNull($frameNameOrIdOrIndex, "frameNameOrId");
 
         $this->logger->log(sprintf("CheckFrame(%s, %d, '%s')",
-            $frameNameOrIdOrIndex, $matchTimeout, $tag));
+            json_encode($frameNameOrIdOrIndex), $matchTimeout, $tag));
 
-        $this->logger->log("Switching to frame with name/id/index: " . $frameNameOrIdOrIndex .
+        $this->logger->log("Switching to frame with name/id/index: " . json_encode($frameNameOrIdOrIndex) .
             " ...");
-        $this->driver->switchTo()->frame($frameNameOrIdOrIndex);
-        $this->logger->log("Done.");
 
+        $locationAsPoint = $this->driver->findElement($frameNameOrIdOrIndex)->getLocation();
+        $this->regionVisibilityStrategy->moveToRegion($this->getPositionProvider(),
+            new Location(0, $locationAsPoint->getY()));
+
+        /*$this->driver/*FIXME need to check = */$this->driver->switchTo()->frame($frameNameOrIdOrIndex);
+        
+        $this->logger->log("Done.");
         $this->checkCurrentFrame($matchTimeout, $tag);
 
         $this->logger->log("Switching back to parent frame");
         $this->driver->switchTo()->parentFrame();
+
         $this->logger->log("Done!");
     }
 
@@ -790,7 +803,6 @@ class Eyes extends EyesBase
             $this->regionToCheck = new RegionProvider();
             $this->regionToCheck->setRegion($elementRegion);
             $this->regionToCheck->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
-            
             parent::checkWindowBase(
             /*new RegionProvider() {
                     public Region getRegion() {
@@ -811,7 +823,7 @@ class Eyes extends EyesBase
                 $eyesElement->setOverflow($originalOverflow);
             }
 
-            $checkFrameOrElement = false;
+            $this->checkFrameOrElement = false;
             $this->setPositionProvider($originalPositionProvider);
             $this->regionToCheck = null;
         }
@@ -980,27 +992,28 @@ class Eyes extends EyesBase
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
 
         $originalFrame = $this->driver->getFrameChain();
-        $this->driver->switchTo()->defaultContent();
+        //FIXME //$this->driver->switchTo()->defaultContent();
 
         try {
             EyesSeleniumUtils::setViewportSize($this->logger, $this->driver, $size);
         } catch (EyesException $e) {
             // Just in case the user catches this error
             /*(EyesTargetLocator)*/
-            $this->driver->switchTo()->frames($originalFrame);
+            //FIXME ///$this->driver->switchTo()->frames($originalFrame);
 
             throw new TestFailedException("Failed to set the viewport size"/*, $e*/);
         }
         /*(EyesTargetLocator)*/
-        $this->driver->switchTo()->frames($originalFrame);
+//FIXME //$this->driver->switchTo()->frames($originalFrame);
+/*FIXME */ //$this->viewportSize = new RectangleSize(450, 300);
         $this->viewportSize = new RectangleSize($size->getWidth(), $size->getHeight());
     }
 
 
     public function getScreenshot()
     {
-
         $this->logger->log("getScreenshot()");
+
 
         $this->updateScalingParams();
 
@@ -1027,6 +1040,7 @@ class Eyes extends EyesBase
                     $this->scaleProviderHandler->get(), $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 $this->logger->log("Building screenshot object...");
+
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
                     null, null, new RectangleSize($entireFrameOrElement->width(), $entireFrameOrElement->height()));
             } else if ($this->forceFullPageScreenshot) {

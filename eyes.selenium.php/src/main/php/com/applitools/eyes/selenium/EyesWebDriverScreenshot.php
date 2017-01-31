@@ -24,26 +24,28 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     private $frameWindow; //Region
 
     private static function calcFrameLocationInScreenshot(Logger $logger,
-                                                          FrameChain $frameChain, ScreenshotType $screenshotType)
+                                                          FrameChain $frameChain,
+                                                          $screenshotType = ScreenshotType::ENTIRE_FRAME)
     {
 
         $logger->verbose("Getting first frame..");
-        $frameIterator = $frameChain->iterator();
-        $firstFrame = $frameIterator->next();
+        //$frameIterator = $frameChain->iterator();
+        //$firstFrame = $frameIterator->next();
+        $frames = $frameChain->getFrames();
         $logger->verbose("Done!");
-        $locationInScreenshot = new Location($firstFrame->getLocation());
-
+        $locationInScreenshot = new Location('','',array_pop($frames)->getLocation());
         // We only consider scroll of the default content if this is
         // a viewport screenshot.
         if ($screenshotType == ScreenshotType::VIEWPORT) {
-            $defaultContentScroll = $firstFrame->getParentScrollPosition();
+            $defaultContentScroll = array_pop($frames)->getParentScrollPosition();
             $locationInScreenshot->offset(-$defaultContentScroll->getX(), -$defaultContentScroll->getY());
         }
 
         $logger->verbose("Iterating over frames..");
-        while ($frameIterator->hasNext()) {
+        end($frames);
+        while (prev($frames)) {
             $logger->verbose("Getting next frame...");
-            $frame = $frameIterator->next();
+            $frame = current($frameIterator);
             $logger->verbose("Done!");
             $frameLocation = $frame->getLocation();
             // For inner frames we must consider the scroll
@@ -67,12 +69,14 @@ class EyesWebDriverScreenshot extends EyesScreenshot
      *                                   location in the screenshot.
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
-                                Gregwar\Image\Image $image = null, /*ScreenshotType*/ $screenshotType = null,
+                                Gregwar\Image\Image $image = null,
+                                $screenshotType = null,
                                 Location $frameLocationInScreenshot = null,
                                 RectangleSize $entireFrameSize = null)
     {
+
         if (!empty($entireFrameSize)) {
-            parent::__construct($image);
+            parent::__construct($image);  //FIXME need to check
             ArgumentGuard::notNull($logger, "logger");
             ArgumentGuard::notNull($driver, "driver");
             ArgumentGuard::notNull($entireFrameSize, "entireFrameSize");
@@ -144,9 +148,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             }
             $this->frameLocationInScreenshot = $frameLocationInScreenshot;
             $logger->verbose("Calculating frame window..");
-            /* FIXME $this->frameWindow = new Region(null, null, null, null,
+            $this->frameWindow = new Region(null, null, null, null,
                                         $frameLocationInScreenshot, $frameSize);
-
+/*
             //FIXME
             //$this->frameWindow->intersect(new Region(/*FIXME0, 0, $image->getWidth(), $image->getHeight()));
 
@@ -188,7 +192,10 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         // We calculate intersection based on as-is coordinates.
 /*          $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
             $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
-*/ $asIsSubScreenshotRegion = $region;//FIXME
+*/
+        $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
+        $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
+
         if ($asIsSubScreenshotRegion->isEmpty() ||
             ($throwIfClipped && ($asIsSubScreenshotRegion->getSize() != $region->getSize()))
         ) {
@@ -214,6 +221,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             $this->driver, $subScreenshotImage, $this->screenshotType,
             $frameLocationInSubScreenshot);
         $this->logger->verbose("Done!");
+
         return $result;
     }
 
@@ -379,7 +387,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         }
 
         // Converting the result to the required coordinates type.
-        $intersectedRegion = convertRegionLocation($intersectedRegion,
+        $intersectedRegion = $this->convertRegionLocation($intersectedRegion,
             CoordinatesType::SCREENSHOT_AS_IS, $resultCoordinatesType);
 
         return $intersectedRegion;

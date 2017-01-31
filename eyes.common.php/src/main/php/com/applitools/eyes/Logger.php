@@ -52,7 +52,7 @@ class Logger
         $deb = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
         $prefix = "";
         if(count($deb) >= 3){
-            $prefix = "caller->" . $deb[2]['function'];
+            $prefix = "caller->" . $deb[2]['function']." ";
         }
 
         return $prefix;

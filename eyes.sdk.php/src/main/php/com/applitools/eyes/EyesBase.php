@@ -825,7 +825,6 @@ abstract class EyesBase
         $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver,
             Gregwar\Image\Image::create(0, 0)); //FIXME
 
-
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
         $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
@@ -847,6 +846,7 @@ abstract class EyesBase
             );
         }
         $this->logger->log("Calling match window...");
+
         $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
             $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
         $this->logger->log("MatchWindow Done!");
@@ -900,7 +900,7 @@ abstract class EyesBase
             $screenshot = $screenshot->getSubScreenshot($region,
                 $regionProvider->getCoordinatesType(), false);
         }
-
+                   
         $this->logger->verbose("Compressing screenshot...");
         $compressResult = $this->compressScreenshot64($screenshot, $lastScreenshot);
         $this->logger->verbose("Done! Getting title...");
@@ -1184,7 +1184,7 @@ abstract class EyesBase
                     $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                         . "' of '" . $this->sessionStartInfo->getAppIdOrName()
                         . "'. " . $instructions;
-                    throw new /*NewTest*/Exception($results, $message);
+                    throw new /*NewTest*/Exception(/*$results, */$message);
                 }
                 return $results;
             }

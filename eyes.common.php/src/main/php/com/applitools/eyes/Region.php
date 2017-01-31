@@ -64,10 +64,10 @@ class Region
      */
     public function isEmpty()
     {
-        return $this->left == self::getEmpty()->left
-        && $this->top == self::getEmpty()->top
-        && $this->width == self::getEmpty()->width
-        && $this->height == self::getEmpty()->height;
+        return $this->left == self::getEmpty()->getLeft()
+        && $this->top == self::getEmpty()->getTop()
+        && $this->width == self::getEmpty()->getWidth()
+        && $this->height == self::getEmpty()->getHeight();
     }
 
     public function equals($obj)

@@ -39,7 +39,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
             //"return arguments.innerHTML;";
 
     const JS_SET_OVERFLOW_FORMATTED_STR =
-            "arguments.overflow = '%s'";
+            "overflow = '%s'";
 
     public function __construct(Logger $logger, EyesWebDriver $eyesDriver,
                                 RemoteWebElement $webElement) {
@@ -201,6 +201,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * @param overflow The overflow to set.
      */
     public function setOverflow($overflow) {
+
         $this->eyesDriver->executeScript(sprintf(self::JS_SET_OVERFLOW_FORMATTED_STR,
                 $overflow));
     }

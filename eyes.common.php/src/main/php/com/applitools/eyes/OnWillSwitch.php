@@ -6,11 +6,7 @@ interface OnWillSwitch {
     * @param targetFrame The element about to be switched to,
     *                     if available. Otherwise, null.
     */
-    public function willSwitchToFrame(TargetType $targetType, WebElement $targetFrame);
+    public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame, Logger $logger, WebDriver $driver);
 
-    /**
-    * Will be called before switching into a window.
-    * @param nameOrHandle The name/handle of the window to be switched to.
-    */
-    public function willSwitchToWindow($nameOrHandle);
+
 }

@@ -20,7 +20,7 @@ class EyesImagesScreenshot extends EyesScreenshot
             if (empty($location)) {
                 $location = new Location(0, 0);
                 $rectangleSize = new RectangleSize($image->getWidth(), $image->getHeight());
-                $this->bounds = new Region($location, $rectangleSize);
+                $this->bounds = new Region($location, $rectangleSize);                              
             }
         }
     }

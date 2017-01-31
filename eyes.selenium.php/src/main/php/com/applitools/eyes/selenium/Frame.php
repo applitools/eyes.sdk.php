@@ -30,7 +30,7 @@ class Frame {
      * @param parentScrollPosition The scroll position the frame's parent was
      *                             in when the frame was switched to.
      */
-    public function __construct(Logger $logger, WebElement $reference,
+    public function __construct(Logger $logger, /*FIXME need to check*/RemoteWebElement $reference,
                  $frameId, Location $location, RectangleSize $size,
                  Location $parentScrollPosition) {
         ArgumentGuard::notNull($logger, "logger");
@@ -40,9 +40,9 @@ class Frame {
         ArgumentGuard::notNull($size, "size");
         ArgumentGuard::notNull($parentScrollPosition, "parentScrollPosition");
 
-        $logger.verbose(sprintf(
+        $logger->verbose(sprintf(
                 "Frame(logger, reference, %s, %s, %s, %s)", $frameId,
-                $location, $size, $parentScrollPosition));
+                json_encode($location), json_encode($size), json_encode($parentScrollPosition)));
 
         $this->logger = $logger;
         $this->reference = $reference;

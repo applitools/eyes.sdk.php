@@ -3,8 +3,8 @@
 class FullPageCaptureAlgorithm {
     // This should pretty much cover all scroll bars (and some fixed position
     // footer elements :).
-    const MAX_SCROLL_BAR_SIZE = 50;
-    const MIN_SCREENSHOT_PART_HEIGHT = 10;
+    const MAX_SCROLL_BAR_SIZE = 0; //FIXME and test
+    const MIN_SCREENSHOT_PART_HEIGHT = 0;
     // TODO use scaling overlap offset.
     const SCALE_MARGIN_PX = 5;
 
@@ -102,9 +102,14 @@ class FullPageCaptureAlgorithm {
                     $this->image->height()));
         $this->logger->verbose("Region after intersect: " . json_encode($regionInScreenshot));
 
-        /*if (!$regionInScreenshot->isEmpty()) {  FIXME do not crop image before full screenshot be prepared
+        $partWidth = $this->image->width();
+        $partHeight = $this->image->height();
+
+        if (!$regionInScreenshot->isEmpty()) {//  FIXME do not crop image before full screenshot be prepared
             $this->image = ImageUtils::getImagePart($this->image, $regionInScreenshot);
-        }*/
+            $partWidth = $regionInScreenshot->getWidth();
+            $partHeight = $regionInScreenshot->getHeight();
+        }
 
         try {
             $entireSize = $positionProvider->getEntireSize();
@@ -133,8 +138,8 @@ class FullPageCaptureAlgorithm {
         // in order to eliminate duplicate bottom scroll bars, as well as fixed
         // position footers.
         $partImageSize =
-                new RectangleSize($this->image->width(),
-                        max($this->image->height() - self::MAX_SCROLL_BAR_SIZE,
+                new RectangleSize($partWidth,
+                        max($partHeight - self::MAX_SCROLL_BAR_SIZE,
                                 self::MIN_SCREENSHOT_PART_HEIGHT));
 
         $this->logger->verbose(sprintf("Total size: %s, image part size: %s",
@@ -143,8 +148,9 @@ class FullPageCaptureAlgorithm {
         // Getting the list of sub-regions composing the whole region (we'll
         // take screenshot for each one).
         $entirePage = new Region(null, null, null, null, Location::getZero(), $entireSize); //FIXME Region construct was merged
-        /*Iterable<Region>*/ $imageParts =
-                $entirePage->getSubRegions($partImageSize);
+
+
+        $imageParts = $entirePage->getSubRegions($partImageSize);
         $this->logger->verbose("Creating stitchedImage container. Size: " . json_encode($entireSize));
         //Notice stitchedImage uses the same type of image as the screenshots.
 
@@ -196,10 +202,11 @@ class FullPageCaptureAlgorithm {
             $partImage = $cutProvider->cut($partImage);
 
             $this->logger->verbose("Done!");
-           /* if (!$regionInScreenshot->isEmpty()) {
+
+            if (!$regionInScreenshot->isEmpty()) {
                 $partImage = ImageUtils::getImagePart($partImage,
                         $regionInScreenshot);
-            }*/
+            }
             // Stitching the current part.
             $this->logger->verbose("Stitching part into the image container...");
             //$stitchedImage->getRaster()->setRect($currentPosition->getX(),

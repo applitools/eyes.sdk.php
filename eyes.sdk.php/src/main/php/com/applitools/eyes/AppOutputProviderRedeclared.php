@@ -23,10 +23,10 @@ class AppOutputProviderRedeclared implements AppOutputProvider
         // Cropping by region if necessary
         $region = $regionProvider->getRegion();
 
-        if (!$region->isEmpty()) {
+        /*if (!$region->isEmpty()) {
             $screenshot = $screenshot->getSubScreenshot($region,
                 $regionProvider->getCoordinatesType(), false);
-        }
+        }*/
 
         $this->eyes->logger->verbose("Compressing screenshot...");
         //FIXME

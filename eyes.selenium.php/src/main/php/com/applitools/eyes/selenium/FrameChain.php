@@ -48,20 +48,20 @@ class FrameChain /*implements Iterable<Frame>*/
      */
     public function __construct(Logger $logger, FrameChain $other = null)
     {
-        if(empty($this->frames) && !($this->frames instanceof ArrayIterator)){
+      /*  if(empty($this->frames) && !($this->frames instanceof ArrayIterator)){
             $this->frames = new ArrayIterator();
-        }
+        }*/    //FIXME need to check
         ArgumentGuard::notNull($logger, "logger");
         $this->logger = $logger;
         if (empty($other)) {
-            $this->frames = new ArrayIterator();
+            $this->frames = array();
         } else {
             $logger->verbose(sprintf("Frame chain copy constructor (size %d)", $other->size()));
 
             foreach ($other->frames as $otherFrame) {
-                $this->frames->set(new Frame($logger, $otherFrame->getReference(),
+                $this->frames[] = new Frame($logger, $otherFrame->getReference(),
                     $otherFrame->getId(), $otherFrame->getLocation(),
-                    $otherFrame->getSize(), $otherFrame->getParentScrollPosition()));
+                    $otherFrame->getSize(), $otherFrame->getParentScrollPosition());
             }
             $logger->verbose("Done!");
         }
@@ -73,7 +73,7 @@ class FrameChain /*implements Iterable<Frame>*/
      */
     public function size()
     {
-        return $this->frames->count();
+        return count($this->frames);
     }
 
     /**
@@ -81,7 +81,7 @@ class FrameChain /*implements Iterable<Frame>*/
      */
     public function clear()
     {
-        $this->frames->clear();
+        $this->frames = array();
     }
 
     /**
@@ -90,7 +90,7 @@ class FrameChain /*implements Iterable<Frame>*/
      */
     public function pop()
     {
-        $this->frames->remove($this->frames->size() - 1);
+        unset($this->frames[count($this->frames) - 1]);
     }
 
     /**
@@ -99,7 +99,7 @@ class FrameChain /*implements Iterable<Frame>*/
      */
     public function push(Frame $frame)
     {
-        $this->frames[] = frame;
+        $this->frames[] = $frame;
     }
 
     /**
@@ -134,9 +134,19 @@ class FrameChain /*implements Iterable<Frame>*/
     public function getCurrentFrameSize()
     {
         $this->logger->verbose("getCurrentFrameSize()");
-        $result = $this->frames->get($this->frames->size() - 1)->getSize();
+        $result = $this->frames[count($this->frames) - 1]->getSize();
         $this->logger->verbose("Done!");
         return $result;
+    }
+
+    /**
+     *
+     * @return The size of the current frame.
+     */
+    public function getFrames()
+    {
+        $this->logger->verbose("getFrames()");
+        return $this->frames;
     }
 
     /**

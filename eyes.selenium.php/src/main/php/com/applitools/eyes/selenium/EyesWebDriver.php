@@ -174,6 +174,9 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
     public function findElement(WebDriverBy $by)
     {
         $webElement = $this->driver->findElement($by);
+
+        //$this->driver->switchTo()->frame($webElement);
+        
         if ($webElement instanceof RemoteWebElement) {
             $webElement = new EyesRemoteWebElement($this->logger, $this,
                 /*(RemoteWebElement)*/
@@ -227,11 +230,11 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
     }
 
     
-        public function switchTo() {
-            $this->logger->verbose("switchTo()");
-            $willSwitch = new OnWillSwitchSelenium();
-            return new EyesTargetLocator($this->logger, $this, $this->driver->switchTo(), $willSwitch);
-        }
+    public function switchTo() {
+        $this->logger->verbose("switchTo()");
+        $willSwitch = new OnWillSwitchSelenium($this->frameChain); //FIXME need to check
+        return new EyesTargetLocator($this->logger, $this, $this->driver->switchTo(), $willSwitch);
+    }
     
     public function navigate()
     {
@@ -258,22 +261,22 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $this->findElement(WebDriverBy::className($className));
     }
 
-    public function findElementsByClassName(String $className)
+    public function findElementsByClassName($className)
     {
         return $this->findElements(WebDriverBy::className($className));
     }
 
-    public function findElementByCssSelector(String $cssSelector)
+    public function findElementByCssSelector($cssSelector)
     {
         return $this->findElement(WebDriverBy::cssSelector($cssSelector));
     }
 
-    public function findElementsByCssSelector(String $cssSelector)
+    public function findElementsByCssSelector($cssSelector)
     {
         return $this->findElements(WebDriverBy::cssSelector($cssSelector));
     }
 
-    public function findElementById(String $id)
+    public function findElementById($id)
     {
         return $this->findElement(WebDriverBy::id($id));
     }
@@ -396,20 +399,22 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
             return $this->defaultContentViewportSize;
         }
 
-        $currentFrames = $this->getFrameChain();
+        //$currentFrames = clone $this->getFrameChain();
+//FIXME
         // Optimization
-        if ($currentFrames->size() > 0) {
-            $this->switchTo()->defaultContent();
-        }
+        //if ($currentFrames->size() > 0) {
+        //    $this->switchTo()->defaultContent();
+        //}
 
         $this->logger->verbose("Extracting viewport size...");
         $this->defaultContentViewportSize = EyesSeleniumUtils::extractViewportSize($this->logger, $this);
         $this->logger->verbose("Done! Viewport size: " . json_encode($this->defaultContentViewportSize));
 
-        if ($currentFrames->size() > 0) {
-            $locator = $this->switchTo();
-            $locator->frames($currentFrames);
-        }
+        //if ($currentFrames->size() > 0) {
+        //    $this->frameChain = clone $currentFrames; //FIXME need to check
+            /*$locator = $this->switchTo();
+            $locator->frames($currentFrames);*/
+        //}
         return $this->defaultContentViewportSize;
     }
 
