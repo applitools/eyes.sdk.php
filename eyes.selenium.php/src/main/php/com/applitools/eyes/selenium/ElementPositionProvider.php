@@ -52,11 +52,8 @@ class ElementPositionProvider implements PositionProvider {
         $this->logger->verbose("getEntireSize()");
         //Don't have possibility to get whole page.
         //But can get region size that contains current element
-        $location = $this->element->getLocation();
-        $size = $this->element->getSize();
-
-        $result = new RectangleSize($location->getX() + $size->getWidth(),
-            $location->getY() + $size->getHeight());
+        $result = new RectangleSize($this->element->getScrollWidth(),
+            $this->element->getScrollHeight());
 
         $this->logger->verbose(sprintf("Entire size: %s", json_encode($result)));
         return $result;

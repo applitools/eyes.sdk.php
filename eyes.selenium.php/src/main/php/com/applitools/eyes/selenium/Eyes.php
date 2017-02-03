@@ -512,8 +512,7 @@ class Eyes extends EyesBase
      *                      {@link #checkElement(By, int, String)} on the
      *                      region.
      */
-    public function checkRegionInFrameSelector(/*may be WebElement*/
-        $frameIndex, By $selector, $matchTimeout = null, $tag = null, $stitchContent = null)
+    public function checkRegionInFrameBySelector(WebDriverBy $frameSelector, WebDriverBy $elementSelector, $matchTimeout = null, $tag = null, $stitchContent = null)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log(sprintf("CheckRegionInFrame(%d, selector, %d, '%s'): Ignored", $frameIndex, $matchTimeout, $tag));
@@ -522,11 +521,11 @@ class Eyes extends EyesBase
         if (empty($matchTimeout)) {
             $matchTimeout = self::USE_DEFAULT_MATCH_TIMEOUT;
         }
-        $this->driver->switchTo()->frame($frameIndex);
+        $this->driver->switchTo()->frame($frameSelector);
         if ($stitchContent) {
-            $this->checkElement($selector, $matchTimeout, $tag);
+            $this->checkElementBySelector($elementSelector, $matchTimeout, $tag);
         } else {
-            $this->checkRegion($selector, $matchTimeout, $tag);
+            $this->checkRegionByElement($this->driver->findElement($frameSelector), $matchTimeout, $tag);
         }
         $this->driver->switchTo()->parentFrame();
     }
@@ -738,7 +737,7 @@ class Eyes extends EyesBase
 //???????
 
         $this->logger->log("Done! Calling checkRegionInFrame..");
-        checkRegionInFrame($framePath/*[framePath.length - 1]*/, $selector,
+        $this->checkRegionInFrame($framePath/*[framePath.length - 1]*/, $selector,
             $matchTimeout, $tag, $stitchContent);
         $this->logger->log("Done! switching back to default content..");
         $this->driver->switchTo()->defaultContent();
@@ -777,11 +776,10 @@ class Eyes extends EyesBase
             $this->setPositionProvider(new ElementPositionProvider($this->logger, $this->driver,
                 $element));
 
-            // Set overflow to "hidden".
-
-            //FIXME $eyesElement->setOverflow("hidden");
-
             $originalOverflow = $eyesElement->getOverflow();
+
+            // Set overflow to "hidden".
+            $eyesElement->setOverflow("hidden");
 
             $p = $eyesElement->getLocation();
 
@@ -1001,7 +999,7 @@ class Eyes extends EyesBase
             /*(EyesTargetLocator)*/
             //FIXME ///$this->driver->switchTo()->frames($originalFrame);
 
-            throw new TestFailedException("Failed to set the viewport size"/*, $e*/);
+            throw new /*TestFailed*/Exception("Failed to set the viewport size"/*, $e*/);
         }
         /*(EyesTargetLocator)*/
 //FIXME //$this->driver->switchTo()->frames($originalFrame);

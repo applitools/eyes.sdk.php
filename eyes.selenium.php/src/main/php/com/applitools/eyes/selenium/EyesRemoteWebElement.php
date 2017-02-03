@@ -7,39 +7,37 @@ class EyesRemoteWebElement extends RemoteWebElement {
 
     const JS_GET_COMPUTED_STYLE_FORMATTED_STR =
         " return arguments;"
-           /* "var elem = arguments[0];" .
-            "var styleProp = '%s';" .
-            "if (window.getComputedStyle) {" .
-                "return window.getComputedStyle(arguments, null).getPropertyValue(styleProp);" .
-            "} else if (elem.currentStyle) {" .
-            "   return elem.currentStyle[styleProp];" .
-            "} else {" .
-                "return null;" .
-            "}"*/;
+        /* "var elem = arguments[0];" .
+         "var styleProp = '%s';" .
+         "if (window.getComputedStyle) {" .
+             "return window.getComputedStyle(arguments, null).getPropertyValue(styleProp);" .
+         "} else if (elem.currentStyle) {" .
+         "   return elem.currentStyle[styleProp];" .
+         "} else {" .
+             "return null;" .
+         "}"*/;
 
     const JS_GET_SCROLL_LEFT =
-            //"return arguments[0].scrollLeft;";
-            "return window.pageXOffset;";
+        "return arguments[0].scrollLeft;";
 
     const JS_GET_SCROLL_TOP =
-            //"return arguments[0].scrollTop;";
-            "return window.pageYOffset;";
+        "return arguments[0].scrollTop;";
 
     const JS_GET_SCROLL_WIDTH =
-            "return arguments[0].scrollWidth;";
+        "return arguments[0].scrollWidth;";
 
     const JS_GET_SCROLL_HEIGHT =
-            "return arguments[0].scrollHeight;";
+        "return arguments[0].scrollHeight;";
 
     const JS_SCROLL_TO_FORMATTED_STR =
-            "window.scrollTo(%s, %s);";
+        "arguments[0].scrollLeft = %d;" .
+        "arguments[0].scrollTop = %d;";
 
     const JS_GET_OVERFLOW =
-            "str = JSON.stringify(arguments); alert(str);";
-            //"return arguments.innerHTML;";
+        "return arguments[0].style.overflow;";
 
     const JS_SET_OVERFLOW_FORMATTED_STR =
-            "overflow = '%s'";
+        "arguments[0].style.overflow = '%s'";
 
     public function __construct(Logger $logger, EyesWebDriver $eyesDriver,
                                 RemoteWebElement $webElement) {
@@ -102,9 +100,9 @@ class EyesRemoteWebElement extends RemoteWebElement {
      */
     public function getComputedStyle($propStyle) {
         $scriptToExec = sprintf
-                (self::JS_GET_COMPUTED_STYLE_FORMATTED_STR, $propStyle);
+        (self::JS_GET_COMPUTED_STYLE_FORMATTED_STR, $propStyle);
         return $this->eyesDriver->getRemoteWebDriver()->executeScript($scriptToExec);
-       // return $this->eyesDriver->getRemoteWebDriver()->execute($scriptToExec);
+        // return $this->eyesDriver->getRemoteWebDriver()->execute($scriptToExec);
     }
 
     /**
@@ -119,32 +117,30 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * @return The value of the scrollLeft property of the element.
      */
     public function getScrollLeft() {
-        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_LEFT);
+        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_LEFT, array($this));
     }
 
     /**
      * @return The value of the scrollTop property of the element.
      */
     public function getScrollTop() {
-        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_TOP);
+        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_TOP, array($this));
 
     }
 
     /**
      * @return The value of the scrollWidth property of the element.
      */
-    /*public function getScrollWidth() {
-        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_WIDTH,
-                $this)->toString();
-    }*/
+    public function getScrollWidth() {
+        return $this->webElement->getAttribute('scrollWidth');
+    }
 
     /**
      * @return The value of the scrollHeight property of the element.
      */
-    /*public function getScrollHeight() {
-        return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_HEIGHT,
-                $this)->toString();
-    }*/
+    public function getScrollHeight() {
+        return $this->webElement->getAttribute('scrollHeight');
+    }
 
     /**
      * @return The width of the left border.
@@ -184,7 +180,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
      */
     public function scrollTo(Location $location) {
         $this->eyesDriver->executeScript(sprintf(self::JS_SCROLL_TO_FORMATTED_STR,
-                $location->getX(), $location->getY()));
+            $location->getX(), $location->getY()), array($this));
     }
 
     /**
@@ -203,7 +199,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     public function setOverflow($overflow) {
 
         $this->eyesDriver->executeScript(sprintf(self::JS_SET_OVERFLOW_FORMATTED_STR,
-                $overflow));
+            $overflow), array($this));
     }
 
     public function click() {
