@@ -67,6 +67,8 @@ Getting started
 			$testName = 'Example_test_name';
 			$eyes->open($this->webDriver, $appName, $testName, new RectangleSize(1024, 500));
 			$eyes->checkWindow("Example_tag_name");
+			$eyes->checkFrame(WebDriverBy::xpath("//*[@src=\"frame1.html\"]"), 3, "Elem_1");
+			$eyes->checkRegionInFrameBySelector(WebDriverBy::xpath("//*[@src=\"frame1.html\"]"), WebDriverBy::id("inner-frame-div"), 3, "Elem_1", true);
 			$eyes->close();
 		}
 	}
