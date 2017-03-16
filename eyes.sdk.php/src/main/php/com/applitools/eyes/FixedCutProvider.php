@@ -43,4 +43,13 @@ class FixedCutProvider implements CutProvider {
 
         return $image;
     }
+
+    public function scale($scaleRatio) {
+        $scaledHeader = (int) ceil($this->header * $scaleRatio);
+        $scaledFooter = (int) ceil($this->footer * $scaleRatio);
+        $scaledLeft = (int) ceil($this->left * $scaleRatio);
+        $scaledRight = (int) ceil($this->right * $scaleRatio);
+
+        return new FixedCutProvider($scaledHeader, $scaledFooter, $scaledLeft, $scaledRight);
+    }
 }

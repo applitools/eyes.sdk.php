@@ -410,8 +410,8 @@ class EyesRemoteWebElement extends RemoteWebElement {
         $response = $this->execute(DriverCommand::GET_ELEMENT_LOCATION,
             array(":id"=>$this->getId()));//ImmutableMap::of("id", $elementId));
         //$rawPoint = $response->getValue();
-        $x = ceil($response["x"]);
-        $y = ceil($response["y"]);
+        $x = floor($response["x"]);
+        $y = floor($response["y"]);
         return new WebDriverPoint($x, $y);
 
         // TODO: Use the command delegation instead. (once the bug is fixed).
@@ -428,8 +428,8 @@ class EyesRemoteWebElement extends RemoteWebElement {
         $response = $this->execute(DriverCommand::GET_ELEMENT_SIZE,
             array(":id"=>$elementId));//ImmutableMap::of("id", elementId));
         //$rawSize = $response->getValue();
-        $width = ceil($response["width"]);
-        $height = ceil($response["height"]);
+        $width = floor($response["width"]);
+        $height = floor($response["height"]);
         return new WebDriverDimension($width, $height);
 
         // TODO: Use the command delegation instead. (once the bug is fixed).

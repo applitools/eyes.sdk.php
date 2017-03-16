@@ -45,7 +45,7 @@ class ContextBasedScaleProvider implements ScaleProvider {
         return $this->scaleRatio;
     }
 
-    public function scaleImage(Gregwar\Image\Image $image) {
+    /*public function scaleImage(Gregwar\Image\Image $image) {
         // First time an image is given we determine the scale ratio.
 
         if ($this->scaleRatio == self::UNKNOWN_SCALE_RATIO) {
@@ -65,5 +65,25 @@ class ContextBasedScaleProvider implements ScaleProvider {
             }
         }
         return ImageUtils::scaleImage($image, $this->scaleMethod, $this->scaleRatio);
+    }*/
+    /**
+     * Set the scale ratio based on the given image.
+     * @param imageToScaleWidth The width of the image to scale, used for calculating the scale ratio.
+     */
+    public function updateScaleRatio($imageToScaleWidth) {
+        $viewportWidth = $this->viewportSize->getWidth();
+        $dcesWidth = $this->topLevelContextEntireSize->getWidth();
+
+            // If the image's width is the same as the viewport's width or the
+            // top level context's width, no scaling is necessary.
+        if ((($imageToScaleWidth >= $viewportWidth - self::ALLOWED_VS_DEVIATION)
+        && ($imageToScaleWidth <= $viewportWidth + self::ALLOWED_VS_DEVIATION))
+        || (($imageToScaleWidth >= $dcesWidth - self::ALLOWED_DCES_DEVIATION)
+        && $imageToScaleWidth <= $dcesWidth + self::ALLOWED_DCES_DEVIATION)) {
+        $this->scaleRatio = 1;
+        } else {
+            $this->scaleRatio = 1 / $this->devicePixelRatio;
+        }
     }
+
 }

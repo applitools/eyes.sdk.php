@@ -548,17 +548,25 @@ class Eyes extends EyesBase
 
             $this->logger->log("Setting scale provider..");
             try {
-                $this->scaleProviderHandler->set(new ContextBasedScaleProvider(
+                $factory = new ContextBasedScaleProviderFactory($this->positionProvider->getEntireSize(), $this->getViewportSize(),
+                    $this->getScaleMethod(), $this->devicePixelRatio, $this->scaleProviderHandler);
+                /*$this->scaleProviderHandler->set(new ContextBasedScaleProvider(
                     $this->positionProvider->getEntireSize(), $this->getViewportSize(),
-                    $this->getScaleMethod(), $this->devicePixelRatio));
+                    $this->getScaleMethod(), $this->devicePixelRatio));*/
             } catch (Exception $e) {
                 // This can happen in Appium for example.
                 $this->logger->log("Failed to set ContextBasedScaleProvider.");
                 $this->logger->log("Using FixedScaleProvider instead...");
-                $this->scaleProviderHandler->set(new FixedScaleProvider(1 / $this->devicePixelRatio));
+                /*$this->scaleProviderHandler->set(new FixedScaleProvider(1 / $this->devicePixelRatio));*/
+                $factory = new FixedScaleProviderFactory(1/$this->devicePixelRatio, $this->getScaleMethod(), $this->scaleProviderHandler);
             }
             $this->logger->log("Done!");
+            return $factory;
         }
+        // If we already have a scale provider set, we'll just use it, and pass a mock as provider handler.
+        $nullProvider = new SimplePropertyHandler();
+
+        return new ScaleProviderIdentityFactory($this->scaleProviderHandler->get(), $nullProvider);
     }
 
     /**
@@ -1012,8 +1020,7 @@ class Eyes extends EyesBase
     {
         $this->logger->log("getScreenshot()");
 
-
-        $this->updateScalingParams();
+        $this->scaleProviderFactory = $this->updateScalingParams();
 
         $originalOverflow = null;
         if ($this->hideScrollbars) {
@@ -1032,10 +1039,10 @@ class Eyes extends EyesBase
                 }else{
                     $originProvider = $this->positionProvider;
                 }
-
+//print_r($this->scaleProviderFactory); die();
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
                     $this->positionProvider, $originProvider,
-                    $this->scaleProviderHandler->get(), $this->cutProviderHandler->get(),
+                    $this->scaleProviderFactory, $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 $this->logger->log("Building screenshot object...");
 

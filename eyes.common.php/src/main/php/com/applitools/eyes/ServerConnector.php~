@@ -155,7 +155,6 @@ class ServerConnector implements ServerConnectorInterface
             curl_setopt($this->ch, CURLOPT_URL, "https://eyessdk.applitools.com/api/sessions/running.json?apiKey=" . $this->apiKey);
             curl_setopt($this->ch, CURLOPT_POST, 1);
             curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
-            curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $params);
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
                     'Content-Type: application/json',
@@ -175,7 +174,6 @@ class ServerConnector implements ServerConnectorInterface
         }
         $validStatusCodes = array('200', '201');
         if (!in_array($information['http_code'], $validStatusCodes)) {
-            throw new Exception('Invalid status code.');
             $runningSession = null;
         } else {
             $result = json_decode($result, true);
@@ -228,7 +226,6 @@ class ServerConnector implements ServerConnectorInterface
             curl_setopt($this->ch, CURLOPT_URL, $runningSessionsEndpoint);
             curl_setopt($this->ch, CURLOPT_POST, 1);
             curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
-            curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $params);
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
                     'Content-Type: application/json',
@@ -246,7 +243,6 @@ class ServerConnector implements ServerConnectorInterface
                 $this->logger->verbose("matchWindow(): Server request success.");
             }else{
                 $this->logger->verbose("matchWindow(): Server request failed. Code: " . $information['http_code']);
-                throw new Exception('Invalid status code.');
             }
             $result = new MatchResult();
             if(!empty($response)){
@@ -266,7 +262,6 @@ class ServerConnector implements ServerConnectorInterface
         //FIXME code not related to Java.
         curl_setopt($this->ch, CURLOPT_URL,"https://eyessdk.applitools.com/api/sessions/running/".$runningSession->getId().".json?isAborted=false&updateBaseline=".($runningSession->getIsNewSession()?"true":"false")."&apiKey=".$this->apiKey);
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
-        curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
                 'Content-Type: application/json',
@@ -280,8 +275,7 @@ class ServerConnector implements ServerConnectorInterface
         if (in_array($information['http_code'], $validStatusCodes)) {
             $this->logger->verbose("stopSession(): Session was stopped");
         }else{
-            $this->logger->verbose("stopSession(): status ".$information['http_code'] . ". Closing was failed");
-            throw new Exception('Invalid status code.');
+            $this->logger->verbose("stopSession(): status ".$information['http_code'] . ". Need to check. Closing was failed");
         }
         curl_close ($this->ch);
         //FIXME may be need to use parseResponseWithJsonData for preparing result

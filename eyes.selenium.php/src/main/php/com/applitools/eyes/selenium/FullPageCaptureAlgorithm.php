@@ -36,7 +36,7 @@ class FullPageCaptureAlgorithm {
 
     public function getStitchedRegion(ImageProvider $imageProvider,
                RegionProvider $regionProvider, PositionProvider $originProvider,
-               PositionProvider $positionProvider, ScaleProvider $scaleProvider,
+               PositionProvider $positionProvider, ScaleProviderFactory $scaleProviderFactory,
                CutProvider $cutProvider, $waitBeforeScreenshots,
                EyesScreenshotFactory $screenshotFactory) {
         $this->logger->verbose("getStitchedRegion()");
@@ -73,10 +73,13 @@ class FullPageCaptureAlgorithm {
         $this->image = $imageProvider->getImage();
 
         // FIXME - scaling should be refactored
-        $this->image = $scaleProvider->scaleImage($this->image);
+        $scaleProvider = $scaleProviderFactory->getScaleProvider($this->image->width());
+        // Notice that we want to cut/crop an image before we scale it, we need to change
+        $pixelRatio = 1 / $scaleProvider->getScaleRatio();
 
         // FIXME - cropping should be overlaid, so a single cut provider will only handle a single part of the image.
 
+        $cutProvider = $cutProvider->scale($pixelRatio);
         $this->image = $cutProvider->cut($this->image);
 
         $this->logger->verbose("Done! Creating screenshot object...");
@@ -196,7 +199,7 @@ class FullPageCaptureAlgorithm {
             // Actually taking the screenshot.
             $this->logger->verbose("Getting image...");
             $partImage = $imageProvider->getImage();
-            $partImage = $scaleProvider->scaleImage($partImage);
+//$partImage = $scaleProvider->scaleImage($partImage);
 
             // FIXME - cropping should be overlaid (see previous comment re cropping)
             $partImage = $cutProvider->cut($partImage);
@@ -207,6 +210,7 @@ class FullPageCaptureAlgorithm {
                 $partImage = ImageUtils::getImagePart($partImage,
                         $regionInScreenshot);
             }
+//            $partImage = ImageUtils::scaleImage($partImage, $scaleProvider->getScaleRatio());
             // Stitching the current part.
             $this->logger->verbose("Stitching part into the image container...");
             //$stitchedImage->getRaster()->setRect($currentPosition->getX(),
@@ -217,6 +221,7 @@ class FullPageCaptureAlgorithm {
             $lastSuccessfulLocation = $currentPosition;
         }
 
+        $stitchedImage = ImageUtils::scaleImage($stitchedImage, $scaleProvider->getScaleRatio());
         if ($partImage != null) {
             $lastSuccesfulPartSize = new RectangleSize($partImage->width(),
                     $partImage->height());
