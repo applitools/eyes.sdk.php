@@ -1,4 +1,4 @@
-# eyes.php
+eyes.php
 =============
 Getting started
 ----------------
