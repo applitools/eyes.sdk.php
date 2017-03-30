@@ -8,7 +8,7 @@ class ImageMatchSettings
     private $matchLevel; //MatchLevel
     private $exact; //ExactMatchSettings
 
-    public function __construct(MatchLevel $matchLevel = null, ExactMatchSettings $exact = null)
+    public function __construct($matchLevel = null, ExactMatchSettings $exact = null)
     {
         if (empty($matchLevel)) {
             $matchLevel = MatchLevel::STRICT;
@@ -31,7 +31,7 @@ class ImageMatchSettings
      *
      * @param matchLevel The "strictness" level of the match.
      */
-    public function setMatchLevel(MatchLevel $matchLevel)
+    public function setMatchLevel($matchLevel)
     {
         $this->matchLevel = $matchLevel;
     }
