@@ -221,7 +221,7 @@ abstract class EyesBase
      * @param matchLevel The match level setting.
      * @see com.applitools.eyes.MatchLevel
      */
-    public function setMatchLevel(MatchLevel $matchLevel) {
+    public function setMatchLevel($matchLevel) {
         $this->defaultMatchSettings->setMatchLevel($matchLevel);
     }
 

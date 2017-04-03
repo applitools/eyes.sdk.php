@@ -109,14 +109,6 @@ class ServerConnector implements ServerConnectorInterface
     {
 
         ArgumentGuard::notNull($sessionStartInfo, "sessionStartInfo");
-
-      /*  $postData;
-        $response;
-        $statusCode;
-        $validStatusCodes = array();
-        $isNewSession;
-        $runningSession;*/
-
         $params = [
             'startInfo' => [
                 "appIdOrName" => $sessionStartInfo->getAppIdOrName(),
@@ -130,7 +122,7 @@ class ServerConnector implements ServerConnectorInterface
                     ]
                 ],
 
-                "matchLevel" => "Strict",
+                "matchLevel" => $sessionStartInfo->getDefaultMatchSettings()->getMatchLevel(),
                 "agentId" => $sessionStartInfo->getAgentId()
             ]
         ];

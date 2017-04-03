@@ -12,7 +12,7 @@ class ScaleProviderIdentityFactory extends ScaleProviderFactory {
      * @param scaleProvider The {@link ScaleProvider}
      */
     public function __construct(ScaleProvider $scaleProvider,
-                            /*PropertyHandler<ScaleProvider>*/ $scaleProviderHandler) { echo "SSSSSSSSSSSSSSSSS";
+                            /*PropertyHandler<ScaleProvider>*/ $scaleProviderHandler) {
         parent::__construct($scaleProviderHandler);
         $this->scaleProvider = $scaleProvider;
     }

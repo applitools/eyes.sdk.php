@@ -583,8 +583,8 @@ class Eyes extends EyesBase
             $this->logger->log("Done! Creating image object...");
 
             $screenshotImage = /*FIXME need to check ImageUtils::imageFromBase64(*/$screenshot64/*)*/;
-            //$screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
-            $scaleProvider = $this->scaleProviderHandler->get();
+            $scaleProvider = $this->updateScalingParams()->getScaleProvider($screenshotImage->width());
+
             $screenshotImage = ImageUtils::scaleImage($screenshotImage, $scaleProvider->getScaleRatio());
 
             $this->logger->log("Done! Building required object...");
@@ -1067,7 +1067,7 @@ class Eyes extends EyesBase
                 */
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
                     new ScrollPositionProvider($this->logger, $this->driver),
-                    $this->positionProvider, /*$this->scaleProviderHandler->get()*/ $scaleProviderFactory,
+                    $this->positionProvider, $scaleProviderFactory,
                     $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 /*(EyesTargetLocator)*/
