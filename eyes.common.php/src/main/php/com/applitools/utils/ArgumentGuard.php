@@ -56,8 +56,8 @@ class ArgumentGuard
 
     /**
      * Fails if the input integer parameter is negative.
-     * @param param The input parameter.
-     * @param paramName The input parameter name.
+     * @param $param|  The input parameter.
+     * @param $paramName string The input parameter name.
      */
     public static function greaterThanOrEqualToZero($param, $paramName)
     {

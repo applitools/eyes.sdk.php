@@ -387,8 +387,8 @@ class EyesRemoteWebElement extends RemoteWebElement {
         return $this->wrapElements($this->webElement->findElementsByTagName($using));
     }
 
-    public function equals($obj) {
-        return ($obj instanceof  RemoteWebElement) && ($this->webElement == $obj);
+    public function equals(WebDriverElement $other) {
+        return ($other instanceof RemoteWebElement) && ($this->webElement->equals($other));
     }
 
     public function hashCode() {

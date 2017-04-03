@@ -10,7 +10,7 @@ abstract class EyesBase
     private $isOpen;
     private $serverConnector;
     private $runningSession;
-    private $viewportSize;/*RectangleSize*/
+    protected $viewportSize;/*RectangleSize*/
     private $batch;/*BatchInfo*/
     private $sessionType;/*it should be class to*/
     private $currentAppName;
@@ -25,7 +25,7 @@ abstract class EyesBase
     private $hostOS;
     private $userInputs = array(); //new ArrayDeque<Trigger>();
     private $shouldMatchWindowRunOnceOnTimeout;
-    private $lastScreenshot;
+    protected $lastScreenshot;
     protected $scaleProviderHandler; //PropertyHandler<ScaleProvider>
     protected $cutProviderHandler; //PropertyHandler<CutProvider>
 
@@ -458,7 +458,7 @@ abstract class EyesBase
     /**
      * Sets the API key of your applitools Eyes account.
      *
-     * @param apiKey The api key to set.
+     * @param $apiKey string The api key to set.
      */
     public function setApiKey($apiKey)
     {

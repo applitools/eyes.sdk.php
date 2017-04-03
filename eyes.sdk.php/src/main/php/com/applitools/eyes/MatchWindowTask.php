@@ -17,14 +17,14 @@ class MatchWindowTask
 
 
     /**
-     * @param logger            A logger instance.
-     * @param serverConnector   Our gateway to the agent
-     * @param runningSession    The running session in which we should match the
-     *                          window
-     * @param retryTimeout      The default total time we tell the agent to ignore
-     *                          mismatches.
-     * @param appOutputProvider A callback for getting the application output
-     *                          when performing match
+     * @param logger|Logger                       A logger instance.
+     * @param serverConnector|ServerConnector     Our gateway to the agent
+     * @param runningSession|RunningSession       The running session in which we should match the
+     *                                            window
+     * @param retryTimeout|int                    The default total time we tell the agent to ignore
+     *                                            mismatches.
+     * @param appOutputProvider|AppOutputProvider A callback for getting the application output
+     *                                            when performing match
      */
     public function __construct(Logger $logger,
         ServerConnector $serverConnector,

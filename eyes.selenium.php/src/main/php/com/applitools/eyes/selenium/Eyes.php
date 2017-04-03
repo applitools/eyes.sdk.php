@@ -25,7 +25,7 @@ class Eyes extends EyesBase
     const DEFAULT_WAIT_BEFORE_SCREENSHOTS = 100000;
 
     protected $driver; //EyesWebDriver FIXME
-    private $dontGetTitle;
+    private $doNotGetTitle;
 
 
     private $forceFullPageScreenshot;
@@ -57,7 +57,7 @@ class Eyes extends EyesBase
         $this->checkFrameOrElement = false;
         $this->regionToCheck = null;
         $this->forceFullPageScreenshot = false;
-        $this->dontGetTitle = false;
+        $this->doNotGetTitle = false;
         $this->hideScrollbars = false;
         $this->devicePixelRatio = self::UNKNOWN_DEVICE_PIXEL_RATIO;
         $this->stitchMode = StitchMode::SCROLL;
@@ -76,7 +76,7 @@ class Eyes extends EyesBase
      * ﻿Forces a full page screenshot (by scrolling and stitching) if the
      * browser only ﻿supports viewport screenshots).
      *
-     * @param shouldForce Whether to force a full page screenshot or not.
+     * @param $shouldForce bool Whether to force a full page screenshot or not.
      */
     public function setForceFullPageScreenshot($shouldForce)
     {
@@ -84,7 +84,7 @@ class Eyes extends EyesBase
     }
 
     /**
-     * @return Whether Eyes should force a full page screenshot.
+     * @return bool Whether Eyes should force a full page screenshot.
      */
     public function getForceFullPageScreenshot()
     {
@@ -147,14 +147,14 @@ class Eyes extends EyesBase
      * page includes fixed position header/sidebar, use {@link StitchMode#CSS}.
      * Default is {@link StitchMode#SCROLL}.
      *
-     * @param mode The stitch mode to set.
+     * @param $mode string The stitch mode to set.
      */
     public function setStitchMode($mode)
     {
         $this->stitchMode = $mode;
         if ($this->driver != null) {
             switch ($mode) {
-                case self::CSS:
+                case StitchMode::CSS:
                     $posProvider = new CssTranslatePositionProvider($this->logger, $this->driver);
                     $this->setPositionProvider($posProvider);
                     break;
@@ -167,7 +167,7 @@ class Eyes extends EyesBase
 
     /**
      *
-     * @return The current stitch mode settings.
+     * @return string The current stitch mode settings.
      */
     public function getStitchMode()
     {
@@ -176,7 +176,7 @@ class Eyes extends EyesBase
 
     /**
      * Hide the scrollbars when taking screenshots.
-     * @param shouldHide Whether to hide the scrollbars or not.
+     * @param bool $shouldHide Whether to hide the scrollbars or not.
      */
     public function setHideScrollbars($shouldHide)
     {
@@ -215,7 +215,7 @@ class Eyes extends EyesBase
 
     /**
      *
-     * @return The device pixel ratio, or {@link #UNKNOWN_DEVICE_PIXEL_RATIO}
+     * @return float The device pixel ratio, or {@link #UNKNOWN_DEVICE_PIXEL_RATIO}
      * if the DPR is not known yet or if it wasn't possible to extract it.
      */
     public function getDevicePixelRatio()
@@ -226,17 +226,16 @@ class Eyes extends EyesBase
     /**
      * Starts a test.
      *
-     * @param driver         The web driver that controls the browser hosting
-     *                       the application under test.
-     * @param appName        The name of the application under test.
-     * @param testName       The test name.
-     * @param viewportSize   The required browser's viewport size
-     *                       (i.e., the visible part of the document's body) or
-     *                       {@code null} to use the current window's viewport.
-     * @param sessionType    The type of test (e.g.,  standard test / visual
-     *                       performance test).
-     * @return A wrapped WebDriver which enables Eyes trigger recording and
-     * frame handling.
+     * @param $driver WebDriver            The web driver that controls the browser hosting
+     *                                     the application under test.
+     * @param $appName string              The name of the application under test.
+     * @param $testName string             The test name.
+     * @param $viewportSize RectangleSize  The required browser's viewport size
+     *                                     (i.e., the visible part of the document's body) or
+     *                                     {@code null} to use the current window's viewport.
+     * @param $sessionType SessionType     The type of test (e.g.,  standard test / visual performance test).
+     * @return EyesWebDriver A wrapped WebDriver which enables Eyes trigger recording and frame handling.
+     * @throws EyesException
      */
     public function open(WebDriver $driver, $appName, $testName,
                          RectangleSize $viewportSize = null, SessionType $sessionType = null)
@@ -289,14 +288,11 @@ class Eyes extends EyesBase
 
 
     /**
-     * Takes a snapshot of the application under test and matches it with
-     * the expected output.
+     * Takes a snapshot of the application under test and matches it with the expected output.
      *
-     * @param matchTimeout The amount of time to retry matching
-     *                     (Milliseconds).
-     * @param tag An optional tag to be associated with the snapshot.
-     * @throws TestFailedException Thrown if a mismatch is detected and
-     *                             immediate failure reports are enabled.
+     * @param $matchTimeout int The amount of time to retry matching (Milliseconds).
+     * @param $tag string An optional tag to be associated with the snapshot.
+     * @throws TestFailedException Thrown if a mismatch is detected and immediate failure reports are enabled.
      */
     public function checkWindow($tag, $matchTimeout = null)
     {
@@ -316,14 +312,12 @@ class Eyes extends EyesBase
     /**
      * Runs a test on the current window.
      *
-     * @param driver         The web driver that controls the browser hosting
-     *                       the application under test.
-     * @param appName        The name of the application under test.
-     * @param testName       The test name (will also be used as the tag name
-     *                       for the step).
-     * @param viewportSize   The required browser's viewport size
-     *                       (i.e., the visible part of the document's body) or
-     *                       {@code null} to use the current window's viewport.
+     * @param $driver WebDriver            The web driver that controls the browser hosting the application under test.
+     * @param $appName string              The name of the application under test.
+     * @param $testName string             The test name (will also be used as the tag name for the step).
+     * @param $viewportSize RectangleSize  The required browser's viewport size
+     *                                    (i.e., the visible part of the document's body) or
+     *                                    {@code null} to use the current window's viewport.
      */
     public function testWindow(WebDriver $driver, $appName = null, $testName, RectangleSize $viewportSize = null)
     {
@@ -338,14 +332,12 @@ class Eyes extends EyesBase
 
     /**
      * Run a visual performance test.
-     * @param driver The driver to use.
-     * @param appName The name of the application being tested.
-     * @param testName The test name.
-     * @param action Actions to be performed in parallel to starting the test.
-     * @param deadline The expected time until the application
-     *                        should have been loaded. (Seconds)
-     * @param timeout The maximum time until the application should have been
-     *                   loaded. (Seconds)
+     * @param $driver WebDriver The driver to use.
+     * @param $appName string The name of the application being tested.
+     * @param $testName string The test name.
+     * @param $action WebDriverAction Action to be performed in parallel to starting the test.
+     * @param $deadline int The expected time until the application should have been loaded. (Seconds)
+     * @param $timeout int The maximum time until the application should have been loaded. (Seconds)
      */
     public function testResponseTime(WebDriver $driver, $appName,
                                      $testName, WebDriverAction $action = null,
@@ -515,7 +507,7 @@ class Eyes extends EyesBase
     public function checkRegionInFrameBySelector(WebDriverBy $frameSelector, WebDriverBy $elementSelector, $matchTimeout = null, $tag = null, $stitchContent = null)
     {
         if ($this->getIsDisabled()) {
-            $this->logger->log(sprintf("CheckRegionInFrame(%d, selector, %d, '%s'): Ignored", $frameIndex, $matchTimeout, $tag));
+            $this->logger->log(sprintf("CheckRegionInFrame(%d, selector, %d, '%s'): Ignored", $frameSelector, $matchTimeout, $tag));
             return;
         }
         if (empty($matchTimeout)) {
@@ -590,8 +582,10 @@ class Eyes extends EyesBase
 
             $this->logger->log("Done! Creating image object...");
 
-            $screenshotImage = /*FIXME ned to check ImageUtils::imageFromBase64(*/$screenshot64/*)*/;
-            $screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
+            $screenshotImage = /*FIXME need to check ImageUtils::imageFromBase64(*/$screenshot64/*)*/;
+            //$screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
+            $scaleProvider = $this->scaleProviderHandler->get();
+            $screenshotImage = ImageUtils::scaleImage($screenshotImage, $scaleProvider->getScaleRatio());
 
             $this->logger->log("Done! Building required object...");
 
@@ -623,12 +617,10 @@ class Eyes extends EyesBase
      * Matches the frame given as parameter, by switching into the frame and
      * using stitching to get an image of the frame.
      *
-     * @param frameNameOrId The name or id of the frame to check. (The same
-     *                      name/id as would be used in a call to
-     *                   driver.switchTo().frame()).
-     * @param matchTimeout The amount of time to retry matching.
-     *                     (Milliseconds)
-     * @param tag An optional tag to be associated with the match.
+     * @param $frameNameOrIdOrIndex string The name, id or index of the frame to check. (The same
+     *                              name/id/index as would be used in a call to driver.switchTo().frame()).
+     * @param $matchTimeout int The amount of time to retry matching. (Milliseconds)
+     * @param $tag string An optional tag to be associated with the match.
      */
     public function checkFrame($frameNameOrIdOrIndex, $matchTimeout, $tag)
     {
@@ -893,9 +885,9 @@ class Eyes extends EyesBase
             return;
         }
 
-        if (!FrameChain::isSameFrameChain($driver->getFrameChain(),
+        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(),
             /*(EyesWebDriverScreenshot)*/
-            $lastScreenshot->getFrameChain())
+            $this->lastScreenshot->getFrameChain())
         ) {
             $this->logger->log(sprintf("Ignoring %s (different frame)", $action));
             return;
@@ -929,7 +921,7 @@ class Eyes extends EyesBase
 
         if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(),
             /*(EyesWebDriverScreenshot) */
-            $lastScreenshot->getFrameChain())
+            $this->lastScreenshot->getFrameChain())
         ) {
             $this->logger->log(sprintf("Ignoring '%s' (different frame)", $text));
             return;
@@ -1020,7 +1012,7 @@ class Eyes extends EyesBase
     {
         $this->logger->log("getScreenshot()");
 
-        $this->scaleProviderFactory = $this->updateScalingParams();
+        $scaleProviderFactory = $this->updateScalingParams();
 
         $originalOverflow = null;
         if ($this->hideScrollbars) {
@@ -1039,10 +1031,10 @@ class Eyes extends EyesBase
                 }else{
                     $originProvider = $this->positionProvider;
                 }
-//print_r($this->scaleProviderFactory); die();
+//print_r($scaleProviderFactory); die();
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
                     $this->positionProvider, $originProvider,
-                    $this->scaleProviderFactory, $this->cutProviderHandler->get(),
+                    $scaleProviderFactory, $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 $this->logger->log("Building screenshot object...");
 
@@ -1075,7 +1067,7 @@ class Eyes extends EyesBase
                 */
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
                     new ScrollPositionProvider($this->logger, $this->driver),
-                    $this->positionProvider, $this->scaleProviderHandler->get(),
+                    $this->positionProvider, /*$this->scaleProviderHandler->get()*/ $scaleProviderFactory,
                     $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 /*(EyesTargetLocator)*/
@@ -1103,12 +1095,12 @@ class Eyes extends EyesBase
 
     public function getTitle()
     {
-        if (!$this->dontGetTitle) {
+        if (!$this->doNotGetTitle) {
             try {
                 return $this->driver->getTitle();
             } catch (Exception $ex) {
                 $this->logger->log("failed (" . $ex->getMessage() . ")");
-                $this->dontGetTitle = true;
+                $this->doNotGetTitle = true;
             }
         }
 

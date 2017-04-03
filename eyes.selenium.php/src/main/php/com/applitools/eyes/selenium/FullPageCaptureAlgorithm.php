@@ -18,20 +18,19 @@ class FullPageCaptureAlgorithm {
     /**
      * Returns a stitching of a region.
      *
-     * @param imageProvider The provider for the screenshot.
-     * @param regionProvider A provider of the region to stitch. If {@code
-     *                       getRegion} returns {@code Region.EMPTY}, the
-     *                       entire image will be stitched.
-     * @param originProvider A provider for scrolling to initial position
+     * @param ImageProvider $imageProvider The provider for the screenshot.
+     * @param RegionProvider $regionProvider A provider of the region to stitch. If {@code
+     *                       getRegion} returns {@code Region.EMPTY}, the entire image will be stitched.
+     * @param PositionProvider $originProvider A provider for scrolling to initial position
      *                       before starting the actual stitching.
-     * @param positionProvider A provider of the scrolling implementation.
-     * @param scaleProvider The provider which performs the necessary
-     *                         scaling.
-     * @param waitBeforeScreenshots Time to wait before each screenshot
-     *                              (milliseconds).
-     * @param screenshotFactory The factory to use for creating screenshots
+     * @param PositionProvider $positionProvider A provider of the scrolling implementation.
+     * @param ScaleProviderFactory $scaleProviderFactory The provider which performs the necessary scaling.
+     * @param CutProvider $cutProvider
+     * @param int $waitBeforeScreenshots Time to wait before each screenshot (milliseconds).
+     * @param EyesScreenshotFactory $screenshotFactory The factory to use for creating screenshots
      *                          from the images.
      * @return An image which represents the stitched region.
+     * @throws EyesException
      */
 
     public function getStitchedRegion(ImageProvider $imageProvider,

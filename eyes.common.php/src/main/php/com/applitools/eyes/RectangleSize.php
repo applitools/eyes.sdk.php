@@ -6,8 +6,8 @@ class RectangleSize {
 
     /**
      * Creates a new RectangleSize instance.
-     * @param width The width of the rectangle.
-     * @param height The height of the rectangle.
+     * @param $width int The width of the rectangle.
+     * @param $height int The height of the rectangle.
      */
     public function __construct($width, $height) {
         ArgumentGuard::greaterThanOrEqualToZero($width, "width");
@@ -18,14 +18,14 @@ class RectangleSize {
     }
 
     /**
-     * @return The rectangle's width.
+     * @return int The rectangle's width.
      */
     public function getWidth() {
         return $this->width;
     }
 
     /**
-     * @return The rectangle's height.
+     * @return int The rectangle's height.
      */
     public function getHeight() {
         return $this->height;
