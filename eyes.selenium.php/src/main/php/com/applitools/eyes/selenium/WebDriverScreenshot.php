@@ -3,6 +3,8 @@
  * Applitools SDK for Selenium integration.
  */
 
+namespace Applitools;
+
 /**
  * Encapsulation for the WebDriver wire protocol "screenshot" command response.
  */

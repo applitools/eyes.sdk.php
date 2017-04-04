@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * Cut provider based on fixed cut values.
  */

@@ -1,5 +1,9 @@
 <?php
 
+namespace Applitools;
+
+use Applitools\Exceptions\IllegalStateException;
+
 /**
  * An implementation of {@link PositionProvider} which throws an exception
  * for every method. Can be used as a placeholder until an actual

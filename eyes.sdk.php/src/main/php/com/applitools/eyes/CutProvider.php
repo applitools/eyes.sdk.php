@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * Encapsulates cutting logic.
  */
@@ -6,8 +9,10 @@ interface CutProvider {
 
     /**
      *
-     * @param image The image to cut.
-     * @return A new cut image.
+     * @param Image $image The image to cut.
+     * @return Image A new cut image.
      */
     function cut($image);
 }
+
+?>

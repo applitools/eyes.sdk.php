@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * Represents a region.
  */
@@ -19,10 +21,10 @@ class Region
 
     protected function makeEmpty()
     {
-        $this->left = self::$empty->getLeft();
-        $this->top = self::$empty->getTop();
-        $this->width = self::$empty->getWidth();
-        $this->height = self::$empty->getHeight();
+        $this->left = self::$empty->left;
+        $this->top = self::$empty->top;
+        $this->width = self::$empty->width;
+        $this->height = self::$empty->height;
     }
 
     public function __construct($left = null, $top = null, $width = null, $height = null,
@@ -89,12 +91,12 @@ class Region
 
     public function hashCode()
     {
-        return ($this->left . $this->top . $this->width + $this->height);
+        return ($this->left . $this->top . $this->width . $this->height);
     }
 
     /**
      *
-     * @return The (top,left) position of the current region.
+     * @return Location The (top,left) position of the current region.
      */
     public function getLocation()
     {
@@ -104,8 +106,8 @@ class Region
     /**
      * Offsets the region's location (in place).
      *
-     * @param dx The X axis offset.
-     * @param dy The Y axis offset.
+     * @param int $dx The X axis offset.
+     * @param int $dy The Y axis offset.
      */
     public function offset($dx, $dy)
     {
@@ -115,7 +117,7 @@ class Region
 
     /**
      *
-     * @return The (top,left) position of the current region.
+     * @return RectangleSize The (top,left) position of the current region.
      */
     public function getSize()
     {
@@ -124,20 +126,20 @@ class Region
 
     /**
      * Set the (top,left) position of the current region
-     * @param location The (top,left) position to set.
+     * @param Location $location The (top,left) position to set.
      */
     public function setLocation(Location $location)
     {
-        ArgumentGuard::notNull(location, "location");
+        ArgumentGuard::notNull($location, "location");
         $this->left = $location->getX();
         $this->top = $location->getY();
     }
 
     /**
      *
-     * @param containerRegion The region to divide into sub-regions.
-     * @param subRegionSize The maximum size of each sub-region.
-     * @return The sub-regions composing the current region. If subRegionSize
+     * @param Region $containerRegion The region to divide into sub-regions.
+     * @param RectangleSize $subRegionSize The maximum size of each sub-region.
+     * @return array The sub-regions composing the current region. If subRegionSize
      * is equal or greater than the current region,  only a single region is
      * returned.
      */
@@ -168,7 +170,7 @@ class Region
         if ($subRegionWidth == $containerRegion->width &&
             $subRegionHeight == $containerRegion->height
         ) {
-            $subRegions->add(new Region($containerRegion));
+            $subRegions[] = new Region($containerRegion);
             return $subRegions;
         }
 
@@ -188,8 +190,7 @@ class Region
                     $currentLeft = ($right - $subRegionWidth) + 1;
                 }
 
-                $subRegions-> add(new Region($currentLeft, $currentTop,
-                    $subRegionWidth, $subRegionHeight));
+                $subRegions[] = new Region($currentLeft, $currentTop, $subRegionWidth, $subRegionHeight);
 
                 $currentLeft += $subRegionWidth;
             }
@@ -199,10 +200,9 @@ class Region
     }
 
     /**
-     * @param containerRegion The region to divide into sub-regions.
-     * @param maxSubRegionSize The maximum size of each sub-region (some
-     *                         regions might be smaller).
-     * @return The sub-regions composing the current region. If
+     * @param Region $containerRegion The region to divide into sub-regions.
+     * @param RectangleSize $maxSubRegionSize The maximum size of each sub-region (some regions might be smaller).
+     * @return array The sub-regions composing the current region. If
      * maxSubRegionSize is equal or greater than the current region,
      * only a single region is returned.
      */
@@ -215,10 +215,8 @@ class Region
         ArgumentGuard::greaterThanZero($maxSubRegionSize->getHeight(),
             "maxSubRegionSize.getHeight()");
 
-        /*List<Region>*/
         $subRegions = array();
-        $subRegions[] = new /*LinkedList<*/Region();
-
+        $subRegions[] = new Region();
 
         $currentTop = $containerRegion->top;
         $bottom = $containerRegion->top + $containerRegion->height;
@@ -252,20 +250,20 @@ class Region
 
     /**
      * Returns a list of sub-regions which compose the current region.
-     * @param subRegionSize The default sub-region size to use.
-     * @param isFixedSize If {@code false}, then sub-regions might have a
+     * @param RectangleSize $subRegionSize The default sub-region size to use.
+     * @param bool $isFixedSize If {@code false}, then sub-regions might have a
      *                      size which is smaller then {@code subRegionSize}
      *                      (thus there will be no overlap of regions).
      *                      Otherwise, all sub-regions will have the same
      *                      size, but sub-regions might overlap.
-     * @return The sub-regions composing the current region. If {@code
+     * @return array The sub-regions composing the current region. If {@code
      * subRegionSize} is equal or greater than the current region,
      * only a single region is returned.
      */
     public function getSubRegions(RectangleSize $subRegionSize, $isFixedSize = false)
     {
         if ($isFixedSize) {
-            return getSubRegionsWithFixedSize($this, $subRegionSize);
+            return $this->getSubRegionsWithFixedSize($this, $subRegionSize);
         }
 
         return $this->getSubRegionsWithVaryingSize($this, $subRegionSize);
@@ -281,13 +279,11 @@ class Region
 
     /**
      * Check if a region is contained within the current region.
-     * @param other The region to check if it is contained within the current
-     *              region.
-     * @return True if {@code other} is contained within the current region,
-     *          false otherwise.
+     * @param Region $other The region to check if it is contained within the current region.
+     * @return bool True if {@code other} is contained within the current region, false otherwise.
      */
 
-    public function contains(Region $other)
+    public function containsRegion(Region $other)
     {
         $right = $this->left + $this->width;
         $otherRight = $other->getLeft() + $other->getWidth();
@@ -302,21 +298,21 @@ class Region
     /**
      * Check if a specified location is contained within this region.
      * <p>
-     * @param location The location to test.
-     * @return True if the location is contained within this region,
+     * @param Location $location The location to test.
+     * @return bool True if the location is contained within this region,
      *          false otherwise.
      */
-    /*public function contains(Location $location) {               //FIXME
+    public function containsLocation(Location $location) {               //FIXME
         return $location->getX() >= $this->left
         && $location->getX() <= ($this->left + $this->width)
         && $location->getY() >= $this->top
         && $location->getY() <= ($this->top + $this->height);
-    }*/
+    }
 
     /**
      * Check if a region is intersected with the current region.
-     * @param other The region to check intersection with.
-     * @return True if the regions are intersected, false otherwise.
+     * @param Region $other The region to check intersection with.
+     * @return bool True if the regions are intersected, false otherwise.
      */
     public function isIntersected(Region $other)
     {
@@ -335,9 +331,8 @@ class Region
     }
 
     /**
-     * Replaces this region with the intersection of itself and
-     * {@code other}
-     * @param other The region with which to intersect.
+     * Replaces this region with the intersection of itself and {@code other}
+     * @param Region $other The region with which to intersect.
      */
     public function intersect(Region $other)
     {
@@ -401,6 +396,6 @@ class Region
 
     public function toString()
     {
-        return "(" . $this->left . ", " . $this->top . ") " . $this->width . "x" . $this->height;
+        return "({$this->left} , {$this->top }) {$this->width}x{$this->height}";
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * An implementation of {@link RegionVisibilityStrategy}, which tries to move
  * to the region.

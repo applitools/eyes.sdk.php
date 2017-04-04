@@ -1,5 +1,5 @@
 <?php
-require_once "PropertyHandler.php";
+namespace Applitools;
 
 /**
  * A property handler for read-only properties (i.e., set always fails).
@@ -22,8 +22,9 @@ class ReadOnlyPropertyHandler implements PropertyHandler
      */
     public function set($obj)
     {
-        $reflect = new ReflectionClass($obj);
-        $this->logger->log(sptintf("Ignored. (%s)", $reflect->getShortName()));
+        $reflect = new \ReflectionClass($obj);
+        $shortName = $reflect->getShortName();
+        $this->logger->log("Ignored. ({$shortName})");
         return false;
     }
 

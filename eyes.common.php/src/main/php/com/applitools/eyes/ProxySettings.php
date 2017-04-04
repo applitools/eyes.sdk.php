@@ -3,6 +3,8 @@
  * Applitools software.
  */
 
+namespace Applitools;
+
 /***
  * Encapsulates settings for sending Eyes communication via proxy.
  */
@@ -36,3 +38,4 @@ class ProxySettings {
         return $this->password;
     }
 }
+?>

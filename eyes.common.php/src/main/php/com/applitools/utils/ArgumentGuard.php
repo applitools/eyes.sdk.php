@@ -1,5 +1,9 @@
 <?php
 
+namespace Applitools;
+
+use InvalidArgumentException;
+
 /**
  * Argument validation utilities.
  */

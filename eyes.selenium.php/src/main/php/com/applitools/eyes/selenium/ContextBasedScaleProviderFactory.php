@@ -1,4 +1,6 @@
 <?php
+namespace Applitools;
+
 /**
  * Factory implementation for creating {@link ContextBasedScaleProvider} instances.
  */
@@ -12,20 +14,20 @@ class ContextBasedScaleProviderFactory extends ScaleProviderFactory {
     /**
      *
      *
-     * @param topLevelContextEntireSize The total size of the top level
+     * @param RectangleSize $topLevelContextEntireSize The total size of the top level
      *                                  context. E.g., for selenium this
      *                                  would be the document size of the top
      *                                  level frame.
-     * @param viewportSize              The viewport size.
-     *
-     * @param scaleMethod               The method used for scaling.
-     * @param devicePixelRatio          The device pixel ratio of the
+     * @param RectangleSize $viewportSize The viewport size.
+     * @param ScaleMethod $scaleMethod The method used for scaling.
+     * @param float $devicePixelRatio The device pixel ratio of the
      *                                  platform on which the application is
      *                                  running.
+     * @param PropertyHandler $scaleProviderHandler
      */
     public function __construct(RectangleSize $topLevelContextEntireSize, RectangleSize $viewportSize,
                                             ScaleMethod $scaleMethod, $devicePixelRatio,
-                                            /*PropertyHandler<ScaleProvider>*/ $scaleProviderHandler) {
+                                            PropertyHandler $scaleProviderHandler) {
         //super(scaleProviderHandler); //FIXME need to check
         $this->scaleProviderHandler = $scaleProviderHandler;
         $this->topLevelContextEntireSize = $topLevelContextEntireSize;
@@ -41,3 +43,5 @@ class ContextBasedScaleProviderFactory extends ScaleProviderFactory {
         return $scaleProvider;
     }
 }
+
+?>

@@ -1,4 +1,5 @@
 <?php
+namespace Applitools;
 
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriver;

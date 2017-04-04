@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * Determines how detected failures are reported.
  */

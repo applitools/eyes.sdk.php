@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * Encapsulates a getRegion "callback" and how the region's coordinates
  * should be used.

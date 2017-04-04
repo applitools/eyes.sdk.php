@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * Encapsulates match settings for the a session.
  */

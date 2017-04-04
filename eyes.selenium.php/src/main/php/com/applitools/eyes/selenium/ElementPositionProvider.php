@@ -1,12 +1,14 @@
 <?php
+namespace Applitools;
+
+use Facebook\WebDriver\WebDriverElement;
 
 class ElementPositionProvider implements PositionProvider {
     private $logger; //Logger
     private $driver; //EyesWebDriver
     private $element; //EyesRemoteWebElement
 
-    public function __construct(Logger $logger, EyesWebDriver $driver,
-                                   WebDriverElement $element) {
+    public function __construct(Logger $logger, EyesWebDriver $driver, WebDriverElement $element) {
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($driver, "driver");
         ArgumentGuard::notNull($element, "element");
@@ -52,8 +54,7 @@ class ElementPositionProvider implements PositionProvider {
         $this->logger->verbose("getEntireSize()");
         //Don't have possibility to get whole page.
         //But can get region size that contains current element
-        $result = new RectangleSize($this->element->getScrollWidth(),
-            $this->element->getScrollHeight());
+        $result = new RectangleSize($this->element->getScrollWidth(), $this->element->getScrollHeight());
 
         $this->logger->verbose(sprintf("Entire size: %s", json_encode($result)));
         return $result;

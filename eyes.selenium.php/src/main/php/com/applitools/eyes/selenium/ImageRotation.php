@@ -1,4 +1,6 @@
 <?php
+namespace Applitools;
+
 /**
  * Encapsulates rotation data for images.
  */
@@ -7,7 +9,7 @@ class ImageRotation {
 
     /**
      *
-     * @param rotation The degrees by which to rotate.
+     * @param float $rotation The degrees by which to rotate.
      */
     public function __construct($rotation) {
         $this->rotation = $rotation;
@@ -15,7 +17,7 @@ class ImageRotation {
 
     /**
      *
-     * @return The degrees by which to rotate.
+     * @return float The degrees by which to rotate.
      */
     public function getRotation() {
         return $this->rotation;

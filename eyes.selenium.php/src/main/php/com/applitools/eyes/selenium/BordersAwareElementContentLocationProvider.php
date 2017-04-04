@@ -1,4 +1,8 @@
 <?php
+
+namespace Applitools;
+
+
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 

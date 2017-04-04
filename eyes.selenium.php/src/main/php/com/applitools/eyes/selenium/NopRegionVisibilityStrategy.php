@@ -1,4 +1,5 @@
 <?php
+namespace Applitools;
 /**
  * An implementation of {@link RegionVisibilityStrategy} which does nothing.
  */

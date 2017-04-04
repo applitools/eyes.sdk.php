@@ -3,6 +3,8 @@
  * Applitools SDK for Selenium integration.
  */
 
+namespace Applitools;
+
 /**
  * A base class for triggers.
  */
@@ -16,3 +18,5 @@ abstract class Trigger {
 
     public abstract function getTriggerType();
 }
+
+?>

@@ -1,8 +1,9 @@
 <?php
+namespace Applitools;
+
 use Facebook\WebDriver\Exception\NoSuchFrameException;
 use Facebook\WebDriver\Remote\RemoteTargetLocator;
 use Facebook\WebDriver\Remote\RemoteWebElement;
-use Facebook\WebDriver\WebDriverElement;
 use Facebook\WebDriver\WebDriverTargetLocator;
 
 /**
@@ -74,14 +75,13 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
             // is not found.
             $this->logger->verbose("Getting frames by name...");
 //$this->checkElement($this->driver->findElement($selector), $matchTimeout, $tag);
-            //$frames = $this->driver->findElementsByName($nameOrId);
-            $frames = $this->driver->findElements($nameOrId);
+            $frames = $this->driver->findElementsByName($nameOrId);
 
             if (count($frames) == 0) {
                 $this->logger->verbose("No frames Found! Trying by id...");
                 // If there are no frames by that name, we'll try the id
                 $frames = $this->driver->findElementsById($nameOrId); //FIXME need to check
-                if ($frames->size() == 0 ) {
+                if (count($frames) == 0 ) {
                     // No such frame, bummer
                     throw new NoSuchFrameException(sprintf("No frame with name or id '%s' exists!", json_encode($nameOrId)));
                 }
@@ -89,7 +89,7 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
             $this->logger->verbose("Done! Making preparations..");
             $this->onWillSwitch->willSwitchToFrame(TargetType::FRAME, $frames[0], $this->logger, $this->driver);
             $this->logger->verbose("Done! Switching to frame...");
-            $element = $this->driver->findElement($nameOrId);//FIXME neeed to check
+            $element = $this->driver->findElementByName($nameOrId);//FIXME need to check
             $this->targetLocator->frame($element);
             $this->logger->verbose("Done!");
             return $this->driver;

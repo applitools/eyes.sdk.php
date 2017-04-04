@@ -3,6 +3,7 @@
 * Applitools SDK for Selenium integration.
 */
 
+namespace Applitools;
 
 
 class MatchWindowTask
@@ -156,3 +157,5 @@ class MatchWindowTask
         return $matchResult;
     }
 }
+
+?>

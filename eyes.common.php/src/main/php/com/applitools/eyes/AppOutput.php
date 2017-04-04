@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * An application output (title, image, etc).
  */

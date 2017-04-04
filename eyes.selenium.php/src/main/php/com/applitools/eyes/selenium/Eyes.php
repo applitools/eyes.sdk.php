@@ -1,6 +1,14 @@
 <?php
+
+namespace Applitools;
+
+use Applitools\Exceptions\EyesException;
+use Applitools\Exceptions\TestFailedException;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriver;
+use Facebook\WebDriver\WebDriverAction;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverElement;
 
 /**
  * The main API gateway for the SDK.
@@ -44,7 +52,7 @@ class Eyes extends EyesBase
      * Creates a new (possibly disabled) Eyes instance that interacts with the
      * Eyes Server at the specified url.
      *
-     * @param serverUrl  The Eyes server URL.
+     * @param string $serverUrl  The Eyes server URL.
      */
     public function __construct($serverUrl = null)
     {
@@ -97,7 +105,7 @@ class Eyes extends EyesBase
      * Sets the time to wait just before taking a screenshot (e.g., to allow
      * positioning to stabilize when performing a full page stitching).
      *
-     * @param waitBeforeScreenshots The time to wait (Milliseconds). Values
+     * @param int $waitBeforeScreenshots The time to wait (Milliseconds). Values
      *                              smaller or equal to 0, will cause the
      *                              default value to be used.
      */
@@ -112,7 +120,7 @@ class Eyes extends EyesBase
 
     /**
      *
-     * @return The time to wait just before taking a screenshot.
+     * @return int The time to wait just before taking a screenshot.
      */
     public function getWaitBeforeScreenshots()
     {
@@ -123,8 +131,7 @@ class Eyes extends EyesBase
      * Turns on/off the automatic scrolling to a region being checked by
      * {@code checkRegion}.
      *
-     * @param shouldScroll Whether to automatically scroll to a region being
-     *                     validated.
+     * @param bool $shouldScroll Whether to automatically scroll to a region being validated.
      */
     public function setScrollToRegion($shouldScroll)
     {
@@ -137,7 +144,7 @@ class Eyes extends EyesBase
     }
 
     /**
-     * @return Whether to automatically scroll to a region being validated.
+     * @return bool Whether to automatically scroll to a region being validated.
      */
     public function getScrollToRegion()
     {
@@ -187,7 +194,7 @@ class Eyes extends EyesBase
 
     /**
      *
-     * @return Whether or not scrollbars are hidden when taking screenshots.
+     * @return bool Whether or not scrollbars are hidden when taking screenshots.
      */
     public function getHideScrollbars()
     {
@@ -196,7 +203,7 @@ class Eyes extends EyesBase
 
     /**
      *
-     * @return The image rotation data.
+     * @return ImageRotation The image rotation data.
      */
     public function getRotation()
     {
@@ -205,7 +212,7 @@ class Eyes extends EyesBase
 
     /**
      *
-     * @param rotation The image rotation data.
+     * @param ImageRotation $rotation The image rotation data.
      */
     public function setRotation(ImageRotation $rotation)
     {
@@ -235,12 +242,12 @@ class Eyes extends EyesBase
      * @param $viewportSize RectangleSize  The required browser's viewport size
      *                                     (i.e., the visible part of the document's body) or
      *                                     {@code null} to use the current window's viewport.
-     * @param $sessionType SessionType     The type of test (e.g.,  standard test / visual performance test).
+     * @param $sessionType string          The type of test (e.g.,  standard test / visual performance test).
      * @return EyesWebDriver A wrapped WebDriver which enables Eyes trigger recording and frame handling.
      * @throws EyesException
      */
     public function open(WebDriver $driver, $appName, $testName,
-                         RectangleSize $viewportSize = null, SessionType $sessionType = null)
+                         RectangleSize $viewportSize = null, $sessionType = null)
     {
         if ($this->getIsDisabled()) {
             $this->logger->verbose("Ignored");
@@ -262,11 +269,9 @@ class Eyes extends EyesBase
         ArgumentGuard::notNull($driver, "driver");
 
         if ($driver instanceof RemoteWebDriver) {
-            $this->driver = new EyesWebDriver($this->logger, $this, /*(RemoteWebDriver)*/
-                $driver);
+            $this->driver = new EyesWebDriver($this->logger, $this, $driver);
         } else if ($driver instanceof EyesWebDriver) {
-            $this->driver = /*(EyesWebDriver)*/
-                $driver;
+            $this->driver = $driver;
         } else {
             $errMsg = "Driver is not a RemoteWebDriver (" . get_class($driver) . ")";
             $this->logger->log($errMsg);
@@ -281,8 +286,8 @@ class Eyes extends EyesBase
                 $this->setPositionProvider($cssTranslatePositionNew);
                 break;
             default:
-                $scrollPositionnew = new ScrollPositionProvider($this->logger, $this->driver);
-                $this->setPositionProvider($scrollPositionnew);
+                $scrollPositionNew = new ScrollPositionProvider($this->logger, $this->driver);
+                $this->setPositionProvider($scrollPositionNew);
         }
         $this->driver->setRotation($this->rotation);
         return $this->driver;
@@ -292,8 +297,8 @@ class Eyes extends EyesBase
     /**
      * Takes a snapshot of the application under test and matches it with the expected output.
      *
-     * @param $matchTimeout int The amount of time to retry matching (Milliseconds).
-     * @param $tag string An optional tag to be associated with the snapshot.
+     * @param int $matchTimeout The amount of time to retry matching (Milliseconds).
+     * @param string $tag An optional tag to be associated with the snapshot.
      * @throws TestFailedException Thrown if a mismatch is detected and immediate failure reports are enabled.
      */
     public function checkWindow($tag, $matchTimeout = null)
@@ -340,6 +345,7 @@ class Eyes extends EyesBase
      * @param $action WebDriverAction Action to be performed in parallel to starting the test.
      * @param $deadline int The expected time until the application should have been loaded. (Seconds)
      * @param $timeout int The maximum time until the application should have been loaded. (Seconds)
+     * @param RectangleSize $viewportSize
      */
     public function testResponseTime(WebDriver $driver, $appName,
                                      $testName, WebDriverAction $action = null,
@@ -376,7 +382,7 @@ class Eyes extends EyesBase
             $this->logger->log(sprintf("Deadline: %d, Elapsed time for match: %d", $deadlineMs, $resultElapsed));
             $deadlineExceeded = $resultElapsed > $deadlineMs;
         }
-        $this->logger->log("Deadline exceeded? " + $deadlineExceeded);
+        $this->logger->log("Deadline exceeded? $deadlineExceeded");
 
         $this->closeResponseTime($deadlineExceeded);
     }
@@ -492,19 +498,11 @@ class Eyes extends EyesBase
      * Switches into the given frame, takes a snapshot of the application under
      * test and matches a region specified by the given selector.
      *
-     * @param frameIndex   The index of the frame to switch to.
-     *                     The name or id of the frame to switch to.
-     *                     (The same index
-     *                     as would be used in a call to
-     *                     driver.switchTo().frame()).
-     * @param selector     A Selector specifying the region to check.
-     * @param matchTimeout The amount of time to retry matching.
-     *                     (Milliseconds)
-     * @param tag          An optional tag to be associated with the snapshot.
-     * @param stitchContent If {@code true}, stitch the internal content of
-     *                      the region (i.e., perform
-     *                      {@link #checkElement(By, int, String)} on the
-     *                      region.
+     * @param WebDriverBy $frameSelector   A selector by which to find a frame.
+     * @param WebDriverBy $elementSelector     A selector specifying the region to check.
+     * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
+     * @param string $tag          An optional tag to be associated with the snapshot.
+     * @param bool $stitchContent If {@code true}, stitch the internal content of the region (i.e., perform {@link #checkElement(By, int, String)} on the region.
      */
     public function checkRegionInFrameBySelector(WebDriverBy $frameSelector, WebDriverBy $elementSelector, $matchTimeout = null, $tag = null, $stitchContent = null)
     {
@@ -534,7 +532,7 @@ class Eyes extends EyesBase
             $this->logger->log("Trying to extract device pixel ratio...");
             try {
                 $this->devicePixelRatio = EyesSeleniumUtils::getDevicePixelRatio($this->driver);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->log("Failed to extract device pixel ratio! Using default.");
                 $this->devicePixelRatio = self::DEFAULT_DEVICE_PIXEL_RATIO;
             }
@@ -547,7 +545,7 @@ class Eyes extends EyesBase
                 /*$this->scaleProviderHandler->set(new ContextBasedScaleProvider(
                     $this->positionProvider->getEntireSize(), $this->getViewportSize(),
                     $this->getScaleMethod(), $this->devicePixelRatio));*/
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 // This can happen in Appium for example.
                 $this->logger->log("Failed to set ContextBasedScaleProvider.");
                 $this->logger->log("Using FixedScaleProvider instead...");
@@ -752,12 +750,10 @@ class Eyes extends EyesBase
      * Takes a snapshot of the application under test and matches a specific
      * element with the expected region output.
      *
-     * @param element      The element to check.
-     * @param matchTimeout The amount of time to retry matching.
-     *                     (Milliseconds)
-     * @param tag          An optional tag to be associated with the snapshot.
-     * @throws TestFailedException if a mismatch is detected and
-     *                             immediate failure reports are enabled
+     * @param WebDriverElement $element      The element to check.
+     * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
+     * @param string $tag          An optional tag to be associated with the snapshot.
+     * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
      */
     protected function checkElement(WebDriverElement $element, $matchTimeout = null, $tag = null)
     {
@@ -765,18 +761,15 @@ class Eyes extends EyesBase
 
         // Since the element might already have been found using EyesWebDriver.
         if ($element instanceof EyesRemoteWebElement) {
-            $eyesElement = /*(EyesRemoteWebElement)*/
-                 clone $element;
+            $eyesElement = clone $element;
         } else {
-            $eyesElement = new EyesRemoteWebElement($this->logger, $this->driver, /*(RemoteWebElement)*/
-                $element);
+            $eyesElement = new EyesRemoteWebElement($this->logger, $this->driver, $element);
         }
 
         $originalPositionProvider = $this->getPositionProvider();
         try {
             $this->checkFrameOrElement = true;
-            $this->setPositionProvider(new ElementPositionProvider($this->logger, $this->driver,
-                $element));
+            $this->setPositionProvider(new ElementPositionProvider($this->logger, $this->driver, $element));
 
             $originalOverflow = $eyesElement->getOverflow();
 
@@ -833,12 +826,11 @@ class Eyes extends EyesBase
     /**
      * Adds a mouse trigger.
      *
-     * @param action  Mouse action.
-     * @param control The control on which the trigger is activated (context
-     *                relative coordinates).
-     * @param cursor  The cursor's position relative to the control.
+     * @param string $action  Mouse action.
+     * @param Region $control The control on which the trigger is activated (context relative coordinates).
+     * @param Location $cursor  The cursor's position relative to the control.
      */
-    protected function addMouseTriggerCursor(MouseAction $action, Region $control, Location $cursor)
+    public function addMouseTriggerCursor($action, Region $control, Location $cursor)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log(sprintf("Ignoring %s (disabled)", $action));
@@ -864,10 +856,10 @@ class Eyes extends EyesBase
     /**
      * Adds a mouse trigger.
      *
-     * @param action  Mouse action.
-     * @param element The WebElement on which the click was called.
+     * @param string $action  Mouse action.
+     * @param WebDriverElement $element The WebElement on which the click was called.
      */
-    protected function addMouseTriggerElement(MouseAction $action, WebElement $element)
+    public function addMouseTriggerElement($action, WebDriverElement $element)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log(sprintf("Ignoring %s (disabled)", $action));
@@ -960,8 +952,8 @@ class Eyes extends EyesBase
      * reason you don't want to call {@link #open(WebDriver, String, String)}
      * (or one of its variants) yet.
      *
-     * @param driver The driver to use for getting the viewport.
-     * @return The viewport size of the current context.
+     * @param WebDriver $driver The driver to use for getting the viewport.
+     * @return RectangleSize The viewport size of the current context.
      */
     public function getViewportSize(WebDriver $driver = null)
     {
@@ -1001,7 +993,7 @@ class Eyes extends EyesBase
             /*(EyesTargetLocator)*/
             //FIXME ///$this->driver->switchTo()->frames($originalFrame);
 
-            throw new /*TestFailed*/Exception("Failed to set the viewport size"/*, $e*/);
+            throw new \Exception("Failed to set the viewport size"/*, $e*/);
         }
         /*(EyesTargetLocator)*/
 //FIXME //$this->driver->switchTo()->frames($originalFrame);
@@ -1100,7 +1092,7 @@ class Eyes extends EyesBase
         if (!$this->doNotGetTitle) {
             try {
                 return $this->driver->getTitle();
-            } catch (Exception $ex) {
+            } catch (\Exception $ex) {
                 $this->logger->log("failed (" . $ex->getMessage() . ")");
                 $this->doNotGetTitle = true;
             }
@@ -1126,7 +1118,6 @@ class Eyes extends EyesBase
      */
     protected function getAppEnvironment()
     {
-
         $appEnv = parent::getAppEnvironment();
         $underlyingDriver = $this->driver->getRemoteWebDriver();
         // If hostOs isn't set, we'll try and extract and OS ourselves.
@@ -1149,10 +1140,10 @@ class Eyes extends EyesBase
                     $os = $platformName;
                     $platformVersion = EyesSeleniumUtils::getPlatformVersion($underlyingDriver);
                     if ($platformVersion != null) {
-                        $majorVersion = $platformVersion->split("\\.", 2)[0]; //????
+                        $majorVersion = explode('.',$platformVersion, 2)[0]; //????
 
                         if (!empty($majorVersion)) {
-                            $os .= " " + $majorVersion;
+                            $os .= " " . $majorVersion;
                         }
                     }
 
@@ -1169,3 +1160,5 @@ class Eyes extends EyesBase
         return $appEnv;
     }
 }
+
+?>

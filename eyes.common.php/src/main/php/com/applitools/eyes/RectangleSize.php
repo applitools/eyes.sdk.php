@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 class RectangleSize {
     private $width;
     private $height;

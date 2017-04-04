@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * Ignores all log messages.
  */
@@ -11,3 +13,5 @@ class NullLogHandler implements LogHandler {
 
     public function close() {}
 }
+
+?>

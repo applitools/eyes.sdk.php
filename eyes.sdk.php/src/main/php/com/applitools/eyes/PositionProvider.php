@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * Encapsulates page/element positioning.
  */
@@ -7,21 +9,19 @@ interface PositionProvider
 {
     /**
      *
-     * @return The current position, or {@code null} if position is not
-     * available.
+     * @return The current position, or {@code null} if position is not available.
      */
     function getCurrentPosition();
 
     /**
      * Go to the specified location.
-     * @param location The position to set.
+     * @param Location $location The position to set.
      */
     function setPosition(Location $location);
 
     /**
      *
-     * @return The entire size of the container which the position is relative
-     * to.
+     * @return RectangleSize The entire size of the container which the position is relative to.
      */
     function getEntireSize();
 

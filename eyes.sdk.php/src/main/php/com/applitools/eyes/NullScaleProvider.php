@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * A scale provider which does nothing.
  */

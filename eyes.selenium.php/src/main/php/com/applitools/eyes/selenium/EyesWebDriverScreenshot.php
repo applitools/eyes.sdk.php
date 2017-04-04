@@ -4,6 +4,14 @@
  * Applitools software.
  */
 
+namespace Applitools;
+
+use Applitools\Exceptions\CoordinatesTypeConversionException;
+use Applitools\Exceptions\EyesDriverOperationException;
+use Applitools\Exceptions\OutOfBoundsException;
+use Facebook\WebDriver\WebDriverElement;
+use Gregwar\Image\Image;
+
 class EyesWebDriverScreenshot extends EyesScreenshot
 {
 
@@ -60,16 +68,15 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     }
 
     /**
-     * @param logger                     A Logger instance.
-     * @param driver                     The web driver used to get the screenshot.
-     * @param image                      The actual screenshot image.
-     * @param screenshotType             (Optional) The screenshot's type (e.g.,
-     *                                   viewport/full page).
-     * @param frameLocationInScreenshot  (Optional) The current frame's
-     *                                   location in the screenshot.
+     * @param Logger $logger                     A Logger instance.
+     * @param EyesWebDriver $driver                     The web driver used to get the screenshot.
+     * @param Image $image                      The actual screenshot image.
+     * @param string $screenshotType             (Optional) The screenshot's type (e.g., viewport/full page).
+     * @param Location $frameLocationInScreenshot  (Optional) The current frame's location in the screenshot.
+     * @param RectangleSize $entireFrameSize
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
-                                Gregwar\Image\Image $image = null,
+                                Image $image = null,
                                 $screenshotType = null,
                                 Location $frameLocationInScreenshot = null,
                                 RectangleSize $entireFrameSize = null)
@@ -164,7 +171,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     }
 
     /**
-     * @return The region of the frame which is available in the screenshot,
+     * @return Region The region of the frame which is available in the screenshot,
      * in screenshot coordinates.
      */
     public function getFrameWindow()
@@ -173,7 +180,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     }
 
     /**
-     * @return A copy of the frame chain which was available when the
+     * @return FrameChain A copy of the frame chain which was available when the
      * screenshot was created.
      */
     public function getFrameChain()
@@ -190,11 +197,11 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         ArgumentGuard::notNull($coordinatesType, "coordinatesType");
 
         // We calculate intersection based on as-is coordinates.
-/*          $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
-            $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
-*/
+        /*          $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
+                    $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
+        */
         $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
-        $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
+            $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
 
         if ($asIsSubScreenshotRegion->isEmpty() ||
             ($throwIfClipped && ($asIsSubScreenshotRegion->getSize() != $region->getSize()))
@@ -225,8 +232,14 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         return $result;
     }
 
-    public function convertLocation(Location $location,
-                                    /*CoordinatesType*/ $from, /*CoordinatesType*/ $to)
+
+    /**
+     * @param Location $location The location to convert.
+     * @param string $from Origin CoordinatesType.
+     * @param string $to Target CoordinatesType.
+     * @return Location The Converted location.
+     */
+    public function convertLocation(Location $location, $from, $to)
     {
 
         ArgumentGuard::notNull($location, "location");
@@ -269,7 +282,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         switch ($from) {
             case CoordinatesType::CONTEXT_AS_IS:
                 switch ($to) {
-                    case CONTEXT_RELATIVE:
+                    case CoordinatesType::CONTEXT_RELATIVE:
                         $result->offset($this->scrollPosition->getX(),
                             $this->scrollPosition->getY());
                         break;
@@ -280,7 +293,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                         break;
 
                     default:
-                        throw new CoordinatesTypeConversionException(from, to);
+                        throw new CoordinatesTypeConversionException($from, $to);
                 }
                 break;
 
@@ -332,15 +345,13 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         return $result;
     }
 
-    public function getLocationInScreenshot(Location $location,
-                                            CoordinatesType $coordinatesType)
+    public function getLocationInScreenshot(Location $location, $coordinatesType)
     {
 
-        $location = $this->convertLocation($location, $coordinatesType,
-            CoordinatesType::SCREENSHOT_AS_IS);
+        $location = $this->convertLocation($location, $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
 
         // Making sure it's within the screenshot bounds
-        if (!$this->frameWindow->contains($location)) {
+        if (!$this->frameWindow->containsLocation($location)) {
             throw new OutOfBoundsException(sprintf(
                 "Location %s ('%s') is not visible in screenshot!", $location,
                 $coordinatesType));
@@ -349,8 +360,8 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     }
 
     public function getIntersectedRegion(Region $region,
-                                         /*CoordinatesType */$originalCoordinatesType,
-                                         /*CoordinatesType */$resultCoordinatesType)
+                                         $originalCoordinatesType,
+                                         $resultCoordinatesType)
     {
         if ($region->isEmpty()) {
             return new Region('','','','','','',$region);
@@ -396,11 +407,10 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     /**
      * Gets the elements region in the screenshot.
      *
-     * @param element The element which region we want to intersect.
-     * @return The intersected region, in {@code SCREENSHOT_AS_IS} coordinates
-     * type.
+     * @param WebDriverElement $element The element which region we want to intersect.
+     * @return Region The intersected region, in {@code SCREENSHOT_AS_IS} coordinates type.
      */
-    public function getIntersectedRegionElement(WebElement $element) //FIXME need to change back the title
+    public function getIntersectedRegionElement(WebDriverElement $element) //FIXME need to change back the title
     {
         ArgumentGuard::notNull($element, "element");
 
@@ -410,8 +420,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         $elementRegion = new Region($pl->getX(), $pl->getY(), $ds->getWidth(), $ds->getHeight());
 
         // Since the element coordinates are in context relative
-        $elementRegion = $this->getIntersectedRegion($elementRegion,
-            CoordinatesType::CONTEXT_RELATIVE);
+        $elementRegion = $this->getIntersectedRegion($elementRegion, CoordinatesType::CONTEXT_RELATIVE);
 
         if (!$elementRegion->isEmpty()) {
             $elementRegion = $this->convertRegionLocation($elementRegion,

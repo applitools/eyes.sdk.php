@@ -1,4 +1,6 @@
 <?php
+namespace Applitools;
+
 use Facebook\WebDriver\JavaScriptExecutor;
 
 /**

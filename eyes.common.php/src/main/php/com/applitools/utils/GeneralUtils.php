@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * General purpose utilities.
  */
@@ -167,3 +170,5 @@ class GeneralUtils
         die();
     }
 }
+
+?>

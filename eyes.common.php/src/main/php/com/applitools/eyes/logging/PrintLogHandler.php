@@ -1,4 +1,5 @@
 <?php
+namespace Applitools;
 /**
  * Writes log messages to the standard output stream.
  */
@@ -31,3 +32,5 @@ class PrintLogHandler implements LogHandler {
      */
     public function close() {}
 }
+
+?>

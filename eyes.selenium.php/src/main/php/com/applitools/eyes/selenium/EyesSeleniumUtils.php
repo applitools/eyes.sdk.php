@@ -2,12 +2,15 @@
 /*
  * Applitools software.
  */
+
+namespace Applitools;
+
 use Facebook\WebDriver\Exception\WebDriverException;
+use Facebook\WebDriver\Interactions\Internal\WebDriverCoordinates;
 use Facebook\WebDriver\JavaScriptExecutor;
 use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverDimension;
 use Facebook\WebDriver\WebDriverPoint;
-
 
 /**
  * We named this class EyesSeleniumUtils because there's a SeleniumUtils
@@ -70,10 +73,10 @@ class EyesSeleniumUtils
     /**
      * Extracts the location relative to the entire page from the coordinates
      * (e.g. as opposed to viewport)
-     * @param coordinates The coordinates from which location is extracted.
-     * @return The location relative to the entire page
+     * @param WebDriverCoordinates $coordinates The coordinates from which location is extracted.
+     * @return Location The location relative to the entire page
      */
-    public static function getPageLocation(Coordinates $coordinates)
+    public static function getPageLocation(WebDriverCoordinates $coordinates)
     {
         if ($coordinates == null) {
             return null;
@@ -86,10 +89,10 @@ class EyesSeleniumUtils
     /**
      * Extracts the location relative to the <b>viewport</b> from the
      * coordinates (e.g. as opposed to the entire page).
-     * @param coordinates The coordinates from which location is extracted.
-     * @return The location relative to the viewport.
+     * @param WebDriverCoordinates $coordinates The coordinates from which location is extracted.
+     * @return Location The location relative to the viewport.
      */
-    public static function getViewportLocation(Coordinates $coordinates)
+    public static function getViewportLocation(WebDriverCoordinates $coordinates)
     {
         if ($coordinates == null) {
             return null;
@@ -101,10 +104,8 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param driver The driver for which to check if it represents a mobile
-     *               device.
-     * @return {@code true} if the platform running the test is a mobile
-     * platform. {@code false} otherwise.
+     * @param driver The driver for which to check if it represents a mobile device.
+     * @return {@code true} if the platform running the test is a mobile platform. {@code false} otherwise.
      */
     public static function isMobileDevice(WebDriver $driver)
     {

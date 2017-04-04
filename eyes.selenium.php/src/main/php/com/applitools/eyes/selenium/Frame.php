@@ -2,6 +2,9 @@
 /*
  * Applitools software.
  */
+
+namespace Applitools;
+
 use Facebook\WebDriver\Remote\RemoteWebElement;
 
 /**

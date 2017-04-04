@@ -3,6 +3,8 @@
  * Applitools SDK for Selenium integration.
  */
 
+namespace Applitools;
+
 /**
  * Encapsulates a mouse trigger.
  */
@@ -46,3 +48,5 @@ class MouseTrigger extends Trigger {
         return sprintf("%s [%s] %s", $this->mouseAction, $$this->control, $this->location);
     }
 }
+
+?>

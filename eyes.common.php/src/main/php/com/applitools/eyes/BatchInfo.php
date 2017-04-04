@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * A batch of tests.
  */

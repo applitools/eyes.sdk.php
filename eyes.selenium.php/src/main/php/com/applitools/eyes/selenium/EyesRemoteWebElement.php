@@ -1,6 +1,11 @@
 <?php
+
+namespace Applitools;
+
+use Applitools\Exceptions\EyesException;
 use Facebook\WebDriver\Remote\DriverCommand;
 use Facebook\WebDriver\Remote\FileDetector;
+use Facebook\WebDriver\Remote\RemoteExecuteMethod;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
@@ -48,7 +53,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     const JS_SET_OVERFLOW_FORMATTED_STR =
         "arguments[0].style.overflow = '%s'";
 
-    public function __construct(Logger $logger, EyesWebDriver $eyesDriver, RemoteWebElement $webElement) {
+    public function __construct(Logger $logger, EyesWebDriver $eyesDriver, WebDriverElement $webElement) {
         //parent::__construct(); FIXME need to check
 
         ArgumentGuard::notNull($logger, "logger");
@@ -64,12 +69,12 @@ class EyesRemoteWebElement extends RemoteWebElement {
             // protected, and we must override this function since we don't
             // have the "parent" and "id" of the aggregated object.
             //FIXME need to check
-            $this->executeMethod = new ReflectionMethod("RemoteExecuteMethod", "execute");
-            //$executeMethod = RemoteWebElement.class.getDeclaredMethod("execute",
-            //        String.class, Map.class);
+
+            $this->executeMethod = new \ReflectionMethod(RemoteExecuteMethod::class, "execute");
+            //$executeMethod = RemoteWebElement.class.getDeclaredMethod("execute", String.class, Map.class);
             $this->executeMethod->setAccessible(true);
-        } catch (Exception $e) {
-            throw new EyesException("Failed to find 'execute' method!");
+        } catch (\Exception $e) {
+            throw new EyesException("Failed to find 'execute' method!", 0, $e);
         }
     }
 
@@ -82,7 +87,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
         try {
             $width = $this->webElement->getSize()->getWidth();
             $height = $this->webElement->getSize()->getHeight();
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             // Not supported on all platforms.
         }
 
@@ -112,14 +117,16 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     /**
-     * @return int The integer value of a computed style.
+     * @param string $propStyle
+     * @return float The integer value of a computed style.
      */
     public function getComputedStyleInteger($propStyle) {
-        return round(floatval($this->getComputedStyle($propStyle)->trim()->replace("px", "")));
+        $computedStyle = $this->getComputedStyle($propStyle);
+        return intval(round(floatval(str_replace("px","", trim($computedStyle)))));
     }
 
     /**
-     * @return The value of the scrollLeft property of the element.
+     * @return float The value of the scrollLeft property of the element.
      */
     public function getScrollLeft() {
         return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_LEFT, array($this));
@@ -130,7 +137,6 @@ class EyesRemoteWebElement extends RemoteWebElement {
      */
     public function getScrollTop() {
         return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_TOP, array($this));
-
     }
 
     /**

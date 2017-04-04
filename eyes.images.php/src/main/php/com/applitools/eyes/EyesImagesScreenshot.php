@@ -1,4 +1,10 @@
 <?php
+namespace Applitools;
+
+use Applitools\Exceptions\CoordinatesTypeConversionException;
+use Applitools\Exceptions\OutOfBoundsException;
+use Gregwar\Image\Image;
+
 /**
  * Encapsulates a screenshot taken by the images SDK.
  */
@@ -10,49 +16,48 @@ class EyesImagesScreenshot extends EyesScreenshot
     protected $bounds; //Region
 
     /**
-     * @param image The screenshot image.
-     * @param location The top/left coordinates of the screenshot in context
-     *                 relative coordinates type.
+     * @param Image $image The screenshot image.
+     * @param Location $location The top/left coordinates of the screenshot in context relative coordinates type.
      */
-    public function __construct(Gregwar\Image\Image $image = null, Location $location = null)
+    public function __construct(Image $image = null, Location $location = null)
     {
+        parent::__construct($image);
         if (!empty($image)) {
             if (empty($location)) {
                 $location = new Location(0, 0);
-                $rectangleSize = new RectangleSize($image->getWidth(), $image->getHeight());
+                $rectangleSize = new RectangleSize($image->width(), $image->height());
                 $this->bounds = new Region($location, $rectangleSize);                              
             }
         }
     }
 
-
-    public function getSubScreenshot(Region $region, CoordinatesType $coordinatesType, $throwIfClipped)
+    public function getSubScreenshot(Region $region, $coordinatesType, $throwIfClipped)
     {
 
         ArgumentGuard::notNull($region, "region");
         ArgumentGuard::notNull($coordinatesType, "coordinatesType");
 
         // We want to get the sub-screenshot in as-is coordinates type.
-        $subScreenshotRegion = getIntersectedRegion($region, $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
+        $subScreenshotRegion = $this->getIntersectedRegion($region, $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
 
         if ($subScreenshotRegion->isEmpty() || ($throwIfClipped && (!$subScreenshotRegion->getSize() == $region->getSize()))) {
-            throw new OutOfBoundsException(sptintf(
+            throw new OutOfBoundsException(sprintf(
                 "Region [%s, (%s)] is out of screenshot bounds [%s]",
-                $region, json_encode($coordinatesType), $bounds));
+                $region, json_encode($coordinatesType), $this->bounds));
         }
 
-        $subScreenshotImage = ImageUtils::getImagePart($image, $subScreenshotRegion);
+        $subScreenshotImage = ImageUtils::getImagePart($this->image, $subScreenshotRegion);
 
         // Notice that we need the bounds-relative coordinates as parameter
         // for new sub-screenshot.
-        $relativeSubScreenshotRegion = convertRegionLocation($subScreenshotRegion,
+        $relativeSubScreenshotRegion = $this->convertRegionLocation($subScreenshotRegion,
             CoordinatesType::SCREENSHOT_AS_IS, CoordinatesType::CONTEXT_RELATIVE);
 
         return new EyesImagesScreenshot($subScreenshotImage,
             $relativeSubScreenshotRegion->getLocation());
     }
 
-    protected function convertLocation(Location $location, CoordinatesType $from, CoordinatesType $to)
+    protected function convertLocation(Location $location, $from, $to)
     {
 
         ArgumentGuard::notNull($location, "location");
@@ -66,7 +71,7 @@ class EyesImagesScreenshot extends EyesScreenshot
         }
 
         switch ($from) {
-            case SCREENSHOT_AS_IS:
+            case CoordinatesType::SCREENSHOT_AS_IS:
                 if ($to == CoordinatesType::CONTEXT_RELATIVE) {
                     $result->offset($this->bounds->getLeft(), $this->bounds->getTop());
                 } else {
@@ -74,7 +79,7 @@ class EyesImagesScreenshot extends EyesScreenshot
                 }
                 break;
 
-            case CONTEXT_RELATIVE:
+            case CoordinatesType::CONTEXT_RELATIVE:
                 if ($to == CoordinatesType::SCREENSHOT_AS_IS) {
                     $result->offset(-$this->bounds->getLeft(), -$this->bounds->getTop());
                 } else {
@@ -88,27 +93,23 @@ class EyesImagesScreenshot extends EyesScreenshot
         return $result;
     }
 
-    public function getLocationInScreenshot(Location $location,
-                                            CoordinatesType $coordinatesType)
+    public function getLocationInScreenshot(Location $location, $coordinatesType)
     {
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($coordinatesType, "coordinatesType");
 
-        $location = convertLocation($location, $coordinatesType,
+        $location = $this->convertLocation($location, $coordinatesType,
             CoordinatesType::CONTEXT_RELATIVE);
 
-        if (!bounds . contains(location)) {
+        if (!$this->bounds . contains($location)) {
             throw new OutOfBoundsException(sprintf(
-                "Location %s ('%s') is not visible in screenshot!", location,
-                coordinatesType));
+                "Location %s ('%s') is not visible in screenshot!", $location,$coordinatesType));
         }
 
         return $this->convertLocation($location, CoordinatesType::CONTEXT_RELATIVE, CoordinatesType::SCREENSHOT_AS_IS);
     }
 
-    protected function getIntersectedRegion(Region $region,
-                                            CoordinatesType $originalCoordinatesType,
-                                            CoordinatesType $resultCoordinatesType)
+    protected function getIntersectedRegion(Region $region, $originalCoordinatesType, $resultCoordinatesType)
     {
 
         ArgumentGuard::notNull($region, "region");
@@ -130,7 +131,7 @@ class EyesImagesScreenshot extends EyesScreenshot
 
         // The returned result should be in the coordinatesType given as
         // parameter.
-        $intersectedRegion->setLocation(convertLocation($intersectedRegion->getLocation(),
+        $intersectedRegion->setLocation($this->convertLocation($intersectedRegion->getLocation(),
             CoordinatesType::CONTEXT_RELATIVE, $resultCoordinatesType));
 
         return $intersectedRegion;

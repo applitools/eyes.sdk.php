@@ -1,5 +1,9 @@
 <?php
 
+namespace Applitools;
+
+use Applitools\Exceptions\EyesException;
+
 class ServerConnector implements ServerConnectorInterface
 {
 
@@ -50,7 +54,7 @@ class ServerConnector implements ServerConnectorInterface
 
     /**
      * Sets the current server URL used by the rest client.
-     * @param serverUrl The URI of the rest server.
+     * @param string $serverUrl The URI of the rest server.
      */
     public function setServerUrl($serverUrl)
     {
@@ -61,7 +65,7 @@ class ServerConnector implements ServerConnectorInterface
     }
 
     /**
-     * @return The URI of the eyes server.
+     * @return string The URI of the eyes server.
      */
     public function getServerUrl()
     {
@@ -72,7 +76,7 @@ class ServerConnector implements ServerConnectorInterface
     /**
      * Sets the API key of your applitools Eyes account.
      *
-     * @param apiKey The api key to set.
+     * @param string $apiKey The api key to set.
      */
     public function setApiKey($apiKey)
     {
@@ -81,7 +85,7 @@ class ServerConnector implements ServerConnectorInterface
     }
 
     /**
-     * @return The currently set API key or {@code null} if no key is set.
+     * @return string The currently set API key or {@code null} if no key is set.
      */
     public function getApiKey()
     {
@@ -100,12 +104,11 @@ class ServerConnector implements ServerConnectorInterface
      * this running session will either be linked to an existing session, or to
      * a completely new session.
      *
-     * @param sessionStartInfo The start parameters for the session.
-     * @return RunningSession object which represents the current running
-     *         session
-     * @throws EyesException
+     * @param SessionStartInfo $sessionStartInfo The start parameters for the session.
+     * @return RunningSession object which represents the current running session
+     * @throws \Exception
      */
-    public function startSession($sessionStartInfo)
+    public function startSession(SessionStartInfo $sessionStartInfo)
     {
 
         ArgumentGuard::notNull($sessionStartInfo, "sessionStartInfo");
@@ -167,8 +170,7 @@ class ServerConnector implements ServerConnectorInterface
         }
         $validStatusCodes = array('200', '201');
         if (!in_array($information['http_code'], $validStatusCodes)) {
-            throw new Exception('Invalid status code.');
-            $runningSession = null;
+            throw new \Exception('Invalid status code.');
         } else {
             $result = json_decode($result, true);
             $runningSession = new RunningSession();
@@ -188,11 +190,11 @@ class ServerConnector implements ServerConnectorInterface
      * Matches the current window (held by the WebDriver) to the expected
      * window.
      *
-     * @param runningSession The current agent's running session.
-     * @param matchData Encapsulation of a capture taken from the application.
-     * @return The results of the window matching.
-     * @throws EyesException For invalid status codes, or response parsing
-     * failed.
+     * @param RunningSession $runningSession The current agent's running session.
+     * @param MatchWindowData $matchData Encapsulation of a capture taken from the application.
+     * @return MatchResult The results of the window matching.
+     * @throws EyesException For invalid status codes, or response parsing failed.
+     * @throws \Exception
      */
     public function matchWindow(RunningSession $runningSession, MatchWindowData $matchData)
     {
@@ -238,7 +240,7 @@ class ServerConnector implements ServerConnectorInterface
                 $this->logger->verbose("matchWindow(): Server request success.");
             }else{
                 $this->logger->verbose("matchWindow(): Server request failed. Code: " . $information['http_code']);
-                throw new Exception('Invalid status code.');
+                throw new \Exception('Invalid status code.');
             }
             $result = new MatchResult();
             if(!empty($response)){
@@ -273,7 +275,7 @@ class ServerConnector implements ServerConnectorInterface
             $this->logger->verbose("stopSession(): Session was stopped");
         }else{
             $this->logger->verbose("stopSession(): status ".$information['http_code'] . ". Closing was failed");
-            throw new Exception('Invalid status code.');
+            throw new \Exception('Invalid status code.');
         }
         curl_close ($this->ch);
         //FIXME may be need to use parseResponseWithJsonData for preparing result

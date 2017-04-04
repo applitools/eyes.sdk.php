@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * A wrapper class for TouchScreen implementation. This class will record
  * certain events such as tap.

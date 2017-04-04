@@ -3,6 +3,8 @@
  * Applitools SDK for Selenium integration.
  */
 
+namespace Applitools;
+
 /**
  * Encapsulates the data to be sent to the agent on a "matchWindow" command.
  */

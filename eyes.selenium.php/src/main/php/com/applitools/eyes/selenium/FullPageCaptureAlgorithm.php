@@ -1,4 +1,9 @@
 <?php
+namespace Applitools;
+
+use Applitools\Exceptions\EyesDriverOperationException;
+use Applitools\Exceptions\EyesException;
+use Gregwar\Image\Image;
 
 class FullPageCaptureAlgorithm {
     // This should pretty much cover all scroll bars (and some fixed position
@@ -29,7 +34,7 @@ class FullPageCaptureAlgorithm {
      * @param int $waitBeforeScreenshots Time to wait before each screenshot (milliseconds).
      * @param EyesScreenshotFactory $screenshotFactory The factory to use for creating screenshots
      *                          from the images.
-     * @return An image which represents the stitched region.
+     * @return Image
      * @throws EyesException
      */
 
@@ -156,7 +161,7 @@ class FullPageCaptureAlgorithm {
         $this->logger->verbose("Creating stitchedImage container. Size: " . json_encode($entireSize));
         //Notice stitchedImage uses the same type of image as the screenshots.
 
-        $stitchedImage = Gregwar\Image\Image::create(
+        $stitchedImage = Image::create(
                 $entireSize->getWidth(), $entireSize->getHeight());
 
         $this->logger->verbose("Done! Adding initial screenshot..");

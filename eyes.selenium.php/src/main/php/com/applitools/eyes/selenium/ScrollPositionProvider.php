@@ -1,5 +1,8 @@
 <?php
 
+namespace Applitools;
+
+use Applitools\Exceptions\EyesDriverOperationException;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\JavaScriptExecutor;
 
