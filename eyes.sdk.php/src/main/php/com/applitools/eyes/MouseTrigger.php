@@ -16,7 +16,7 @@ class MouseTrigger extends Trigger {
     private $location; //Location
 
 
-    public function __construct(MouseAction $mouseAction, Region $control, Location $location) {
+    public function __construct($mouseAction, Region $control, Location $location) {
 
         ArgumentGuard::notNull($mouseAction, "mouseAction");
         ArgumentGuard::notNull($control, "control");
@@ -39,7 +39,7 @@ class MouseTrigger extends Trigger {
     }
 
     public function getTriggerType() {
-        return TriggerType::Mouse;
+        return Trigger::Mouse;
     }
 
     public function toString() {

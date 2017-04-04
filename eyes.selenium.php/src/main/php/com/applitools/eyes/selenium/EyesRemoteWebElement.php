@@ -1,4 +1,13 @@
 <?php
+use Facebook\WebDriver\Remote\DriverCommand;
+use Facebook\WebDriver\Remote\FileDetector;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverDimension;
+use Facebook\WebDriver\WebDriverElement;
+use Facebook\WebDriver\WebDriverPoint;
+
 class EyesRemoteWebElement extends RemoteWebElement {
     private $logger; //Logger
     private $eyesDriver; //EyesWebDriver
@@ -39,8 +48,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     const JS_SET_OVERFLOW_FORMATTED_STR =
         "arguments[0].style.overflow = '%s'";
 
-    public function __construct(Logger $logger, EyesWebDriver $eyesDriver,
-                                RemoteWebElement $webElement) {
+    public function __construct(Logger $logger, EyesWebDriver $eyesDriver, RemoteWebElement $webElement) {
         //parent::__construct(); FIXME need to check
 
         ArgumentGuard::notNull($logger, "logger");
@@ -60,7 +68,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
             //$executeMethod = RemoteWebElement.class.getDeclaredMethod("execute",
             //        String.class, Map.class);
             $this->executeMethod->setAccessible(true);
-        } catch (NoSuchMethodException $e) {
+        } catch (Exception $e) {
             throw new EyesException("Failed to find 'execute' method!");
         }
     }
@@ -79,12 +87,12 @@ class EyesRemoteWebElement extends RemoteWebElement {
         }
 
         if ($left < 0) {
-            $width = Math::max(0, $width + $left);
+            $width = max(0, $width + $left);
             $left = 0;
         }
 
         if ($top < 0) {
-            $height = Math::max(0, $height + $top);
+            $height = max(0, $height + $top);
             $top = 0;
         }
 
@@ -92,11 +100,9 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     /**
-     * Returns the computed value of the style property for the current
-     * element.
-     * @param propStyle The style property which value we would like to
-     *                  extract.
-     * @return The value of the style property of the element, or {@code null}.
+     * Returns the computed value of the style property for the current element.
+     * @param string $propStyle The style property which value we would like to extract.
+     * @return mixed The value of the style property of the element, or {@code null}.
      */
     public function getComputedStyle($propStyle) {
         $scriptToExec = sprintf
@@ -106,11 +112,10 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     /**
-     * @return The integer value of a computed style.
+     * @return int The integer value of a computed style.
      */
-    private function getComputedStyleInteger($propStyle) {
-        return Math::round(Float::valueOf($this->getComputedStyle($propStyle)->trim()->
-                replace("px", "")));
+    public function getComputedStyleInteger($propStyle) {
+        return round(floatval($this->getComputedStyle($propStyle)->trim()->replace("px", "")));
     }
 
     /**
@@ -121,7 +126,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     /**
-     * @return The value of the scrollTop property of the element.
+     * @return float The value of the scrollTop property of the element.
      */
     public function getScrollTop() {
         return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_TOP, array($this));
@@ -129,21 +134,21 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     /**
-     * @return The value of the scrollWidth property of the element.
+     * @return float The value of the scrollWidth property of the element.
      */
     public function getScrollWidth() {
         return $this->webElement->getAttribute('scrollWidth');
     }
 
     /**
-     * @return The value of the scrollHeight property of the element.
+     * @return float The value of the scrollHeight property of the element.
      */
     public function getScrollHeight() {
         return $this->webElement->getAttribute('scrollHeight');
     }
 
     /**
-     * @return The width of the left border.
+     * @return float The width of the left border.
      */
     public function getBorderLeftWidth() {
         //return $this->getComputedStyleInteger("border-left-width");
@@ -151,7 +156,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     /**
-     * @return The width of the right border.
+     * @return float The width of the right border.
      */
     public function getBorderRightWidth() {
         //return $this->getComputedStyleInteger("border-right-width");
@@ -159,7 +164,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     /**
-     * @return The width of the top border.
+     * @return float The width of the top border.
      */
     public function getBorderTopWidth() {
         //return $this->getComputedStyleInteger("border-top-width");
@@ -167,7 +172,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     /**
-     * @return The width of the bottom border.
+     * @return float The width of the bottom border.
      */
     public function getBorderBottomWidth() {
         //return $this->getComputedStyleInteger("border-bottom-width");
@@ -176,7 +181,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
 
     /**
      * Scrolls to the specified location inside the element.
-     * @param location The location to scroll to.
+     * @param Location $location The location to scroll to.
      */
     public function scrollTo(Location $location) {
         $this->eyesDriver->executeScript(sprintf(self::JS_SCROLL_TO_FORMATTED_STR,
@@ -184,7 +189,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
     }
 
     /**
-     * @return The overflow of the element.
+     * @return string The overflow of the element.
      */
     public function getOverflow() {
         return $this->getCssValue("overflow");
@@ -194,7 +199,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
 
     /**
      * Sets the overflow of the element.
-     * @param overflow The overflow to set.
+     * @param string $overflow The overflow to set.
      */
     public function setOverflow($overflow) {
 
@@ -284,8 +289,10 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * For RemoteWebElement object, the function returns an
      * EyesRemoteWebElement object. For all other types of WebElement,
      * the function returns the original object.
+     * @param WebDriverElement $elementToWrap
+     * @return EyesRemoteWebElement|WebDriverElement
      */
-    private function wrapElement(WebElement $elementToWrap) {
+    private function wrapElement(WebDriverElement $elementToWrap) {
         $resultElement = $elementToWrap; //FIXME clone?
         if ($elementToWrap instanceof RemoteWebElement) {
             $resultElement = new EyesRemoteWebElement($this->logger, $this->eyesDriver,
@@ -298,6 +305,8 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * For RemoteWebElement object, the function returns an
      * EyesRemoteWebElement object. For all other types of WebElement,
      * the function returns the original object.
+     * @param $elementsToWrap
+     * @return array
      */
     private function wrapElements($elementsToWrap) {
         // This list will contain the found elements wrapped with our class.

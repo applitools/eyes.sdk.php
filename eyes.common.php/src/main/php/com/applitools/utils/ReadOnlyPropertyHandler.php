@@ -17,12 +17,13 @@ class ReadOnlyPropertyHandler implements PropertyHandler
 
     /**
      * This method does nothing. It simply returns false.
-     * @param obj The object to set.
-     * @return Always returns false.
+     * @param $obj object The object to set.
+     * @return bool Always returns false.
      */
     public function set($obj)
     {
-        $this->logger->log(sptintf("Ignored. (%s)", $this->getClass()->getSimpleName()));
+        $reflect = new ReflectionClass($obj);
+        $this->logger->log(sptintf("Ignored. (%s)", $reflect->getShortName()));
         return false;
     }
 

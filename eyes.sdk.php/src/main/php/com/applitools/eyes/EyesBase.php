@@ -1,4 +1,6 @@
 <?php
+use Facebook\WebDriver\WebDriver;
+
 abstract class EyesBase
 {
 
@@ -1069,7 +1071,7 @@ abstract class EyesBase
             $this->logger->verbose("Making sure 'action' thread had finished...");
             try {
                 $actionThread->join(30000);
-            } catch (InterruptedException $e) {
+            } catch (Exception $e) {
                 $this->logger->verbose(
                     "Got interrupted while waiting for 'action' to finish!");
             }

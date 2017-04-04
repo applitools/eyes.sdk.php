@@ -2,6 +2,11 @@
 /*
  * Applitools software.
  */
+use Facebook\WebDriver\Exception\WebDriverException;
+use Facebook\WebDriver\JavaScriptExecutor;
+use Facebook\WebDriver\WebDriver;
+use Facebook\WebDriver\WebDriverDimension;
+use Facebook\WebDriver\WebDriverPoint;
 
 
 /**
@@ -146,9 +151,9 @@ class EyesSeleniumUtils
 
     /**
      * Sets the overflow of the current context's document element.
-     * @param executor The executor to use for setting the overflow.
-     * @param value The overflow value to set.
-     * @return The previous overflow value (could be {@code null} if undefined).
+     * @param JavascriptExecutor $executor The executor to use for setting the overflow.
+     * @param mixed $value The overflow value to set.
+     * @return string The previous overflow value (could be {@code null} if undefined).
      */
     public static function setOverflow(JavascriptExecutor $executor, $value)
     {
@@ -167,13 +172,12 @@ class EyesSeleniumUtils
     /**
      * Hides the scrollbars of the current context's document element.
      *
-     * @param executor The executor to use for hiding the scrollbars.
-     * @param stabilizationTimeout The amount of time to wait for the "hide
+     * @param JavascriptExecutor $executor The executor to use for hiding the scrollbars.
+     * @param int $stabilizationTimeout The amount of time to wait for the "hide
      *                             scrollbars" action to take effect
      *                             (Milliseconds). Zero/negative values are
      *                             ignored.
-     * @return The previous value of the overflow property (could be
-     *          {@code null}).
+     * @return string The previous value of the overflow property (could be {@code null}).
      */
     public static function hideScrollbars(JavascriptExecutor $executor, $stabilizationTimeout)
     {
@@ -181,7 +185,7 @@ class EyesSeleniumUtils
         if ($stabilizationTimeout > 0) {
             try { //?????? FIXME need to check
                 GeneralUtils::sleep($stabilizationTimeout);
-            } catch (InterruptedException $e) {
+            } catch (Exception $e) {
                 // Nothing to do.
             }
         }
@@ -190,8 +194,8 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param executor The executor to use.
-     * @return The current scroll position of the current frame.
+     * @param JavascriptExecutor $executor The executor to use.
+     * @return Location The current scroll position of the current frame.
      */
     public static function getCurrentScrollPosition(JavascriptExecutor $executor)
     {
@@ -204,8 +208,8 @@ class EyesSeleniumUtils
 
     /**
      * Sets the scroll position of the current frame.
-     * @param executor The executor to use.
-     * @param location The position to be set.
+     * @param JavascriptExecutor $executor The executor to use.
+     * @param Location $location The position to be set.
      */
     public static function setCurrentScrollPosition(JavascriptExecutor $executor, Location $location)
     {
@@ -214,8 +218,9 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param executor The executor to use.
-     * @return The size of the entire content.
+     * @param JavascriptExecutor $executor The executor to use.
+     * @return RectangleSize The size of the entire content.
+     * @throws EyesDriverOperationException
      */
     public static function getCurrentFrameContentEntireSize(JavascriptExecutor $executor)
     {
@@ -251,9 +256,9 @@ class EyesSeleniumUtils
     }
 
     /**
-     * @param logger The logger to use.
-     * @param driver The web driver to use.
-     * @return The viewport size of the current context.
+     * @param Logger $logger The logger to use.
+     * @param WebDriver $driver The web driver to use.
+     * @return RectangleSize The viewport size of the current context.
      */
     public static function extractViewportSize(Logger $logger, WebDriver $driver)
     {
@@ -288,9 +293,10 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param logger The logger to use.
-     * @param driver The web driver to use.
-     * @param size The size to set as the viepwort size.
+     * @param Logger $logger The logger to use.
+     * @param WebDriver $driver The web driver to use.
+     * @param RectangleSize $size The size to set as the viepwort size.
+     * @throws EyesException
      */
     public static function setViewportSize(Logger $logger, WebDriver $driver, RectangleSize $size)
     {

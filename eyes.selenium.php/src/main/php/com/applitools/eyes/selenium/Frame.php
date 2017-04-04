@@ -2,6 +2,7 @@
 /*
  * Applitools software.
  */
+use Facebook\WebDriver\Remote\RemoteWebElement;
 
 /**
  * Encapsulates a frame/iframe. This is a generic type class,
@@ -19,15 +20,15 @@ class Frame {
     protected $parentScrollPosition; //Location
 
     /**
-     * @param logger A Logger instance.
-     * @param reference The web element for the frame, used as a reference to
+     * @param Logger $logger A Logger instance.
+     * @param RemoteWebElement $reference The web element for the frame, used as a reference to
      *                  switch into the frame.
-     * @param frameId The id of the frame. Can be used later for comparing
+     * @param mixed $frameId The id of the frame. Can be used later for comparing
      *                two frames.
-     * @param location The location of the frame within the current frame.
-     * @param size The frame element size (i.e., the size of the frame on the
+     * @param Location $location The location of the frame within the current frame.
+     * @param RectangleSize $size The frame element size (i.e., the size of the frame on the
      *             screen, not the internal document size).
-     * @param parentScrollPosition The scroll position the frame's parent was
+     * @param Location $parentScrollPosition The scroll position the frame's parent was
      *                             in when the frame was switched to.
      */
     public function __construct(Logger $logger, /*FIXME need to check*/RemoteWebElement $reference,

@@ -1,4 +1,6 @@
 <?php
+use Facebook\WebDriver\JavaScriptExecutor;
+
 /**
  * A {@link PositionProvider} which is based on CSS translates. This is
  * useful when we want to stitch a page which contains fixed position elements.
@@ -9,8 +11,7 @@ class CssTranslatePositionProvider implements PositionProvider {
     private $executor; //JavascriptExecutor
     private $lastSetPosition; //Location cache.
 
-    public function __construct(Logger $logger, JavascriptExecutor
-            $executor) {
+    public function __construct(Logger $logger, JavascriptExecutor $executor) {
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($executor, "executor");
 

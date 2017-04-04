@@ -1,5 +1,8 @@
 <?php
 
+use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\WebDriver;
+
 class OnWillSwitchSelenium implements OnWillSwitch {
     private $frameChain; //FrameChain FIXME
 

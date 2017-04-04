@@ -1,4 +1,6 @@
 <?php
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriver;
 
 /**
  * The main API gateway for the SDK.
@@ -266,7 +268,7 @@ class Eyes extends EyesBase
             $this->driver = /*(EyesWebDriver)*/
                 $driver;
         } else {
-            $errMsg = "Driver is not a RemoteWebDriver (" . $driver->getClass()->getName() . ")";
+            $errMsg = "Driver is not a RemoteWebDriver (" . get_class($driver) . ")";
             $this->logger->log($errMsg);
             throw new EyesException($errMsg);
         }

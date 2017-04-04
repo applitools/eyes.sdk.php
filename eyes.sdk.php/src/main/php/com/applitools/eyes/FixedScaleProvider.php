@@ -10,8 +10,8 @@ class FixedScaleProvider implements ScaleProvider
 
     /**
      *
-     * @param scaleRatio The scale ratio to use.
-     * @param method The method used for scaling the image.
+     * @param $scaleRatio int The scale ratio to use.
+     * @param $method ScaleMethod The method used for scaling the image.
      */
     public function __construct($scaleRatio, ScaleMethod $method = null)
     {
