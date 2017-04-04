@@ -87,7 +87,7 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
             $this->onWillSwitch->willSwitchToFrame(TargetType::FRAME, $frames[0], $this->logger, $this->driver);
             $this->logger->verbose("Done! Switching to frame...");
             $element = $this->driver->findElement($nameOrId);//FIXME neeed to check
-            $this->targetLocator->frame($element); //FIXME neeed to check
+            $this->targetLocator->frame($element);
             $this->logger->verbose("Done!");
             return $this->driver;
         }
@@ -100,7 +100,7 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
             $this->logger->verbose("Making preparations..");
             $this->onWillSwitch->willSwitchToFrame(TargetType::PARENT_FRAME, null, $this->logger, $this->driver);
             $this->logger->verbose("Done! Switching to parent frame..");
-            //$this->targetLocator->parentFrame(); //FIXME parentFrame do not exists
+            $this->targetLocator->defaultContent();
         }
         $this->logger->verbose("Done!");
         return $this->driver;
