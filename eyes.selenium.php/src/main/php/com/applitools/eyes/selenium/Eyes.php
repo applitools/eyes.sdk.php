@@ -468,12 +468,9 @@ class Eyes extends EyesBase
 
         $element = $this->driver->findElement($selector);
 
-        if ($stitchContent)
-        {
+        if ($stitchContent) {
             $this->checkElement($element, $matchTimeout, $tag);
-        }
-        else
-        {
+        } else {
             $this->checkRegionByElement($element, $matchTimeout, $tag);
         }
     }
