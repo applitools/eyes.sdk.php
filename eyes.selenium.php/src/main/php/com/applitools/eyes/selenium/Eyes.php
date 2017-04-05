@@ -913,9 +913,10 @@ class Eyes extends EyesBase
             return;
         }
 
-        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(),
-            /*(EyesWebDriverScreenshot)*/
-            $this->lastScreenshot->getFrameChain())
+        /** @var EyesWebDriverScreenshot $eyesWebDriverScreenshot */
+        $eyesWebDriverScreenshot = $this->lastScreenshot;
+
+        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), $eyesWebDriverScreenshot->getFrameChain())
         ) {
             $this->logger->log(sprintf("Ignoring %s (different frame)", $action));
             return;
@@ -947,11 +948,11 @@ class Eyes extends EyesBase
             return;
         }
 
-        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(),
-            /*(EyesWebDriverScreenshot) */
-            $this->lastScreenshot->getFrameChain())
-        ) {
-            $this->logger->log(sprintf("Ignoring '%s' (different frame)", $text));
+        /** @var EyesWebDriverScreenshot $eyesWebDriverScreenshot */
+        $eyesWebDriverScreenshot = $this->lastScreenshot;
+
+        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), $eyesWebDriverScreenshot->getFrameChain())) {
+            $this->logger->log("Ignoring '$text' (different frame)");
             return;
         }
         $this->addTextTriggerBase($control, $text);
