@@ -5,14 +5,16 @@
 
 namespace Applitools;
 
+use Applitools\Exceptions\EyesException;
 use Gregwar\Image\Image;
 
 class ImageUtils {
     /**
      * Encodes a given image as PNG.
      *
-     * @param image The image to encode.
-     * @return The PNG bytes representation of the image.
+     * @param Image $image The image to encode.
+     * @return string The PNG bytes representation of the image.
+     * @throws EyesException
      */
     public static function encodeAsPng(Image $image) {
 return "somestring"; //FIXME
@@ -38,15 +40,13 @@ return "somestring"; //FIXME
     }
 
     /**
-     * Creates a {@code BufferedImage} from an image file specified by {@code
-     * path}.
+     * Creates a {@code BufferedImage} from an image file specified by {@code path}.
      *
-     * @param path The path to the image file.
-     * @return A {@code BufferedImage} instance.
-     * @throws com.applitools.eyes.EyesException If there was a problem
+     * @param string %path The path to the image file.
+     * @return Image An {@code Image} instance.
+     * @throws EyesException If there was a problem
      * creating the {@code BufferedImage} instance.
      */
-
     public static function imageFromFile($path){
         try {
             $result = ImageIO::read(new File($path));
@@ -77,22 +77,22 @@ return "somestring"; //FIXME
 
     /**
      *
-     * @param image The image from which to get its base64 representation.
-     * @return The base64 representation of the image (bytes encoded as PNG).
+     * @param Image $image The image from which to get its base64 representation.
+     * @return string The base64 representation of the image (bytes encoded as PNG).
      */
     public static function base64FromImage(Image $image) {
         ArgumentGuard::notNull($image, "image");
 
         $imageBytes = self::encodeAsPng($image);
-        return Base64::encodeBase64String($imageBytes);
+        return base64_encode($imageBytes);
     }
 
     /**
      * Creates a BufferedImage instance from raw image bytes.
      *
-     * @param imageBytes The raw bytes of the image.
-     * @return A BufferedImage instance representing the image.
-     * @throws com.applitools.eyes.EyesException If there was a problem
+     * @param string $imageBytes The raw bytes of the image.
+     * @return Image A BufferedImage instance representing the image.
+     * @throws EyesException If there was a problem
      * creating the {@code BufferedImage} instance.
      */
     public static function imageFromBytes($imageBytes){
@@ -100,7 +100,7 @@ return "somestring"; //FIXME
             //FIXME need to check
             $image = new Image();
             $image->setResource(imagecreatefromstring($imageBytes));
-        } catch (IOException $e) {
+        } catch (\Exception $e) {
             throw new EyesException("Failed to create buffered image!", $e);
         }
         return $image;
@@ -170,10 +170,9 @@ return "somestring"; //FIXME
     /**
      * Creates a copy of an image with an updated image type.
      *
-     * @param src The image to copy.
-     * @param updatedType The type of the copied image.
-     *                    See {@link BufferedImage#getType()}.
-     * @return A copy of the {@code src} of the requested type.
+     * @param Image $src The image to copy.
+     * @param string $updatedType The type of the copied image. See {@link BufferedImage#getType()}.
+     * @return Image A copy of the {@code src} of the requested type.
      */
     public static function copyImageWithType(Image $src, $updatedType) {
         ArgumentGuard::notNull($src, "src");

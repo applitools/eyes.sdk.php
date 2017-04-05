@@ -37,9 +37,15 @@ abstract class EyesBase
     private $hostOS;
     private $userInputs = array(); //new ArrayDeque<Trigger>();
     private $shouldMatchWindowRunOnceOnTimeout;
+
+    /** @var  EyesScreenshot */
     protected $lastScreenshot;
-    protected $scaleProviderHandler; //PropertyHandler<ScaleProvider>
-    protected $cutProviderHandler; //PropertyHandler<CutProvider>
+
+    /** @var SimplePropertyHandler */
+    protected $scaleProviderHandler;
+
+    /** @var SimplePropertyHandler */
+    protected $cutProviderHandler;
 
     /** @var Logger */
     protected $logger;

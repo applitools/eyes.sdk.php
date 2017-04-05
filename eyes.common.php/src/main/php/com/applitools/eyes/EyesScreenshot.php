@@ -56,16 +56,17 @@ abstract class EyesScreenshot {
     public abstract function getLocationInScreenshot(Location $location, $coordinatesType);
 
 
-    protected abstract function getIntersectedRegion(Region $region,
+    public abstract function getIntersectedRegion(Region $region,
     /*CoordinatesType */$originalCoordinatesType,
     /*CoordinatesType */$resultCoordinatesType);
 
+    /*
     /**
     * Get the intersection of the given region with the screenshot.
     *
-    * @param region The region to intersect.
-    * @param coordinatesType The coordinates type of {@code region}.
-    * @return The intersected region, in {@code coordinatesType} coordinates.
+    * @param Region $region The region to intersect.
+    * @param CoordinatesType $coordinatesType The coordinates type of {@code region}.
+    * @return Region The intersected region, in {@code coordinatesType} coordinates.
     */
     /*protected function getIntersectedRegion(Region $region, CoordinatesType $coordinatesType) {
         return getIntersectedRegion($region, $coordinatesType, $coordinatesType);

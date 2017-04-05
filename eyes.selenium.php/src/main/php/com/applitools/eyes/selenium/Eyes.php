@@ -242,7 +242,7 @@ class Eyes extends EyesBase
      *                                     (i.e., the visible part of the document's body) or
      *                                     {@code null} to use the current window's viewport.
      * @param $sessionType string          The type of test (e.g.,  standard test / visual performance test).
-     * @return EyesWebDriver A wrapped WebDriver which enables Eyes trigger recording and frame handling.
+     * @return EyesWebDriver|WebDriver     A wrapped WebDriver which enables Eyes trigger recording and frame handling.
      * @throws EyesException
      */
     public function open(WebDriver $driver, $appName, $testName,
@@ -679,7 +679,8 @@ class Eyes extends EyesBase
      * @return WebDriverElement
      * @throws \Exception
      */
-    public static function findElement(EyesWebDriver $driver, $elementNameOrId) {
+    public static function findElement(EyesWebDriver $driver, $elementNameOrId)
+    {
         $elements = $driver->findElementsByName($elementNameOrId);
         if (count($elements) === 0) {
             $elements = $driver->findElementsById($elementNameOrId);
@@ -691,6 +692,7 @@ class Eyes extends EyesBase
         return $elements[0];
     }
 
+    /*
     /**
      * Matches the frame given by the frames path, by switching into the frame
      * and using stitching to get an image of the frame.
@@ -734,18 +736,18 @@ class Eyes extends EyesBase
      * Switches into the given frame, takes a snapshot of the application under
      * test and matches a region specified by the given selector.
      *
-     * @param framePath The path to the frame to check. This is a list of
+     * @param array $framePath The path to the frame to check. This is a list of
      *                  frame names/IDs (where each frame is nested in the
      *                  previous frame).
-     * @param selector A Selector specifying the region to check.
-     * @param matchTimeout The amount of time to retry matching (milliseconds).
-     * @param tag An optional tag to be associated with the snapshot.
-     * @param stitchContent Whether or not to stitch the internal content of
+     * @param WebDriverBy $selector A Selector specifying the region to check.
+     * @param int $matchTimeout The amount of time to retry matching (milliseconds).
+     * @param string $tag An optional tag to be associated with the snapshot.
+     * @param bool $stitchContent Whether or not to stitch the internal content of
      *                      the region (i.e., perform
      *                      {@link #checkElement(By, int, String)} on the
      *                      region.
      */
-    public function checkRegionInFramePath($framePath = array(), By $selector,
+    public function checkRegionInFramePath($framePath = array(), WebDriverBy $selector,
                                            $matchTimeout = null, $tag,
                                            $stitchContent = false)
     {
@@ -933,10 +935,10 @@ class Eyes extends EyesBase
     /**
      * Adds a keyboard trigger.
      *
-     * @param control The control's context-relative region.
-     * @param text    The trigger's text.
+     * @param Region $control The control's context-relative region.
+     * @param string $text The trigger's text.
      */
-    protected function addTextTriggerControl($control, $text)
+    protected function addTextTriggerControl(Region $control, $text)
     {
         if ($this->getIsDisabled()) {
             $this->logger->verbose(sprintf("Ignoring '%s' (disabled)", text));
@@ -961,10 +963,10 @@ class Eyes extends EyesBase
     /**
      * Adds a keyboard trigger.
      *
-     * @param element The element for which we sent keys.
-     * @param text    The trigger's text.
+     * @param WebDriverElement $element The element for which we sent keys.
+     * @param string $text The trigger's text.
      */
-    protected function addTextTriggerElement(WebElement $element, $text)
+    protected function addTextTriggerElement(WebDriverElement $element, $text)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log(spirntf("Ignoring '%s' (disabled)", $text));
@@ -981,7 +983,6 @@ class Eyes extends EyesBase
         $this->addTextTrigger($elementRegion, $text);
     }
 
-
     /**
      * Call this method if for some
      * reason you don't want to call {@link #open(WebDriver, String, String)}
@@ -992,7 +993,6 @@ class Eyes extends EyesBase
      */
     public function getViewportSize(WebDriver $driver = null)
     {
-
         if (!empty($driver)) {
             ArgumentGuard::notNull($this->driver, "driver");
             return EyesSeleniumUtils::extractViewportSize($this->logger, $this->driver);

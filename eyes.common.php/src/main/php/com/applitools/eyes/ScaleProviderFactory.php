@@ -7,7 +7,8 @@ namespace Applitools;
  */
 abstract class ScaleProviderFactory {
 
-    protected $scaleProviderHandler; //PropertyHandler<ScaleProvider>
+    /** @var PropertyHandler */
+    protected $scaleProviderHandler;
 
     /**
      *
