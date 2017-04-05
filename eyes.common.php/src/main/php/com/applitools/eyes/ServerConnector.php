@@ -147,7 +147,7 @@ class ServerConnector implements ServerConnectorInterface
 */
         try {
             $this->ch = curl_init();
-            curl_setopt($this->ch, CURLOPT_URL, "https://eyessdk.applitools.com/api/sessions/running.json?apiKey=" . $this->apiKey);
+            curl_setopt($this->ch, CURLOPT_URL, "{$this->serverUrl}/api/sessions/running.json?apiKey={$this->apiKey}");
             curl_setopt($this->ch, CURLOPT_POST, 1);
             curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
             curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -234,13 +234,12 @@ class ServerConnector implements ServerConnectorInterface
             $response = curl_exec($this->ch);
             $information = curl_getinfo($this->ch);
 
-
             $validStatusCodes = array('200', '201');
             if (in_array($information['http_code'], $validStatusCodes)) {
                 $this->logger->verbose("matchWindow(): Server request success.");
             }else{
                 $this->logger->verbose("matchWindow(): Server request failed. Code: " . $information['http_code']);
-                throw new \Exception('Invalid status code.');
+                throw new \Exception('Invalid status code. Code: '  . $information['http_code']);
             }
             $result = new MatchResult();
             if(!empty($response)){
@@ -248,7 +247,7 @@ class ServerConnector implements ServerConnectorInterface
                 $result->setAsExpected($res->asExpected == "true" ? true : false);
             }
 
-        } catch (IOException $e) {
+        } catch (\Exception $e) {
             throw new EyesException("Failed send check window request!", $e);
         }
         return $result;
@@ -257,8 +256,7 @@ class ServerConnector implements ServerConnectorInterface
     public function stopSession(RunningSession $runningSession, $isAborted, $save)
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
-        //FIXME code not related to Java.
-        curl_setopt($this->ch, CURLOPT_URL,"https://eyessdk.applitools.com/api/sessions/running/".$runningSession->getId().".json?isAborted=false&updateBaseline=".($runningSession->getIsNewSession()?"true":"false")."&apiKey=".$this->apiKey);
+        curl_setopt($this->ch, CURLOPT_URL,"{$this->serverUrl}/api/sessions/running/{$runningSession->getId()}.json?isAborted=false&updateBaseline={$runningSession->getIsNewSession()}&apiKey={$this->apiKey}");
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
