@@ -17,10 +17,10 @@ class TestFailedException extends \Exception{
      * @param TestResults $testResults The results of the current test if available,
      *                      {@code null} otherwise.
      * @param string $message A description string.
-     * @param \Throwable $cause The cause for this exception.
+     * @param \Throwable $previous The cause for this exception.
      */
-    public function __construct(TestResults $testResults = null, $message, \Throwable $cause) {
-        parent::__construct($message, $cause);
+    public function __construct(TestResults $testResults = null, $message, \Throwable $previous = null) {
+        parent::__construct($message, $previous);
         $this->testResults = $testResults;
     }
 

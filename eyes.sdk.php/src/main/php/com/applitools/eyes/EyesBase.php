@@ -35,6 +35,7 @@ abstract class EyesBase
     protected $lastScreenshot;
     protected $scaleProviderHandler; //PropertyHandler<ScaleProvider>
     protected $cutProviderHandler; //PropertyHandler<CutProvider>
+    private $sessionStartInfo;
 
 
     public function __construct($serverUrl)
@@ -502,18 +503,19 @@ abstract class EyesBase
     }
 
     /**
-     * @return The viewport size of the AUT.
+     * @return RectangleSize The viewport size of the AUT.
      */
     protected abstract function getViewportSize();
 
     /**
-     * @param size The required viewport size.
+     * @param WebDriver|null $driver
+     * @param RectangleSize $size The required viewport size.
      */
     protected abstract function setViewportSize(WebDriver $driver = null, RectangleSize $size);
 
     /**
      *
-     * @return The name of the application under test.
+     * @return string The name of the application under test.
      */
     public function getAppName()
     {
@@ -522,14 +524,14 @@ abstract class EyesBase
 
     /**
      *
-     * @param appName The name of the application under test.
+     * @param string $appName The name of the application under test.
      */
     public function setAppName($appName) {
         $this->appName = $appName;
     }
 
     /**
-     * @return The inferred environment string
+     * @return string The inferred environment string
      * or {@code null} if none is available. The inferred string is in the
      * format "source:info" where source is either "useragent" or "pos".
      * Information associated with a "useragent" source is a valid browser user
@@ -1120,11 +1122,10 @@ abstract class EyesBase
     /**
      * Ends the test.
      *
-     * @param throwEx If true, an exception will be thrown for failed/new tests.
-     * @return The test results.
+     * @param bool $throwEx If true, an exception will be thrown for failed/new tests.
+     * @return TestResults
      * @throws TestFailedException if a mismatch was found and throwEx is true.
-     * @throws NewTestException    if this is a new test was found and throwEx
-     *                             is true.
+     * @throws NewTestException    if this is a new test was found and throwEx is true.
      */
     public function close($throwEx = true)
     {
@@ -1177,7 +1178,7 @@ abstract class EyesBase
                     $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                         . "' of '" . $this->sessionStartInfo->getAppIdOrName()
                         . "'. " . $instructions;
-                    throw new /*NewTest*/Exception(/*$results, */$message);
+                    throw new NewTestException($results, $message);
                 }
                 return $results;
             }
