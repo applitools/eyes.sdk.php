@@ -41,8 +41,12 @@ abstract class EyesBase
     protected $scaleProviderHandler; //PropertyHandler<ScaleProvider>
     protected $cutProviderHandler; //PropertyHandler<CutProvider>
 
+    /** @var Logger */
+    protected $logger;
+
     /** @var SessionStartInfo */
     private $sessionStartInfo;
+    private $matchWindowTask;
 
 
     public function __construct($serverUrl)
@@ -87,18 +91,17 @@ abstract class EyesBase
      */
     public function setHostOS($hostOS)
     {
-
-        $this->logger->log("Host OS: " . $hostOS);
+        $this->logger->log("Host OS: $hostOS");
 
         if (empty($hostOS)) {
             $this->hostOS = null;
         } else {
-            $this->hostOS = $hostOS->trim();
+            $this->hostOS = trim($hostOS);
         }
     }
 
     /**
-     * @return get the host OS running the AUT.
+     * @return string get the host OS running the AUT.
      */
     public function getHostOS()
     {
@@ -134,8 +137,7 @@ abstract class EyesBase
      * Changes to the baseline or model of a branch do not propagate to other
      * branches.
      *
-     * @param branchName Branch name or {@code null} to specify the default
-     *                   branch.
+     * @param string $branchName Branch name or {@code null} to specify the default branch.
      */
     public function setBranchName($branchName)
     {
@@ -144,7 +146,7 @@ abstract class EyesBase
 
     /**
      *
-     * @return The current branch (see {@link #setBranchName(String)}).
+     * @return string The current branch (see {@link #setBranchName(String)}).
      */
     public function getBranchName()
     {
@@ -182,7 +184,7 @@ abstract class EyesBase
 
     /**
      *
-     * @return The current proxy settings used by the server connector,
+     * @return ProxySettings The current proxy settings used by the server connector,
      * or {@code null} if no proxy is set.
      */
     public function getProxy()
@@ -192,7 +194,7 @@ abstract class EyesBase
 
     /**
      * Sets the proxy settings to be used by the rest client.
-     * @param proxySettings The proxy settings to be used by the rest client.
+     * @param ProxySettings $proxySettings The proxy settings to be used by the rest client.
      * If {@code null} then no proxy is set.
      */
     public function setProxy(ProxySettings $proxySettings)
@@ -201,7 +203,7 @@ abstract class EyesBase
     }
 
     /**
-     * @param failureReports The failure reports setting.
+     * @param FailureReports $failureReports The failure reports setting.
      * @see FailureReports
      */
     public function setFailureReports(FailureReports $failureReports)
@@ -210,7 +212,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return the failure reports setting.
+     * @return string The failure reports setting.
      */
     public function getFailureReports()
     {
@@ -220,8 +222,7 @@ abstract class EyesBase
     /**
      * Updates the match settings to be used for the session.
      *
-     * @param defaultMatchSettings The match settings to be used for the
-     *                             session.
+     * @param ImageMatchSettings $defaultMatchSettings The match settings to be used for the session.
      */
     public function setDefaultMatchSettings(ImageMatchSettings $defaultMatchSettings)
     {
@@ -231,7 +232,7 @@ abstract class EyesBase
 
     /**
      *
-     * @return The match settings used for the session.
+     * @return ImageMatchSettings The match settings used for the session.
      */
     public function getDefaultMatchSettings()
     {
@@ -241,12 +242,11 @@ abstract class EyesBase
     /**
      * This function is deprecated. Please use
      * {@link #setDefaultMatchSettings} instead.
-     * <p>
      * The test-wide match level to use when checking application screenshot
      * with the expected output.
      *
-     * @param matchLevel The match level setting.
-     * @see com.applitools.eyes.MatchLevel
+     * @param string $matchLevel The match level setting.
+     * @see MatchLevel
      */
     public function setMatchLevel($matchLevel)
     {
@@ -255,7 +255,7 @@ abstract class EyesBase
 
     /**
      * @deprecated  Please use{@link #getDefaultMatchSettings} instead.
-     * @return The test-wide match level.
+     * @return string The test-wide match level.
      */
     public function getMatchLevel()
     {
@@ -263,7 +263,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return The maximum time in seconds {@link #checkWindowBase
+     * @return int The maximum time in seconds {@link #checkWindowBase
      * (RegionProvider, String, boolean, int)} waits for a match.
      */
     public function getMatchTimeout()
@@ -272,10 +272,9 @@ abstract class EyesBase
     }
 
     /**
-     * Sets the maximal time (in seconds) a match operation tries to perform
-     * a match.
+     * Sets the maximal time (in seconds) a match operation tries to perform a match.
      *
-     * @param seconds Total number of seconds to wait for a match.
+     * @param int $seconds Total number of seconds to wait for a match.
      */
     public function setMatchTimeout($seconds)
     {
@@ -350,8 +349,8 @@ abstract class EyesBase
     /**
      * Adds a text trigger.
      *
-     * @param control The control's position relative to the window.
-     * @param text    The trigger's text.
+     * @param Region $control The control's position relative to the window.
+     * @param string $text The trigger's text.
      */
     protected function addTextTriggerBase(Region $control, $text)
     {
@@ -388,7 +387,7 @@ abstract class EyesBase
     /**
      * Adds a trigger to the current list of user inputs.
      *
-     * @param trigger The trigger to add to the user inputs list.
+     * @param Trigger $trigger The trigger to add to the user inputs list.
      */
     protected function addUserInput(Trigger $trigger)
     {
@@ -412,8 +411,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return User inputs collected between {@code checkWindowBase}
-     * invocations.
+     * @return Trigger[] User inputs collected between {@code checkWindowBase} invocations.
      */
     protected function getUserInputs()
     {
@@ -425,14 +423,13 @@ abstract class EyesBase
 
 
     /**
-     * @param baselineName If specified, determines the baseline to compare
-     *                     with and disables automatic baseline inference.
+     * @param string $baselineName If specified, determines the baseline to compare with and disables automatic baseline inference.
      */
     public function setBaselineName($baselineName)
     {
         $this->logger->log("Baseline name: " . $baselineName);
 
-        if ($baselineName == null || $baselineName->isEmpty()) {
+        if ($baselineName == null || $baselineName == '') {
             $this->baselineName = null;
         } else {
             $this->baselineName = $baselineName;
@@ -440,7 +437,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return The baseline name, if specified.
+     * @return string The baseline name, if specified.
      */
     public function getBaselineName()
     {
@@ -449,7 +446,7 @@ abstract class EyesBase
 
 
     /**
-     * @return The base agent id of the SDK.
+     * @return string The base agent id of the SDK.
      */
     protected abstract function getBaseAgentId();
 
@@ -501,7 +498,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return The currently set log handler.
+     * @return LogHandler The currently set log handler.
      */
     public function getLogHandler()
     {
@@ -511,7 +508,7 @@ abstract class EyesBase
     /**
      * Sets a handler of log messages generated by this API.
      *
-     * @param logHandler Handles log messages generated by this API.
+     * @param LogHandler $logHandler Handles log messages generated by this API.
      */
     public function setLogHandler(LogHandler $logHandler)
     {
@@ -519,7 +516,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return Whether a session is open.
+     * @return bool Whether a session is open.
      */
     public function getIsOpen()
     {
@@ -629,7 +626,7 @@ abstract class EyesBase
      * Sets the OS (e.g., Windows) and application (e.g., Chrome) that host the
      * application under test.
      *
-     * @param string $hostOS  The name of the OS hosting the application under test or {@code null} to auto-detect.
+     * @param string $hostOS The name of the OS hosting the application under test or {@code null} to auto-detect.
      * @param string $hostApp The name of the application hosting the application under test or {@code null} to auto-detect.
      */
     public function setAppEnvironment($hostOS, $hostApp)
@@ -833,7 +830,7 @@ abstract class EyesBase
      * @param bool $ignoreMismatch Whether to ignore this check if a mismatch is found.
      * @param int $retryTimeout The amount of time to retry matching in milliseconds or a negative value to use the default retry timeout.
      * @return MatchResult The result of matching the output with the expected output.
-     * @throws Exception
+     * @throws TestFailedException
      */
     public function checkWindowBase(RegionProvider $regionProvider, $tag = "", $ignoreMismatch = false, $retryTimeout = null)
     {
@@ -856,7 +853,7 @@ abstract class EyesBase
             $this->startSession();
             $this->logger->log("Done!");
 
-            $appOutputProviderRedeclared = new AppOutputProviderRedeclared($this);
+            $appOutputProviderRedeclared = new AppOutputProviderRedeclared($this, $this->logger);
 
             $this->matchWindowTask = new MatchWindowTask(
                 $this->logger,
@@ -899,12 +896,9 @@ abstract class EyesBase
 
 
     /**
-     * @param regionProvider      A callback for getting the region of the
-     *                            screenshot which will be set in the
-     *                            application output.
-     * @param lastScreenshot      Previous application screenshot (used for
-     *                            compression) or {@code null} if not available.
-     * @return The updated app output and screenshot.
+     * @param RegionProvider $regionProvider A callback for getting the region of the screenshot which will be set in the application output.
+     * @param EyesScreenshot $lastScreenshot Previous application screenshot (used for compression) or {@code null} if not available.
+     * @return AppOutputWithScreenshot The updated app output and screenshot.
      */
     private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot)
     {
@@ -934,7 +928,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return The user given agent id of the SDK.
+     * @return string The user given agent id of the SDK.
      */
     public function getAgentId()
     {
@@ -942,10 +936,9 @@ abstract class EyesBase
     }
 
     /**
-     * Sets the user given agent id of the SDK. {@code null} is referred to
-     * as no id.
+     * Sets the user given agent id of the SDK. {@code null} is referred to as no id.
      *
-     * @param agentId The agent ID to set.
+     * @param string %agentId The agent ID to set.
      */
     public function setAgentId($agentId)
     {
@@ -956,7 +949,7 @@ abstract class EyesBase
      * Sets the batch in which context future tests will run or {@code null}
      * if tests are to run standalone.
      *
-     * @param batch The batch info to set.
+     * @param BatchInfo $batch The batch info to set.
      */
     public function setBatch(BatchInfo $batch)
     {
@@ -969,7 +962,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return The currently set batch info.
+     * @return BatchInfo The currently set batch info.
      */
     public function getBatch()
     {
@@ -979,7 +972,7 @@ abstract class EyesBase
     /**
      * Manually set the the sizes to cut from an image before it's validated.
      *
-     * @param cutProvider the provider doing the cut. If {@code null}, Eyes
+     * @param CutProvider $cutProvider the provider doing the cut. If {@code null}, Eyes
      *                     would automatically infer if cutting is needed.
      */
     public function setImageCut(CutProvider $cutProvider)
@@ -995,9 +988,10 @@ abstract class EyesBase
     /**
      * Compresses a given screenshot.
      *
-     * @param screenshot     The screenshot to compress.
-     * @param lastScreenshot The previous screenshot, or null.
-     * @return A base64 encoded compressed screenshot.
+     * @param EyesScreenshot $screenshot The screenshot to compress.
+     * @param EyesScreenshot $lastScreenshot The previous screenshot, or null.
+     * @return string A base64 encoded compressed screenshot.
+     * @throws EyesException
      */
     public function compressScreenshot64(EyesScreenshot $screenshot,
                                          EyesScreenshot $lastScreenshot)

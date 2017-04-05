@@ -14,7 +14,7 @@ interface ServerConnectorInterface
 
     public function getServerUrl();
 
-    public function setProxy($proxySettings);
+    public function setProxy(ProxySettings $proxySettings);
 
     public function getProxy();
 
@@ -39,8 +39,9 @@ interface ServerConnectorInterface
      * Stops the running session.
      *
      * @param RunningSession $runningSession The running session to be stopped.
+     * @param bool $isAborted
+     * @param bool $save
      * @return TestResults object for the stopped running session
-     * @throws EyesException
      */
     public function stopSession(RunningSession $runningSession, $isAborted, $save);
 

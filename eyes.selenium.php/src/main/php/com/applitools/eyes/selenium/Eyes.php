@@ -57,8 +57,6 @@ class Eyes extends EyesBase
      */
     public function __construct($serverUrl = null)
     {
-
-
         if (empty($serverUrl)) {
             $serverUrl = $this->getDefaultServerUrl();
         }
@@ -578,9 +576,8 @@ class Eyes extends EyesBase
     /**
      * Verifies the current frame.
      *
-     * @param matchTimeout The amount of time to retry matching.
-     *                     (Milliseconds)
-     * @param tag An optional tag to be associated with the snapshot.
+     * @param int $matchTimeout The amount of time to retry matching. Milliseconds)
+     * @param string $tag An optional tag to be associated with the snapshot.
      */
     protected function checkCurrentFrame($matchTimeout, $tag)
     {
@@ -631,36 +628,31 @@ class Eyes extends EyesBase
      * Matches the frame given as parameter, by switching into the frame and
      * using stitching to get an image of the frame.
      *
-     * @param $frameNameOrIdOrIndex string The name, id or index of the frame to check. (The same
-     *                              name/id/index as would be used in a call to driver.switchTo().frame()).
+     * @param $frameNameOrId string The name or id of the frame to check. (The same name/id as would be used in a call to driver.switchTo().frame()).
      * @param $matchTimeout int The amount of time to retry matching. (Milliseconds)
      * @param $tag string An optional tag to be associated with the match.
      */
-    public function checkFrame($frameNameOrIdOrIndex, $matchTimeout, $tag)
+    public function checkFrame($frameNameOrId, $matchTimeout, $tag)
     {
         if ($this->getIsDisabled()) {
-            $this->logger->log(sprintf("CheckFrame(%s, %d, '%s'): Ignored",
-                $frameNameOrIdOrIndex, $matchTimeout, $tag));
+            $this->logger->log("CheckFrame('$frameNameOrId', $matchTimeout, '$tag'): Ignored");
             return;
         }
         if (empty($matchTimeout)) {
             $matchTimeout = self::USE_DEFAULT_MATCH_TIMEOUT;
         }
 
-        ArgumentGuard::notNull($frameNameOrIdOrIndex, "frameNameOrId");
+        ArgumentGuard::notNull($frameNameOrId, "frameNameOrId");
 
-        $this->logger->log(sprintf("CheckFrame(%s, %d, '%s')",
-            json_encode($frameNameOrIdOrIndex), $matchTimeout, $tag));
+        $this->logger->log("CheckFrame('$frameNameOrId', $matchTimeout, '$tag')");
+        $this->logger->log("Switching to frame with name/id: '$frameNameOrId' ...");
 
-        $this->logger->log("Switching to frame with name/id/index: " . json_encode($frameNameOrIdOrIndex) .
-            " ...");
-
-        $locationAsPoint = $this->driver->findElement($frameNameOrIdOrIndex)->getLocation();
+        $locationAsPoint = self::findElement($this->driver, $frameNameOrId)->getLocation();
         $this->regionVisibilityStrategy->moveToRegion($this->getPositionProvider(),
             new Location(0, $locationAsPoint->getY()));
 
         /*$this->driver/*FIXME need to check = */
-        $this->driver->switchTo()->frame($frameNameOrIdOrIndex);
+        $this->driver->switchTo()->frame($frameNameOrId);
 
         $this->logger->log("Done.");
         $this->checkCurrentFrame($matchTimeout, $tag);
@@ -669,6 +661,24 @@ class Eyes extends EyesBase
         $this->driver->switchTo()->parentFrame();
 
         $this->logger->log("Done!");
+    }
+
+    /**
+     * @param EyesWebDriver $driver
+     * @param string $elementNameOrId
+     * @return WebDriverElement
+     * @throws \Exception
+     */
+    public static function findElement(EyesWebDriver $driver, $elementNameOrId) {
+        $elements = $driver->findElementsByName($elementNameOrId);
+        if (count($elements) === 0) {
+            $elements = $driver->findElementsById($elementNameOrId);
+            if (count($elements) === 0) {
+                throw new \Exception("Couldn't find element by name or id '$elementNameOrId'");
+            }
+        }
+
+        return $elements[0];
     }
 
     /**

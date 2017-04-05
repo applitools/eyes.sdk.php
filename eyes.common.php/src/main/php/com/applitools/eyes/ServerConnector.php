@@ -29,10 +29,10 @@ class ServerConnector implements ServerConnectorInterface
 
     /**
      * Sets the proxy settings to be used by the rest client.
-     * @param proxySettings The proxy settings to be used by the rest client.
+     * @param ProxySettings $proxySettings The proxy settings to be used by the rest client.
      * If {@code null} then no proxy is set.
      */
-    public function setProxy($proxySettings)
+    public function setProxy(ProxySettings $proxySettings)
     {
         $this->proxySettings = $proxySettings;
         // After the server is updated we must make sure the endpoint refers
@@ -42,13 +42,13 @@ class ServerConnector implements ServerConnectorInterface
 
     /**
      *
-     * @return The current proxy settings used by the rest client,
+     * @return ProxySettings The current proxy settings used by the rest client,
      * or {@code null} if no proxy is set.
      */
 
     public function getProxy()
     {
-        return $this->ProxySettins;
+        return $this->proxySettings;
     }
 
 
@@ -164,7 +164,7 @@ class ServerConnector implements ServerConnectorInterface
                     accept(MediaType.APPLICATION_JSON).
                     entity(postData, MediaType.APPLICATION_JSON_TYPE).
                     post(ClientResponse.class);*/
-        } catch (RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             $this->logger->verbose("startSession(): Server request failed: " . $e->getMessage());
             throw $e;
         }

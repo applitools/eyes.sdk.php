@@ -1,8 +1,19 @@
 <?php
 namespace Applitools;
 
+use Facebook\WebDriver\WebDriverElement;
+
 class FullRegionProvider extends RegionProvider{
+
+    /**
+     * @var WebDriverElement
+     */
     protected $element;
+
+    /**
+     * FullRegionProvider constructor.
+     * @param WebDriverElement $element
+     */
     public function __construct($element = null)
     {
         $this->element = $element;
@@ -10,7 +21,7 @@ class FullRegionProvider extends RegionProvider{
 
     /**
      *
-     * @return A region with "as is" viewport coordinates.
+     * @return Region A region with "as is" viewport coordinates.
      */
     public function getRegion()
     {//FIXME
@@ -20,6 +31,9 @@ class FullRegionProvider extends RegionProvider{
                             $d->getHeight());
     }
 
+    /**
+     * @return string
+     */
     public function getCoordinatesType() {
         // If we're given a region, it is relative to the
         // frame's viewport.
