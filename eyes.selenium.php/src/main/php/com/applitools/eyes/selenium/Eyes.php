@@ -34,7 +34,8 @@ class Eyes extends EyesBase
     // Microseconds
     const DEFAULT_WAIT_BEFORE_SCREENSHOTS = 100000;
 
-    protected $driver; //EyesWebDriver FIXME
+    /** @var EyesWebDriver */
+    protected $driver;
     private $doNotGetTitle;
 
 
@@ -52,13 +53,13 @@ class Eyes extends EyesBase
      * Creates a new (possibly disabled) Eyes instance that interacts with the
      * Eyes Server at the specified url.
      *
-     * @param string $serverUrl  The Eyes server URL.
+     * @param string $serverUrl The Eyes server URL.
      */
     public function __construct($serverUrl = null)
     {
 
 
-        if(empty($serverUrl)){
+        if (empty($serverUrl)) {
             $serverUrl = $this->getDefaultServerUrl();
         }
 
@@ -253,8 +254,8 @@ class Eyes extends EyesBase
             $this->logger->verbose("Ignored");
             return $driver;
         }
-        if(empty($viewportSize)){
-            if(empty($driver)){
+        if (empty($viewportSize)) {
+            if (empty($driver)) {
                 //FIXME need to extract  EyesSeleniumUtils::extractViewportSize
             } else { //FIXME need to optimize code
                 $viewportSize = new RectangleSize(
@@ -392,13 +393,10 @@ class Eyes extends EyesBase
      * Takes a snapshot of the application under test and matches a specific
      * region within it with the expected output.
      *
-     * @param region       A non empty region representing the screen region to
-     *                     check.
-     * @param matchTimeout The amount of time to retry matching.
-     *                     (Milliseconds)
-     * @param tag          An optional tag to be associated with the snapshot.
-     * @throws TestFailedException Thrown if a mismatch is detected and
-     *                             immediate failure reports are enabled.
+     * @param Region $region A non empty region representing the screen region to check.
+     * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
+     * @param string $tag An optional tag to be associated with the snapshot.
+     * @throws TestFailedException Thrown if a mismatch is detected and immediate failure reports are enabled.
      */
     public function checkRegion(Region $region, $matchTimeout = null, $tag = null/*, $stitchContent = null, $selector = null*/)
     {
@@ -407,13 +405,13 @@ class Eyes extends EyesBase
                 $region, $matchTimeout, $tag));
             return;
         }
-/*
-        if ($stitchContent) {
-            $this->checkElement($selector);
-        } else {
-            $this->checkElemetRegion($selector);
-        }
-*/
+        /*
+                if ($stitchContent) {
+                    $this->checkElement($selector);
+                } else {
+                    $this->checkElementRegion($selector);
+                }
+        */
         ArgumentGuard::notNull($region, "region");
 
         $this->logger->log(sprintf("CheckRegion([%s], %d, '%s')", json_encode($region),
@@ -437,57 +435,73 @@ class Eyes extends EyesBase
      * Takes a snapshot of the application under test and matches a region
      * specified by the given selector with the expected region output.
      *
-     * @param selector     Selects the region to check.
-     * @param matchTimeout The amount of time to retry matching.
-     *                     (Milliseconds)
-     * @param tag          An optional tag to be associated with the screenshot.
-     * @throws TestFailedException if a mismatch is detected and
-     *                             immediate failure reports are enabled
+     * @param WebDriverBy $selector Selects the region to check.
+     * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
+     * @param string $tag An optional tag to be associated with the screenshot.
+     * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
      */
-    public function checkElementBySelector(WebDriverBy $selector, $matchTimeout = null, $tag) {
-
+    public function checkElementBySelector(WebDriverBy $selector, $matchTimeout = null, $tag)
+    {
         if ($this->getIsDisabled()) {
             $this->logger->log(sprintf("CheckRegion(selector, %d, '%s'): Ignored",
-            $matchTimeout, $tag));
+                $matchTimeout, $tag));
             return;
         }
         $this->checkElement($this->driver->findElement($selector), $matchTimeout, $tag);
+    }
+
+
+    /**
+     * Takes a snapshot of the application under test and matches a region
+     * specified by the given selector with the expected region output.
+     *
+     * @param WebDriverBy $selector Selects the region to check.
+     * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
+     * @param string $tag An optional tag to be associated with the screenshot.
+     * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
+     */
+    public function checkRegionBySelector(WebDriverBy $selector, $matchTimeout = null, $tag)
+    {
+        if ($this->getIsDisabled()) {
+            $this->logger->log("checkRegionBySelector(selector, $matchTimeout, '$tag'): Ignored");
+            return;
+        }
+        $element = $this->driver->findElement($selector);
+        $this->checkRegionByElement($element, $matchTimeout, $tag);
     }
 
     /**
      * Takes a snapshot of the application under test and matches a region of
      * a specific element with the expected region output.
      *
-     * @param element      The element which represents the region to check.
-     * @param matchTimeout The amount of time to retry matching.
-     *                     (Milliseconds)
-     * @param tag          An optional tag to be associated with the snapshot.
-     * @throws TestFailedException if a mismatch is detected and
-     *                             immediate failure reports are enabled
+     * @param WebDriverElement $element The element which represents the region to check.
+     * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
+     * @param string $tag An optional tag to be associated with the snapshot.
+     * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
      */
-    public function checkRegionByElement(WebElement $element, $matchTimeout, $tag) {
+    public function checkRegionByElement(WebDriverElement $element, $matchTimeout = -1, $tag)
+    {
         if ($this->getIsDisabled()) {
-            $this->logger->verbose(sprintf("CheckRegion(element, %d, '%s'): Ignored",
-            $matchTimeout, $tag));
+            $this->logger->log("checkRegionByElement(element, $matchTimeout, '$tag'): Ignored");
             return;
         }
 
         ArgumentGuard::notNull($element, "element");
 
         $this->logger->verbose(sprintf("CheckRegion(element, %d, '%s')",
-                $matchTimeout, $tag));
+            $matchTimeout, $tag));
 
         // If needed, scroll to the top/left of the element (additional help
         // to make sure it's visible).
         $locationAsPoint = $element->getLocation();
         $this->regionVisibilityStrategy->moveToRegion($this->positionProvider,
-                    new Location($locationAsPoint->getX(), $locationAsPoint->getY()));
-        $fullregion = new FullRegionProvider();
-                parent::checkWindowBase(
-                $fullregion,
-                $tag,
-                false,
-                $matchTimeout
+            new Location($locationAsPoint->getX(), $locationAsPoint->getY()));
+        $fullRegion = new FullRegionProvider();
+        parent::checkWindowBase(
+            $fullRegion,
+            $tag,
+            false,
+            $matchTimeout
         );
         $this->logger->verbose("Done! trying to scroll back to original position..");
         $this->regionVisibilityStrategy->returnToOriginalPosition($this->positionProvider);
@@ -498,10 +512,10 @@ class Eyes extends EyesBase
      * Switches into the given frame, takes a snapshot of the application under
      * test and matches a region specified by the given selector.
      *
-     * @param WebDriverBy $frameSelector   A selector by which to find a frame.
-     * @param WebDriverBy $elementSelector     A selector specifying the region to check.
+     * @param WebDriverBy $frameSelector A selector by which to find a frame.
+     * @param WebDriverBy $elementSelector A selector specifying the region to check.
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
-     * @param string $tag          An optional tag to be associated with the snapshot.
+     * @param string $tag An optional tag to be associated with the snapshot.
      * @param bool $stitchContent If {@code true}, stitch the internal content of the region (i.e., perform {@link #checkElement(By, int, String)} on the region.
      */
     public function checkRegionInFrameBySelector(WebDriverBy $frameSelector, WebDriverBy $elementSelector, $matchTimeout = null, $tag = null, $stitchContent = null)
@@ -550,7 +564,7 @@ class Eyes extends EyesBase
                 $this->logger->log("Failed to set ContextBasedScaleProvider.");
                 $this->logger->log("Using FixedScaleProvider instead...");
                 /*$this->scaleProviderHandler->set(new FixedScaleProvider(1 / $this->devicePixelRatio));*/
-                $factory = new FixedScaleProviderFactory(1/$this->devicePixelRatio, $this->getScaleMethod(), $this->scaleProviderHandler);
+                $factory = new FixedScaleProviderFactory(1 / $this->devicePixelRatio, $this->getScaleMethod(), $this->scaleProviderHandler);
             }
             $this->logger->log("Done!");
             return $factory;
@@ -645,8 +659,9 @@ class Eyes extends EyesBase
         $this->regionVisibilityStrategy->moveToRegion($this->getPositionProvider(),
             new Location(0, $locationAsPoint->getY()));
 
-        /*$this->driver/*FIXME need to check = */$this->driver->switchTo()->frame($frameNameOrIdOrIndex);
-        
+        /*$this->driver/*FIXME need to check = */
+        $this->driver->switchTo()->frame($frameNameOrIdOrIndex);
+
         $this->logger->log("Done.");
         $this->checkCurrentFrame($matchTimeout, $tag);
 
@@ -750,9 +765,9 @@ class Eyes extends EyesBase
      * Takes a snapshot of the application under test and matches a specific
      * element with the expected region output.
      *
-     * @param WebDriverElement $element      The element to check.
+     * @param WebDriverElement $element The element to check.
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
-     * @param string $tag          An optional tag to be associated with the snapshot.
+     * @param string $tag An optional tag to be associated with the snapshot.
      * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
      */
     protected function checkElement(WebDriverElement $element, $matchTimeout = null, $tag = null)
@@ -826,9 +841,9 @@ class Eyes extends EyesBase
     /**
      * Adds a mouse trigger.
      *
-     * @param string $action  Mouse action.
+     * @param string $action Mouse action.
      * @param Region $control The control on which the trigger is activated (context relative coordinates).
-     * @param Location $cursor  The cursor's position relative to the control.
+     * @param Location $cursor The cursor's position relative to the control.
      */
     public function addMouseTriggerCursor($action, Region $control, Location $cursor)
     {
@@ -856,7 +871,7 @@ class Eyes extends EyesBase
     /**
      * Adds a mouse trigger.
      *
-     * @param string $action  Mouse action.
+     * @param string $action Mouse action.
      * @param WebDriverElement $element The WebElement on which the click was called.
      */
     public function addMouseTriggerElement($action, WebDriverElement $element)
@@ -997,7 +1012,7 @@ class Eyes extends EyesBase
         }
         /*(EyesTargetLocator)*/
 //FIXME //$this->driver->switchTo()->frames($originalFrame);
-/*FIXME */ //$this->viewportSize = new RectangleSize(450, 300);
+        /*FIXME */ //$this->viewportSize = new RectangleSize(450, 300);
         $this->viewportSize = new RectangleSize($size->getWidth(), $size->getHeight());
     }
 
@@ -1020,9 +1035,9 @@ class Eyes extends EyesBase
                 $this->logger->log("Check frame/element requested");
                 $algo = new FullPageCaptureAlgorithm($this->logger);
 
-                if($this->getStitchMode() == "CSS"){
+                if ($this->getStitchMode() == "CSS") {
                     $originProvider = new CssTranslatePositionProvider($this->logger, $this->driver);
-                }else{
+                } else {
                     $originProvider = $this->positionProvider;
                 }
 //print_r($scaleProviderFactory); die();
@@ -1043,22 +1058,22 @@ class Eyes extends EyesBase
                 $regionProvider = new RegionProvider();
 
 
-              /*  BufferedImage fullPageImage = algo.getStitchedRegion
-                    (imageProvider,
-                        new RegionProvider() {
-                            public Region getRegion() {
-                                return Region.EMPTY;
-                            }
+                /*  BufferedImage fullPageImage = algo.getStitchedRegion
+                      (imageProvider,
+                          new RegionProvider() {
+                              public Region getRegion() {
+                                  return Region.EMPTY;
+                              }
 
-                            public CoordinatesType getCoordinatesType() {
-                                return null;
-                            }
-                        },
-                        new ScrollPositionProvider(logger, this.driver),
-                        positionProvider, scaleProviderHandler.get(),
-                                cutProviderHandler.get(),
-                        getWaitBeforeScreenshots(), screenshotFactory);
-                */
+                              public CoordinatesType getCoordinatesType() {
+                                  return null;
+                              }
+                          },
+                          new ScrollPositionProvider(logger, this.driver),
+                          positionProvider, scaleProviderHandler.get(),
+                                  cutProviderHandler.get(),
+                          getWaitBeforeScreenshots(), screenshotFactory);
+                  */
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
                     new ScrollPositionProvider($this->logger, $this->driver),
                     $this->positionProvider, $scaleProviderFactory,
@@ -1140,7 +1155,7 @@ class Eyes extends EyesBase
                     $os = $platformName;
                     $platformVersion = EyesSeleniumUtils::getPlatformVersion($underlyingDriver);
                     if ($platformVersion != null) {
-                        $majorVersion = explode('.',$platformVersion, 2)[0]; //????
+                        $majorVersion = explode('.', $platformVersion, 2)[0]; //????
 
                         if (!empty($majorVersion)) {
                             $os .= " " . $majorVersion;
