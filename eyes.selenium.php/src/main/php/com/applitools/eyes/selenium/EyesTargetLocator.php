@@ -58,7 +58,7 @@ class EyesTargetLocator implements WebDriverTargetLocator
         } else if ($selector instanceof WebDriverBy) {
             $frames = $this->driver->findElements($selector);
             if (count($frames) == 0) {
-                throw new NoSuchFrameException("The given selector did'nt find any match.");
+                throw new NoSuchFrameException("The given selector didn't find any match.");
             }
             $frameElement = $frames[0];
         } else if (is_string($selector)) {

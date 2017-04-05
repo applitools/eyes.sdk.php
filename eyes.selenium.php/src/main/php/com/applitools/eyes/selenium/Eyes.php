@@ -456,16 +456,26 @@ class Eyes extends EyesBase
      * @param WebDriverBy $selector Selects the region to check.
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
      * @param string $tag An optional tag to be associated with the screenshot.
+     * @param  bool $stitchContent
      * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
      */
-    public function checkRegionBySelector(WebDriverBy $selector, $matchTimeout = null, $tag)
+    public function checkRegionBySelector(WebDriverBy $selector, $matchTimeout = null, $tag, $stitchContent = false)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log("checkRegionBySelector(selector, $matchTimeout, '$tag'): Ignored");
             return;
         }
+
         $element = $this->driver->findElement($selector);
-        $this->checkRegionByElement($element, $matchTimeout, $tag);
+
+        if ($stitchContent)
+        {
+            $this->checkElement($element, $matchTimeout, $tag);
+        }
+        else
+        {
+            $this->checkRegionByElement($element, $matchTimeout, $tag);
+        }
     }
 
     /**
@@ -494,7 +504,7 @@ class Eyes extends EyesBase
         $locationAsPoint = $element->getLocation();
         $this->regionVisibilityStrategy->moveToRegion($this->positionProvider,
             new Location($locationAsPoint->getX(), $locationAsPoint->getY()));
-        $fullRegion = new FullRegionProvider();
+        $fullRegion = new FullRegionProvider($element);
         parent::checkWindowBase(
             $fullRegion,
             $tag,
@@ -516,7 +526,7 @@ class Eyes extends EyesBase
      * @param string $tag An optional tag to be associated with the snapshot.
      * @param bool $stitchContent If {@code true}, stitch the internal content of the region (i.e., perform {@link #checkElement(By, int, String)} on the region.
      */
-    public function checkRegionInFrameBySelector(WebDriverBy $frameSelector, WebDriverBy $elementSelector, $matchTimeout = null, $tag = null, $stitchContent = null)
+    public function checkRegionInFrameBySelector(WebDriverBy $frameSelector, WebDriverBy $elementSelector, $matchTimeout = null, $tag = null, $stitchContent = false)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log(sprintf("CheckRegionInFrame(%d, selector, %d, '%s'): Ignored", $frameSelector, $matchTimeout, $tag));

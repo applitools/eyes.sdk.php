@@ -14,8 +14,9 @@ class FullRegionProvider extends RegionProvider{
      * FullRegionProvider constructor.
      * @param WebDriverElement $element
      */
-    public function __construct($element = null)
+    public function __construct(WebDriverElement $element = null)
     {
+        parent::__construct();
         $this->element = $element;
     }
 
