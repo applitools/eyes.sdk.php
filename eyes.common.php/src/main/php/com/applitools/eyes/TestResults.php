@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * Eyes test results.
  */

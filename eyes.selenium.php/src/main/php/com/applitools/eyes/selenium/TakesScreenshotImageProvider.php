@@ -1,4 +1,6 @@
 <?php
+namespace Applitools;
+
 /**
  * An image provider based on WebDriver's {@link TakesScreenshot} interface.
  */

@@ -3,6 +3,8 @@
 * Applitools SDK for Selenium integration.
 */
 
+namespace Applitools;
+
 /**
  * The result of a window match by the agent.
  */

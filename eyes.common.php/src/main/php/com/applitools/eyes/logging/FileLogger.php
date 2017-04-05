@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * Writes log messages to a file.
  */

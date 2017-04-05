@@ -1,5 +1,9 @@
 <?php
 
+namespace Applitools;
+
+use Gregwar\Image\Image;
+
 /**
  * Scale provider based on a fixed scale ratio.
  */
@@ -10,8 +14,8 @@ class FixedScaleProvider implements ScaleProvider
 
     /**
      *
-     * @param scaleRatio The scale ratio to use.
-     * @param method The method used for scaling the image.
+     * @param $scaleRatio int The scale ratio to use.
+     * @param $method ScaleMethod The method used for scaling the image.
      */
     public function __construct($scaleRatio, ScaleMethod $method = null)
     {
@@ -38,8 +42,8 @@ class FixedScaleProvider implements ScaleProvider
      *
      * {@inheritDoc}
      */
-    public function scaleImage(Gregwar\Image\Image $image)
+    public function scaleImage(Image $image)
     {
-        return ImageUtils::scaleImage($image, $this->scaleMethod, $this->scaleRatio);
+        return ImageUtils::scaleImage($image, $this->scaleRatio);
     }
 }

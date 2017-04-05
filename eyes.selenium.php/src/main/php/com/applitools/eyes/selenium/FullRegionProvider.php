@@ -1,4 +1,6 @@
 <?php
+namespace Applitools;
+
 class FullRegionProvider extends RegionProvider{
     protected $element;
     public function __construct($element = null)

@@ -1,4 +1,7 @@
 <?
+
+namespace Applitools;
+
 /**
  * Encapsulates settings for the "Exact" match level.
  */
@@ -98,3 +101,5 @@ class ExactMatchSettings {
                 $this->minDiffWidth, $this->minDiffHeight, $this->matchThreshold);
     }
 }
+
+?>

@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * Encapsulates data for the session currently running in the agent.
  */

@@ -1,8 +1,14 @@
 <?php
+namespace Applitools;
+
+use Facebook\WebDriver\Exception\NoSuchFrameException;
+use Facebook\WebDriver\Remote\RemoteTargetLocator;
+use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverTargetLocator;
 
 /**
- * Wraps a target locator so we can keep track of which frames have been
- * switched to.
+ * Wraps a target locator so we can keep track of which frames have been switched to.
  */
 class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTargetLocator {
 
@@ -15,10 +21,10 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
 
     /**
      * Initialized a new EyesTargetLocator object.
-     * @param driver The WebDriver from which the targetLocator was received.
-     * @param targetLocator The actual TargetLocator object.
-     * @param onWillSwitch A delegate to be called whenever a relavant switch
-     *                     is about to be performed.
+     * @param Logger $logger
+     * @param EyesWebDriver $driver The WebDriver from which the targetLocator was received.
+     * @param WebDriverTargetLocator $targetLocator The actual TargetLocator object.
+     * @param OnWillSwitch $onWillSwitch A delegate to be called whenever a relevant switch is about to be performed.
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
                              WebDriverTargetLocator $targetLocator, OnWillSwitch $onWillSwitch) {
@@ -35,63 +41,45 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
     }
 
     public function frame($selector) {
-        if($selector instanceof WebElement){
+        $frameElement = null;
+        if($selector instanceof RemoteWebElement){
             $frameElement = $selector;
             $this->logger->verbose("EyesTargetLocator.frame(element)");
-            $this->logger->verbose("Making preparations..");
-            $this->onWillSwitch->willSwitchToFrame(TargetType::FRAME, $frameElement, $this->logger);
-            $this->logger->verbose("Done! Switching to frame...");
-            $this->targetLocator->frame($frameElement);
-            $this->logger->verbose("Done!");
-            return $this->driver;
         }
-        else if(is_integer($selector)){
-            $index = $selector;
-            $this->logger->verbose(sprintf("EyesTargetLocator.frame(%d)", $index));
-            // Finding the target element so and reporting it using onWillSwitch.
-            $this->logger->verbose("Getting frames list...");
-            $frames = $this->driver->findElementsByCssSelector(
-                "frame, iframe");
-            if ($index > $this->frames->size()) {
-                throw new NoSuchFrameException(sprintf("Frame index [%d] is invalid!", $index));
+        else if ($selector instanceof WebDriverBy) {
+            $frames = $this->driver->findElements($selector);
+            if (count($frames) == 0) {
+                throw new NoSuchFrameException("The given selector did'nt find any match.");
             }
-            $this->logger->verbose("Done! getting the specific frame...");
-            $targetFrame = $frames->get($index);
-            $this->logger->verbose("Done! Making preparations...");
-            $this->onWillSwitch->willSwitchToFrame(TargetType::FRAME, $targetFrame, $this->logger);
-            $this->logger->verbose("Done! Switching to frame...");
-            $this->targetLocator->frame($index);
-            $this->logger->verbose("Done!");
-            return $this->driver;
-        } else{
+            $frameElement = $frames[0];
+        } else if (is_string($selector)) {
             $nameOrId = $selector;
             $this->logger->verbose(sprintf("EyesTargetLocator.frame('%s')", json_encode($nameOrId)));
             // Finding the target element so we can report it.
-            // We use find elements(plural) to avoid exception when the element
-            // is not found.
+            // We use find elements(plural) to avoid exception when the element is not found.
             $this->logger->verbose("Getting frames by name...");
-//$this->checkElement($this->driver->findElement($selector), $matchTimeout, $tag);
-            //$frames = $this->driver->findElementsByName($nameOrId);
-            $frames = $this->driver->findElements($nameOrId);
+            $frames = $this->driver->findElementsByName($nameOrId);
 
             if (count($frames) == 0) {
                 $this->logger->verbose("No frames Found! Trying by id...");
                 // If there are no frames by that name, we'll try the id
                 $frames = $this->driver->findElementsById($nameOrId); //FIXME need to check
-                if ($frames->size() == 0 ) {
+                if (count($frames) == 0 ) {
                     // No such frame, bummer
-                    throw new NoSuchFrameException(sprintf("No frame with name or id '%s' exists!", json_encode($nameOrId)));
+                    throw new NoSuchFrameException("No frame with name or id '$nameOrId' exists!");
                 }
             }
-            $this->logger->verbose("Done! Making preparations..");
-            $this->onWillSwitch->willSwitchToFrame(TargetType::FRAME, $frames[0], $this->logger, $this->driver);
-            $this->logger->verbose("Done! Switching to frame...");
-            $element = $this->driver->findElement($nameOrId);//FIXME neeed to check
-            $this->targetLocator->frame($element);
-            $this->logger->verbose("Done!");
-            return $this->driver;
+            $frameElement = $frames[0];
+        } else {
+            throw new \InvalidArgumentException("Can't handle selector of type " . get_class($selector));
         }
 
+        $this->logger->verbose("Making preparations..");
+        $this->onWillSwitch->willSwitchToFrame(TargetType::FRAME, $frameElement, $this->logger, $this->driver);
+        $this->logger->verbose("Done! Switching to frame...");
+        $this->targetLocator->frame($frameElement);
+        $this->logger->verbose("Done!");
+        return $this->driver;
     }
 
     public function parentFrame() {
@@ -181,7 +169,7 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
         $this->logger->verbose("EyesTargetLocator.alert()");
         $this->logger->verbose("Switching to alert..");
         $result = $this->targetLocator->alert();
-        $this->logger.verbose("Done!");
+        $this->logger->verbose("Done!");
         return $result;
     }
 }

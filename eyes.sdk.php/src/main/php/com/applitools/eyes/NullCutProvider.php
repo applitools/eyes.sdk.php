@@ -1,4 +1,5 @@
 <?php
+namespace Applitools;
 /**
  * A cut provider which does nothing.
  */
@@ -8,3 +9,5 @@ class NullCutProvider extends FixedCutProvider {
         parent::__construct(0, 0, 0, 0);
     }
 }
+
+?>

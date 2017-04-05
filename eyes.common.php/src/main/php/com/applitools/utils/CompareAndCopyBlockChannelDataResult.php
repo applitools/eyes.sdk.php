@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * Encapsulates a result for the CompareAndCopyBlockChannelData function.
  */
@@ -37,3 +39,5 @@ class CompareAndCopyBlockChannelDataResult
         return $this->buffer;
     }
 }
+
+?>

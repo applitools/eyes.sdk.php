@@ -1,4 +1,7 @@
 <?php
+namespace Applitools;
+use Gregwar\Image\Image;
+
 /**
  * Encapsulates the instantiation of an {@link EyesWebDriverScreenshot} .
  */
@@ -11,7 +14,9 @@ class EyesWebDriverScreenshotFactory implements EyesScreenshotFactory {
         $this->driver = $driver;
     }
 
-    public function makeScreenshot(Gregwar\Image\Image $image) {
+    public function makeScreenshot(Image $image) {
         return new EyesWebDriverScreenshot($this->logger, $this->driver, $image);
     }
 }
+
+?>

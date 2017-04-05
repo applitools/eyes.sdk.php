@@ -1,5 +1,8 @@
 <?php
 
+namespace Applitools;
+use Applitools\Exceptions\NoFramesException;
+
 /**
  * Represents a path to a frame, including their location and scroll.
  */
@@ -10,29 +13,22 @@ class FrameChain /*implements Iterable<Frame>*/
 
     /**
      * Compares two frame chains.
-     * @param c1 Frame chain to be compared against c2.
-     * @param c2 Frame chain to be compared against c1.
-     * @return True if both frame chains represent the same frame,
-     *         false otherwise.
+     * @param FrameChain $c1 Frame chain to be compared against c2.
+     * @param FrameChain $c2 Frame chain to be compared against c1.
+     * @return bool True if both frame chains represent the same frame, false otherwise.
      */
     public static function isSameFrameChain(FrameChain $c1, FrameChain $c2)
     {
-        $lc1 = $c1->frames->count();
-        $lc2 = $c2->frames->count();
+        $lc1 = count($c1->frames);
+        $lc2 = count($c2->frames);
 
         // different chains size means different frames
         if ($lc1 != $lc2) {
             return false;
         }
 
-        /*Iterator<Frame>*/
-        $c1Iterator = $c1->iterator();
-        /*Iterator<Frame>*/
-        $c2Iterator = $c2->iterator();
-
-        //noinspection ForLoopReplaceableByForEach
         for ($i = 0; $i < $lc1; ++$i) {
-            if (!$c1Iterator->next()->getId()->equals($c2Iterator->next()->getId())) {
+            if (!($c1->frames[$i]->equals($c2->frames[$i]))){
                 return false;
             }
         }
@@ -42,9 +38,8 @@ class FrameChain /*implements Iterable<Frame>*/
 
     /**
      * Creates a frame chain which is a copy of the current frame.
-     * @param logger A Logger instance.
-     * @param other A frame chain from which the current frame chain will be
-     *              created.
+     * @param Logger $logger A Logger instance.
+     * @param FrameChain $other A frame chain from which the current frame chain will be created.
      */
     public function __construct(Logger $logger, FrameChain $other = null)
     {
@@ -69,7 +64,7 @@ class FrameChain /*implements Iterable<Frame>*/
 
     /**
      *
-     * @return The number of frames in the chain.
+     * @return int The number of frames in the chain.
      */
     public function size()
     {
@@ -95,7 +90,7 @@ class FrameChain /*implements Iterable<Frame>*/
 
     /**
      * Appends a frame to the frame chain.
-     * @param frame The frame to be added.
+     * @param Frame $frame The frame to be added.
      */
     public function push(Frame $frame)
     {
@@ -104,7 +99,7 @@ class FrameChain /*implements Iterable<Frame>*/
 
     /**
      *
-     * @return The location of the current frame in the page.
+     * @return Location The location of the current frame in the page.
      */
     public function getCurrentFrameOffset()
     {
@@ -116,20 +111,20 @@ class FrameChain /*implements Iterable<Frame>*/
     }
 
     /**
-     *
-     * @return The outermost frame's location, or NoFramesException.
+     * @return Location The outermost frame's location, or NoFramesException.
+     * @throws NoFramesException
      */
     public function getDefaultContentScrollPosition()
     {
-        if ($this->frames->count() == 0) {
+        if (count($this->frames) == 0) {
             throw new NoFramesException("No frames in frame chain");
         }
-        return new Location($this->frames->get(0)->getParentScrollPosition());
+        return new Location($this->frames[0]->getParentScrollPosition());
     }
 
     /**
      *
-     * @return The size of the current frame.
+     * @return RectangleSize The size of the current frame.
      */
     public function getCurrentFrameSize()
     {
@@ -141,37 +136,11 @@ class FrameChain /*implements Iterable<Frame>*/
 
     /**
      *
-     * @return The size of the current frame.
+     * @return array The array of frames in this chain.
      */
     public function getFrames()
     {
         $this->logger->verbose("getFrames()");
         return $this->frames;
-    }
-
-    /**
-     *
-     * @return An iterator to go over the frames in the chain.
-     */
-    public /*Iterator<Frame>*/
-    function iterator()
-    {
-        /*  return new Iterator<Frame>() {
-              Iterator<Frame> framesIterator = frames.iterator();
-              public boolean hasNext() {
-                  return framesIterator.hasNext();
-              }
-
-              public Frame next() {
-                  return framesIterator.next();
-              }
-
-              public void remove() {
-                  throw new EyesException(
-                          "Remove is forbidden using the iterator!");
-              }
-          };*/
-        echo "MOCK4";  //FIXME
-        die();
     }
 }

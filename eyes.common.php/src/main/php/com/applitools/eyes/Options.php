@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * Encapsulates the "Options" section of the MatchExpectedOutput body data.
  */
@@ -74,3 +77,5 @@ class Options
         return $this->forceMatch;
     }
 }
+
+?>

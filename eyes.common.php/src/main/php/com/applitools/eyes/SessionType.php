@@ -1,4 +1,6 @@
 <?php
+
+namespace Applitools;
 /**
  * The type of the session.
  */

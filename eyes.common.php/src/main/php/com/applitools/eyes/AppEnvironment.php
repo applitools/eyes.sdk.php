@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * The environment in which the application under test is executing.
  */
@@ -12,6 +14,10 @@ class AppEnvironment
 
     /**
      * Creates a new AppEnvironment instance.
+     * @param string $os
+     * @param string $hostingApp
+     * @param RectangleSize $displaySize
+     * @param string $inferred
      */
     public function __construct($os = null, $hostingApp = null, RectangleSize $displaySize = null, $inferred = null)
     {
@@ -37,6 +43,7 @@ class AppEnvironment
 
     /**
      * Sets the inferred environment information.
+     * @param string $inferred
      */
     public function setInferred($inferred)
     {
@@ -44,8 +51,7 @@ class AppEnvironment
     }
 
     /**
-     * Gets the OS hosting the application under test or {@code null} if
-     * unknown.
+     * Gets the OS hosting the application under test or {@code null} if unknown.
      */
     public function getOs()
     {
@@ -53,8 +59,8 @@ class AppEnvironment
     }
 
     /**
-     * Sets the OS hosting the application under test or {@code null} if
-     * unknown.
+     * Sets the OS hosting the application under test or {@code null} if unknown.
+     * @param string $os
      */
     public function setOs($os)
     {
@@ -62,8 +68,7 @@ class AppEnvironment
     }
 
     /**
-     * Gets the application hosting the application under test or {@code null}
-     * if unknown.
+     * Gets the application hosting the application under test or {@code null} if unknown.
      */
     public function getHostingApp()
     {
@@ -71,8 +76,8 @@ class AppEnvironment
     }
 
     /**
-     * Sets the application hosting the application under test or {@code null}
-     * if unknown.
+     * Sets the application hosting the application under test or {@code null} if unknown.
+     * @param string $hostingApp
      */
     public function setHostingApp($hostingApp)
     {
@@ -81,6 +86,7 @@ class AppEnvironment
 
     /**
      * Gets the display size of the application or {@code null} if unknown.
+     * @return RectangleSize
      */
     public function getDisplaySize()
     {
@@ -89,8 +95,9 @@ class AppEnvironment
 
     /**
      * Sets the display size of the application or {@code null} if unknown.
+     * @param RectangleSize $size
      */
-    public function setDisplaySize($size)
+    public function setDisplaySize(RectangleSize $size)
     {
         $this->displaySize = $size; /*RectangleSize*/
     }

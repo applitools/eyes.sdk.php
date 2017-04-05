@@ -2,6 +2,11 @@
 /*
  * Applitools software.
  */
+
+namespace Applitools;
+
+use Gregwar\Image\Image;
+
 class ImageUtils {
     /**
      * Encodes a given image as PNG.
@@ -9,7 +14,7 @@ class ImageUtils {
      * @param image The image to encode.
      * @return The PNG bytes representation of the image.
      */
-    public static function encodeAsPng(Gregwar\Image\Image $image) {
+    public static function encodeAsPng(Image $image) {
 return "somestring"; //FIXME
         ArgumentGuard::notNull($image, "image");
         $pngBytesStream = new ByteArrayOutputStream();
@@ -75,7 +80,7 @@ return "somestring"; //FIXME
      * @param image The image from which to get its base64 representation.
      * @return The base64 representation of the image (bytes encoded as PNG).
      */
-    public static function base64FromImage(Gregwar\Image\Image $image) {
+    public static function base64FromImage(Image $image) {
         ArgumentGuard::notNull($image, "image");
 
         $imageBytes = self::encodeAsPng($image);
@@ -93,7 +98,7 @@ return "somestring"; //FIXME
     public static function imageFromBytes($imageBytes){
         try {
             //FIXME need to check
-            $image = new Gregwar\Image\Image();
+            $image = new Image();
             $image->setResource(imagecreatefromstring($imageBytes));
         } catch (IOException $e) {
             throw new EyesException("Failed to create buffered image!", $e);
@@ -104,15 +109,14 @@ return "somestring"; //FIXME
     /**
      * Get a copy of the part of the image given by region.
      *
-     * @param image The image from which to get the part.
-     * @param region The region which should be copied from the image.
-     * @return The part of the image.
+     * @param Image $image The image from which to get the part.
+     * @param Region $region The region which should be copied from the image.
+     * @return Image The part of the image.
      */
-    public static function getImagePart(Gregwar\Image\Image $image, Region $region) {
+    public static function getImagePart(Image $image, Region $region) {
         ArgumentGuard::notNull($image, "image");
 
-        $image->crop($region->getLeft(),
-            $region->getTop(), $region->getWidth(), $region->getHeight());
+        $image->crop($region->getLeft(), $region->getTop(), $region->getWidth(), $region->getHeight());
 
         return $image;
     }
@@ -120,11 +124,11 @@ return "somestring"; //FIXME
     /**
      * Rotates an image by the given degrees.
      *
-     * @param image The image to rotate.
-     * @param deg The degrees by which to rotate the image.
-     * @return A rotated image.
+     * @param Image $image The image to rotate.
+     * @param float $deg The degrees by which to rotate the image.
+     * @return Image A rotated image.
      */
-    public static function rotateImage(Gregwar\Image\Image $image, $deg) {
+    public static function rotateImage(Image $image, $deg) {
         /* FIXME
                 ArgumentGuard::notNull($image, "image");
 
@@ -171,10 +175,9 @@ return "somestring"; //FIXME
      *                    See {@link BufferedImage#getType()}.
      * @return A copy of the {@code src} of the requested type.
      */
-    public static function copyImageWithType(Gregwar\Image\Image $src, $updatedType) {
+    public static function copyImageWithType(Image $src, $updatedType) {
         ArgumentGuard::notNull($src, "src");
-        $result = new Gregwar\Image\Image($src->getWidth(),
-                $src->getHeight(), $updatedType);
+        $result = new Image($src->width(), $src->height(), $updatedType);
         $g2 = $result->createGraphics();
         $g2->drawRenderedImage($src, null);
         $g2->dispose();
@@ -184,12 +187,12 @@ return "somestring"; //FIXME
     /**
      * Scales an image by the given ratio
      *
-     * @param image The image to scale.
-     * @param scaleRatio Factor to multiply the image dimensions by
-     * @return If the scale ratio != 1, returns a new scaled image,
+     * @param Image $image The image to scale.
+     * @param float $scaleRatio Factor to multiply the image dimensions by
+     * @return Image If the scale ratio != 1, returns a new scaled image,
      * otherwise, returns the original image.
      */
-    public static function scaleImage(Gregwar\Image\Image $image, $scaleRatio) {
+    public static function scaleImage(Image $image, $scaleRatio) {
         //if you have ScaleProvider use  $scaleProvider->getScaleRatio();
         ArgumentGuard::notNull($image, "image");
         ArgumentGuard::notNull($scaleRatio, "scaleRatio");
@@ -214,13 +217,13 @@ return "somestring"; //FIXME
     /**
      * Scales an image by the given ratio
      *
-     * @param image The image to scale.
-     * @param targetWidth The width to resize the image to
-     * @param targetHeight The height to resize the image to
-     * @return If the size of image equal to target size, returns the original image,
+     * @param Image $image The image to scale.
+     * @param int $targetWidth The width to resize the image to
+     * @param int $targetHeight The height to resize the image to
+     * @return Image If the size of image equal to target size, returns the original image,
      * otherwise, returns a new resized image.
      */
-     public static function resizeImage(Gregwar\Image\Image $image, $targetWidth, $targetHeight) {
+     public static function resizeImage(Image $image, $targetWidth, $targetHeight) {
           ArgumentGuard::notNull($image, "image");
           ArgumentGuard::notNull($targetWidth, "targetWidth");
           ArgumentGuard::notNull($targetHeight, "targetHeight");
@@ -261,7 +264,7 @@ return "somestring"; //FIXME
         return max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($x1)));
     }
 
-    private static function scaleImageBicubic(Gregwar\Image\Image $srcImage, $targetWidth, $targetHeight) {
+    private static function scaleImageBicubic(Image $srcImage, $targetWidth, $targetHeight) {
         $bufDst = imagecreatetruecolor($targetWidth, $targetHeight);//new DataBufferByte($targetWidth * $targetHeight * 4);
         //$wSrc = $srcImage->width();
         //$hSrc = $srcImage->height();
@@ -323,7 +326,7 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
         for ($i = 0; $i < $hDst2; $i++) {
             for ($j = 0; $j < $wDst2; $j++) {
                 $y = $i * ($hSrc - 1) / $hDst2;
-                $yPos = floor($y);
+                $yPos = intval($y);
                 $t = $y - $yPos;
 
                 foreach ($pixels2[$yPos][$j] as $key=>$val) {
@@ -372,13 +375,13 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
         } else {
             $bufDst = $buf2;
         }
-        $dstImage = new Gregwar\Image\Image();
+        $dstImage = new Image();
 
         $dstImage->setResource($bufDst);
         return $dstImage;
     }
 
-    private static function scaleImageIncrementally(/*BufferedImage*/ $src, $targetWidth, $targetHeight) {
+    private static function scaleImageIncrementally(Image $src, $targetWidth, $targetHeight) {
         $hasReassignedSrc = false;
         $currentWidth = $src->width();
         $currentHeight = $src->height();
@@ -437,12 +440,11 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
 
     /**
      * Removes a given region from the image.
-     * @param image The image to crop.
-     * @param regionToCrop The region to crop from the image.
-     * @return A new image without the cropped region.
+     * @param Image $image The image to crop.
+     * @param Region $regionToCrop The region to crop from the image.
+     * @return Image The cropped image.
      */
-    public static function cropImage(Gregwar\Image\Image $image,
-                                          Region $regionToCrop) {
+    public static function cropImage(Image $image, Region $regionToCrop) {
         $croppedImage = Scalr::crop($image, $regionToCrop->getLeft(),
                 $regionToCrop->getTop(), $regionToCrop->getWidth(),
                 $regionToCrop->getHeight());

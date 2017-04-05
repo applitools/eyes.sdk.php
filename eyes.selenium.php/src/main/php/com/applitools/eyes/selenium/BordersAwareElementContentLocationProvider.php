@@ -1,4 +1,11 @@
 <?php
+
+namespace Applitools;
+
+
+use Facebook\WebDriver\Exception\WebDriverException;
+use Facebook\WebDriver\Remote\RemoteWebElement;
+
 /**
  * Encapsulates an algorithm to find an element's content location, based on
  * the element's location.
@@ -7,13 +14,12 @@ class BordersAwareElementContentLocationProvider {
 
     /**
      * Returns a location based on the given location.
-     * @param logger The logger to use.
-     * @param element The element for which we want to find the content's
-     *                location.
-     * @param location The location of the element.
-     * @return The location of the content of the element.
+     * @param Logger $logger The logger to use.
+     * @param RemoteWebElement $element The element for which we want to find the content's location.
+     * @param Location $location The location of the element.
+     * @return Location The location of the content of the element.
      */
-    public function getLocation(Logger $logger, RemoteWebElement/*FIXME nned to check*/ $element,
+    public function getLocation(Logger $logger, RemoteWebElement/*FIXME need to check*/ $element,
                                 Location $location) {
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($element, "element");
@@ -52,7 +58,7 @@ class BordersAwareElementContentLocationProvider {
                 $logger->verbose("Element is not an EyesWebElement! " .
                         "(when trying to get border-left-width) " .
                         "Element's class: " .
-                        $element->getClass()->getName());
+                        get_class($element));
                 $logger->verbose("Using getCssValue...");
                 //FIXME $propValue = $element->getCssValue("border-left-width");
                 $element->getBorderLeftWidth(); //FIXME
@@ -94,7 +100,7 @@ class BordersAwareElementContentLocationProvider {
                 $logger->verbose("Element is not an EyesWebElement " .
                         "(when trying to get border-top-width) " .
                         "Element's class: " .
-                        $element->getClass()->getName());
+                        get_class($element));
                 $logger->verbose("Using getCssValue...");
                 $propValue =
                     //FIXME $element->getCssValue("border-top-width");

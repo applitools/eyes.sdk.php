@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 class Logger
 {
     private $logHandler; //LogHandler
@@ -20,7 +22,7 @@ class Logger
 
 
     /**
-     * @return The currently set log handler.
+     * @return LogHandler The currently set log handler.
      */
     public function getLogHandler() {
         return $this->logHandler;
@@ -32,9 +34,8 @@ class Logger
     }
     /**
      * Sets the log handler.
-     * @param handler The log handler to set. If you want a log handler which
-     *                does nothing, use {@link
-     *                com.applitools.eyes.NullLogHandler}.
+     * @param LogHandler $handler The log handler to set. If you want a log handler which
+     *                does nothing, use {@link Applitools\NullLogHandler}.
      */
     public function setLogHandler(LogHandler $handler) {
         ArgumentGuard::notNull($handler, "handler");
@@ -60,18 +61,4 @@ class Logger
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+?>

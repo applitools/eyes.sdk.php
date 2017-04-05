@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * Encapsulates the type of coordinates used by the region provider.
  */

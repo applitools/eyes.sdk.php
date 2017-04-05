@@ -1,4 +1,5 @@
 <?php
+namespace Applitools;
 
 /**
  * Encapsulates state for {@link CssTranslatePositionProvider} instances.

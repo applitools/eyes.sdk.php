@@ -1,4 +1,5 @@
 <?php
+namespace Applitools;
 
 class TargetType /*extends SplEnum*/{  //FIXME
     const FRAME = "FRAME";

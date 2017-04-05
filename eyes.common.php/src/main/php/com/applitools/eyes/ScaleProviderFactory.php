@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * Abstraction for instantiating scale providers.
  */
@@ -8,18 +11,18 @@ abstract class ScaleProviderFactory {
 
     /**
      *
-     * @param scaleProviderHandler A handler to update once a {@link ScaleProvider} instance is created.
+     * @param PropertyHandler $scaleProviderHandler A handler to update once a {@link ScaleProvider} instance is created.
      */
-    public function __construct(/*PropertyHandler<ScaleProvider>*/ $scaleProviderHandler) {
+    public function __construct(PropertyHandler $scaleProviderHandler) {
         $this->scaleProviderHandler = $scaleProviderHandler;
     }
 
     /**
      * The main API for this factory.
      *
-     * @param imageToScaleWidth The width of the image to scale. This parameter CAN be by class implementing
+     * @param int $imageToScaleWidth The width of the image to scale. This parameter CAN be by class implementing
      *                          the factory, but this is not mandatory.
-     * @return A {@link ScaleProvider} instance.
+     * @return ScaleProvider A {@link ScaleProvider} instance.
      */
     public function getScaleProvider($imageToScaleWidth) {
         $scaleProvider = $this->getScaleProviderImpl($imageToScaleWidth);
@@ -32,9 +35,11 @@ abstract class ScaleProviderFactory {
      * The implementation of getting/creating the scale provider, should be implemented by child classes.
      *
      *
-     * @param imageToScaleWidth The width of the image to scale. This parameter CAN be by class implementing
+     * @param int $imageToScaleWidth The width of the image to scale. This parameter CAN be by class implementing
      *                          the factory, but this is not mandatory.
-     * @return The scale provider to be used.
+     * @return ScaleProvider The scale provider to be used.
      */
     protected abstract function getScaleProviderImpl($imageToScaleWidth);
 }
+
+?>

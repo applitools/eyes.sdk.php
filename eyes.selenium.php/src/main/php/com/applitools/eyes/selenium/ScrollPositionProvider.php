@@ -1,5 +1,11 @@
 <?php
 
+namespace Applitools;
+
+use Applitools\Exceptions\EyesDriverOperationException;
+use Facebook\WebDriver\Exception\WebDriverException;
+use Facebook\WebDriver\JavaScriptExecutor;
+
 class ScrollPositionProvider implements PositionProvider
 {
 
@@ -16,7 +22,8 @@ class ScrollPositionProvider implements PositionProvider
     }
 
     /**
-     * @return The scroll position of the current frame.
+     * @return Location The scroll position of the current frame.
+     * @throws EyesDriverOperationException
      */
     public function getCurrentPosition()
     {
@@ -24,7 +31,7 @@ class ScrollPositionProvider implements PositionProvider
         try {
             $result = EyesSeleniumUtils::getCurrentScrollPosition($this->executor);
         } catch (WebDriverException $e) {
-            throw new EyesDriverOperationException("Failed to extract current scroll position!");
+            throw new EyesDriverOperationException("Failed to extract current scroll position!", $e);
         }
         $this->logger->verbose(sprintf("Current position: %s", json_encode($result)));
         return $result;
@@ -32,7 +39,7 @@ class ScrollPositionProvider implements PositionProvider
 
     /**
      * Go to the specified location.
-     * @param location The position to scroll to.
+     * @param Location $location The position to scroll to.
      */
     public function setPosition(Location $location)
     {
@@ -43,7 +50,7 @@ class ScrollPositionProvider implements PositionProvider
 
     /**
      *
-     * @return The entire size of the container which the position is relative
+     * @return RectangleSize The entire size of the container which the position is relative
      * to.
      */
     public function getEntireSize()

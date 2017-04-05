@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 class StitchMode
 {
     /**

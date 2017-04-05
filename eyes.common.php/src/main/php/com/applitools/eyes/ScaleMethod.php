@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * The list of possible scaling methods.
  */

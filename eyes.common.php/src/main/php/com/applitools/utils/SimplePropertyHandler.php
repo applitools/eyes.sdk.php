@@ -1,5 +1,6 @@
 <?php
-require_once "PropertyHandler.php";
+
+namespace Applitools;
 
 /**
  * A simple implementation of {@link PropertyHandler}. Allows get/set.

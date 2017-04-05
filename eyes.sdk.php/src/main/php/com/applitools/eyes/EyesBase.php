@@ -1,4 +1,11 @@
 <?php
+namespace Applitools;
+
+use Applitools\Exceptions\TestFailedException;
+use Applitools\Exceptions\NewTestException;
+use Facebook\WebDriver\WebDriver;
+use Gregwar\Image\Image;
+
 abstract class EyesBase
 {
 
@@ -10,7 +17,7 @@ abstract class EyesBase
     private $isOpen;
     private $serverConnector;
     private $runningSession;
-    private $viewportSize;/*RectangleSize*/
+    protected $viewportSize;/*RectangleSize*/
     private $batch;/*BatchInfo*/
     private $sessionType;/*it should be class to*/
     private $currentAppName;
@@ -25,9 +32,10 @@ abstract class EyesBase
     private $hostOS;
     private $userInputs = array(); //new ArrayDeque<Trigger>();
     private $shouldMatchWindowRunOnceOnTimeout;
-    private $lastScreenshot;
+    protected $lastScreenshot;
     protected $scaleProviderHandler; //PropertyHandler<ScaleProvider>
     protected $cutProviderHandler; //PropertyHandler<CutProvider>
+    private $sessionStartInfo;
 
 
     public function __construct($serverUrl)
@@ -68,7 +76,7 @@ abstract class EyesBase
 
 
     /**
-     * @param hostOS The host OS running the AUT.
+     * @param string $hostOS The host OS running the AUT.
      */
     public function setHostOS($hostOS)
     {
@@ -136,8 +144,7 @@ abstract class EyesBase
      * Sets the branch under which new branches are created. (see {@link
      * #setBranchName(String)}.
      *
-     * @param branchName Branch name or {@code null} to specify the default
-     *                   branch.
+     * @param string $branchName Branch name or {@code null} to specify the default branch.
      */
     public function setParentBranchName($branchName) {
         $this->parentBranchName = $branchName;
@@ -145,7 +152,7 @@ abstract class EyesBase
 
     /**
      *
-     * @return The name of the current parent branch under which new branches
+     * @return string The name of the current parent branch under which new branches
      * will be created. (see {@link #setParentBranchName(String)}).
      */
     public function getParentBranchName() {
@@ -153,7 +160,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return The currently set position provider.
+     * @return PositionProvider The currently set position provider.
      */
     protected function getPositionProvider() {
         return $this->positionProvider;
@@ -232,7 +239,7 @@ abstract class EyesBase
     public function getMatchLevel() {
         return $this->defaultMatchSettings->getMatchLevel();
     }
-    
+
     /**
      * @return The maximum time in seconds {@link #checkWindowBase
      * (RegionProvider, String, boolean, int)} waits for a match.
@@ -264,12 +271,12 @@ abstract class EyesBase
     /**
      * Adds a mouse trigger.
      *
-     * @param action  Mouse action.
-     * @param control The control on which the trigger is activated
+     * @param string $action  Mouse action.
+     * @param Region $control The control on which the trigger is activated
      *                (location is relative to the window).
-     * @param cursor  The cursor's position relative to the control.
+     * @param Location $cursor  The cursor's position relative to the control.
      */
-    protected function addMouseTriggerBase(MouseAction $action, Region $control, Location $cursor) {
+    protected function addMouseTriggerBase($action, Region $control, Location $cursor) {
         if ($this->getIsDisabled()) {
             $this->logger->verbose(sprintf("Ignoring %s (disabled)", $action));
             return;
@@ -293,7 +300,7 @@ abstract class EyesBase
         try {
             $cursorInScreenshot = $this->lastScreenshot->getLocationInScreenshot(
                 $cursorInScreenshot, CoordinatesType::CONTEXT_RELATIVE);
-        } catch (OutOfBoundsException $e) {
+        } catch (EyesOutOfBoundsException $e) {
             $this->logger->verbose(sprintf("Ignoring %s (out of bounds)", $action));
             return;
         }
@@ -310,7 +317,7 @@ abstract class EyesBase
         }
 
         $trigger = new MouseTrigger($action, $controlScreenshotIntersect, $cursorInScreenshot);
-        addUserInput($trigger);
+        $this->addUserInput($trigger);
 
         $this->logger->verbose(sprintf("Added %s", $trigger));
     }
@@ -395,7 +402,7 @@ abstract class EyesBase
      */
     public function setBaselineName($baselineName) {
         $this->logger->log("Baseline name: " . $baselineName);
-        
+
         if($baselineName == null || $baselineName->isEmpty()) {
             $this->baselineName = null;
         }
@@ -403,7 +410,7 @@ abstract class EyesBase
             $this->baselineName = $baselineName;
         }
     }
-    
+
     /**
      * @return The baseline name, if specified.
      */
@@ -458,7 +465,7 @@ abstract class EyesBase
     /**
      * Sets the API key of your applitools Eyes account.
      *
-     * @param apiKey The api key to set.
+     * @param $apiKey string The api key to set.
      */
     public function setApiKey($apiKey)
     {
@@ -496,18 +503,19 @@ abstract class EyesBase
     }
 
     /**
-     * @return The viewport size of the AUT.
+     * @return RectangleSize The viewport size of the AUT.
      */
     protected abstract function getViewportSize();
 
     /**
-     * @param size The required viewport size.
+     * @param WebDriver|null $driver
+     * @param RectangleSize $size The required viewport size.
      */
     protected abstract function setViewportSize(WebDriver $driver = null, RectangleSize $size);
 
     /**
      *
-     * @return The name of the application under test.
+     * @return string The name of the application under test.
      */
     public function getAppName()
     {
@@ -516,14 +524,14 @@ abstract class EyesBase
 
     /**
      *
-     * @param appName The name of the application under test.
+     * @param string $appName The name of the application under test.
      */
     public function setAppName($appName) {
         $this->appName = $appName;
     }
 
     /**
-     * @return The inferred environment string
+     * @return string The inferred environment string
      * or {@code null} if none is available. The inferred string is in the
      * format "source:info" where source is either "useragent" or "pos".
      * Information associated with a "useragent" source is a valid browser user
@@ -534,9 +542,8 @@ abstract class EyesBase
     abstract protected function getInferredEnvironment();
 
     /**
-     * Application environment is the environment (e.g., the host OS) which
-     * runs the application under test.
-     * @return The current application environment.
+     * Application environment is the environment (e.g., the host OS) which runs the application under test.
+     * @return AppEnvironment The current application environment.
      */
     protected function getAppEnvironment()
     {
@@ -571,13 +578,13 @@ abstract class EyesBase
     }
 
     /**
-     * @return An updated screenshot.
+     * @return EyesScreenshot An updated screenshot.
      */
-    protected abstract function getScreenshot();
+    public abstract function getScreenshot();
 
     /**
      *
-     * @return The URI of the eyes server.
+     * @return string The URI of the eyes server.
      */
     public function getServerUrl() {
         return $this->serverConnector->getServerUrl();
@@ -719,7 +726,7 @@ abstract class EyesBase
 
     /**
      *
-     * @param method The method used to perform scaling.
+     * @param string $method The method used to perform scaling.
      */
     protected function setScaleMethod($method)
     {
@@ -734,8 +741,7 @@ abstract class EyesBase
 
     /**
      * Manually set the scale ratio for the images being validated.
-     * @param scaleRatio The scale ratio to use, or {@code null} to reset
-     *                   back to automatic scaling.
+     * @param float $scaleRatio The scale ratio to use, or {@code null} to reset back to automatic scaling.
      */
     public function setScaleRatio($scaleRatio) {
         if ($scaleRatio != null) {
@@ -744,13 +750,12 @@ abstract class EyesBase
         } else {
             $this->scaleProviderHandler = new SimplePropertyHandler();
             $this->scaleProviderHandler->set(new NullScaleProvider());
-
         }
     }
 
     /**
      *
-     * @return The ratio used to scale the images being validated.
+     * @return float The ratio used to scale the images being validated.
      */
     public function getScaleRatio() {
         return $this->scaleProviderHandler->get()->getScaleRatio();
@@ -759,8 +764,7 @@ abstract class EyesBase
     /**
      * Set whether or not failed tests are saved by default.
      *
-     * @param saveFailedTests True if failed tests should be saved by
-     *                        default, false otherwise.
+     * @param bool $saveFailedTests True if failed tests should be saved by default, false otherwise.
      */
     public function setSaveFailedTests($saveFailedTests) {
         $this->saveFailedTests = $saveFailedTests;
@@ -769,15 +773,14 @@ abstract class EyesBase
     /**
      * Set whether or not new tests are saved by default.
      *
-     * @param saveNewTests True if new tests should be saved by default.
-     *                     False otherwise.
+     * @param bool $saveNewTests True if new tests should be saved by default. False otherwise.
      */
     public function setSaveNewTests($saveNewTests) {
         $this->saveNewTests = $saveNewTests;
     }
 
     /**
-     * @return The current title of of the AUT.
+     * @return string The current title of of the AUT.
      */
     protected abstract function getTitle();
 
@@ -787,32 +790,25 @@ abstract class EyesBase
     public function getSaveFailedTests() {
         return $this->saveFailedTests;
     }
-    
+
     /**
      * @return True if new tests are saved by default.
      */
     public function getSaveNewTests() {
         return $this->saveNewTests;
     }
-    
+
     /**
-     * Takes a snapshot of the application under test and matches it with the
-     * expected output.
+     * Takes a snapshot of the application under test and matches it with the expected output.
      *
-     * @param regionProvider      Returns the region to check or the empty
-     *                            rectangle to check the entire window.
-     * @param tag                 An optional tag to be associated with the
-     *                            snapshot.
-     * @param ignoreMismatch      Whether to ignore this check if a mismatch is
-     *                            found.
-     * @param retryTimeout        The amount of time to retry matching in
-     *                            milliseconds or a negative value to use the
-     *                            default retry timeout.
-     * @return The result of matching the output with the expected output.
-     * @throws com.applitools.eyes.TestFailedException Thrown if a mismatch is
-     *          detected and immediate failure reports are enabled.
+     * @param RegionProvider $regionProvider Returns the region to check or the empty rectangle to check the entire window.
+     * @param string $tag An optional tag to be associated with the snapshot.
+     * @param bool $ignoreMismatch Whether to ignore this check if a mismatch is found.
+     * @param int $retryTimeout The amount of time to retry matching in milliseconds or a negative value to use the default retry timeout.
+     * @return MatchResult The result of matching the output with the expected output.
+     * @throws Exception
      */
-    public function checkWindowBase($regionProvider, $tag = "", $ignoreMismatch = false, $retryTimeout = null)
+    public function checkWindowBase(RegionProvider $regionProvider, $tag = "", $ignoreMismatch = false, $retryTimeout = null)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log("Ignored");
@@ -822,8 +818,7 @@ abstract class EyesBase
         }
         //FIXME
         //require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
-        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver,
-            Gregwar\Image\Image::create(0, 0)); //FIXME
+        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, Image::create(0, 0)); //FIXME
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
@@ -900,7 +895,7 @@ abstract class EyesBase
             $screenshot = $screenshot->getSubScreenshot($region,
                 $regionProvider->getCoordinatesType(), false);
         }
-                   
+
         $this->logger->verbose("Compressing screenshot...");
         $compressResult = $this->compressScreenshot64($screenshot, $lastScreenshot);
         $this->logger->verbose("Done! Getting title...");
@@ -1069,7 +1064,7 @@ abstract class EyesBase
             $this->logger->verbose("Making sure 'action' thread had finished...");
             try {
                 $actionThread->join(30000);
-            } catch (InterruptedException $e) {
+            } catch (Exception $e) {
                 $this->logger->verbose(
                     "Got interrupted while waiting for 'action' to finish!");
             }
@@ -1127,11 +1122,10 @@ abstract class EyesBase
     /**
      * Ends the test.
      *
-     * @param throwEx If true, an exception will be thrown for failed/new tests.
-     * @return The test results.
+     * @param bool $throwEx If true, an exception will be thrown for failed/new tests.
+     * @return TestResults
      * @throws TestFailedException if a mismatch was found and throwEx is true.
-     * @throws NewTestException    if this is a new test was found and throwEx
-     *                             is true.
+     * @throws NewTestException    if this is a new test was found and throwEx is true.
      */
     public function close($throwEx = true)
     {
@@ -1184,7 +1178,7 @@ abstract class EyesBase
                     $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                         . "' of '" . $this->sessionStartInfo->getAppIdOrName()
                         . "'. " . $instructions;
-                    throw new /*NewTest*/Exception(/*$results, */$message);
+                    throw new NewTestException($results, $message);
                 }
                 return $results;
             }
@@ -1204,7 +1198,7 @@ abstract class EyesBase
     /**
      * Ends the test.
      *
-     * @param isDeadlineExceeded If {@code true} the test will fail (unless
+     * @param bool $isDeadlineExceeded If {@code true} the test will fail (unless
      *                           it's a new test).
      * @throws TestFailedException
      * @throws NewTestException
@@ -1276,3 +1270,5 @@ abstract class EyesBase
         }
     }
 }
+
+?>

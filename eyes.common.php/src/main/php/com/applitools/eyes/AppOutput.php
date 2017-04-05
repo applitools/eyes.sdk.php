@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * An application output (title, image, etc).
  */
@@ -13,8 +15,8 @@ class AppOutput
     private $screenshot64;
 
     /**
-     * @param title        The title of the window.
-     * @param screenshot64 Base64 encoding of the screenshot's bytes (the
+     * @param string $title        The title of the window.
+     * @param EyesScreenshot $screenshot64 Base64 encoding of the screenshot's bytes (the
      *                     byte can be in either in compressed or
      *                     uncompressed form)
      */

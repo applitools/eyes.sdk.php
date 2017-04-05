@@ -1,4 +1,5 @@
 <?php
+namespace Applitools;
 
 /**
  * Encapsulates data required to start session using the Session API.
@@ -17,15 +18,14 @@ class SessionStartInfo
     private $parentBranchName;
     private $defaultMatchSettings;
 
-    public function __construct($agentId, /*SessionType*/
+    public function __construct($agentId,
                                 $sessionType,
                                 $appIdOrName, $verId,
-                                $scenarioIdOrName, /*BatchInfo*/
-                                $batchInfo,
-                                $envName, /*AppEnvironment*/
-                                $environment,
-        /*ImageMatchSettings*/
-                                $defaultMatchSettings,
+                                $scenarioIdOrName,
+                                BatchInfo $batchInfo,
+                                $envName,
+                                AppEnvironment $environment,
+                                ImageMatchSettings $defaultMatchSettings,
                                 $branchName, $parentBranchName)
     {
         /*ArgumentGuard.notNullOrEmpty(agentId, "agentId");

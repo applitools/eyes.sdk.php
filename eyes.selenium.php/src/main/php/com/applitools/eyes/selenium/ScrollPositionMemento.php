@@ -1,4 +1,6 @@
 <?php
+namespace Applitools;
+
 /**
  * Encapsulates state for {@link ScrollPositionProvider} instances.
  */

@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * A location in a two-dimensional plane.
  */
@@ -12,9 +14,9 @@ class Location
 
     /**
      * Creates a Location instance.
-     * @param other A location instance from which to create the location.
-     * @param x The X coordinate of this location.
-     * @param y The Y coordinate of this location.
+     * @param Location $other A location instance from which to create the location.
+     * @param int $x The X coordinate of this location.
+     * @param int $y The Y coordinate of this location.
      */
     public function __construct($x = null, $y = null, Location $other = null)
     {
@@ -35,17 +37,17 @@ class Location
     public static function getZero(){ //FIXME instead of self::ZERO
         return new Location(0, 0);
     }
-    public function equals(/*Object */$obj)
+
+    public function equals($other)
     {
-        if ($this == $obj) {
+        if ($this === $other) {
             return true;
         }
 
-        if (!($obj instanceof Location)) {
+        if (!($other instanceof Location)) {
             return false;
         }
 
-        $other = /*(Location)*/ $obj; // ???? clone
         return ($this->getX() == $other->getX()) && ($this->getY() == $other->getY());
     }
 
@@ -56,10 +58,9 @@ class Location
 
     /**
      * Translates this location by the specified amount (in place!).
-     * <p>
-     * @param dx The amount to offset the x-coordinate.
-     * @param dy The amount to offset the y-coordinate.
-     * @param amount The amount the offset.
+     * @param int $dx The amount to offset the x-coordinate.
+     * @param int $dy The amount to offset the y-coordinate.
+     * @param Location $amount The amount the offset.
      */
     public function offset($dx = null, $dy = null, Location $amount = null)
     {
@@ -72,17 +73,10 @@ class Location
             $this->x += $dx;
             $this->y += $dy;
         }
-
     }
 
     /**
-     * Translates this location by the specified amount (in place!).
-     * <p>
-
-
-
-    /**
-     * @return The X coordinate of this location.
+     * @return int The X coordinate of this location.
      */
     public function getX()
     {
@@ -90,7 +84,7 @@ class Location
     }
 
     /**
-     * @return The Y coordinate of this location.
+     * @return int The Y coordinate of this location.
      */
     public function getY()
     {
@@ -99,6 +93,6 @@ class Location
 
     public function toString()
     {
-        return "(" . $this->x . ", " . $this->y . ")";
+        return "({$this->x}, {$this->y})";
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 class AppOutputProviderRedeclared implements AppOutputProvider
 {
     private $eyes; //EyesBase

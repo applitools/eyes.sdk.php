@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * General purpose utilities.
  */
@@ -94,15 +97,15 @@ class GeneralUtils
     {
         try {
             usleep((int)$microseconds);
-        } catch (InterruptedException $ex) {
+        } catch (Exception $ex) {
             throw new RuntimeException("sleep interrupted", $ex);
         }
     }
 
     /**
-     * @param format The date format parser.
-     * @param date The date string in a format matching {@code format}.
-     * @return The {@link java.util.Date} represented by the input string.
+     * @param DateFormat $format The date format parser.
+     * @param string $date The date string in a format matching {@code format}.
+     * @return Date  The {@link java.util.Date} represented by the input string.
      */
     public static function getDate(DateFormat $format, $date)
     {
@@ -167,3 +170,5 @@ class GeneralUtils
         die();
     }
 }
+
+?>

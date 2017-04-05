@@ -2,19 +2,21 @@
 /*
  * Applitools SDK for Selenium integration.
  */
+namespace Applitools;
+
+use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\WebDriverKeyboard;
 
 /**
- * A wrapper class for Selenium's Keyboard interface, so we can record keyboard
- * events.
+ * A wrapper class for Selenium's Keyboard interface, so we can record keyboard events.
  */
-class EyesKeyboard implements Keyboard {
+class EyesKeyboard implements WebDriverKeyboard {
 
     private $logger; //Logger
     private $eyesDriver; //EyesWebDriver
     private $keyboard; //Keyboard
 
-    public function __construct(Logger $logger, EyesWebDriver $eyesDriver,
-                        Keyboard $keyboard) {
+    public function __construct(Logger $logger, EyesWebDriver $eyesDriver, WebDriverKeyboard $keyboard) {
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($eyesDriver, "eyesDriver");
         ArgumentGuard::notNull($keyboard, "keyboard");
@@ -23,10 +25,10 @@ class EyesKeyboard implements Keyboard {
         $this->eyesDriver = $eyesDriver;
         $this->keyboard = $keyboard;
     }
+    
+    public function sendKeys($charSequences) {
 
-    public function sendKeys(/*CharSequence...*/ $charSequences) {
-
-        $control = Region::EMPTY;
+        $control = Region::getEmpty();
 
         // We first find the active element to get the region
         $activeElement = $this->eyesDriver->switchTo()->activeElement();

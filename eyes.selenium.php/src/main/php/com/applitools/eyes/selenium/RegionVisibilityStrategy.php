@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * Encapsulates implementations for providing region visibility during
  * checkRegion.

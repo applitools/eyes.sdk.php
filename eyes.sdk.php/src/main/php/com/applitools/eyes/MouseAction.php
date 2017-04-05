@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 class MouseAction {
     const Click = "Click";
     const RightClick = "RightClick";
@@ -7,3 +10,5 @@ class MouseAction {
     const Down = "Down";
     const Up = "Up";
 }
+
+?>

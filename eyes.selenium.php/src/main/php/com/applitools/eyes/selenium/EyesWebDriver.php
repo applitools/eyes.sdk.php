@@ -1,4 +1,15 @@
 <?php
+namespace Applitools;
+
+use Applitools\Exceptions\EyesException;
+use Facebook\WebDriver\JavaScriptExecutor;
+use Facebook\WebDriver\Remote\RemoteExecuteMethod;
+use Facebook\WebDriver\Remote\RemoteTouchScreen;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\WebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Gregwar\Image\Image;
 
 /**
  * An Eyes implementation of the interfaces implemented by
@@ -25,18 +36,19 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
      * Rotates the image as necessary. The rotation is either manually forced
      * by passing a non-null ImageRotation, or automatically inferred.
      *
-     * @param driver The underlying driver which produced the screenshot.
-     * @param image The image to normalize.
-     * @param rotation The degrees by which to rotate the image:
+     * @param Logger $logger
+     * @param WebDriver $driver The underlying driver which produced the screenshot.
+     * @param Image $image The image to normalize.
+     * @param ImageRotation $rotation The degrees by which to rotate the image:
      *                 positive values = clockwise rotation,
      *                 negative values = counter-clockwise,
      *                 0 = force no rotation, null = rotate automatically
      *                 when needed.
-     * @return A normalized image.
+     * @return Image A normalized image.
      */
     public static function normalizeRotation(Logger $logger,
                                              WebDriver $driver,
-                                             Gregwar\Image\Image $image,
+                                             Image $image,
                                              ImageRotation $rotation)
     {
         ArgumentGuard::notNull($driver, "driver");
@@ -44,23 +56,22 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         $normalizedImage = clone $image;
         if ($rotation != null) {
             if ($rotation->getRotation() != 0) {
-                $normalizedImage = ImageUtils::rotateImage($image,
-                    $rotation->getRotation());
+                $normalizedImage = ImageUtils::rotateImage($image, $rotation->getRotation());
             }
         } else { // Do automatic rotation if necessary
             try {
                 $logger->verbose("Trying to automatically normalize rotation...");
                 if (EyesSeleniumUtils::isMobileDevice($driver) &&
                     EyesSeleniumUtils::isLandscapeOrientation($driver)
-                    && $image->getHeight() > $image->getWidth()
+                    && $image->height() > $image->width()
                 ) {
                     // For Android, we need to rotate images to the right, and
                     // for iOS to the left.
                     $degrees = EyesSeleniumUtils::isAndroid($driver) ? 90 : -90;
                     $normalizedImage = ImageUtils::rotateImage($image, $degrees);
                 }
-            } catch (Exception $e) {
-                $logger->verbose("Got exception: " + $e->getMessage());
+            } catch (\Exception $e) {
+                $logger->verbose("Got exception: " . $e->getMessage());
                 $logger->verbose("Skipped automatic rotation handling.");
             }
         }
@@ -85,19 +96,22 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         $executeMethod = null;
         try {
             $executeMethod = new RemoteExecuteMethod($driver);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // If an exception occurred, we simply won't instantiate "touch".
         }
         if (null != $executeMethod) {
-            $touch = new EyesTouchScreen($logger, $this,
+            $this->touch = new EyesTouchScreen($logger, $this,
                 new RemoteTouchScreen($executeMethod));
         } else {
-            $touch = null;
+            $this->touch = null;
         }
 
         $logger->verbose("Driver session is " . $this->getSessionId());
     }
 
+    /**
+     * @return Eyes
+     */
     public function getEyes()
     {
         return $this->eyes;
@@ -115,7 +129,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
 
     /**
      *
-     * @return The image rotation data.
+     * @return ImageRotation The image rotation data.
      */
     public function getRotation()
     {
@@ -124,7 +138,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
 
     /**
      *
-     * @param rotation The image rotation data.
+     * @param ImageRotation $rotation The image rotation data.
      */
     public function setRotation(ImageRotation $rotation)
     {
@@ -187,17 +201,15 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
             // activities).
             $this->elementsIds[$webElement->getId()] = $webElement;
         } else {
-            throw new EyesException(sprintf(
-                "findElement: Element is not a RemoteWebElement: %s", $by));
+            throw new EyesException(sprintf("findElement: Element is not a RemoteWebElement: %s", $by));
         }
 
         return $webElement;
     }
 
     /**
-     * Found elements are sometimes accessed by their IDs (e.g. tapping an
-     * element in Appium).
-     * @return Maps of IDs for found elements.
+     * Found elements are sometimes accessed by their IDs (e.g. tapping an element in Appium).
+     * @return array Maps of IDs for found elements.
      */
     public function getElementIds()
     {
@@ -366,7 +378,6 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
 
     public function executeAsyncScript($script, array $args = array())
     {
-
         // Appium commands are sometimes sent as Javascript
         if (AppiumJsCommandExtractor::isAppiumJsCommand($script)) {
             $trigger = AppiumJsCommandExtractor::extractTrigger($this->elementsIds,
@@ -377,7 +388,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
                 if ($trigger instanceof MouseTrigger) {
                     $mt = /*(MouseTrigger)*/
                         $trigger;
-                    $this->eyes->addMouseTrigger($mt->getMouseAction(), $mt->getControl(), $mt->getLocation());
+                    $this->eyes->addMouseTriggerCursor($mt->getMouseAction(), $mt->getControl(), $mt->getLocation());
                 }
             }
         }
@@ -386,9 +397,8 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
 
 
     /**
-     * @param forceQuery If true, we will perform the query even if we have a
-     *                   cached viewport size.
-     * @return The viewport size of the default content (outer most frame).
+     * @param bool $forceQuery If true, we will perform the query even if we have a cached viewport size.
+     * @return RectangleSize The viewport size of the default content (outer most frame).
      */
     public function getDefaultContentViewportSize($forceQuery = false)
     {
@@ -420,7 +430,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
 
     /**
      *
-     * @return A copy of the current frame chain.
+     * @return FrameChain A copy of the current frame chain.
      */
     public function getFrameChain()
     {
@@ -450,7 +460,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
             $userAgent = $this->driver->executeScript(
                 "return navigator.userAgent");
             $this->logger->verbose("user agent: " . $userAgent);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->logger->verbose("Failed to obtain user-agent string");
             $userAgent = null;
         }

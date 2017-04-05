@@ -1,4 +1,7 @@
 <?php
+
+namespace Applitools;
+
 /**
  * Scale provider which determines the scale ratio according to the context.
  */
@@ -17,12 +20,13 @@ class ContextBasedScaleProvider implements ScaleProvider {
 
     /**
      *
-     * @param topLevelContextEntireSize The total size of the top level
+     * @param RectangleSize $topLevelContextEntireSize The total size of the top level
      *                                  context. E.g., for selenium this
      *                                  would be the document size of the top
      *                                  level frame.
-     * @param viewportSize              The viewport size.
-     * @param devicePixelRatio          The device pixel ratio of the
+     * @param RectangleSize $viewportSize The viewport size.
+     * @param ScaleMethod $scaleMethod
+     * @param float $devicePixelRatio The device pixel ratio of the
      *                                  platfrom on which the application is
      *                                  running.
      */

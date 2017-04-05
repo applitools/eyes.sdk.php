@@ -2,6 +2,9 @@
 /*
  * Applitools SDK for Selenium integration.
  */
+
+namespace Applitools;
+
 /**
  * Provides image compression based on delta between consecutive images.
  */
@@ -210,5 +213,6 @@
 
         return $resultStream->toByteArray();
     }
-
 }
+
+?>

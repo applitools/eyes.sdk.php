@@ -1,5 +1,9 @@
 <?php
 
+namespace Applitools;
+
+use InvalidArgumentException;
+
 /**
  * Argument validation utilities.
  */
@@ -7,99 +11,107 @@ class ArgumentGuard
 {
     /**
      * Fails if the input parameter is null.
-     * @param param The input parameter.
-     * @param paramName The input parameter name.
+     * @param mixed $param The input parameter.
+     * @param string $paramName The input parameter name.
+     * @throws InvalidArgumentException
      */
     public static function notNull($param, $paramName)
     {
         if (null === $param) { //FIXME
-            throw new /*IllegalArgument*/Exception($paramName . " is null");
+            throw new InvalidArgumentException ($paramName . " is null");
         }
     }
 
     /**
      * Fails if the input parameter equals the input value.
-     * @param param The input parameter.
-     * @param value The input value.
-     * @param paramName The input parameter name.
+     * @param mixed $param The input parameter.
+     * @param mixed $value The input value.
+     * @param string $paramName The input parameter name.
+     * @throws InvalidArgumentException
      */
     public static function notEqual($param, $value, $paramName)
     {
         if (($param == $value) && ($param != null)) {
-            throw new IllegalArgumentException($paramName . " == " . $value);
+            throw new InvalidArgumentException($paramName . " == " . $value);
         }
     }
 
     /**
      * Fails if the input parameter string is null or empty.
-     * @param param The input parameter.
-     * @param paramName The input parameter name.
+     * @param mixed $param The input parameter.
+     * @param string $paramName The input parameter name.
+     * @throws InvalidArgumentException
      */
     public static function notNullOrEmpty($param, $paramName)
     {
         if (empty($param)) {
-            throw new IllegalArgumentException($paramName . " is empty");
+            throw new InvalidArgumentException($paramName . " is empty");
         }
     }
 
     /**
      * Fails if the input parameter is not null.
-     * @param param The input parameter.
-     * @param paramName The input parameter name.
+     * @param mixed $param The input parameter.
+     * @param string $paramName The input parameter name.
+     * @throws InvalidArgumentException
      */
     public static function isNull($param, $paramName)
     {
         if (null !== $param) {
-            throw new IllegalArgumentException(paramName + " is not null");
+            throw new InvalidArgumentException($paramName . " is not null");
         }
     }
 
     /**
      * Fails if the input integer parameter is negative.
-     * @param param The input parameter.
-     * @param paramName The input parameter name.
+     * @param mixed $param The input parameter.
+     * @param string $paramName string The input parameter name.
+     * @throws InvalidArgumentException
      */
     public static function greaterThanOrEqualToZero($param, $paramName)
     {
         if (0 > $param) {
-            throw new IllegalArgumentException($paramName . " < 0");
+            throw new InvalidArgumentException($paramName . " < 0");
         }
     }
 
     /**
      * Fails if the input integer parameter is smaller than 1.
-     * @param param The input parameter.
-     * @param paramName The input parameter name.
+     * @param mixed $param The input parameter.
+     * @param string $paramName The input parameter name.
+     * @throws InvalidArgumentException
      */
     public static function greaterThanZero($param, $paramName)
     {
         if (0 >= $param) {
-            throw new IllegalArgumentException($paramName . " < 1");
+            throw new InvalidArgumentException($paramName . " < 1");
         }
     }
 
 
     /**
      * Fails if the input integer parameter is equal to 0.
-     * @param param The input parameter.
-     * @param paramName The input parameter name.
+     * @param mixed $param The input parameter.
+     * @param string $paramName The input parameter name.
+     * @throws InvalidArgumentException
      */
     public static function notZero($param, $paramName)
     {
         if (0 == $param) {
-            throw new IllegalArgumentException($paramName . " == 0");
+            throw new InvalidArgumentException($paramName . " == 0");
         }
     }
 
     /**
      * Fails if isValid is false.
-     * @param isValid Whether the current state is valid.
-     * @param errMsg A description of the error.
+     * @param bool $isValid Whether the current state is valid.
+     * @param string $errMsg A description of the error.
+     * @throws InvalidArgumentException
      */
     public static function isValidState($isValid, $errMsg)
     {
         if (!$isValid) {
-            throw new IllegalStateException($errMsg);
+            throw new InvalidArgumentException($errMsg);
         }
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Applitools;
+
 /**
  * The extent in which two images match (or are expected to match).
  */
