@@ -941,12 +941,12 @@ class Eyes extends EyesBase
     protected function addTextTriggerControl(Region $control, $text)
     {
         if ($this->getIsDisabled()) {
-            $this->logger->verbose(sprintf("Ignoring '%s' (disabled)", text));
+            $this->logger->verbose("Ignoring '$text' (disabled)");
             return;
         }
 
         if ($this->lastScreenshot == null) {
-            $this->logger->log(sprintf("Ignoring '%s' (no screenshot)", $text));
+            $this->logger->log("Ignoring '$text' (no screenshot)");
             return;
         }
 
@@ -969,7 +969,7 @@ class Eyes extends EyesBase
     protected function addTextTriggerElement(WebDriverElement $element, $text)
     {
         if ($this->getIsDisabled()) {
-            $this->logger->log(spirntf("Ignoring '%s' (disabled)", $text));
+            $this->logger->log("Ignoring '$text' (disabled)");
             return;
         }
 
