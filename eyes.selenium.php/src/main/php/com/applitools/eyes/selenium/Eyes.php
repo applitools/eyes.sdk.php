@@ -386,36 +386,45 @@ class Eyes extends EyesBase
         $this->closeResponseTime($deadlineExceeded);
     }
 
-
     /**
      * Takes a snapshot of the application under test and matches a specific
      * region within it with the expected output.
      *
-     * @param Region $region A non empty region representing the screen region to check.
+     * @param mixed $region A non empty region representing the screen region to check.
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
      * @param string $tag An optional tag to be associated with the snapshot.
-     * @throws TestFailedException Thrown if a mismatch is detected and immediate failure reports are enabled.
+     * @param bool $stitchContent
+     * @throws \Exception
      */
-    public function checkRegion(Region $region, $matchTimeout = null, $tag = null/*, $stitchContent = null, $selector = null*/)
+    public function checkRegion($region, $matchTimeout = null, $tag = null, $stitchContent = false)
     {
         if ($this->getIsDisabled()) {
-            $this->logger->log(sprintf("CheckRegion([%s], %d, '%s'): Ignored",
-                $region, $matchTimeout, $tag));
+            $this->logger->log("CheckRegion($region, $matchTimeout, '$tag'): Ignored");
             return;
         }
-        /*
-                if ($stitchContent) {
-                    $this->checkElement($selector);
-                } else {
-                    $this->checkElementRegion($selector);
-                }
-        */
-        ArgumentGuard::notNull($region, "region");
 
-        $this->logger->log(sprintf("CheckRegion([%s], %d, '%s')", json_encode($region),
-            $matchTimeout, $tag));
+        $targetRegion = null;
+        if ($region instanceof Region){
+            $targetRegion = $region;
+        } else if ($region instanceof WebDriverElement) {
+            $this->checkRegionByElement($region, $matchTimeout, $tag, $stitchContent);
+            return;
+        } else if ($region instanceof WebDriverBy) {
+            $this->checkRegionBySelector($region, $matchTimeout, $tag, $stitchContent);
+            return;
+        } else if (is_string($region)) {
+            $element = self::findElement($this->driver, $region);
+            $this->checkRegionByElement($element, $matchTimeout, $tag, $stitchContent);
+            return;
+        } else {
+            throw new \Exception("couldn't handle region of type " . get_class($region));
+        }
 
-        $regionProvider = new RegionProvider($region);
+        ArgumentGuard::notNull($targetRegion, "region");
+
+        $this->logger->log("CheckRegion($targetRegion, $matchTimeout, '$tag')");
+
+        $regionProvider = new RegionProvider($targetRegion);
         $regionProvider->setCoordinatesType(CoordinatesType::SCREENSHOT_AS_IS); //FIXME need to check
         parent::checkWindowBase(
             $regionProvider,
@@ -423,31 +432,10 @@ class Eyes extends EyesBase
             false,
             $matchTimeout
         );
-        $this->logger->log("Done! trying to scroll back to original position..");
+        $this->logger->log("Done! trying to scroll back to original position...");
         $this->regionVisibilityStrategy->returnToOriginalPosition($this->positionProvider); /// ????
         $this->logger->log("Done!");
-
     }
-
-    /**
-     * Takes a snapshot of the application under test and matches a region
-     * specified by the given selector with the expected region output.
-     *
-     * @param WebDriverBy $selector Selects the region to check.
-     * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
-     * @param string $tag An optional tag to be associated with the screenshot.
-     * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
-     */
-    public function checkElementBySelector(WebDriverBy $selector, $matchTimeout = null, $tag)
-    {
-        if ($this->getIsDisabled()) {
-            $this->logger->log(sprintf("CheckRegion(selector, %d, '%s'): Ignored",
-                $matchTimeout, $tag));
-            return;
-        }
-        $this->checkElement($this->driver->findElement($selector), $matchTimeout, $tag);
-    }
-
 
     /**
      * Takes a snapshot of the application under test and matches a region
@@ -467,12 +455,7 @@ class Eyes extends EyesBase
         }
 
         $element = $this->driver->findElement($selector);
-
-        if ($stitchContent) {
-            $this->checkElement($element, $matchTimeout, $tag);
-        } else {
-            $this->checkRegionByElement($element, $matchTimeout, $tag);
-        }
+        $this->checkRegionByElement($element, $matchTimeout, $tag, $stitchContent);
     }
 
     /**
@@ -482,9 +465,9 @@ class Eyes extends EyesBase
      * @param WebDriverElement $element The element which represents the region to check.
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
      * @param string $tag An optional tag to be associated with the snapshot.
-     * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
+     * @param bool $stitchContent
      */
-    public function checkRegionByElement(WebDriverElement $element, $matchTimeout = -1, $tag)
+    public function checkRegionByElement(WebDriverElement $element, $matchTimeout = -1, $tag, $stitchContent = false)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log("checkRegionByElement(element, $matchTimeout, '$tag'): Ignored");
@@ -493,11 +476,14 @@ class Eyes extends EyesBase
 
         ArgumentGuard::notNull($element, "element");
 
-        $this->logger->verbose(sprintf("CheckRegion(element, %d, '%s')",
-            $matchTimeout, $tag));
+        $this->logger->verbose("CheckRegion(element, $matchTimeout, '$tag')");
 
-        // If needed, scroll to the top/left of the element (additional help
-        // to make sure it's visible).
+        if ($stitchContent) {
+            $this->checkElement($element, $matchTimeout, $tag);
+            return;
+        }
+
+        // If needed, scroll to the top/left of the element (additional help to make sure it's visible).
         $locationAsPoint = $element->getLocation();
         $this->regionVisibilityStrategy->moveToRegion($this->positionProvider,
             new Location($locationAsPoint->getX(), $locationAsPoint->getY()));
@@ -513,31 +499,56 @@ class Eyes extends EyesBase
         $this->logger->verbose("Done!");
     }
 
+    private function findElementMixed($element) {
+
+        $targetElement = null;
+        if ($element instanceof WebDriverElement) {
+            $targetElement = $element;
+        } else if ($element instanceof WebDriverBy) {
+            $targetElement = $this->driver->findElement($element);
+        } else if (is_string($element)) {
+            $targetElement = self::findElement($this->driver, $element);
+        } else if ($element instanceof Frame){
+            $targetElement = $element->getReference();
+        } else {
+            throw new \Exception("couldn't find target element");
+        }
+
+        return $targetElement;
+    }
+
     /**
      * Switches into the given frame, takes a snapshot of the application under
      * test and matches a region specified by the given selector.
      *
-     * @param WebDriverBy $frameSelector A selector by which to find a frame.
-     * @param WebDriverBy $elementSelector A selector specifying the region to check.
-     * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
+     * @param mixed $frame A selector by which to find a frame.
+     * @param mixed $element A selector specifying the region to check.
      * @param string $tag An optional tag to be associated with the snapshot.
      * @param bool $stitchContent If {@code true}, stitch the internal content of the region (i.e., perform {@link #checkElement(By, int, String)} on the region.
+     * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
      */
-    public function checkRegionInFrameBySelector(WebDriverBy $frameSelector, WebDriverBy $elementSelector, $matchTimeout = null, $tag = null, $stitchContent = false)
+    public function checkRegionInFrame($frame, $element,  $tag = null, $stitchContent = false, $matchTimeout = null)
     {
         if ($this->getIsDisabled()) {
-            $this->logger->log(sprintf("CheckRegionInFrame(%d, selector, %d, '%s'): Ignored", $frameSelector, $matchTimeout, $tag));
+            $this->logger->log("checkRegionInFrame($frame, $element, $matchTimeout, '$tag', $stitchContent): Ignored");
             return;
         }
         if (empty($matchTimeout)) {
             $matchTimeout = self::USE_DEFAULT_MATCH_TIMEOUT;
         }
-        $this->driver->switchTo()->frame($frameSelector);
+
+        $targetFrame = $this->findElementMixed($frame);
+
+        $this->driver->switchTo()->frame($targetFrame);
+
+        $targetElement = $this->findElementMixed($element);
+
         if ($stitchContent) {
-            $this->checkElementBySelector($elementSelector, $matchTimeout, $tag);
+            $this->checkElement($targetElement, $matchTimeout, $tag);
         } else {
-            $this->checkRegionByElement($this->driver->findElement($frameSelector), $matchTimeout, $tag);
+            $this->checkRegionByElement($this->driver->findElement($targetElement), $matchTimeout, $tag);
         }
+
         $this->driver->switchTo()->parentFrame();
     }
 
@@ -759,20 +770,17 @@ class Eyes extends EyesBase
         ArgumentGuard::greaterThanZero($framePath['length'], "framePath.length");
         $this->logger->log(sprintf("checkFrame(framePath, %d, '%s')", $matchTimeout, $tag));
         $originalFrameChain = $this->driver->getFrameChain();
-        // We'll switch into the PARENT frame of the frame we want to check,
-        // and call check frame.
+        // We'll switch into the PARENT frame of the frame we want to check, and call check frame.
         $this->logger->log("Switching to parent frame according to frames path..");
-        $parentFramePath = $framePath->length; //new String[framePath.length-1];
 
-//??????? //FIXME
-//        System.arraycopy(framePath, 0, parentFramePath, 0,
-//            parentFramePath.length);
+        $parentFramePath = $framePath; // this actually copies the array.
+        $lastFrame = array_pop($parentFramePath);
+
 //        ((EyesTargetLocator)(driver.switchTo())).frames(parentFramePath);
 //???????
 
         $this->logger->log("Done! Calling checkRegionInFrame..");
-        $this->checkRegionInFrame($framePath/*[framePath.length - 1]*/, $selector,
-            $matchTimeout, $tag, $stitchContent);
+        $this->checkRegionInFrame($lastFrame, $selector, $matchTimeout, $tag, $stitchContent);
         $this->logger->log("Done! switching back to default content..");
         $this->driver->switchTo()->defaultContent();
         $this->logger->log("Done! Switching into the original frame..");
@@ -784,20 +792,20 @@ class Eyes extends EyesBase
      * Takes a snapshot of the application under test and matches a specific
      * element with the expected region output.
      *
-     * @param WebDriverElement $element The element to check.
+     * @param mixed $element The element to check.
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
      * @param string $tag An optional tag to be associated with the snapshot.
      * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
      */
-    protected function checkElement(WebDriverElement $element, $matchTimeout = null, $tag = null)
+    protected function checkElement($element, $matchTimeout = null, $tag = null)
     {
         $originalOverflow = null;
 
         // Since the element might already have been found using EyesWebDriver.
         if ($element instanceof EyesRemoteWebElement) {
-            $eyesElement = clone $element;
+            $eyesElement = $element;
         } else {
-            $eyesElement = new EyesRemoteWebElement($this->logger, $this->driver, $element);
+            $eyesElement = new EyesRemoteWebElement($this->logger, $this->driver, $this->findElementMixed($element));
         }
 
         $originalPositionProvider = $this->getPositionProvider();
@@ -831,15 +839,6 @@ class Eyes extends EyesBase
             $this->regionToCheck->setRegion($elementRegion);
             $this->regionToCheck->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
             parent::checkWindowBase(
-            /*new RegionProvider() {
-                    public Region getRegion() {
-                        return Region.EMPTY;
-                    }
-
-                    public CoordinatesType getCoordinatesType() {
-                        return null;
-                    }
-                }*/
                 $this->regionToCheck,
                 $tag,
                 false,
@@ -856,7 +855,6 @@ class Eyes extends EyesBase
         }
     }
 
-
     /**
      * Adds a mouse trigger.
      *
@@ -867,21 +865,20 @@ class Eyes extends EyesBase
     public function addMouseTriggerCursor($action, Region $control, Location $cursor)
     {
         if ($this->getIsDisabled()) {
-            $this->logger->log(sprintf("Ignoring %s (disabled)", $action));
+            $this->logger->log("Ignoring $action (disabled)");
             return;
         }
 
         // Triggers are actually performed on the previous window.
         if ($this->lastScreenshot == null) {
-            $this->logger->log(sprintf("Ignoring %s (no screenshot)",
-                $action));
+            $this->logger->log("Ignoring $action (no screenshot)");
             return;
         }
 
-        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), /*(EyesWebDriverScreenshot) */
-            $this->lastScreenshot->getFrameChain())
-        ) {
-            $this->logger->log(sprintf("Ignoring %s (different frame)", $action));
+        /** @var EyesWebDriverScreenshot $eyesWebDriverScreenshot */
+        $eyesWebDriverScreenshot = $this->lastScreenshot;
+        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), $eyesWebDriverScreenshot->getFrameChain())) {
+            $this->logger->log("Ignoring $action (different frame)");
             return;
         }
         $this->addMouseTriggerBase($action, $control, $cursor);
@@ -896,7 +893,7 @@ class Eyes extends EyesBase
     public function addMouseTriggerElement($action, WebDriverElement $element)
     {
         if ($this->getIsDisabled()) {
-            $this->logger->log(sprintf("Ignoring %s (disabled)", $action));
+            $this->logger->log("Ignoring $action (disabled)");
             return;
         }
 
@@ -909,23 +906,21 @@ class Eyes extends EyesBase
 
         // Triggers are actually performed on the previous window.
         if ($this->lastScreenshot == null) {
-            $this->logger->log(sprintf("Ignoring %s (no screenshot)", $action));
+            $this->logger->log("Ignoring $action (no screenshot)");
             return;
         }
 
         /** @var EyesWebDriverScreenshot $eyesWebDriverScreenshot */
         $eyesWebDriverScreenshot = $this->lastScreenshot;
 
-        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), $eyesWebDriverScreenshot->getFrameChain())
-        ) {
-            $this->logger->log(sprintf("Ignoring %s (different frame)", $action));
+        if (!FrameChain::isSameFrameChain($this->driver->getFrameChain(), $eyesWebDriverScreenshot->getFrameChain())) {
+            $this->logger->log("Ignoring $action (different frame)");
             return;
         }
 
         // Get the element region which is intersected with the screenshot,
         // so we can calculate the correct cursor position.
-        $elementRegion = $this->lastScreenshot->getIntersectedRegion
-        ($elementRegion, CoordinatesType::CONTEXT_RELATIVE);
+        $elementRegion = $eyesWebDriverScreenshot->getIntersectedRegion($elementRegion, CoordinatesType::CONTEXT_RELATIVE);
 
         $this->addMouseTriggerBase($action, $elementRegion, $elementRegion->getMiddleOffset());
     }

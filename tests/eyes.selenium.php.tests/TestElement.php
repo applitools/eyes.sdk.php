@@ -62,7 +62,7 @@ class TestElement extends PHPUnit\Framework\TestCase
      */
     public function testCheckRegion()
     {
-        self::$eyes->checkRegionBySelector(WebDriverBy::id("overflowing-div"), -1,"Region", true);
+        self::$eyes->checkRegion(WebDriverBy::id("overflowing-div"), -1,"Region", true);
     }
 
     /**
@@ -80,7 +80,7 @@ class TestElement extends PHPUnit\Framework\TestCase
      */
     public function testCheckRegionInFrame()
     {
-        self::$eyes->checkRegionInFrameBySelector(WebDriverBy::name("frame1"), WebDriverBy::id("inner-frame-div"), -1,  "Inner frame div", true);
+        self::$eyes->checkRegionInFrame("frame1", "inner-frame-div", "Inner frame div", true);
     }
 
     /**
