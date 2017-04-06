@@ -14,29 +14,43 @@ class MatchResult
 
     private $asExpected = false;
     private $windowId;
-    private $screenshot; //EyesScreenshot
+
+    /** @var EyesScreenshot */
+    private $screenshot;
 
     public function __construct()
     {
     }
 
+    /**
+     * @return bool
+     */
     public function getAsExpected()
     {
         return $this->asExpected;
     }
 
+    /**
+     * @param bool $asExpected
+     */
     public function setAsExpected($asExpected)
     {
         $this->asExpected = $asExpected;
     }
 
+    /**
+     * @return EyesScreenshot
+     */
     public function getScreenshot()
     {
         return $this->screenshot;
     }
 
-    public function setScreenshot($screenshot)
-    {//EyesScreenshot
+    /**
+     * @param EyesScreenshot $screenshot
+     */
+    public function setScreenshot(EyesScreenshot $screenshot)
+    {
         $this->screenshot = $screenshot;
     }
 

@@ -75,6 +75,8 @@ class FullPageCaptureAlgorithm
         }
 
         $this->logger->verbose("Getting top/left image...");
+
+        /** @var Image $image */
         $image = $imageProvider->getImage();
 
         // FIXME - scaling should be refactored

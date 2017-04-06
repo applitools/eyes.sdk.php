@@ -4,5 +4,10 @@ namespace Applitools;
 
 interface AppOutputProvider
 {
-    public function getAppOutput(RegionProvider $regionProvider_, EyesScreenshot $lastScreenshot);
+    /**
+     * @param RegionProvider $regionProvider
+     * @param EyesScreenshot $lastScreenshot
+     * @return AppOutputWithScreenshot
+     */
+    public function getAppOutput(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot);
 }

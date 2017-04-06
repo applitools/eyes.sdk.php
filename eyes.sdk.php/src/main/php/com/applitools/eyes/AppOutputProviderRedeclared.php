@@ -16,8 +16,9 @@ class AppOutputProviderRedeclared implements AppOutputProvider
         $this->logger = $logger;
     }
 
-    public function getAppOutput(RegionProvider $regionProvider_, EyesScreenshot $lastScreenshot_ = null){
-        return $this->getAppOutputWithScreenshot($regionProvider_, $lastScreenshot_);
+    /** @inheritdoc */
+    public function getAppOutput(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot = null){
+        return $this->getAppOutputWithScreenshot($regionProvider, $lastScreenshot);
     }
 
 //FIXME this functionality from EyesBase
