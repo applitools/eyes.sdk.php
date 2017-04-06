@@ -410,7 +410,8 @@ class Eyes extends EyesBase
             $this->checkRegionByElement($region, $matchTimeout, $tag, $stitchContent);
             return;
         } else if ($region instanceof WebDriverBy) {
-            $this->checkRegionBySelector($region, $matchTimeout, $tag, $stitchContent);
+            $element = $this->driver->findElement($region);
+            $this->checkRegionByElement($element, $matchTimeout, $tag, $stitchContent);
             return;
         } else if (is_string($region)) {
             $element = self::findElement($this->driver, $region);

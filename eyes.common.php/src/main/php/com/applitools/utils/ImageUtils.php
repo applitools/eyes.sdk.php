@@ -17,9 +17,10 @@ class ImageUtils {
      * @throws EyesException
      */
     public static function encodeAsPng(Image $image) {
-return "somestring"; //FIXME
         ArgumentGuard::notNull($image, "image");
-        $pngBytesStream = new ByteArrayOutputStream();
+        $pngData = $image->get('png');
+        return $pngData;
+        /*$pngBytesStream = new ByteArrayOutputStream();
 
         try {
             // Get the clipped image in PNG encoding.
@@ -36,7 +37,7 @@ return "somestring"; //FIXME
                 throw new EyesException("Failed to close png byte stream", $e);
             }
         }
-        return $encodedImage;
+        return $encodedImage;*/
     }
 
     /**
@@ -83,7 +84,7 @@ return "somestring"; //FIXME
     public static function base64FromImage(Image $image) {
         ArgumentGuard::notNull($image, "image");
 
-        $imageBytes = self::encodeAsPng($image);
+        $imageBytes = $image->get('png');
         return base64_encode($imageBytes);
     }
 

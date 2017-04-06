@@ -846,9 +846,6 @@ abstract class EyesBase
             $result->setAsExpected(true);
             return $result;
         }
-        //FIXME
-        //require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
-        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, Image::create(0, 0)); //FIXME
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
@@ -999,29 +996,25 @@ abstract class EyesBase
      * @return string A base64 encoded compressed screenshot.
      * @throws EyesException
      */
-    public function compressScreenshot64(EyesScreenshot $screenshot,
-                                         EyesScreenshot $lastScreenshot)
+    public function compressScreenshot64(EyesScreenshot $screenshot, EyesScreenshot $lastScreenshot = null)
     {
-
         ArgumentGuard::notNull($screenshot, "screenshot");
 
         $screenshotImage = $screenshot->getImage();
-        $uncompressed = ImageUtils::encodeAsPng($screenshotImage);
+        $uncompressed = $screenshotImage->get('png');
 
-        $source = ($lastScreenshot != null) ?
-            $lastScreenshot->getImage() : null;
+        $source = ($lastScreenshot != null) ? $lastScreenshot->getImage() : null;
 
         // Compressing the screenshot
         try {
-            $compressedScreenshot = 'sobe byte string';/* FIXME ImageDeltaCompressor::compressByRawBlocks(
-            $screenshotImage, $uncompressed, $source);*/
-        } catch (IOException $e) {
-            throw new EyesException("Failed to compress screenshot!", $e);
+            $compressedScreenshot = ImageDeltaCompressor::compressByRawBlocks($screenshotImage, $uncompressed, $source);
+        } catch (\Exception $e) {
+            $this->logger->log("Failed to compress screenshot! {$e->getMessage()}");
+            return base64_encode($uncompressed);
         }
 
         return base64_encode($compressedScreenshot); //FIXME just need to check
     }
-
 
     /**
      * Runs a timing test.

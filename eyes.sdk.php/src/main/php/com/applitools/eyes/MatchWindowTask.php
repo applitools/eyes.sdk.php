@@ -65,8 +65,8 @@ class MatchWindowTask
      * Repeatedly obtains an application snapshot and matches it with the next
      * expected output, until a match is found or the timeout expires.
      *
-     * @param array $userInputs User input preceding this match.
-     * @param EyesScreenshot $lastScreenshot The last screenshot matched or not ignored.
+     * @param Trigger[] $userInputs User input preceding this match.
+     * @param EyesScreenshot|null $lastScreenshot The last screenshot matched or not ignored.
      * @param RegionProvider $regionProvider Window region to capture.
      * @param string $tag Optional tag to be associated with the match (can be {@code null}).
      * @param bool $shouldMatchWindowRunOnceOnTimeout Force a single match attempt at the end of the match timeout.
@@ -74,8 +74,7 @@ class MatchWindowTask
      * @param int $retryTimeout The amount of time to retry matching in milliseconds or a negative value to use the default retry timeout.
      * @return MatchResult Returns the results of the match
      */
-    public function matchWindow(/*Trigger[]*/
-        $userInputs, EyesScreenshot $lastScreenshot,
+    public function matchWindow($userInputs, EyesScreenshot $lastScreenshot = null,
         RegionProvider $regionProvider, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout)
     {
         if ($retryTimeout === null || $retryTimeout < 0) {

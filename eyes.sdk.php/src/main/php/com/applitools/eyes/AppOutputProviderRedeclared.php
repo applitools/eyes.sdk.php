@@ -16,12 +16,12 @@ class AppOutputProviderRedeclared implements AppOutputProvider
         $this->logger = $logger;
     }
 
-    public function getAppOutput(RegionProvider $regionProvider_, EyesScreenshot $lastScreenshot_){
+    public function getAppOutput(RegionProvider $regionProvider_, EyesScreenshot $lastScreenshot_ = null){
         return $this->getAppOutputWithScreenshot($regionProvider_, $lastScreenshot_);
     }
 
 //FIXME this functionality from EyesBase
-    private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot) {
+    private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot = null) {
         $this->logger->verbose("getting screenshot...");
         // Getting the screenshot (abstract function implemented by each SDK).
         $screenshot = $this->eyes->getScreenshot();
@@ -37,8 +37,8 @@ class AppOutputProviderRedeclared implements AppOutputProvider
 
         $this->logger->verbose("Compressing screenshot...");
         //FIXME
-        $compressResult = $screenshot;
-        //$compressResult = $this->eyes->compressScreenshot64($screenshot, $lastScreenshot);
+        //$compressResult = $screenshot;
+        $compressResult = $this->eyes->compressScreenshot64($screenshot, $lastScreenshot);
         $this->logger->verbose("Done! Getting title...");
         $title = "";  //FIXME  $title = $this->eyes->getTitle();
         $this->logger->verbose("Done!");

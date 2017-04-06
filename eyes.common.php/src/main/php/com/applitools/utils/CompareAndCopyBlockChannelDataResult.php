@@ -12,9 +12,8 @@ class CompareAndCopyBlockChannelDataResult
 
     /**
      *
-     * @param isIdentical Whether or not the target block was identical to
-     *                    the source block.
-     * @param buffer The target block's pixel values for a specific channel.
+     * @param bool $isIdentical Whether or not the target block was identical to the source block.
+     * @param int[] $buffer The target block's pixel values for a specific channel.
      */
     public function __construct($isIdentical, $buffer)
     {
@@ -23,8 +22,7 @@ class CompareAndCopyBlockChannelDataResult
     }
 
     /**
-     * @return Whether or not the target block was identical to the
-     * source block.
+     * @return bool Whether or not the target block was identical to the source block.
      */
     public function getIsIdentical()
     {
@@ -32,7 +30,7 @@ class CompareAndCopyBlockChannelDataResult
     }
 
     /**
-     * @return The target block's pixel values for a specific channel.
+     * @return int[] The target block's pixel values for a specific channel.
      */
     public function getBuffer()
     {

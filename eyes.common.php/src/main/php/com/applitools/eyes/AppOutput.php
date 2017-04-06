@@ -7,7 +7,6 @@ namespace Applitools;
  */
 class AppOutput
 {
-
     /**
      * The title of the screen of the application being captured.
      */
@@ -15,10 +14,8 @@ class AppOutput
     private $screenshot64;
 
     /**
-     * @param string $title        The title of the window.
-     * @param EyesScreenshot $screenshot64 Base64 encoding of the screenshot's bytes (the
-     *                     byte can be in either in compressed or
-     *                     uncompressed form)
+     * @param string $title The title of the window.
+     * @param string $screenshot64 Base64 encoding of the screenshot's bytes (the byte can be in either in compressed or uncompressed form)
      */
     public function __construct($title, $screenshot64)
     {
@@ -26,13 +23,21 @@ class AppOutput
         $this->screenshot64 = $screenshot64;
     }
 
+    /**
+     * @return string
+     */
     public function getTitle()
     {
         return $this->title;
     }
 
+    /**
+     * @return string
+     */
     public function getScreenshot64()
     {
         return $this->screenshot64;
     }
 }
+
+?>

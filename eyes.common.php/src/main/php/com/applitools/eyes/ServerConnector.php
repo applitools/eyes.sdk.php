@@ -147,7 +147,8 @@ class ServerConnector implements ServerConnectorInterface
 */
         try {
             $this->ch = curl_init();
-            curl_setopt($this->ch, CURLOPT_URL, "{$this->serverUrl}/api/sessions/running.json?apiKey={$this->apiKey}");
+            curl_setopt($this->ch, CURLOPT_URL, "{$this->endPoint}.json?apiKey={$this->apiKey}");
+            curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
             curl_setopt($this->ch, CURLOPT_POST, 1);
             curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
             curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -200,32 +201,39 @@ class ServerConnector implements ServerConnectorInterface
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
         ArgumentGuard::notNull($matchData, "data");
-        
-        $imageName = tempnam(sys_get_temp_dir(),"merged_image_").".png";
-        $matchData->getAppOutput()->getScreenshot64()->getImage()->save($imageName,"png",100);
-        $image = base64_encode(file_get_contents($imageName));
-        //FIXME code not related to Java.
+
+        $base64data = $matchData->getAppOutput()->getScreenshot64();
+        $imageData = base64_decode($base64data);
+
+        if ($imageData == false) {
+            $this->logger->log("base64 data: $base64data");
+        }
+
+        $this->logger->log("base64 data length: " . strlen($base64data));
+        $this->logger->log("image data length: " . strlen($imageData));
+
         $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json?apiKey=".$this->apiKey;
 
         try {
             $params = [
                 'appOutput' => [
-                    "title" => $matchData->getAppOutput()->getTitle(),
-                    "screenshot64" => $image
+                    "title" => $matchData->getAppOutput()->getTitle()
                 ],
                 "tag" => $matchData->getTag(),
                 "ignoreMismatch" => $matchData->getIgnoreMismatch(),
             ];
-            $params = json_encode($params);
+            $json = json_encode($params);
+            $params = pack('N', strlen($json)) . $json . $imageData;
 
-
+            curl_reset($this->ch);
             curl_setopt($this->ch, CURLOPT_URL, $runningSessionsEndpoint);
+            curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
             curl_setopt($this->ch, CURLOPT_POST, 1);
             curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
             curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $params);
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
-                    'Content-Type: application/json',
+                    'Content-Type: application/octet-stream',
                     'Content-Length: ' . strlen($params),
                 )
             );
@@ -248,7 +256,8 @@ class ServerConnector implements ServerConnectorInterface
             }
 
         } catch (\Exception $e) {
-            throw new EyesException("Failed send check window request!", $e);
+            $this->logger->log("Failed sending checkWindow request. code: {$e->getCode()}. message: {$e->getMessage()}");
+            throw new EyesException("Failed sending checkWindow request!", $e->getCode(), $e);
         }
         return $result;
     }
@@ -256,7 +265,12 @@ class ServerConnector implements ServerConnectorInterface
     public function stopSession(RunningSession $runningSession, $isAborted, $save)
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
-        curl_setopt($this->ch, CURLOPT_URL,"{$this->serverUrl}/api/sessions/running/{$runningSession->getId()}.json?isAborted=false&updateBaseline={$runningSession->getIsNewSession()}&apiKey={$this->apiKey}");
+
+        $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json?apiKey=".$this->apiKey;
+
+        curl_reset($this->ch);
+        curl_setopt($this->ch, CURLOPT_URL,"{$runningSessionsEndpoint}&isAborted=false&updateBaseline={$runningSession->getIsNewSession()}");
+        curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
@@ -279,7 +293,6 @@ class ServerConnector implements ServerConnectorInterface
         //FIXME may be need to use parseResponseWithJsonData for preparing result
         return new TestResults(json_decode($server_output, true));
     }
-
-
 }
 
+?>

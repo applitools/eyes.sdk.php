@@ -5,6 +5,8 @@
 
 namespace Applitools;
 
+use Gregwar\Image\Image;
+
 /**
  * Provides image compression based on delta between consecutive images.
  */
@@ -31,40 +33,35 @@ namespace Applitools;
     /**
      * Computes the width and height of the image data contained in the block
      * at the input column and row.
-     * @param imageSize The image size in pixels.
-     * @param blockSize The block size for which we would like to compute the
-     *                  image data width and height.
-     * @param blockColumn The block column index
-     * @param blockRow The block row index
-     * @return The width and height of the image data contained in the block.
+     * @param RectangleSize $imageSize The image size in pixels.
+     * @param int $blockSize The block size for which we would like to compute the image data width and height.
+     * @param int $blockColumn The block column index
+     * @param int $blockRow The block row index
+     * @return RectangleSize The width and height of the image data contained in the block.
      */
-    private static function getActualBlockSize(Dimension $imageSize,
-            $blockSize, $blockColumn, $blockRow) {
-        $actualWidth = Math::min($imageSize->width - ($blockColumn * $blockSize),
-                $blockSize);
-        $actualHeight = Math::min($imageSize->height - ($blockRow * $blockSize),
-                                $blockSize);
+    private static function getActualBlockSize(RectangleSize $imageSize, $blockSize, $blockColumn, $blockRow) {
+        $actualWidth = min($imageSize->getWidth() - ($blockColumn * $blockSize), $blockSize);
+        $actualHeight = min($imageSize->getHeight() - ($blockRow * $blockSize), $blockSize);
 
-        return new Dimension($actualWidth, $actualHeight);
+        return new RectangleSize($actualWidth, $actualHeight);
     }
 
     /**
      * Compares a block of pixels between the source and target images.
-     * @param sourcePixels The pixels of the source block.
-     * @param targetPixels The pixels of the target block
-     * @param imageSize The image size in pixels.
-     * @param pixelLength Bytes per pixel. Since pixel might include alpha.
-     * @param blockSize The block size in pixels.
-     * @param blockColumn The column index of the block to compare.
-     * @param blockRow The row index of the block to compare.
-     * @param channel The channel for which we compare the blocks
-     * @return Whether the source and target blocks are identical,
-     * and a copy of the target block's channel bytes.
+     * @param int[] $sourcePixels The pixels of the source block.
+     * @param int[] $targetPixels The pixels of the target block
+     * @param RectangleSize $imageSize The image size in pixels.
+     * @param int $pixelLength Bytes per pixel. Since pixel might include alpha.
+     * @param int $blockSize The block size in pixels.
+     * @param int $blockColumn The column index of the block to compare.
+     * @param int $blockRow The row index of the block to compare.
+     * @param int $channel The channel for which we compare the blocks
+     * @return CompareAndCopyBlockChannelDataResult Whether the source and target blocks are identical, and a copy of the target block's channel bytes.
      */
 
     private static function CompareAndCopyBlockChannelData(
                 $sourcePixels, $targetPixels,
-                Dimension $imageSize, $pixelLength, $blockSize,
+                RectangleSize $imageSize, $pixelLength, $blockSize,
             $blockColumn, $blockRow, $channel) {
 
         $isIdentical = true; // initial default
@@ -72,14 +69,13 @@ namespace Applitools;
         // Getting the actual amount of data in the block we wish to copy
         $actualBlockSize = self::getActualBlockSize($imageSize, $blockSize, $blockColumn, $blockRow);
 
-        $actualBlockHeight = $actualBlockSize->height;
-        $actualBlockWidth = $actualBlockSize->width;
+        $actualBlockHeight = $actualBlockSize->getHeight();
+        $actualBlockWidth = $actualBlockSize->getWidth();
 
-        $stride = $imageSize->width * $pixelLength;
+        $stride = $imageSize->getWidth() * $pixelLength;
 
-        // The number of bytes actually contained in the block for the
-        // current channel (might be less than blockSize*blockSize)
-        $channelBytes = $actualBlockHeight*$actualBlockWidth; //FIXME need to check
+        // The number of bytes actually contained in the block for the current channel (might be less than blockSize*blockSize)
+        $channelBytes = array_fill(0,$actualBlockHeight*$actualBlockWidth, 0);
         $channelBytesOffset = 0;
 
         // Actually comparing and copying the pixels
@@ -98,26 +94,20 @@ namespace Applitools;
             }
         }
 
-        return new CompareAndCopyBlockChannelDataResult($isIdentical,
-                $channelBytes);
+        return new CompareAndCopyBlockChannelDataResult($isIdentical, $channelBytes);
     }
 
     /**
      * Compresses a target image based on a difference from a source image.
      *
-     * @param target The image we want to compress.
-     * @param targetEncoded The image we want to compress in its png bytes
-     *                      representation.
-     * @param source The baseline image by which a compression will be
-     *               performed.
-     * @param blockSize How many pixels per block.
-     * @return The compression result, or the {@code targetEncoded} if the
-     * compressed bytes count is greater than the uncompressed bytes count.
-     * @throws java.io.IOException If there was a problem reading/writing
-     * from/to the streams which are created during the process.
+     * @param Image $target The image we want to compress.
+     * @param string $targetEncoded The image we want to compress in its png bytes representation.
+     * @param Image $source The baseline image by which a compression will be performed.
+     * @param int $blockSize How many pixels per block.
+     * @return string The compression result, or the {@code targetEncoded} if the compressed bytes count is greater than the uncompressed bytes count.
+     * @throws \Exception If there was a problem reading/writing from/to the streams which are created during the process.
      */
-    public static function compressByRawBlocks(Gregwar\Image\Image $target,
-            $targetEncoded, Gregwar\Image\Image $source, $blockSize = 30 ){
+    public static function compressByRawBlocks(Image $target, $targetEncoded, Image $source = null, $blockSize = 30 ){
 //FIXME need to find suitable solution depends on "BufferedImage"
         // If there's no image to compare to, or the images are in different
         // sizes, we simply return the encoded target.
@@ -133,29 +123,23 @@ namespace Applitools;
         $sourcePixels =
                 /*((DataBufferByte)*/ $source->getRaster()->getDataBuffer()->getData();
 
-        // The number of bytes comprising a pixel (depends if there's an
-        // Alpha channel).
+        // The number of bytes comprising a pixel (depends if there's an Alpha channel).
         $pixelLength = ($target->getAlphaRaster() != null) ? 4 : 3;
-        $imageSize = new Dimension($target->getWidth(),
-                                            $target->getHeight());
+        $imageSize = new RectangleSize($target->width(), $target->height());
 
         // Calculating how many block columns and rows we've got.
-        $blockColumnsCount = ($target->getWidth() / $blockSize)
-                + (($target->getWidth() % $blockSize) == 0 ? 0 : 1);
-        $blockRowsCount = ($target->getHeight() / $blockSize)
-                + (($target->getHeight() % $blockSize) == 0 ? 0 : 1);
+        $blockColumnsCount = ($target->width() / $blockSize)
+                + (($target->width() % $blockSize) == 0 ? 0 : 1);
+        $blockRowsCount = ($target->height() / $blockSize)
+                + (($target->height() % $blockSize) == 0 ? 0 : 1);
         
         // We'll use a stream for the compression.
         $resultStream = new ByteArrayOutputStream();
-        $resultCountingStream =
-                new CountingOutputStream($resultStream);
+        $resultCountingStream = new CountingOutputStream($resultStream);
         // Since we need to write "short" and other variations.
-        $resultDataOutputStream =
-                new DataOutputStream($resultCountingStream);
+        $resultDataOutputStream = new DataOutputStream($resultCountingStream);
         // This will be used for doing actual data compression
-        $compressed =
-                new DeflaterOutputStream($resultCountingStream,
-                        new Deflater(Deflater::BEST_COMPRESSION,true));
+        $compressed = new DeflaterOutputStream($resultCountingStream, new Deflater(Deflater::BEST_COMPRESSION,true));
 
         $compressedDos = new DataOutputStream($compressed);
 
@@ -196,8 +180,7 @@ namespace Applitools;
                         if ($resultCountingStream->getBytesCount()
                             > $targetEncoded->length) {
                             $compressedDos->close();
-                            return Arrays::copyOf($targetEncoded,
-                                                    $targetEncoded->length);
+                            return Arrays::copyOf($targetEncoded, $targetEncoded->length);
                         }
                     }
 
