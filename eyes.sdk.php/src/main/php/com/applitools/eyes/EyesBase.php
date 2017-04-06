@@ -1,6 +1,8 @@
 <?php
+
 namespace Applitools;
 
+use Applitools\Exceptions\EyesException;
 use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
 use Facebook\WebDriver\WebDriver;
@@ -16,7 +18,10 @@ abstract class EyesBase
     private $isDisabled;
     private $isOpen;
     private $serverConnector;
+
+    /** @var RunningSession */
     private $runningSession;
+
     protected $viewportSize;/*RectangleSize*/
     private $batch;/*BatchInfo*/
     private $sessionType;/*it should be class to*/
@@ -32,10 +37,24 @@ abstract class EyesBase
     private $hostOS;
     private $userInputs = array(); //new ArrayDeque<Trigger>();
     private $shouldMatchWindowRunOnceOnTimeout;
+
+    /** @var  EyesScreenshot */
     protected $lastScreenshot;
-    protected $scaleProviderHandler; //PropertyHandler<ScaleProvider>
-    protected $cutProviderHandler; //PropertyHandler<CutProvider>
+
+    /** @var SimplePropertyHandler */
+    protected $scaleProviderHandler;
+
+    /** @var SimplePropertyHandler */
+    protected $cutProviderHandler;
+
+    /** @var Logger */
+    protected $logger;
+
+    /** @var SessionStartInfo */
     private $sessionStartInfo;
+
+    /** @var MatchWindowTask */
+    private $matchWindowTask;
 
 
     public function __construct($serverUrl)
@@ -80,18 +99,17 @@ abstract class EyesBase
      */
     public function setHostOS($hostOS)
     {
-
-        $this->logger->log("Host OS: " . $hostOS);
+        $this->logger->log("Host OS: $hostOS");
 
         if (empty($hostOS)) {
             $this->hostOS = null;
         } else {
-            $this->hostOS = $hostOS->trim();
+            $this->hostOS = trim($hostOS);
         }
     }
 
     /**
-     * @return get the host OS running the AUT.
+     * @return string get the host OS running the AUT.
      */
     public function getHostOS()
     {
@@ -99,19 +117,21 @@ abstract class EyesBase
     }
 
     /**
-     * @return The application name running the AUT.
+     * @return string The application name running the AUT.
      */
-    public function getHostApp() {
+    public function getHostApp()
+    {
         return $this->hostApp;
     }
 
     /**
-     * @param hostApp The application running the AUT (e.g., Chrome).
+     * @param string $hostApp The application running the AUT (e.g., Chrome).
      */
-    public function setHostApp($hostApp) {
+    public function setHostApp($hostApp)
+    {
         $this->logger->log("Host App: " . $hostApp);
 
-        if ($hostApp == null || $hostApp->isEmpty()) {
+        if ($hostApp == null || $hostApp == '') {
             $this->hostApp = null;
         } else {
             $this->hostApp = $hostApp;
@@ -125,18 +145,19 @@ abstract class EyesBase
      * Changes to the baseline or model of a branch do not propagate to other
      * branches.
      *
-     * @param branchName Branch name or {@code null} to specify the default
-     *                   branch.
+     * @param string $branchName Branch name or {@code null} to specify the default branch.
      */
-    public function setBranchName($branchName) {
+    public function setBranchName($branchName)
+    {
         $this->branchName = $branchName;
     }
 
     /**
      *
-     * @return The current branch (see {@link #setBranchName(String)}).
+     * @return string The current branch (see {@link #setBranchName(String)}).
      */
-    public function getBranchName() {
+    public function getBranchName()
+    {
         return $this->branchName;
     }
 
@@ -146,7 +167,8 @@ abstract class EyesBase
      *
      * @param string $branchName Branch name or {@code null} to specify the default branch.
      */
-    public function setParentBranchName($branchName) {
+    public function setParentBranchName($branchName)
+    {
         $this->parentBranchName = $branchName;
     }
 
@@ -155,106 +177,115 @@ abstract class EyesBase
      * @return string The name of the current parent branch under which new branches
      * will be created. (see {@link #setParentBranchName(String)}).
      */
-    public function getParentBranchName() {
+    public function getParentBranchName()
+    {
         return $this->parentBranchName;
     }
 
     /**
      * @return PositionProvider The currently set position provider.
      */
-    protected function getPositionProvider() {
+    protected function getPositionProvider()
+    {
         return $this->positionProvider;
     }
 
     /**
      *
-     * @return The current proxy settings used by the server connector,
+     * @return ProxySettings The current proxy settings used by the server connector,
      * or {@code null} if no proxy is set.
      */
-    public function getProxy() {
+    public function getProxy()
+    {
         return $this->serverConnector->getProxy();
     }
 
     /**
      * Sets the proxy settings to be used by the rest client.
-     * @param proxySettings The proxy settings to be used by the rest client.
+     * @param ProxySettings $proxySettings The proxy settings to be used by the rest client.
      * If {@code null} then no proxy is set.
      */
-    public function setProxy(ProxySettings $proxySettings) {
+    public function setProxy(ProxySettings $proxySettings)
+    {
         $this->serverConnector->setProxy($proxySettings);
     }
 
     /**
-     * @param failureReports The failure reports setting.
+     * @param FailureReports $failureReports The failure reports setting.
      * @see FailureReports
      */
-    public function setFailureReports(FailureReports $failureReports) {
+    public function setFailureReports(FailureReports $failureReports)
+    {
         $this->failureReports = $failureReports;
     }
 
     /**
-     * @return the failure reports setting.
+     * @return string The failure reports setting.
      */
-    public function getFailureReports() {
+    public function getFailureReports()
+    {
         return $this->failureReports;
     }
 
     /**
      * Updates the match settings to be used for the session.
      *
-     * @param defaultMatchSettings The match settings to be used for the
-     *                             session.
+     * @param ImageMatchSettings $defaultMatchSettings The match settings to be used for the session.
      */
-    public function setDefaultMatchSettings(ImageMatchSettings $defaultMatchSettings) {
+    public function setDefaultMatchSettings(ImageMatchSettings $defaultMatchSettings)
+    {
         ArgumentGuard::notNull($defaultMatchSettings, "defaultMatchSettings");
         $this->defaultMatchSettings = $defaultMatchSettings;
     }
 
     /**
      *
-     * @return The match settings used for the session.
+     * @return ImageMatchSettings The match settings used for the session.
      */
-    public function getDefaultMatchSettings() {
+    public function getDefaultMatchSettings()
+    {
         return $this->defaultMatchSettings;
     }
 
     /**
      * This function is deprecated. Please use
      * {@link #setDefaultMatchSettings} instead.
-     * <p>
      * The test-wide match level to use when checking application screenshot
      * with the expected output.
      *
-     * @param matchLevel The match level setting.
-     * @see com.applitools.eyes.MatchLevel
+     * @param string $matchLevel The match level setting.
+     * @see MatchLevel
      */
-    public function setMatchLevel($matchLevel) {
+    public function setMatchLevel($matchLevel)
+    {
         $this->defaultMatchSettings->setMatchLevel($matchLevel);
     }
 
     /**
      * @deprecated  Please use{@link #getDefaultMatchSettings} instead.
-     * @return The test-wide match level.
+     * @return string The test-wide match level.
      */
-    public function getMatchLevel() {
+    public function getMatchLevel()
+    {
         return $this->defaultMatchSettings->getMatchLevel();
     }
 
     /**
-     * @return The maximum time in seconds {@link #checkWindowBase
+     * @return int The maximum time in seconds {@link #checkWindowBase
      * (RegionProvider, String, boolean, int)} waits for a match.
      */
-    public function getMatchTimeout() {
+    public function getMatchTimeout()
+    {
         return $this->matchTimeout;
     }
 
     /**
-     * Sets the maximal time (in seconds) a match operation tries to perform
-     * a match.
+     * Sets the maximal time (in seconds) a match operation tries to perform a match.
      *
-     * @param seconds Total number of seconds to wait for a match.
+     * @param int $seconds Total number of seconds to wait for a match.
      */
-    public function setMatchTimeout($seconds) {
+    public function setMatchTimeout($seconds)
+    {
         if ($this->getIsDisabled()) {
             $this->logger->verbose("Ignored");
             return;
@@ -271,12 +302,13 @@ abstract class EyesBase
     /**
      * Adds a mouse trigger.
      *
-     * @param string $action  Mouse action.
+     * @param string $action Mouse action.
      * @param Region $control The control on which the trigger is activated
      *                (location is relative to the window).
-     * @param Location $cursor  The cursor's position relative to the control.
+     * @param Location $cursor The cursor's position relative to the control.
      */
-    protected function addMouseTriggerBase($action, Region $control, Location $cursor) {
+    protected function addMouseTriggerBase($action, Region $control, Location $cursor)
+    {
         if ($this->getIsDisabled()) {
             $this->logger->verbose(sprintf("Ignoring %s (disabled)", $action));
             return;
@@ -306,8 +338,8 @@ abstract class EyesBase
         }
 
         $controlScreenshotIntersect = $this->lastScreenshot->getIntersectedRegion($control,
-        CoordinatesType::CONTEXT_RELATIVE,
-        CoordinatesType::SCREENSHOT_AS_IS);
+            CoordinatesType::CONTEXT_RELATIVE,
+            CoordinatesType::SCREENSHOT_AS_IS);
 
         // If the region is NOT empty, we'll give the coordinates relative to
         // the control.
@@ -325,10 +357,11 @@ abstract class EyesBase
     /**
      * Adds a text trigger.
      *
-     * @param control The control's position relative to the window.
-     * @param text    The trigger's text.
+     * @param Region $control The control's position relative to the window.
+     * @param string $text The trigger's text.
      */
-    protected function addTextTriggerBase(Region $control, $text) {
+    protected function addTextTriggerBase(Region $control, $text)
+    {
         if ($this->getIsDisabled()) {
             $this->logger->verbose(sprintf("Ignoring '%s' (disabled)", $text));
             return;
@@ -346,8 +379,8 @@ abstract class EyesBase
         }
 
         $control = $this->lastScreenshot->getIntersectedRegion($control,
-                CoordinatesType::CONTEXT_RELATIVE,
-                CoordinatesType::SCREENSHOT_AS_IS);
+            CoordinatesType::CONTEXT_RELATIVE,
+            CoordinatesType::SCREENSHOT_AS_IS);
         if ($control->isEmpty()) {
             $this->logger->verbose(sprintf("Ignoring '%s' (out of bounds)", $text));
             return;
@@ -362,9 +395,10 @@ abstract class EyesBase
     /**
      * Adds a trigger to the current list of user inputs.
      *
-     * @param trigger The trigger to add to the user inputs list.
+     * @param Trigger $trigger The trigger to add to the user inputs list.
      */
-    protected function addUserInput(Trigger $trigger) {
+    protected function addUserInput(Trigger $trigger)
+    {
         if ($this->isDisabled) {
             return;
         }
@@ -376,7 +410,8 @@ abstract class EyesBase
     /**
      * Clears the user inputs list.
      */
-    protected function clearUserInputs() {
+    protected function clearUserInputs()
+    {
         if ($this->isDisabled) {
             return;
         }
@@ -384,8 +419,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return User inputs collected between {@code checkWindowBase}
-     * invocations.
+     * @return Trigger[] User inputs collected between {@code checkWindowBase} invocations.
      */
     protected function getUserInputs()
     {
@@ -397,36 +431,35 @@ abstract class EyesBase
 
 
     /**
-     * @param baselineName If specified, determines the baseline to compare
-     *                     with and disables automatic baseline inference.
+     * @param string $baselineName If specified, determines the baseline to compare with and disables automatic baseline inference.
      */
-    public function setBaselineName($baselineName) {
+    public function setBaselineName($baselineName)
+    {
         $this->logger->log("Baseline name: " . $baselineName);
 
-        if($baselineName == null || $baselineName->isEmpty()) {
+        if ($baselineName == null || $baselineName == '') {
             $this->baselineName = null;
-        }
-        else {
+        } else {
             $this->baselineName = $baselineName;
         }
     }
 
     /**
-     * @return The baseline name, if specified.
+     * @return string The baseline name, if specified.
      */
-    public function getBaselineName() {
+    public function getBaselineName()
+    {
         return $this->baselineName;
     }
 
 
     /**
-     * @return The base agent id of the SDK.
+     * @return string The base agent id of the SDK.
      */
     protected abstract function getBaseAgentId();
 
     /**
-     * @return The full agent id composed of both the base agent id and the
-     * user given agent id.
+     * @return string The full agent id composed of both the base agent id and the user given agent id.
      */
     protected function getFullAgentId()
     {
@@ -434,12 +467,11 @@ abstract class EyesBase
         if ($agentId == null) {
             return $this->getBaseAgentId();
         }
-        return sprintf("%s [%s]", $agentId, $this->getBaseAgentId());
+        return "$agentId [{$this->getBaseAgentId()}]";
     }
 
     /**
-     * @param isDisabled If true, all interactions with this API will be
-     *                   silently ignored.
+     * @param bool $isDisabled If true, all interactions with this API will be silently ignored.
      */
     public function setIsDisabled($isDisabled)
     {
@@ -447,7 +479,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return Whether eyes is disabled.
+     * @return bool Whether eyes is disabled.
      */
     public function getIsDisabled()
     {
@@ -455,7 +487,7 @@ abstract class EyesBase
     }
 
     /**
-     * @return The currently set API key or {@code null} if no key is set.
+     * @return string The currently set API key or {@code null} if no key is set.
      */
     public function getApiKey()
     {
@@ -474,23 +506,25 @@ abstract class EyesBase
     }
 
     /**
-     * @return The currently set log handler.
+     * @return LogHandler The currently set log handler.
      */
-    public function getLogHandler() {
+    public function getLogHandler()
+    {
         return $this->logger->getLogHandler();
     }
 
     /**
      * Sets a handler of log messages generated by this API.
      *
-     * @param logHandler Handles log messages generated by this API.
+     * @param LogHandler $logHandler Handles log messages generated by this API.
      */
-    public function setLogHandler(LogHandler $logHandler) {
+    public function setLogHandler(LogHandler $logHandler)
+    {
         $this->logger->setLogHandler($logHandler);
     }
 
     /**
-     * @return Whether a session is open.
+     * @return bool Whether a session is open.
      */
     public function getIsOpen()
     {
@@ -526,7 +560,8 @@ abstract class EyesBase
      *
      * @param string $appName The name of the application under test.
      */
-    public function setAppName($appName) {
+    public function setAppName($appName)
+    {
         $this->appName = $appName;
     }
 
@@ -565,8 +600,7 @@ abstract class EyesBase
 
     /**
      * Sets the current server URL used by the rest client.
-     * @param serverUrl The URI of the rest server, or {@code null} to use
-     *                  the default server.
+     * @param string $serverUrl The URI of the rest server, or {@code null} to use the default server.
      */
     public function setServerUrl($serverUrl)
     {
@@ -586,7 +620,8 @@ abstract class EyesBase
      *
      * @return string The URI of the eyes server.
      */
-    public function getServerUrl() {
+    public function getServerUrl()
+    {
         return $this->serverConnector->getServerUrl();
     }
 
@@ -595,16 +630,12 @@ abstract class EyesBase
         return "https://eyessdk.applitools.com";
     }
 
-
-    /** Superseded by {@link #setHostOS(String)} and {@link #setHostApp
-     * (String)}.
+    /** Superseded by {@link #setHostOS(String)} and {@link #setHostApp (String)}.
      * Sets the OS (e.g., Windows) and application (e.g., Chrome) that host the
      * application under test.
      *
-     * @param hostOS  The name of the OS hosting the application under test or
-     *                {@code null} to auto-detect.
-     * @param hostApp The name of the application hosting the application under
-     *                test or {@code null} to auto-detect.
+     * @param string $hostOS The name of the OS hosting the application under test or {@code null} to auto-detect.
+     * @param string $hostApp The name of the application hosting the application under test or {@code null} to auto-detect.
      */
     public function setAppEnvironment($hostOS, $hostApp)
     {
@@ -613,10 +644,9 @@ abstract class EyesBase
             return;
         }
 
-        $this->logger->log("Warning: SetAppEnvironment is deprecated! Please use " +
-            "'setHostOS' and 'setHostApp'");
+        $this->logger->log("Warning: SetAppEnvironment is deprecated! Please use 'setHostOS' and 'setHostApp'");
 
-        $this->logger->verbose("setAppEnvironment(" . $hostOS . ", " . $hostApp . ")");
+        $this->logger->verbose("setAppEnvironment($hostOS, $hostApp)");
         $this->setHostOS($hostOS);
         $this->setHostApp($hostApp);
     }
@@ -656,10 +686,8 @@ abstract class EyesBase
         }
     }
 
-
     public function openBase($appName, $testName, RectangleSize $viewportSize, SessionType $sessionType = null)
     {
-
         $this->logger->getLogHandler()->open();
 
         try {
@@ -714,15 +742,13 @@ abstract class EyesBase
         }
     }
 
-
     /**
-     * @param positionProvider The position provider to be used.
+     * @param PositionProvider $positionProvider The position provider to be used.
      */
     protected function setPositionProvider(PositionProvider $positionProvider)
     {
         $this->positionProvider = $positionProvider;
     }
-
 
     /**
      *
@@ -743,10 +769,11 @@ abstract class EyesBase
      * Manually set the scale ratio for the images being validated.
      * @param float $scaleRatio The scale ratio to use, or {@code null} to reset back to automatic scaling.
      */
-    public function setScaleRatio($scaleRatio) {
+    public function setScaleRatio($scaleRatio)
+    {
         if ($scaleRatio != null) {
             $this->scaleProviderHandler = new ReadOnlyPropertyHandler(
-            $this->logger, new FixedScaleProvider($scaleRatio));
+                $this->logger, new FixedScaleProvider($scaleRatio));
         } else {
             $this->scaleProviderHandler = new SimplePropertyHandler();
             $this->scaleProviderHandler->set(new NullScaleProvider());
@@ -757,7 +784,8 @@ abstract class EyesBase
      *
      * @return float The ratio used to scale the images being validated.
      */
-    public function getScaleRatio() {
+    public function getScaleRatio()
+    {
         return $this->scaleProviderHandler->get()->getScaleRatio();
     }
 
@@ -766,7 +794,8 @@ abstract class EyesBase
      *
      * @param bool $saveFailedTests True if failed tests should be saved by default, false otherwise.
      */
-    public function setSaveFailedTests($saveFailedTests) {
+    public function setSaveFailedTests($saveFailedTests)
+    {
         $this->saveFailedTests = $saveFailedTests;
     }
 
@@ -775,7 +804,8 @@ abstract class EyesBase
      *
      * @param bool $saveNewTests True if new tests should be saved by default. False otherwise.
      */
-    public function setSaveNewTests($saveNewTests) {
+    public function setSaveNewTests($saveNewTests)
+    {
         $this->saveNewTests = $saveNewTests;
     }
 
@@ -787,14 +817,16 @@ abstract class EyesBase
     /**
      * @return True if failed tests are saved by default.
      */
-    public function getSaveFailedTests() {
+    public function getSaveFailedTests()
+    {
         return $this->saveFailedTests;
     }
 
     /**
      * @return True if new tests are saved by default.
      */
-    public function getSaveNewTests() {
+    public function getSaveNewTests()
+    {
         return $this->saveNewTests;
     }
 
@@ -806,7 +838,7 @@ abstract class EyesBase
      * @param bool $ignoreMismatch Whether to ignore this check if a mismatch is found.
      * @param int $retryTimeout The amount of time to retry matching in milliseconds or a negative value to use the default retry timeout.
      * @return MatchResult The result of matching the output with the expected output.
-     * @throws Exception
+     * @throws TestFailedException
      */
     public function checkWindowBase(RegionProvider $regionProvider, $tag = "", $ignoreMismatch = false, $retryTimeout = null)
     {
@@ -816,34 +848,18 @@ abstract class EyesBase
             $result->setAsExpected(true);
             return $result;
         }
-        //FIXME
-        //require '../../eyes/eyes.php/eyes.selenium.php/src/main/php/com/applitools/eyes/selenium/EyesWebDriverScreenshot.php'; //FIXME
-        $this->lastScreenshot = new EyesWebDriverScreenshot($this->logger, $this->driver, Image::create(0, 0)); //FIXME
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
         $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
 
-        if ($this->runningSession == null) {
-            $this->logger->log("No running session, calling start session..");
-            $this->startSession();
-            $this->logger->log("Done!");
+        $this->ensureRunningSession();
 
-            $appOutputProviderRedeclared = new AppOutputProviderRedeclared($this);
-
-            $this->matchWindowTask = new MatchWindowTask(
-                $this->logger,
-                $this->serverConnector,
-                $this->runningSession,
-                $this->matchTimeout,
-                // A callback which will call getAppOutput
-                $appOutputProviderRedeclared
-            );
-        }
         $this->logger->log("Calling match window...");
 
         $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
             $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
+
         $this->logger->log("MatchWindow Done!");
 
         if (!$result->getAsExpected()) {
@@ -859,8 +875,7 @@ abstract class EyesBase
             }
 
             if ($this->getFailureReports() == "FailureReports::IMMEDIATE") {
-                throw new /*TestFailed*/Exception(sprintf("Mismatch found in '%s' of '%s'",
-                    $this->sessionStartInfo->getScenarioIdOrName(), $this->sessionStartInfo->getAppIdOrName()));
+                throw new TestFailedException("Mismatch found in '{$this->sessionStartInfo->getScenarioIdOrName()}' of '{$this->sessionStartInfo->getAppIdOrName()}'");
             }
         } else { // Match successful
             $this->clearUserInputs();
@@ -871,14 +886,32 @@ abstract class EyesBase
         return $result;
     }
 
+    private function ensureRunningSession()
+    {
+        if ($this->runningSession != null) {
+            return;
+        }
+
+        $this->logger->log("No running session, calling start session..");
+        $this->startSession();
+        $this->logger->log("Done!");
+
+        $appOutputProviderRedeclared = new AppOutputProviderRedeclared($this, $this->logger);
+
+        $this->matchWindowTask = new MatchWindowTask(
+            $this->logger,
+            $this->serverConnector,
+            $this->runningSession,
+            $this->matchTimeout,
+            // A callback which will call getAppOutput
+            $appOutputProviderRedeclared
+        );
+    }
 
     /**
-     * @param regionProvider      A callback for getting the region of the
-     *                            screenshot which will be set in the
-     *                            application output.
-     * @param lastScreenshot      Previous application screenshot (used for
-     *                            compression) or {@code null} if not available.
-     * @return The updated app output and screenshot.
+     * @param RegionProvider $regionProvider A callback for getting the region of the screenshot which will be set in the application output.
+     * @param EyesScreenshot $lastScreenshot Previous application screenshot (used for compression) or {@code null} if not available.
+     * @return AppOutputWithScreenshot The updated app output and screenshot.
      */
     private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot)
     {
@@ -908,19 +941,20 @@ abstract class EyesBase
     }
 
     /**
-     * @return The user given agent id of the SDK.
+     * @return string The user given agent id of the SDK.
      */
-    public function getAgentId() {
+    public function getAgentId()
+    {
         return $this->agentId;
     }
 
     /**
-     * Sets the user given agent id of the SDK. {@code null} is referred to
-     * as no id.
+     * Sets the user given agent id of the SDK. {@code null} is referred to as no id.
      *
-     * @param agentId The agent ID to set.
+     * @param string %agentId The agent ID to set.
      */
-    public function setAgentId($agentId) {
+    public function setAgentId($agentId)
+    {
         $this->agentId = $agentId;
     }
 
@@ -928,9 +962,10 @@ abstract class EyesBase
      * Sets the batch in which context future tests will run or {@code null}
      * if tests are to run standalone.
      *
-     * @param batch The batch info to set.
+     * @param BatchInfo $batch The batch info to set.
      */
-    public function setBatch(BatchInfo $batch) {
+    public function setBatch(BatchInfo $batch)
+    {
         if ($this->isDisabled) {
             $this->logger->verbose("Ignored");
             return;
@@ -940,19 +975,21 @@ abstract class EyesBase
     }
 
     /**
-     * @return The currently set batch info.
+     * @return BatchInfo The currently set batch info.
      */
-    public function getBatch() {
+    public function getBatch()
+    {
         return $this->batch;
     }
 
     /**
      * Manually set the the sizes to cut from an image before it's validated.
      *
-     * @param cutProvider the provider doing the cut. If {@code null}, Eyes
+     * @param CutProvider $cutProvider the provider doing the cut. If {@code null}, Eyes
      *                     would automatically infer if cutting is needed.
      */
-    public function setImageCut(CutProvider $cutProvider) {
+    public function setImageCut(CutProvider $cutProvider)
+    {
         if ($cutProvider != null) {
             $this->cutProviderHandler = new ReadOnlyPropertyHandler($this->logger, $cutProvider);
         } else {
@@ -964,52 +1001,46 @@ abstract class EyesBase
     /**
      * Compresses a given screenshot.
      *
-     * @param screenshot     The screenshot to compress.
-     * @param lastScreenshot The previous screenshot, or null.
-     * @return A base64 encoded compressed screenshot.
+     * @param EyesScreenshot $screenshot The screenshot to compress.
+     * @param EyesScreenshot $lastScreenshot The previous screenshot, or null.
+     * @return string A base64 encoded compressed screenshot.
+     * @throws EyesException
      */
-    public function compressScreenshot64(EyesScreenshot $screenshot,
-                                         EyesScreenshot $lastScreenshot)
+    public function compressScreenshot64(EyesScreenshot $screenshot, EyesScreenshot $lastScreenshot = null)
     {
-
         ArgumentGuard::notNull($screenshot, "screenshot");
 
         $screenshotImage = $screenshot->getImage();
-        $uncompressed = ImageUtils::encodeAsPng($screenshotImage);
 
-        $source = ($lastScreenshot != null) ?
-            $lastScreenshot->getImage() : null;
+        $source = ($lastScreenshot != null) ? $lastScreenshot->getImage() : null;
 
         // Compressing the screenshot
         try {
-            $compressedScreenshot = 'sobe byte string';/* FIXME ImageDeltaCompressor::compressByRawBlocks(
-            $screenshotImage, $uncompressed, $source);*/
-        } catch (IOException $e) {
-            throw new EyesException("Failed to compress screenshot!", $e);
+            $compressedScreenshot = ImageDeltaCompressor::compressByRawBlocks($screenshotImage, $uncompressed, $source);
+        } catch (\Exception $e) {
+            $this->logger->log("Failed to compress screenshot! {$e->getMessage()}");
+            return base64_encode($uncompressed);
         }
 
         return base64_encode($compressedScreenshot); //FIXME just need to check
     }
 
-
     /**
      * Runs a timing test.
      *
-     * @param regionProvider    Returns the region to check or the empty
+     * @param RegionProvider $regionProvider Returns the region to check or the empty
      *                          rectangle to check the entire window.
-     * @param action            An action to run in parallel to starting the
+     * @param mixed|null $action An action to run in parallel to starting the
      *                          test, or {@code null} if no such action is
      *                          required.
-     * @param deadline          The expected amount of time until finding a
-     *                          match. (Seconds)
-     * @param timeout           The maximum amount of time to retry matching.
-     *                          (Seconds)
-     * @param matchInterval     The interval for testing for a match.
-     *                          (Milliseconds)
-     * @return The earliest match found, or {@code null} if no match was found.
+     * @param int $deadline The expected amount of time until finding a match. (Seconds)
+     * @param int $timeout The maximum amount of time to retry matching. (Seconds)
+     * @param int $matchInterval The interval for testing for a match. (Milliseconds)
+     * @return ResponseTimeAlgorithm The earliest match found, or {@code null} if no match was found.
      */
     protected function testResponseTimeBase(
-        RegionProvider $regionProvider, Runnable $action, $deadline, $timeout, $matchInterval) {
+        RegionProvider $regionProvider, Runnable $action, $deadline, $timeout, $matchInterval)
+    {
 
         if ($this->getIsDisabled()) {
             $this->logger->verbose("Ignored");
@@ -1023,8 +1054,8 @@ abstract class EyesBase
         ArgumentGuard::greaterThanZero($matchInterval, "matchInterval");
 
         $this->logger->verbose(sprintf(
-                "testResponseTimeBase(regionProvider, %d, %d, %d)",
-                $deadline, $timeout, $matchInterval));
+            "testResponseTimeBase(regionProvider, %d, %d, %d)",
+            $deadline, $timeout, $matchInterval));
 
         if ($this->runningSession == null) {
             $this->logger->verbose("No running session, calling start session..");
@@ -1164,9 +1195,8 @@ abstract class EyesBase
                 $this->logger->log("--- Failed test ended. See details at " . $sessionResultsUrl);
 
                 if ($throwEx) {
-                    $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
-                        . "' of '" . $this->sessionStartInfo->getAppIdOrName() . "'. See details at " . $sessionResultsUrl;
-                    throw new /*FIXME TestFailed*/Exception(/*$results, */$message/*, $throwEx*/);
+                    $message = "'{$this->sessionStartInfo->getScenarioIdOrName()}' of '{$this->sessionStartInfo->getAppIdOrName()}'. See details at $sessionResultsUrl";
+                    throw new TestFailedException($results, $message);
                 }
                 return $results;
             }
@@ -1203,63 +1233,63 @@ abstract class EyesBase
      * @throws TestFailedException
      * @throws NewTestException
      */
-    protected function closeResponseTime($isDeadlineExceeded) {
+    protected function closeResponseTime($isDeadlineExceeded)
+    {
         try {
             if ($this->isDisabled) {
-            $this->logger->verbose("Ignored");
-        }
+                $this->logger->verbose("Ignored");
+            }
 
-        $this->logger->verbose(sprintf("closeResponseTime(%b)",
+            $this->logger->verbose(sprintf("closeResponseTime(%b)",
                 $isDeadlineExceeded));
-        ArgumentGuard::isValidState($this->isOpen, "Eyes not open");
+            ArgumentGuard::isValidState($this->isOpen, "Eyes not open");
 
-        $isOpen = false;
+            $this->isOpen = false;
 
-        if ($this->runningSession == null) {
-            $this->logger->verbose("Server session was not started");
-            $this->logger->log("--- Empty test ended.");
-            return;
-        }
+            if ($this->runningSession == null) {
+                $this->logger->verbose("Server session was not started");
+                $this->logger->log("--- Empty test ended.");
+                return;
+            }
 
-        $isNewSession = $this->runningSession->getIsNewSession();
-        $sessionResultsUrl = $this->runningSession->getUrl();
+            $isNewSession = $this->runningSession->getIsNewSession();
+            $sessionResultsUrl = $this->runningSession->getUrl();
 
-        $this->logger->verbose("Ending server session...");
-        $save = ($isNewSession && $this->saveNewTests);
+            $this->logger->verbose("Ending server session...");
+            $save = ($isNewSession && $this->saveNewTests);
 
-        $this->logger->verbose("Automatically save test? " . $save ? "Yes" : "No");
-        $results = $this->serverConnector->stopSession($this->runningSession, false, $save);
+            $this->logger->verbose("Automatically save test? " . $save ? "Yes" : "No");
+            $results = $this->serverConnector->stopSession($this->runningSession, false, $save);
 
-        $results->setNew($isNewSession);
-        $results->setUrl($sessionResultsUrl);
-        $this->logger->verbose(json_encode($results));
+            $results->setNew($isNewSession);
+            $results->setUrl($sessionResultsUrl);
+            $this->logger->verbose(json_encode($results));
 
-        if ($isDeadlineExceeded && !$isNewSession) {
+            if ($isDeadlineExceeded && !$isNewSession) {
 
-            $this->logger->log("--- Failed test ended. See details at "
-                   . $sessionResultsUrl);
+                $this->logger->log("--- Failed test ended. See details at "
+                    . $sessionResultsUrl);
 
-            $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
+                $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                     . "' of '"
                     . $this->sessionStartInfo->getAppIdOrName()
                     . "'. See details at " . $sessionResultsUrl;
-                throw new /*TestFailed*/Exception($results, $message);
-        }
+                throw new TestFailedException($results, $message);
+            }
 
-        if ($isNewSession) {
-            $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
+            if ($isNewSession) {
+                $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
 
-            $this->logger->log("--- New test ended. " . $instructions);
+                $this->logger->log("--- New test ended. " . $instructions);
 
-            $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
-                    . "' of '" . $this->sessionStartInfo
-                    . $this->getAppIdOrName()
+                $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
+                    . "' of '" . $this->sessionStartInfo->getAppIdOrName()
                     . "'. " . $instructions;
-                throw new /*NewTest*/Exception($results, $message);
-        }
+                throw new NewTestException($results, $message);
+            }
 
-        // Test passed
-        $this->logger->log("--- Test passed. See details at " . $sessionResultsUrl);
+            // Test passed
+            $this->logger->log("--- Test passed. See details at " . $sessionResultsUrl);
 
         } finally {
             // Making sure that we reset the running session even if an
@@ -1269,6 +1299,7 @@ abstract class EyesBase
             $this->logger->getLogHandler()->close();
         }
     }
+
 }
 
 ?>

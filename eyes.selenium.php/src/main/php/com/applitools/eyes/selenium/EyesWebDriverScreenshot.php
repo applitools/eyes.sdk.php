@@ -347,24 +347,25 @@ class EyesWebDriverScreenshot extends EyesScreenshot
 
     public function getLocationInScreenshot(Location $location, $coordinatesType)
     {
-
         $location = $this->convertLocation($location, $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
 
         // Making sure it's within the screenshot bounds
         if (!$this->frameWindow->containsLocation($location)) {
-            throw new OutOfBoundsException(sprintf(
-                "Location %s ('%s') is not visible in screenshot!", $location,
-                $coordinatesType));
+            throw new OutOfBoundsException("Location $location ('$coordinatesType') is not visible in screenshot!");
         }
         return $location;
     }
 
     public function getIntersectedRegion(Region $region,
                                          $originalCoordinatesType,
-                                         $resultCoordinatesType)
+                                         $resultCoordinatesType = null)
     {
         if ($region->isEmpty()) {
             return new Region('','','','','','',$region);
+        }
+
+        if ($resultCoordinatesType == null) {
+            $resultCoordinatesType = $originalCoordinatesType;
         }
 
         $intersectedRegion = $this->convertRegionLocation($region,
@@ -385,9 +386,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 break;
 
             default:
-                throw new CoordinatesTypeConversionException(
-                    sprintf("Unknown coordinates type: '%s'",
-                        $originalCoordinatesType));
+                throw new CoordinatesTypeConversionException("Unknown coordinates type: '$originalCoordinatesType'");
 
         }
 

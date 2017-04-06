@@ -17,15 +17,14 @@ class RegionProvider
         }else{
             $this->region = $region;
         }
-
     }
 
     /**
      *
-     * @return A region with "as is" viewport coordinates.
+     * @return Region A region with "as is" viewport coordinates.
      */
     public function getRegion()
-    {//FIXME
+    {
         return $this->region;
     }
 
@@ -34,7 +33,7 @@ class RegionProvider
     }
     /**
      *
-     * @return The type of coordinates on which the region is based.
+     * @return CoordinatesType The type of coordinates on which the region is based.
      */
     public function getCoordinatesType()
     {

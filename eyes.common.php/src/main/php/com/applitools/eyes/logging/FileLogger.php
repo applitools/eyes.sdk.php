@@ -2,10 +2,13 @@
 
 namespace Applitools;
 
+use Applitools\Exceptions\EyesException;
+
 /**
  * Writes log messages to a file.
  */
-class FileLogger implements LogHandler {
+class FileLogger implements LogHandler
+{
 
     private $isVerbose;
     private $filename;
@@ -14,51 +17,51 @@ class FileLogger implements LogHandler {
 
     /**
      * Creates a new FileHandler instance.
-     * @param filename The file in which to save the logs.
-     * @param append Whether to append the logs if the current file exists,
-     *               or to overwrite the existing file.
-     * @param isVerbose Whether to handle or ignore verbose log messages.
+     * @param string $filename The file in which to save the logs.
+     * @param bool $append Whether to append the logs if the current file exists,  or to overwrite the existing file.
+     * @param bool $isVerbose Whether to handle or ignore verbose log messages.
      */
-    public function __construct($filename = "eyes.log", $append = true, $isVerbose) {
+    public function __construct($filename = "eyes.log", $append = true, $isVerbose)
+    {
         $this->filename = $filename;
         $this->append = $append;
         $this->isVerbose = $isVerbose;
         $file = null;
     }
 
-
     /**
      * Open the log file for writing.
      */
-    public function open() {
+    public function open()
+    {
         try {
             if ($this->file != null) {
-                //noinspection EmptyCatchBlock
                 try {
-                    $this->file->close();
-                } catch (Exception $e) {}
+                    fclose($this->file);
+                } catch (\Exception $e) {
+                }
             }
-            //FIXME
-           $this->file = ""/* FIXME new BufferedWriter(new FileWriter(new File(filename),
-                    append))*/;
-        } catch (IOException $e) {
+            $this->file = fopen($this->filename, $this->append ? "a" : "c");
+        } catch (\Exception $e) {
             throw new EyesException("Failed to create log file!", $e);
         }
     }
 
     /**
      * Handle a message to be logged.
-     * @param verbose Whether this message is flagged as verbose or not.
-     * @param logString The string to log.
+     * @param bool $verbose Whether this message is flagged as verbose or not.
+     * @param string $logString The string to log.
+     * @throws EyesException
      */
-    public function onMessage($verbose, $logString) {
+    public function onMessage($verbose, $logString)
+    {
         if ($this->file != null && (!$verbose || $this->isVerbose)) {
 
             $currentTime = date("H:i:s");
 
-            try {//FIXME
-                $this->write($currentTime . " Eyes: " . $logString);
-            } catch (IOException $e) {
+            try {
+                fwrite($this->file, "$currentTime Eyes: $logString");
+            } catch (\Exception $e) {
                 throw new EyesException("Failed to write log to file!", $e);
             }
         }
@@ -67,14 +70,14 @@ class FileLogger implements LogHandler {
     /**
      * Close the log file for writing.
      */
-    public function close() {
-        //noinspection EmptyCatchBlock
+    public function close()
+    {
         try {
-            if ($this->file !=null) {
-                //FIXME
-                $this->file->close();
+            if ($this->file != null) {
+                fclose($this->file);
             }
-        } catch (IOException $e) {}
+        } catch (\Exception $e) {
+        }
         $this->file = null;
     }
 }

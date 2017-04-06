@@ -4,15 +4,15 @@ namespace Applitools;
 
 class Logger
 {
-    private $logHandler; //LogHandler
+    /** @var LogHandler */
+    private $logHandler;
 
-    public function __construct($handler = null) {
+    public function __construct(LogHandler $handler = null) {
         if(empty($handler)){
             $this->logHandler = new NullLogHandler();
         }else{
             $this->logHandler = $handler;
         }
-
     }
 
     public function log($message)
@@ -44,8 +44,7 @@ class Logger
 
     /**
      *
-     * @return The name of the method which called the logger, if possible,
-     * or an empty string.
+     * @return string The name of the method which called the logger, if possible, or an empty string.
      */
     private function getPrefix() {
 

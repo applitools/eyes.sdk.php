@@ -10,9 +10,9 @@ class PrintLogHandler implements LogHandler {
     /**
      * Creates a new StdoutLogHandler instance.
      *
-     * @param isVerbose Whether to handle or ignore verbose log messages.
+     * @param bool $isVerbose Whether to handle or ignore verbose log messages.
      */
-    public function __construct($isVerbose = null) {
+    public function __construct($isVerbose = false) {
         $this->isVerbose = $isVerbose;
     }
 

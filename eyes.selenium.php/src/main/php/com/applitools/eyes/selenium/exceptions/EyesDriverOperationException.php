@@ -11,7 +11,7 @@ class EyesDriverOperationException extends EyesException {
      * @param string $message A description of the error.
      * @param \Throwable $e The throwable this exception should wrap.
      */
-    public function __construct($message, \Throwable $e) {
+    public function __construct($message, \Throwable $e = null) {
         parent::__construct($message, $e);
     }
 }

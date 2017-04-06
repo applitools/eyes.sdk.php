@@ -139,7 +139,7 @@ class Region
      *
      * @param Region $containerRegion The region to divide into sub-regions.
      * @param RectangleSize $subRegionSize The maximum size of each sub-region.
-     * @return array The sub-regions composing the current region. If subRegionSize
+     * @return Region[] The sub-regions composing the current region. If subRegionSize
      * is equal or greater than the current region,  only a single region is
      * returned.
      */
@@ -202,7 +202,7 @@ class Region
     /**
      * @param Region $containerRegion The region to divide into sub-regions.
      * @param RectangleSize $maxSubRegionSize The maximum size of each sub-region (some regions might be smaller).
-     * @return array The sub-regions composing the current region. If
+     * @return Region[] The sub-regions composing the current region. If
      * maxSubRegionSize is equal or greater than the current region,
      * only a single region is returned.
      */
@@ -256,7 +256,7 @@ class Region
      *                      (thus there will be no overlap of regions).
      *                      Otherwise, all sub-regions will have the same
      *                      size, but sub-regions might overlap.
-     * @return array The sub-regions composing the current region. If {@code
+     * @return Region[] The sub-regions composing the current region. If {@code
      * subRegionSize} is equal or greater than the current region,
      * only a single region is returned.
      */
@@ -394,7 +394,7 @@ class Region
         return new Location($middleX, $middleY);
     }
 
-    public function toString()
+    public function __toString()
     {
         return "({$this->left} , {$this->top }) {$this->width}x{$this->height}";
     }

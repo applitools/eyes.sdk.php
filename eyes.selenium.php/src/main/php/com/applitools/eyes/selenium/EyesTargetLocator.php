@@ -1,23 +1,31 @@
 <?php
+
 namespace Applitools;
 
+use Applitools\Exceptions\EyesException;
 use Facebook\WebDriver\Exception\NoSuchFrameException;
-use Facebook\WebDriver\Remote\RemoteTargetLocator;
 use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverTargetLocator;
 
 /**
  * Wraps a target locator so we can keep track of which frames have been switched to.
  */
-class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTargetLocator {
-
-    private $logger; //Logger
-    protected $driver; //EyesWebDriver
-    private $scrollPosition; //ScrollPositionProvider
-    private $onWillSwitch; //OnWillSwitch
-    private $targetLocator; //WebDriver.TargetLocator
-    protected $targetType; // TargetType
+class EyesTargetLocator implements WebDriverTargetLocator
+{
+    /** @var Logger Logger */
+    private $logger;
+    /** @var EyesWebDriver */
+    protected $driver;
+    /** @var ScrollPositionProvider */
+    private $scrollPosition;
+    /** @var OnWillSwitch */
+    private $onWillSwitch;
+    /** @var WebDriverTargetLocator */
+    private $targetLocator;
+    /** @var TargetType */
+    protected $targetType;
 
     /**
      * Initialized a new EyesTargetLocator object.
@@ -27,7 +35,8 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
      * @param OnWillSwitch $onWillSwitch A delegate to be called whenever a relevant switch is about to be performed.
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
-                             WebDriverTargetLocator $targetLocator, OnWillSwitch $onWillSwitch) {
+                                WebDriverTargetLocator $targetLocator, OnWillSwitch $onWillSwitch)
+    {
         $this->targetType = new TargetType();
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($driver, "driver");
@@ -40,36 +49,22 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
         $this->scrollPosition = new ScrollPositionProvider($logger, $driver);
     }
 
-    public function frame($selector) {
+    public function frame($selector)
+    {
         $frameElement = null;
-        if($selector instanceof RemoteWebElement){
+        if ($selector instanceof RemoteWebElement) {
             $frameElement = $selector;
             $this->logger->verbose("EyesTargetLocator.frame(element)");
-        }
-        else if ($selector instanceof WebDriverBy) {
+        } else if ($selector instanceof WebDriverBy) {
             $frames = $this->driver->findElements($selector);
             if (count($frames) == 0) {
-                throw new NoSuchFrameException("The given selector did'nt find any match.");
+                throw new NoSuchFrameException("The given selector didn't find any match.");
             }
             $frameElement = $frames[0];
         } else if (is_string($selector)) {
             $nameOrId = $selector;
             $this->logger->verbose(sprintf("EyesTargetLocator.frame('%s')", json_encode($nameOrId)));
-            // Finding the target element so we can report it.
-            // We use find elements(plural) to avoid exception when the element is not found.
-            $this->logger->verbose("Getting frames by name...");
-            $frames = $this->driver->findElementsByName($nameOrId);
-
-            if (count($frames) == 0) {
-                $this->logger->verbose("No frames Found! Trying by id...");
-                // If there are no frames by that name, we'll try the id
-                $frames = $this->driver->findElementsById($nameOrId); //FIXME need to check
-                if (count($frames) == 0 ) {
-                    // No such frame, bummer
-                    throw new NoSuchFrameException("No frame with name or id '$nameOrId' exists!");
-                }
-            }
-            $frameElement = $frames[0];
+            $frameElement = Eyes::findElement($this->driver, $nameOrId);
         } else {
             throw new \InvalidArgumentException("Can't handle selector of type " . get_class($selector));
         }
@@ -82,7 +77,8 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
         return $this->driver;
     }
 
-    public function parentFrame() {
+    public function parentFrame()
+    {
         $this->logger->verbose("EyesTargetLocator.parentFrame()");
         if ($this->driver->getFrameChain()->size() != 0) {
             $this->logger->verbose("Making preparations..");
@@ -97,27 +93,31 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
     /**
      * Switches into every frame in the frame chain. This is used as way to
      * switch into nested frames (while considering scroll) in a single call.
-     * @param frameArg The path to the frame to switch to.
+     * @param mixed $frameArg The path to the frame to switch to.
      *                 Or the path to the frame to check. This is a list of
      *                 frame names/IDs (where each frame is nested in the
      *                 previous frame).
-     * @return The WebDriver with the switched context.
+     * @return WebDriver The WebDriver with the switched context.
      */
-    public function frames($frameArg) {
-        if($frameArg instanceof FrameChain){
+    public function frames($frameArg)
+    {
+        if ($frameArg instanceof FrameChain) {
             $frameChain = $frameArg;
             $this->logger->verbose("EyesTargetLocator.frames(frameChain)");
-            foreach ($frameChain as $frame) {
-                $this->logger->verbose("Scrolling by parent scroll position..");
-                $this->scrollPosition->setPosition($frame->getParentScrollPosition());
-                $this->logger->verbose("Done! Switching to frame...");
-                $this->driver->switchTo()->frame($frame->getReference());
-                $this->logger->verbose("Done!");
+            $frames = $frameChain->getFrames();
+            if ($frames != null) {
+                foreach ($frames as $frame) {
+                    $this->logger->verbose("Scrolling by parent scroll position..");
+                    $this->scrollPosition->setPosition($frame->getParentScrollPosition());
+                    $this->logger->verbose("Done! Switching to frame...");
+                    $this->driver->switchTo()->frame($frame->getReference());
+                    $this->logger->verbose("Done!");
+                }
             }
-        }else{
+        } else {
             $framesPath = $frameArg;
             $this->logger->verbose("EyesTargetLocator.frames(framesPath)");
-            foreach($framesPath as $frameNameOrId) {
+            foreach ($framesPath as $frameNameOrId) {
                 $this->logger->verbose("Switching to frame...");
                 $this->driver->switchTo()->frame($frameNameOrId);
                 $this->logger->verbose("Done!");
@@ -127,7 +127,8 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
         return $this->driver;
     }
 
-    public function window($nameOrHandle) {
+    public function window($nameOrHandle)
+    {
         $this->logger->verbose("EyesTargetLocator.frames()");
         $this->logger->verbose("Making preparations..");
         $this->onWillSwitch->willSwitchToWindow($nameOrHandle);
@@ -140,7 +141,8 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
         return $this->driver;
     }
 
-    public function defaultContent() {
+    public function defaultContent()
+    {
         $this->logger->verbose("EyesTargetLocator.defaultContent()");
         if ($this->driver->getFrameChain()->size() != 0) {
             $this->logger->verbose("Making preparations..");
@@ -152,20 +154,21 @@ class EyesTargetLocator /*implements WebDriverTargetLocator*/extends RemoteTarge
         return $this->driver;
     }
 
-    public function activeElement() {
+    public function activeElement()
+    {
         $this->logger->verbose("EyesTargetLocator.activeElement()");
         $this->logger->verbose("Switching to element..");
         $element = $this->targetLocator->activeElement();
         if (!($element instanceof RemoteWebElement)) {
             throw new EyesException("Not a remote web element!");
         }
-        $result = new EyesRemoteWebElement($this->logger, $this->driver,
-                /*(RemoteWebElement)*/$element);
+        $result = new EyesRemoteWebElement($this->logger, $this->driver, $element);
         $this->logger->verbose("Done!");
         return $result;
     }
 
-    public function alert() {
+    public function alert()
+    {
         $this->logger->verbose("EyesTargetLocator.alert()");
         $this->logger->verbose("Switching to alert..");
         $result = $this->targetLocator->alert();

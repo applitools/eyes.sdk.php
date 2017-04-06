@@ -22,21 +22,21 @@ class CssTranslatePositionProvider implements PositionProvider {
     }
 
     public function getCurrentPosition() {
-        $this->logger->verbose("position to return: " . json_encode($this->lastSetPosition));
+        $this->logger->verbose("position to return: {$this->lastSetPosition}");
         return $this->lastSetPosition;
     }
 
     public function setPosition(Location $location) {
         ArgumentGuard::notNull($location, "location");
-        $this->logger->verbose("Setting position to: " . json_encode($location));
+        $this->logger->verbose("Setting position to: $location");
         EyesSeleniumUtils::translateTo($this->executor, $location);
         $this->logger->verbose("Done!");
         $this->lastSetPosition = $location;
     }
 
     public function getEntireSize() {
-        /*RectangleSize */$entireSize = EyesSeleniumUtils::getCurrentFrameContentEntireSize($this->executor);
-        $this->logger->verbose("Entire size: " . json_encode($entireSize));
+        $entireSize = EyesSeleniumUtils::getCurrentFrameContentEntireSize($this->executor);
+        $this->logger->verbose("Entire size: $entireSize");
         return $entireSize;
     }
 

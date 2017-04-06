@@ -6,9 +6,12 @@ use Applitools\Exceptions\NoFramesException;
 /**
  * Represents a path to a frame, including their location and scroll.
  */
-class FrameChain /*implements Iterable<Frame>*/
+class FrameChain
 {
-    private $logger; //Logger
+    /** @var Logger */
+    private $logger;
+
+    /** @var Frame[] */
     private $frames;
 
     /**
@@ -136,7 +139,7 @@ class FrameChain /*implements Iterable<Frame>*/
 
     /**
      *
-     * @return array The array of frames in this chain.
+     * @return Frame[] The array of frames in this chain.
      */
     public function getFrames()
     {

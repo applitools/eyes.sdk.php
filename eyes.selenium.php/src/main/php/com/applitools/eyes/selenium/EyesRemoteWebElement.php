@@ -414,6 +414,9 @@ class EyesRemoteWebElement extends RemoteWebElement {
         return $this->webElement->isDisplayed();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getLocation() {
         // This is workaround: Selenium currently just removes the value
         // after the decimal dot (instead of rounding up), which causes

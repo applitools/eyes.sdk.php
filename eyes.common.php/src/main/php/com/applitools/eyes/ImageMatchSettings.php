@@ -19,10 +19,9 @@ class ImageMatchSettings
         $this->exact = $exact;
     }
 
-
     /**
      *
-     * @return The "strictness" level of the match.
+     * @return string The "strictness" level of the match.
      */
     public function getMatchLevel()
     {
@@ -31,7 +30,7 @@ class ImageMatchSettings
 
     /**
      *
-     * @param matchLevel The "strictness" level of the match.
+     * @param string $matchLevel The "strictness" level of the match.
      */
     public function setMatchLevel($matchLevel)
     {
@@ -40,7 +39,7 @@ class ImageMatchSettings
 
     /**
      *
-     * @return The parameters for the "Exact" match settings.
+     * @return ExactMatchSettings The parameters for the "Exact" match settings.
      */
     public function getExact()
     {
@@ -49,7 +48,7 @@ class ImageMatchSettings
 
     /**
      *
-     * @param exact The parameters for the "exact" match settings.
+     * @param ExactMatchSettings $exact The parameters for the "exact" match settings.
      */
     public function setExact(ExactMatchSettings $exact)
     {
