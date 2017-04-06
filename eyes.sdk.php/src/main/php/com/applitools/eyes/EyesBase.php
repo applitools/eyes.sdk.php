@@ -1011,6 +1011,7 @@ abstract class EyesBase
         ArgumentGuard::notNull($screenshot, "screenshot");
 
         $screenshotImage = $screenshot->getImage();
+        $uncompressed = $screenshotImage->get('png');
 
         $source = ($lastScreenshot != null) ? $lastScreenshot->getImage() : null;
 
