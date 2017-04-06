@@ -14,7 +14,10 @@ class ServerConnector implements ServerConnectorInterface
     protected $sdkName;
     private $apiKey;
     private $endPoint;
+
+    /** @var ProxySettings */
     private $proxySettings;
+
     private $serverUrl;
     private $logger;
     private $ch;
@@ -148,7 +151,11 @@ class ServerConnector implements ServerConnectorInterface
         try {
             $this->ch = curl_init();
             curl_setopt($this->ch, CURLOPT_URL, "{$this->endPoint}.json?apiKey={$this->apiKey}");
-            curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
+
+            if ($this->proxySettings != null) {
+                curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
+            }
+
             curl_setopt($this->ch, CURLOPT_POST, 1);
             curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
             curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -227,7 +234,11 @@ class ServerConnector implements ServerConnectorInterface
 
             curl_reset($this->ch);
             curl_setopt($this->ch, CURLOPT_URL, $runningSessionsEndpoint);
-            curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
+
+            if ($this->proxySettings != null) {
+                curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
+            }
+
             curl_setopt($this->ch, CURLOPT_POST, 1);
             curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
             curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -270,7 +281,11 @@ class ServerConnector implements ServerConnectorInterface
 
         curl_reset($this->ch);
         curl_setopt($this->ch, CURLOPT_URL,"{$runningSessionsEndpoint}&isAborted=false&updateBaseline={$runningSession->getIsNewSession()}");
-        curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
+
+        if ($this->proxySettings != null) {
+            curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
+        }
+
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
