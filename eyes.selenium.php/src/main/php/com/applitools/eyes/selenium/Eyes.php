@@ -1049,14 +1049,14 @@ class Eyes extends EyesBase
                 $this->logger->log("Check frame/element requested");
                 $algo = new FullPageCaptureAlgorithm($this->logger);
 
-                if ($this->getStitchMode() == "CSS") {
+                if ($this->getStitchMode() == StitchMode::CSS) {
                     $originProvider = new CssTranslatePositionProvider($this->logger, $this->driver);
                 } else {
                     $originProvider = $this->positionProvider;
                 }
 //print_r($scaleProviderFactory); die();
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
-                    $this->positionProvider, $originProvider,
+                    $originProvider, $this->getPositionProvider(),
                     $scaleProviderFactory, $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 $this->logger->log("Building screenshot object...");

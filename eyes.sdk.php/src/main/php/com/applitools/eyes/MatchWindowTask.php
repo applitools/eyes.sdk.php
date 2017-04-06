@@ -81,7 +81,7 @@ class MatchWindowTask
             $retryTimeout = $this->defaultRetryTimeout;
         }
 
-        $this->logger->log(sprintf("retryTimeout = %d", $retryTimeout));
+        $this->logger->log("retryTimeout = $retryTimeout");
 
         $elapsedTimeStart = microtime(true);
 
@@ -130,16 +130,16 @@ class MatchWindowTask
             // if we're here because we haven't found a match yet, try once more
             if (!$matchResult->getAsExpected()) {
 
-                $appOutput = $this->appOutputProvider->getAppOutput($regionProvider,
-                    $lastScreenshot);
+                $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
 
-                $matchResult = $this->performMatch($userInputs, $appOutput, $tag,
-                    $ignoreMismatch);
+                $matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch);
             }
         }
         $elapsedTime = (microtime(true) - $elapsedTimeStart);
         $this->logger->log(sprintf("Completed in  %.2f seconds", $elapsedTime));
-        $matchResult->setScreenshot($appOutput/* FIXME now output is a string ->getScreenshot()*/);
+
+        $matchResult->setScreenshot($appOutput->getScreenshot());
+
         return $matchResult;
     }
 }

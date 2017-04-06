@@ -4,9 +4,15 @@ namespace Applitools;
 use Facebook\WebDriver\WebDriverElement;
 
 class ElementPositionProvider implements PositionProvider {
-    private $logger; //Logger
-    private $driver; //EyesWebDriver
-    private $element; //EyesRemoteWebElement
+
+    /** @var Logger */
+    private $logger;
+
+    /** @var EyesWebDriver */
+    private $driver;
+
+    /** @var EyesRemoteWebElement */
+    private $element;
 
     public function __construct(Logger $logger, EyesWebDriver $driver, WebDriverElement $element) {
         ArgumentGuard::notNull($logger, "logger");
@@ -15,30 +21,28 @@ class ElementPositionProvider implements PositionProvider {
 
         $this->logger = $logger;
         $this->driver = $driver;
-        $this->element = new EyesRemoteWebElement($logger, $driver,
-                /*(RemoteWebElement)*/$element);
+        $this->element = new EyesRemoteWebElement($logger, $driver, $element);
     }
 
     /**
-     * @return The scroll position of the current element.
+     * @return Location The scroll position of the current element.
      */
     public function getCurrentPosition() {
         $this->logger->verbose("getCurrentScrollPosition()");
 
-        $result = new Location($this->element->getScrollLeft(),
-                $this->element->getScrollTop());
+        $result = new Location($this->element->getScrollLeft(), $this->element->getScrollTop());
 
-        $this->logger->verbose(sprintf("Current position: %s", json_encode($result)));
+        $this->logger->verbose("Current position: $result");
 
         return $result;
     }
 
     /**
      * Go to the specified location.
-     * @param location The position to scroll to.
+     * @param Location $location The position to scroll to.
      */
     public function setPosition(Location $location) {
-        $this->logger->verbose(sprintf("Scrolling element to %s", json_encode($location)));
+        $this->logger->verbose("Scrolling element to $location");
 
         $this->element->scrollTo($location);
 
@@ -47,8 +51,7 @@ class ElementPositionProvider implements PositionProvider {
 
     /**
      *
-     * @return The entire size of the container which the position is relative
-     * to.
+     * @return RectangleSize The entire size of the container which the position is relative to.
      */
     public function getEntireSize() {
         $this->logger->verbose("getEntireSize()");
@@ -56,7 +59,7 @@ class ElementPositionProvider implements PositionProvider {
         //But can get region size that contains current element
         $result = new RectangleSize($this->element->getScrollWidth(), $this->element->getScrollHeight());
 
-        $this->logger->verbose(sprintf("Entire size: %s", json_encode($result)));
+        $this->logger->verbose("Entire size: $result");
         return $result;
     }
 
@@ -65,6 +68,10 @@ class ElementPositionProvider implements PositionProvider {
     }
 
     public function restoreState(PositionMemento $state) {
-        $this->setPosition(new Location($state->getX(), $state->getY()));
+        if ($state instanceof ElementPositionMemento) {
+            $this->setPosition(new Location($state->getX(), $state->getY()));
+        } else {
+            throw new \InvalidArgumentException('state should be of type \Applitools\ElementPositionMemento');
+        }
     }
 }

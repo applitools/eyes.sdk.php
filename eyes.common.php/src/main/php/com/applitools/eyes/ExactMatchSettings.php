@@ -30,7 +30,7 @@ class ExactMatchSettings {
 
     /**
      *
-     * @return The minimal non-ignorable pixel intensity difference.
+     * @return float The minimal non-ignorable pixel intensity difference.
      */
     public function getMinDiffIntensity() {
         return $this->minDiffIntensity;
@@ -38,8 +38,7 @@ class ExactMatchSettings {
 
     /**
      *
-     * @param minDiffIntensity The minimal non-ignorable pixel intensity
-     *                         difference.
+     * @param float $minDiffIntensity The minimal non-ignorable pixel intensity difference.
      */
     public function setMinDiffIntensity($minDiffIntensity) {
         $this->minDiffIntensity = $minDiffIntensity;
@@ -47,7 +46,7 @@ class ExactMatchSettings {
 
     /**
      *
-     * @return The minimal non-ignorable diff region width.
+     * @return int The minimal non-ignorable diff region width.
      */
     public function getMinDiffWidth() {
         return $this->minDiffWidth;
@@ -55,7 +54,7 @@ class ExactMatchSettings {
 
     /**
      *
-     * @param minDiffWidth The minimal non-ignorable diff region width.
+     * @param int $minDiffWidth The minimal non-ignorable diff region width.
      */
     public function setMinDiffWidth($minDiffWidth) {
         $this->minDiffWidth = $minDiffWidth;
@@ -63,7 +62,7 @@ class ExactMatchSettings {
 
     /**
      *
-     * @return The minimal non-ignorable diff region height.
+     * @return int The minimal non-ignorable diff region height.
      */
     public function getMinDiffHeight() {
         return $this->minDiffHeight;
@@ -71,7 +70,7 @@ class ExactMatchSettings {
 
     /**
      *
-     * @param minDiffHeight The minimal non-ignorable diff region height.
+     * @param int $minDiffHeight The minimal non-ignorable diff region height.
      */
     public function setMinDiffHeight($minDiffHeight) {
         $this->minDiffHeight = $minDiffHeight;
@@ -79,7 +78,7 @@ class ExactMatchSettings {
 
     /**
      *
-     * @return The ratio of differing pixels above which images are
+     * @return float The ratio of differing pixels above which images are
      * considered mismatching.
      */
     public function getMatchThreshold() {
@@ -88,7 +87,7 @@ class ExactMatchSettings {
 
     /**
      *
-     * @param matchThreshold The ratio of differing pixels above which images
+     * @param float $matchThreshold The ratio of differing pixels above which images
      *                       are considered mismatching.
      */
     public function setMatchThreshold($matchThreshold) {

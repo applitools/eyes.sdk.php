@@ -56,6 +56,9 @@ abstract class EyesBase
     /** @var MatchWindowTask */
     private $matchWindowTask;
 
+    /** @var PositionProvider */
+    protected $positionProvider;
+
 
     public function __construct($serverUrl)
     {
@@ -871,7 +874,7 @@ abstract class EyesBase
             $this->shouldMatchWindowRunOnceOnTimeout = true;
 
             if (!$this->runningSession->getIsNewSession()) {
-                $this->logger->log(sprintf("Mismatch! (%s)", $tag));
+                $this->logger->log("Mismatch! ($tag)");
             }
 
             if ($this->getFailureReports() == "FailureReports::IMMEDIATE") {
