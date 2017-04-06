@@ -5,21 +5,20 @@ namespace Applitools;
  * Encapsulates state for {@link CssTranslatePositionProvider} instances.
  */
 class CssTranslatePositionMemento extends PositionMemento {
-    private $transforms = array(); // Map<String, String>
+
+    private $transforms = array();
 
     /**
      *
-     * @param transforms The current transforms. The keys are the style keys
-     *                   from which each of the transforms were taken.
+     * @param array $transforms The current transforms. The keys are the style keys from which each of the transforms were taken.
      */
-    public function __construct(/*Map<String, String> */$transforms) {
+    public function __construct($transforms) {
         $this->transforms = $transforms;
     }
 
     /**
      *
-     * @return The current transforms. The keys are the style keys from
-     * which each of the transforms were taken.
+     * @return array The current transforms. The keys are the style keys from which each of the transforms were taken.
      */
     public function getTransform() {
         return $this->transforms;

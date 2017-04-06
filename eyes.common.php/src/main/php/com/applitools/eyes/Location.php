@@ -91,7 +91,7 @@ class Location
         return $this->y;
     }
 
-    public function toString()
+    public function __toString()
     {
         return "({$this->x}, {$this->y})";
     }

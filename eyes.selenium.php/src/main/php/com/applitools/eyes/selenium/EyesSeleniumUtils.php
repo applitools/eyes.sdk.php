@@ -5,9 +5,12 @@
 
 namespace Applitools;
 
+use Applitools\Exceptions\EyesDriverOperationException;
+use Applitools\Exceptions\EyesException;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Interactions\Internal\WebDriverCoordinates;
 use Facebook\WebDriver\JavaScriptExecutor;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverDimension;
 use Facebook\WebDriver\WebDriverPoint;
@@ -186,7 +189,7 @@ class EyesSeleniumUtils
         if ($stabilizationTimeout > 0) {
             try { //?????? FIXME need to check
                 GeneralUtils::sleep($stabilizationTimeout);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 // Nothing to do.
             }
         }
@@ -227,13 +230,9 @@ class EyesSeleniumUtils
     {
         try {
             //noinspection unchecked
-            /*List<Long> */
-            $esAsList =
-                /*(List<Long>)*/
-                $executor->executeScript(self::JS_GET_CONTENT_ENTIRE_SIZE);
+            $esAsList = $executor->executeScript(self::JS_GET_CONTENT_ENTIRE_SIZE);
             if (count($esAsList) <= 0) {
-                throw new EyesDriverOperationException(
-                    "Received empty value as frame's size");
+                throw new EyesDriverOperationException("Received empty value as frame's size");
             }
             $result = new RectangleSize((int)$esAsList[0], (int)$esAsList[1]);
         } catch (WebDriverException $e) {
@@ -245,14 +244,12 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param executor The executor to use.
-     * @return The viewport size.
+     * @param JavaScriptExecutor $executor The executor to use.
+     * @return RectangleSize The viewport size.
      */
     public static function executeViewportSizeExtraction(JavascriptExecutor $executor) //FIXME
     {
-        //noinspection unchecked
-        /*List<Long> */
-        $vsAsList = /*(List<Long>) */ $executor->executeScript(self::JS_GET_VIEWPORT_SIZE);
+        $vsAsList = $executor->executeScript(self::JS_GET_VIEWPORT_SIZE);
         return new RectangleSize((int)$vsAsList[0], (int)$vsAsList[1]);
     }
 
@@ -393,10 +390,10 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param driver The driver to get the platform version from.
+     * @param RemoteWebDriver $driver The driver to get the platform version from.
      * @return The plaform version or {@code null} if it is undefined.
      */
-    public static function getPlatformVersion(HasCapabilities $driver)
+    public static function getPlatformVersion(RemoteWebDriver $driver)
     {
         $capabilities = $driver->getCapabilities();
         $platformVersionObj = $capabilities->getCapability(MobileCapabilityType::PLATFORM_VERSION);
@@ -405,8 +402,8 @@ class EyesSeleniumUtils
     }
 
     /**
-     * @param executor The executor to use.
-     * @return The device pixel ratio.
+     * @param JavascriptExecutor $executor The executor to use.
+     * @return float The device pixel ratio.
      */
     public static function getDevicePixelRatio(JavascriptExecutor $executor)
     {
@@ -415,15 +412,15 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param executor The executor to use.
-     * @return The current documentElement transform values, according to
+     * @param JavascriptExecutor $executor The executor to use.
+     * @return mixed The current documentElement transform values, according to
      * {@link #JS_TRANSFORM_KEYS}.
      */
     public static function getCurrentTransform(JavascriptExecutor $executor)
     {
         $script = "return { ";
         foreach (json_decode(self::JS_TRANSFORM_KEYS) as $key) { // ???????
-            $script .= "'" . $key . "'" . ": document.documentElement.style['" . $key . "'],";
+            $script .= "'$key': document.documentElement.style['$key'],";
         }
 
         // Ending the list
@@ -439,15 +436,15 @@ class EyesSeleniumUtils
      * Sets transforms for document.documentElement according to the given
      * map of style keys and values.
      *
-     * @param executor The executor to use.
-     * @param transforms The transforms to set. Keys are used as style keys,
+     * @param JavascriptExecutor $executor The executor to use.
+     * @param array $transforms The transforms to set. Keys are used as style keys,
      *                   and values are the values for those styles.
      */
     public static function setTransforms(JavascriptExecutor $executor, $transforms)
     {
         $script = "";
         foreach ($transforms as $key=>$entry) {
-            $script .= "document.documentElement.style['" . $key . "'] = '" . $entry . "';";
+            $script .= "document.documentElement.style['$key'] = '$entry';";
         }
         $executor->executeScript($script);
     }
@@ -456,8 +453,8 @@ class EyesSeleniumUtils
      * Set the given transform to document.documentElement for all style keys
      * defined in {@link #JS_TRANSFORM_KEYS} .
      *
-     * @param executor The executor to use.
-     * @param transform The transform value to set.
+     * @param JavascriptExecutor $executor The executor to use.
+     * @param string $transform The transform value to set.
      */
     public static function setTransform(JavascriptExecutor $executor, $transform)
     {
@@ -472,11 +469,11 @@ class EyesSeleniumUtils
 
     /**
      * Translates the current documentElement to the given position.
-     * @param executor The executor to use.
-     * @param position The position to translate to.
+     * @param JavascriptExecutor $executor The executor to use.
+     * @param Location $position The position to translate to.
      */
     public static function translateTo(JavascriptExecutor $executor, Location $position)
     {
-        self::setTransform($executor, sprintf("translate(-%spx, -%spx)", $position->getX(), $position->getY()));
+        self::setTransform($executor, "translate(-{$position->getX()}px, -{$position->getY()}px)");
     }
 }

@@ -1071,29 +1071,12 @@ class Eyes extends EyesBase
                 $algo = new FullPageCaptureAlgorithm($this->logger);
                 $regionProvider = new RegionProvider();
 
-
-                /*  BufferedImage fullPageImage = algo.getStitchedRegion
-                      (imageProvider,
-                          new RegionProvider() {
-                              public Region getRegion() {
-                                  return Region.EMPTY;
-                              }
-
-                              public CoordinatesType getCoordinatesType() {
-                                  return null;
-                              }
-                          },
-                          new ScrollPositionProvider(logger, this.driver),
-                          positionProvider, scaleProviderHandler.get(),
-                                  cutProviderHandler.get(),
-                          getWaitBeforeScreenshots(), screenshotFactory);
-                  */
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
                     new ScrollPositionProvider($this->logger, $this->driver),
                     $this->positionProvider, $scaleProviderFactory,
                     $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
-                /*(EyesTargetLocator)*/
+
                 $this->driver->switchTo()->frames($originalFrame);
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);
             } else {

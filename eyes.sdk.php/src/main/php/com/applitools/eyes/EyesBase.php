@@ -52,6 +52,8 @@ abstract class EyesBase
 
     /** @var SessionStartInfo */
     private $sessionStartInfo;
+
+    /** @var MatchWindowTask */
     private $matchWindowTask;
 
 
@@ -851,26 +853,13 @@ abstract class EyesBase
         ArgumentGuard::notNull($regionProvider, "regionProvider");
         $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
 
-        if ($this->runningSession == null) {
-            $this->logger->log("No running session, calling start session..");
-            $this->startSession();
-            $this->logger->log("Done!");
+        $this->ensureRunningSession();
 
-            $appOutputProviderRedeclared = new AppOutputProviderRedeclared($this, $this->logger);
-
-            $this->matchWindowTask = new MatchWindowTask(
-                $this->logger,
-                $this->serverConnector,
-                $this->runningSession,
-                $this->matchTimeout,
-                // A callback which will call getAppOutput
-                $appOutputProviderRedeclared
-            );
-        }
         $this->logger->log("Calling match window...");
 
         $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
             $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
+
         $this->logger->log("MatchWindow Done!");
 
         if (!$result->getAsExpected()) {
@@ -897,6 +886,27 @@ abstract class EyesBase
         return $result;
     }
 
+    private function ensureRunningSession()
+    {
+        if ($this->runningSession != null) {
+            return;
+        }
+
+        $this->logger->log("No running session, calling start session..");
+        $this->startSession();
+        $this->logger->log("Done!");
+
+        $appOutputProviderRedeclared = new AppOutputProviderRedeclared($this, $this->logger);
+
+        $this->matchWindowTask = new MatchWindowTask(
+            $this->logger,
+            $this->serverConnector,
+            $this->runningSession,
+            $this->matchTimeout,
+            // A callback which will call getAppOutput
+            $appOutputProviderRedeclared
+        );
+    }
 
     /**
      * @param RegionProvider $regionProvider A callback for getting the region of the screenshot which will be set in the application output.
@@ -1001,7 +1011,6 @@ abstract class EyesBase
         ArgumentGuard::notNull($screenshot, "screenshot");
 
         $screenshotImage = $screenshot->getImage();
-        $uncompressed = $screenshotImage->get('png');
 
         $source = ($lastScreenshot != null) ? $lastScreenshot->getImage() : null;
 
@@ -1290,6 +1299,7 @@ abstract class EyesBase
             $this->logger->getLogHandler()->close();
         }
     }
+
 }
 
 ?>

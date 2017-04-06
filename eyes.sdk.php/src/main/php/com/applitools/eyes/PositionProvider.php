@@ -9,7 +9,7 @@ interface PositionProvider
 {
     /**
      *
-     * @return The current position, or {@code null} if position is not available.
+     * @return Location The current position, or {@code null} if position is not available.
      */
     function getCurrentPosition();
 
@@ -32,7 +32,7 @@ interface PositionProvider
      * translation based position provider (in WebDriver based SDKs), might
      * save the entire "transform" style value as its state.
      *
-     * @return The current state of the position provider, which can later be
+     * @return PositionMemento The current state of the position provider, which can later be
      * restored by  passing it as a parameter to {@link #restoreState}.
      */
     function getState();
@@ -41,7 +41,7 @@ interface PositionProvider
      * Restores the state of the position provider to the state provided as a
      * parameter.
      *
-     * @param state The state to restore to.
+     * @param PositionMemento $state The state to restore to.
      */
     function restoreState(PositionMemento $state);
 }
