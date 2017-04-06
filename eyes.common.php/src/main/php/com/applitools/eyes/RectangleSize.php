@@ -35,37 +35,34 @@ class RectangleSize {
 
     /**
      * Parses a string into a {link RectangleSize} instance.
-     * @param size A string representing width and height separated by "x".
-     * @return An instance representing the input size.
+     * @param string $size A string representing width and height separated by "x".
+     * @return RectangleSize An instance representing the input size.
      */
-    public function parse($size) {
+    public static function parse($size) {
         ArgumentGuard::notNull($size, "size");
-        $parts = $size->split("x"); //FIXME
+        $parts = explode('x', $size);
         if ($parts->length != 2) {
-            throw new IllegalArgumentException(
-                    "Not a valid size string: " . $size);
+            throw new \InvalidArgumentException("Not a valid size string: $size");
         }
 
-        return new RectangleSize($parts[0], $parts[1]); //FIXME
+        return new RectangleSize(intval($parts[0]), intval($parts[1]));
     }
 
     /**
-     * @param obj A {@link com.applitools.eyes.RectangleSize} instance to be
+     * @param object $other A {@link com.applitools.eyes.RectangleSize} instance to be
      *            checked for equality with the current instance.
-     * @return {@code true} if and only if the input objects are equal by
+     * @return bool {@code true} if and only if the input objects are equal by
      *          value, {@code false} otherwise.
      */
-
-    public function equals($obj) { //FIXME
-        if ($this == $obj) {
+    public function equals($other) { //FIXME
+        if ($this === $other) {
             return true;
         }
 
-        if (!($obj instanceof RectangleSize)) {
+        if (!($other instanceof RectangleSize)) {
             return false;
         }
 
-        $other = /*(RectangleSize)*/ $obj;
         return (($this->width == $other->width) && ($this->height == $other->height));
     }
 
@@ -73,7 +70,7 @@ class RectangleSize {
         return $this->width ^ $this->height;
     }
 
-    public function toString() {
+    public function __toString() {
         return $this->width . "x" . $this->height;
     }
 }
