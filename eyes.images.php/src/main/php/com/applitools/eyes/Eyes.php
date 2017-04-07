@@ -7,6 +7,9 @@ use Applitools\RectangleSize;
 use Applitools\ArgumentGuard;
 use Applitools\RegionProvider;
 use Applitools\EyesImagesScreenshot;
+use Applitools\Region;
+use Applitools\CoordinatesType;
+use Applitools\Location;
 
 class Eyes extends EyesBase {
 
@@ -82,7 +85,7 @@ class Eyes extends EyesBase {
 
         if ($this->viewportSize == null) {
             $this->setViewportSize(
-                    new RectangleSize($image->getWidth(), $image->getHeight())
+                    new RectangleSize($image->width(), $image->height())
             );
         }
 
@@ -123,7 +126,7 @@ class Eyes extends EyesBase {
         }
 
         $regionProvider = new RegionProvider($region);
-        $regionProvider->setCoordinatesType(CoordinatesType.SCREENSHOT_AS_IS);
+        $regionProvider->setCoordinatesType(CoordinatesType::SCREENSHOT_AS_IS);
 
         return $this->checkImage_($regionProvider, $image, $tag, $ignoreMismatch);
     }
@@ -137,7 +140,7 @@ class Eyes extends EyesBase {
      *                relative coordinates).
      * @param $cursor  The cursor's position relative to the control.
      */
-    public function addMouseTrigger(MouseAction $action, Region $control,
+    public function addMouseTrigger($action, Region $control,
             Location $cursor) {
         $this->addMouseTriggerBase($action, $control, $cursor);
     }
