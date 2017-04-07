@@ -109,7 +109,7 @@ class EyesImagesScreenshot extends EyesScreenshot
         return $this->convertLocation($location, CoordinatesType::CONTEXT_RELATIVE, CoordinatesType::SCREENSHOT_AS_IS);
     }
 
-    protected function getIntersectedRegion(Region $region, $originalCoordinatesType, $resultCoordinatesType)
+    public function getIntersectedRegion(Region $region, $originalCoordinatesType, $resultCoordinatesType)
     {
 
         ArgumentGuard::notNull($region, "region");

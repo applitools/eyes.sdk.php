@@ -357,7 +357,7 @@ class Eyes extends EyesBase
             $timeout = $deadline + self::RESPONSE_TIME_DEFAULT_DIFF_FROM_DEADLINE;
         }
         if (!empty($viewportSize)) {
-            $this->setViewportSize($driver, $viewportSize);
+            $this->setViewportSize($viewportSize, $driver);
         }
         $this->open($driver, $appName, $testName, SessionType::PROGRESSION);
         $runnableAction = null;
@@ -627,15 +627,6 @@ class Eyes extends EyesBase
 
             $this->regionToCheck->setCoordinatesType(CoordinatesType::SCREENSHOT_AS_IS);
 
-            /*{FIXME need to check
-            public Region getRegion() {
-                    return screenshot.getFrameWindow();
-                }
-
-                public CoordinatesType getCoordinatesType() {
-                    return CoordinatesType.SCREENSHOT_AS_IS;
-                }
-            };*/
             parent::checkWindowBase($this->regionToCheck, $tag, false, $matchTimeout);
         } finally {
             $this->checkFrameOrElement = false;
@@ -1002,7 +993,7 @@ class Eyes extends EyesBase
      *
      * {@inheritDoc}
      */
-    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size)
+    protected function setViewportSize(RectangleSize $size, WebDriver $driver = null)
     {
         if (!empty($driver)) {
             ArgumentGuard::notNull($driver, "driver");

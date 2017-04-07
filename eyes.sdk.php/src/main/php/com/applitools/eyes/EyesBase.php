@@ -93,7 +93,7 @@ abstract class EyesBase
         $this->saveNewTests = true;
         $this->saveFailedTests = false;
         $this->agentId = null;
-
+        $this->lastScreenshot = null;
     }
 
 
@@ -545,10 +545,9 @@ abstract class EyesBase
     protected abstract function getViewportSize();
 
     /**
-     * @param WebDriver|null $driver
      * @param RectangleSize $size The required viewport size.
      */
-    protected abstract function setViewportSize(WebDriver $driver = null, RectangleSize $size);
+    protected abstract function setViewportSize(RectangleSize $size);
 
     /**
      *
