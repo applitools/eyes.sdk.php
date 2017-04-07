@@ -302,7 +302,7 @@ class Region
      * @return bool True if the location is contained within this region,
      *          false otherwise.
      */
-    public function containsLocation(Location $location) {               //FIXME
+    public function containsLocation(Location $location) {
         return $location->getX() >= $this->left
         && $location->getX() <= ($this->left + $this->width)
         && $location->getY() >= $this->top

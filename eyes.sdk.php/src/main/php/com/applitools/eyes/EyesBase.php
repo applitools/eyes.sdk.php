@@ -328,10 +328,10 @@ abstract class EyesBase
         }
 
         // Getting the location of the cursor in the screenshot
-        $cursorInScreenshot = new Location($cursor);
+        $cursorInScreenshot = new Location(null, null, $cursor);
         // First we need to getting the cursor's coordinates relative to the
         // context (and not to the control).
-        $cursorInScreenshot->offset($control->getLocation());
+        $cursorInScreenshot->offset(null, null, $control->getLocation());
         try {
             $cursorInScreenshot = $this->lastScreenshot->getLocationInScreenshot(
                 $cursorInScreenshot, CoordinatesType::CONTEXT_RELATIVE);
@@ -354,7 +354,7 @@ abstract class EyesBase
         $trigger = new MouseTrigger($action, $controlScreenshotIntersect, $cursorInScreenshot);
         $this->addUserInput($trigger);
 
-        $this->logger->verbose(sprintf("Added %s", $trigger));
+        $this->logger->verbose(sprintf("Added %s", json_encode($trigger)));
     }
 
     /**
@@ -688,7 +688,7 @@ abstract class EyesBase
         }
     }
 
-    public function openBase($appName, $testName, RectangleSize $viewportSize, SessionType $sessionType = null)
+    public function openBase($appName, $testName, RectangleSize $viewportSize = null, SessionType $sessionType = null)
     {
         $this->logger->getLogHandler()->open();
 
@@ -1118,7 +1118,7 @@ abstract class EyesBase
         if ($this->viewportSize == null) {
             $this->viewportSize = $this->getViewportSize();
         } else {
-            $this->setViewportSize(null, $this->viewportSize);
+            $this->setViewportSize($this->viewportSize);
         }
 
         if ($this->batch == null) {

@@ -26,7 +26,7 @@ class EyesImagesScreenshot extends EyesScreenshot
             if (empty($location)) {
                 $location = new Location(0, 0);
                 $rectangleSize = new RectangleSize($image->width(), $image->height());
-                $this->bounds = new Region($location, $rectangleSize);                              
+                $this->bounds = new Region(null, null, null, null, $location, $rectangleSize);
             }
         }
     }
@@ -59,12 +59,11 @@ class EyesImagesScreenshot extends EyesScreenshot
 
     protected function convertLocation(Location $location, $from, $to)
     {
-
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($from, "from");
         ArgumentGuard::notNull($to, "to");
 
-        $result = new Location($location);
+        $result = new Location(null, null, $location);
 
         if ($from == $to) {
             return $result;
@@ -101,7 +100,7 @@ class EyesImagesScreenshot extends EyesScreenshot
         $location = $this->convertLocation($location, $coordinatesType,
             CoordinatesType::CONTEXT_RELATIVE);
 
-        if (!$this->bounds . contains($location)) {
+        if (!$this->bounds->containsLocation($location)) {
             throw new OutOfBoundsException(sprintf(
                 "Location %s ('%s') is not visible in screenshot!", $location,$coordinatesType));
         }
