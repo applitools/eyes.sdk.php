@@ -85,10 +85,11 @@ class FrameChain
     /**
      * Removes the last inserted frame element. Practically means we switched
      * back to the parent of the current frame
+     * @return Frame|null Returns the popped frame
      */
     public function pop()
     {
-        unset($this->frames[count($this->frames) - 1]);
+        return array_pop($this->frames);
     }
 
     /**
@@ -98,6 +99,17 @@ class FrameChain
     public function push(Frame $frame)
     {
         $this->frames[] = $frame;
+    }
+
+    /**
+     * @return Frame|null Returns the current frame
+     */
+    public function peek()
+    {
+        if (count($this->frames) == 0) {
+            return null;
+        }
+        return $this->frames[count($this->frames) - 1];
     }
 
     /**

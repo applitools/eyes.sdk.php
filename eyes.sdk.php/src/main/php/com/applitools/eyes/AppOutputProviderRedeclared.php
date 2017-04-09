@@ -29,7 +29,7 @@ class AppOutputProviderRedeclared implements AppOutputProvider
         $this->logger->verbose("Done getting screenshot!");
 
         // Cropping by region if necessary
-        $region = $regionProvider->getRegion();
+        //$region = $regionProvider->getRegion();
 
         /*if (!$region->isEmpty()) {
             $screenshot = $screenshot->getSubScreenshot($region,

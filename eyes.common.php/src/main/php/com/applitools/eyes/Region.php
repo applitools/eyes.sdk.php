@@ -50,8 +50,6 @@ class Region
      */
     public static function CreateFromLTWH($left, $top, $width, $height)
     {
-        ArgumentGuard::greaterThanOrEqualToZero($left, "left");
-        ArgumentGuard::greaterThanOrEqualToZero($top, "top");
         ArgumentGuard::greaterThanOrEqualToZero($width, "width");
         ArgumentGuard::greaterThanOrEqualToZero($height, "height");
         $region = new Region();

@@ -1,20 +1,18 @@
 <?php
 namespace Applitools;
 
-use Facebook\WebDriver\WebDriverElement;
-
 class FullRegionProvider extends RegionProvider{
 
     /**
-     * @var WebDriverElement
+     * @var EyesRemoteWebElement
      */
     protected $element;
 
     /**
      * FullRegionProvider constructor.
-     * @param WebDriverElement $element
+     * @param EyesRemoteWebElement $element
      */
-    public function __construct(WebDriverElement $element = null)
+    public function __construct(EyesRemoteWebElement $element = null)
     {
         parent::__construct();
         $this->element = $element;
@@ -26,9 +24,8 @@ class FullRegionProvider extends RegionProvider{
      */
     public function getRegion()
     {
-        $p = $this->element->getLocation();
-        $d = $this->element->getSize();
-        return Region::CreateFromLTWH($p->getX(), $p->getY(), $d->getWidth(), $d->getHeight());
+        $elementRegion = $this->element->getClientAreaBounds();
+        return $elementRegion;
     }
 
     /**

@@ -488,7 +488,9 @@ class Eyes extends EyesBase
         $locationAsPoint = $element->getLocation();
         $this->regionVisibilityStrategy->moveToRegion($this->positionProvider,
             new Location($locationAsPoint->getX(), $locationAsPoint->getY()));
-        $fullRegion = new FullRegionProvider($element);
+
+        $eyesElement = new EyesRemoteWebElement($this->logger, $this->driver, $element);
+        $fullRegion = new FullRegionProvider($eyesElement);
         parent::checkWindowBase(
             $fullRegion,
             $tag,

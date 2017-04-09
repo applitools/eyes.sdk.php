@@ -144,7 +144,7 @@ class FullPageCaptureAlgorithm
         $entirePage = Region::CreateFromLocationAndSize(Location::getZero(), $entireSize);
 
         $imageParts = $entirePage->getSubRegions($partImageSize);
-        $this->logger->verbose("imageParts: " . var_export($imageParts, true));
+        //$this->logger->verbose("imageParts: " . var_export($imageParts, true));
 
         $this->logger->verbose("Creating stitchedImage container. Size: $entireSize");
         //Notice stitchedImage uses the same type of image as the screenshots.

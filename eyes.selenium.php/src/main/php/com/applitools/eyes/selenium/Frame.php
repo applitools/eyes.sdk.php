@@ -75,4 +75,9 @@ class Frame {
     public function getParentScrollPosition() {
         return $this->parentScrollPosition;
     }
+
+    public function __toString()
+    {
+        return $this->reference->getID();
+    }
 }

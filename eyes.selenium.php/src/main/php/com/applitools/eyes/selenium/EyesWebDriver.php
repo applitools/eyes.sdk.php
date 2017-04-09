@@ -431,13 +431,9 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $this->defaultContentViewportSize;
     }
 
-    /**
-     *
-     * @return FrameChain A copy of the current frame chain.
-     */
     public function getFrameChain()
     {
-        return new FrameChain($this->logger, $this->frameChain);
+        return $this->frameChain;
     }
 
     public function getScreenshotAs(/*OutputType<X>*/$xOutputType)

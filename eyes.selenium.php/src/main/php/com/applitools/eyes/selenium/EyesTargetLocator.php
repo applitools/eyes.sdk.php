@@ -80,11 +80,23 @@ class EyesTargetLocator implements WebDriverTargetLocator
     public function parentFrame()
     {
         $this->logger->verbose("EyesTargetLocator.parentFrame()");
-        if ($this->driver->getFrameChain()->size() != 0) {
-            $this->logger->verbose("Making preparations..");
+        $chain = $this->driver->getFrameChain();
+        $this->logger->verbose("switching to parent frame. \"before\" chain size: {$chain->size()}");
+
+        if ($chain->size() > 0) {
+            $this->logger->verbose("Making preparations...");
             $this->onWillSwitch->willSwitchToFrame(TargetType::PARENT_FRAME, null, $this->logger, $this->driver);
-            $this->logger->verbose("Done! Switching to parent frame..");
-            $this->targetLocator->defaultContent();
+            $this->logger->verbose("Done! Switching to parent frame...");
+            if ($chain->size() > 0) {
+                $this->logger->verbose("switching to current frame. chain size: {$chain->size()}");
+                $this->targetLocator->defaultContent();
+                foreach ($chain->getFrames() as $frame) {
+                    $this->targetLocator->frame($frame->getReference());
+                }
+            } else {
+                $this->logger->verbose("switching to default content");
+                $this->targetLocator->defaultContent();
+            }
         }
         $this->logger->verbose("Done!");
         return $this->driver;
