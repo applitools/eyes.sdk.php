@@ -11,10 +11,10 @@ interface OnWillSwitch {
      * @param mixed $targetType The type of frame we're about to switch into.
      * @param RemoteWebElement $targetFrame The element about to be switched to, if available. Otherwise, null.
      * @param Logger $logger
-     * @param WebDriver $driver
+     * @param EyesWebDriver $driver
      * @return
      */
-    public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame, Logger $logger, WebDriver $driver);
+    public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame, Logger $logger, EyesWebDriver $driver);
 
 
 }

@@ -32,6 +32,9 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
     private $rotation; //ImageRotation
     private $defaultContentViewportSize; //RectangleSize
 
+    /** @var RemoteExecuteMethod */
+    private $executeMethod;
+
     /**
      * Rotates the image as necessary. The rotation is either manually forced
      * by passing a non-null ImageRotation, or automatically inferred.
@@ -93,15 +96,15 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         $this->defaultContentViewportSize = null;
 
         // initializing "touch" if possible
-        $executeMethod = null;
+        $this->executeMethod = null;
         try {
-            $executeMethod = new RemoteExecuteMethod($driver);
+            $this->executeMethod = new RemoteExecuteMethod($driver);
         } catch (\Exception $e) {
             // If an exception occurred, we simply won't instantiate "touch".
         }
-        if (null != $executeMethod) {
-            $this->touch = new EyesTouchScreen($logger, $this,
-                new RemoteTouchScreen($executeMethod));
+
+        if (null != $this->executeMethod) {
+            $this->touch = new EyesTouchScreen($logger, $this, new RemoteTouchScreen($this->executeMethod));
         } else {
             $this->touch = null;
         }

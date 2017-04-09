@@ -28,7 +28,7 @@ class FullRegionProvider extends RegionProvider{
     {
         $p = $this->element->getLocation();
         $d = $this->element->getSize();
-        return new Region($p->getX(), $p->getY(), $d->getWidth(), $d->getHeight());
+        return Region::CreateFromLTWH($p->getX(), $p->getY(), $d->getWidth(), $d->getHeight());
     }
 
     /**

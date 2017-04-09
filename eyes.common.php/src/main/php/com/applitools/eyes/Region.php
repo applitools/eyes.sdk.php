@@ -13,9 +13,19 @@ class Region
     private $height;
     public static $empty;
 
+    /** @var Logger */
+    private static $logger;
+
+    public static function initLogger($logger)
+    {
+        self::$logger = $logger;
+    }
+
     public static function getEmpty()
     {
-        self::$empty = new Region(0, 0, 0, 0);
+        if (self::$empty == null) {
+            self::$empty = Region::CreateFromLTWH(0, 0, 0, 0);
+        }
         return self::$empty;
     }
 
@@ -27,37 +37,41 @@ class Region
         $this->height = self::$empty->height;
     }
 
-    public function __construct($left = null, $top = null, $width = null, $height = null,
-                                Location $location = null, RectangleSize $size = null,
-                                Region $other = null) //FIXME 3 construct's merged
+    public function __construct()
     {
-        if($left !== null && $top !== null && $width !== null && $height !== null){
-            ArgumentGuard::greaterThanOrEqualToZero($width, "width");
-            ArgumentGuard::greaterThanOrEqualToZero($height, "height");
-            //$this->empty = new Region(0, 0, 0, 0); //FIXME
+    }
 
-            $this->left = $left;
-            $this->top = $top;
-            $this->width = $width;
-            $this->height = $height;
-        }
-        else if($location !== null && $size !== null){
-            ArgumentGuard::notNull($location, "location");
-            ArgumentGuard::notNull($size, "size");
+    /**
+     * @param float $left
+     * @param float $top
+     * @param float $width
+     * @param float $height
+     * @return Region
+     */
+    public static function CreateFromLTWH($left, $top, $width, $height)
+    {
+        ArgumentGuard::greaterThanOrEqualToZero($left, "left");
+        ArgumentGuard::greaterThanOrEqualToZero($top, "top");
+        ArgumentGuard::greaterThanOrEqualToZero($width, "width");
+        ArgumentGuard::greaterThanOrEqualToZero($height, "height");
+        $region = new Region();
+        $region->left = $left;
+        $region->top = $top;
+        $region->width = $width;
+        $region->height = $height;
+        return $region;
+    }
 
-            $this->left = $location->getX();
-            $this->top = $location->getY();
-            $this->width = $size->getWidth();
-            $this->height = $size->getHeight();
-        }
-        else if ($other ==! null){
-            ArgumentGuard::notNull($other, "other");
-
-            $this->left = $other->getLeft();
-            $this->top = $other->getTop();
-            $this->width = $other->getWidth();
-            $this->height = $other->getHeight();
-        }
+    public static function CreateFromLocationAndSize(Location $location, RectangleSize $size)
+    {
+        ArgumentGuard::notNull($location, "location");
+        ArgumentGuard::notNull($size, "size");
+        $region = new Region();
+        $region->left = $location->getX();
+        $region->top = $location->getY();
+        $region->width = $size->getWidth();
+        $region->height = $size->getHeight();
+        return $region;
     }
 
     /**
@@ -67,9 +81,9 @@ class Region
     public function isEmpty()
     {
         return $this->left == self::getEmpty()->getLeft()
-        && $this->top == self::getEmpty()->getTop()
-        && $this->width == self::getEmpty()->getWidth()
-        && $this->height == self::getEmpty()->getHeight();
+            && $this->top == self::getEmpty()->getTop()
+            && $this->width == self::getEmpty()->getWidth()
+            && $this->height == self::getEmpty()->getHeight();
     }
 
     public function equals($obj)
@@ -84,9 +98,9 @@ class Region
         $other = clone $obj; // clone????
 
         return ($this->getLeft() == $other->getLeft())
-        && ($this->getTop() == $other->getTop())
-        && ($this->getWidth() == $other->getWidth())
-        && ($this->getHeight() == $other->getHeight());
+            && ($this->getTop() == $other->getTop())
+            && ($this->getWidth() == $other->getWidth())
+            && ($this->getHeight() == $other->getHeight());
     }
 
     public function hashCode()
@@ -143,8 +157,7 @@ class Region
      * is equal or greater than the current region,  only a single region is
      * returned.
      */
-    private static function getSubRegionsWithFixedSize(
-        Region $containerRegion, RectangleSize $subRegionSize)
+    private static function getSubRegionsWithFixedSize(Region $containerRegion, RectangleSize $subRegionSize)
     {
         ArgumentGuard::notNull($containerRegion, "containerRegion");
         ArgumentGuard::notNull($subRegionSize, "subRegionSize");
@@ -170,7 +183,7 @@ class Region
         if ($subRegionWidth == $containerRegion->width &&
             $subRegionHeight == $containerRegion->height
         ) {
-            $subRegions[] = new Region($containerRegion);
+            $subRegions[] = clone $containerRegion;
             return $subRegions;
         }
 
@@ -190,7 +203,7 @@ class Region
                     $currentLeft = ($right - $subRegionWidth) + 1;
                 }
 
-                $subRegions[] = new Region($currentLeft, $currentTop, $subRegionWidth, $subRegionHeight);
+                $subRegions[] = Region::CreateFromLTWH($currentLeft, $currentTop, $subRegionWidth, $subRegionHeight);
 
                 $currentLeft += $subRegionWidth;
             }
@@ -208,15 +221,14 @@ class Region
      */
     private static function getSubRegionsWithVaryingSize(Region $containerRegion, RectangleSize $maxSubRegionSize)
     {
+        self::$logger->verbose("getSubRegionsWithVaryingSize {$containerRegion}, {$maxSubRegionSize}");
+
         ArgumentGuard::notNull($containerRegion, "containerRegion");
         ArgumentGuard::notNull($maxSubRegionSize, "maxSubRegionSize");
-        ArgumentGuard::greaterThanZero($maxSubRegionSize->getWidth(),
-            "maxSubRegionSize.getWidth()");
-        ArgumentGuard::greaterThanZero($maxSubRegionSize->getHeight(),
-            "maxSubRegionSize.getHeight()");
+        ArgumentGuard::greaterThanZero($maxSubRegionSize->getWidth(), "maxSubRegionSize.getWidth()");
+        ArgumentGuard::greaterThanZero($maxSubRegionSize->getHeight(), "maxSubRegionSize.getHeight()");
 
         $subRegions = array();
-        $subRegions[] = new Region();
 
         $currentTop = $containerRegion->top;
         $bottom = $containerRegion->top + $containerRegion->height;
@@ -238,13 +250,16 @@ class Region
                 $currentHeight = $currentBottom - $currentTop;
                 $currentWidth = $currentRight - $currentLeft;
 
-                $subRegions[] = new Region($currentLeft, $currentTop,
-                    $currentWidth, $currentHeight);
+                $subRegions[] = Region::CreateFromLTWH($currentLeft, $currentTop, $currentWidth, $currentHeight);
 
                 $currentLeft += $maxSubRegionSize->getWidth();
             }
             $currentTop += $maxSubRegionSize->getHeight();
         }
+
+        $count = count($subRegions);
+        self::$logger->verbose("returning {$count} sub regions");
+
         return $subRegions;
     }
 
@@ -292,7 +307,7 @@ class Region
         $otherBottom = $other->getTop() + $other->getHeight();
 
         return $this->top <= $other->getTop() && $this->left <= $other->getLeft()
-        && $bottom >= $otherBottom && $right >= $otherRight;
+            && $bottom >= $otherBottom && $right >= $otherRight;
     }
 
     /**
@@ -302,11 +317,12 @@ class Region
      * @return bool True if the location is contained within this region,
      *          false otherwise.
      */
-    public function containsLocation(Location $location) {               //FIXME
+    public function containsLocation(Location $location)
+    {               //FIXME
         return $location->getX() >= $this->left
-        && $location->getX() <= ($this->left + $this->width)
-        && $location->getY() >= $this->top
-        && $location->getY() <= ($this->top + $this->height);
+            && $location->getX() <= ($this->left + $this->width)
+            && $location->getY() >= $this->top
+            && $location->getY() <= ($this->top + $this->height);
     }
 
     /**

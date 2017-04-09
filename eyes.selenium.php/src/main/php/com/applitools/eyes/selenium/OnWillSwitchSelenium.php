@@ -11,7 +11,7 @@ class OnWillSwitchSelenium implements OnWillSwitch {
         $this->frameChain = $frameChain; //FIXME need to check
     }
 
-    public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame = null, Logger $logger, WebDriver $driver) {
+    public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame = null, Logger $logger, EyesWebDriver $driver) {
         $logger->verbose("willSwitchToFrame()");
 
         switch($targetType) {
@@ -26,24 +26,26 @@ class OnWillSwitchSelenium implements OnWillSwitch {
             default: // Switching into a frame
                 $logger->verbose("Frame");
     
-                $frameId = /*(EyesRemoteWebElement)*/$targetFrame->getId();
-                $pl = $targetFrame->getLocation();
-                $ds = $targetFrame->getSize();
+                $frameId = $targetFrame->getId();
 
-                // Get the frame's content location.
-                $bordersAwareElement = new BordersAwareElementContentLocationProvider();
-                $contentLocation = $bordersAwareElement->getLocation($logger, $targetFrame, new Location($pl->getX(), $pl->getY()));
-                
+                /** @var EyesRemoteWebElement $eyesFrame */
+                $eyesFrame = null;
+                if ($targetFrame instanceof EyesRemoteWebElement) {
+                    $eyesFrame = $targetFrame;
+                } else {
+                    $eyesFrame = new EyesRemoteWebElement($logger, $driver, $targetFrame);
+                }
+
+                $rect = $eyesFrame->getClientAreaBounds();
+                $pl = $rect->getLocation();
+                $innerSize = $rect->getSize();
+
                 $scrollPositionProvider = new ScrollPositionProvider($logger, $driver);
 
-                $rectangleSize = new RectangleSize($ds->getWidth(), $ds->getHeight());
-
-                $frame = new Frame($logger, $targetFrame, $frameId, $contentLocation, $rectangleSize, $scrollPositionProvider->getCurrentPosition());
-
+                $frame = new Frame($logger, $targetFrame, $frameId, $pl, $innerSize, $scrollPositionProvider->getCurrentPosition());
 
                 $this->frameChain->push($frame);
         }
         $logger->verbose("Done!");
     }
-
 }

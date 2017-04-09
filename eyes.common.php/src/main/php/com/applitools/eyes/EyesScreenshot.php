@@ -56,9 +56,15 @@ abstract class EyesScreenshot {
     public abstract function getLocationInScreenshot(Location $location, $coordinatesType);
 
 
-    public abstract function getIntersectedRegion(Region $region,
-    /*CoordinatesType */$originalCoordinatesType,
-    /*CoordinatesType */$resultCoordinatesType);
+    /**
+     * Get the intersection of the given region with the screenshot.
+     *
+     * @param Region $region The region to intersect.
+     * @param string $originalCoordinatesType The coordinates type of {@code region}.
+     * @param $resultCoordinatesType
+     * @return Region The intersected region, in  coordinates {@code $resultCoordinatesType}.
+     */
+    public abstract function getIntersectedRegion(Region $region,    $originalCoordinatesType,    $resultCoordinatesType);
 
     /*
     /**
@@ -85,13 +91,13 @@ abstract class EyesScreenshot {
         ArgumentGuard::notNull($region, "region");
 
         if ($region->isEmpty()) {
-            return new Region($region);
+            return clone $region;
         }
 
         ArgumentGuard::notNull($from, "from");
         ArgumentGuard::notNull($to, "to");
 
         $updatedLocation = $this->convertLocation($region->getLocation(), $from, $to);
-        return new Region(null, null, null, null, $updatedLocation, $region->getSize());
+        return Region::CreateFromLocationAndSize($updatedLocation, $region->getSize());
     }
 }

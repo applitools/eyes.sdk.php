@@ -44,9 +44,6 @@ abstract class EyesBase
     /** @var SimplePropertyHandler */
     protected $scaleProviderHandler;
 
-    /** @var SimplePropertyHandler */
-    protected $cutProviderHandler;
-
     /** @var Logger */
     protected $logger;
 
@@ -71,13 +68,13 @@ abstract class EyesBase
         ArgumentGuard::notNull($serverUrl, "serverUrl");
 
         $this->logger = new Logger(new PrintLogHandler());
+        ImageUtils::initLogger($this->logger);
+        Region::initLogger($this->logger);
 
         $this->scaleProviderHandler = new SimplePropertyHandler();
         $scaleProvider = new NullScaleProvider();
         $this->scaleProviderHandler->set($scaleProvider);
-        $this->cutProviderHandler = new SimplePropertyHandler();
-        $cutProvider = new NullCutProvider();
-        $this->cutProviderHandler->set($cutProvider);
+
         $this->positionProvider = new InvalidPositionProvider();
         $this->scaleMethod = ScaleMethod::getDefault();
         $this->viewportSize = null;
@@ -328,7 +325,7 @@ abstract class EyesBase
         }
 
         // Getting the location of the cursor in the screenshot
-        $cursorInScreenshot = new Location($cursor);
+        $cursorInScreenshot = clone $cursor;
         // First we need to getting the cursor's coordinates relative to the
         // context (and not to the control).
         $cursorInScreenshot->offset($control->getLocation());
@@ -374,7 +371,7 @@ abstract class EyesBase
         ArgumentGuard::notNull($text, "text");
 
         // We don't want to change the objects we received.
-        $control = new Region($control);
+        $control = clone $control;
 
         if ($this->lastScreenshot == null) {
             $this->logger->verbose(sprintf("Ignoring '%s' (no screenshot)", $text));
@@ -983,22 +980,6 @@ abstract class EyesBase
     public function getBatch()
     {
         return $this->batch;
-    }
-
-    /**
-     * Manually set the the sizes to cut from an image before it's validated.
-     *
-     * @param CutProvider $cutProvider the provider doing the cut. If {@code null}, Eyes
-     *                     would automatically infer if cutting is needed.
-     */
-    public function setImageCut(CutProvider $cutProvider)
-    {
-        if ($cutProvider != null) {
-            $this->cutProviderHandler = new ReadOnlyPropertyHandler($this->logger, $cutProvider);
-        } else {
-            $this->cutProviderHandler = new SimplePropertyHandler();
-            $this->cutProviderHandler->set(new NullCutProvider());
-        }
     }
 
     /**

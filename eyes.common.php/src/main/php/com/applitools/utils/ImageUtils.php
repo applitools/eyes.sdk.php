@@ -9,6 +9,14 @@ use Applitools\Exceptions\EyesException;
 use Gregwar\Image\Image;
 
 class ImageUtils {
+
+    /** @var  Logger */
+    private static $logger;
+
+    public static function initLogger(Logger $logger){
+        self::$logger = $logger;
+    }
+
     /**
      * Encodes a given image as PNG.
      *
@@ -20,24 +28,6 @@ class ImageUtils {
         ArgumentGuard::notNull($image, "image");
         $pngData = $image->get('png');
         return $pngData;
-        /*$pngBytesStream = new ByteArrayOutputStream();
-
-        try {
-            // Get the clipped image in PNG encoding.
-            ImageIO::write($image, "png", $pngBytesStream);
-            $pngBytesStream->flush();
-            $encodedImage = $pngBytesStream->toByteArray();
-        } catch (IOException $e) {
-            throw new EyesException("Failed to encode image", $e);
-        } finally {
-            try{
-                $pngBytesStream->close();
-            } catch (IOException $e) {
-                //noinspection ThrowFromFinallyBlock
-                throw new EyesException("Failed to close png byte stream", $e);
-            }
-        }
-        return $encodedImage;*/
     }
 
     /**
@@ -116,6 +106,10 @@ class ImageUtils {
      */
     public static function getImagePart(Image $image, Region $region) {
         ArgumentGuard::notNull($image, "image");
+
+        if (self::$logger != null) {
+            self::$logger->verbose("getImagePart (image [{$image->width()}x{$image->height()}], $region)");
+        }
 
         $image->crop($region->getLeft(), $region->getTop(), $region->getWidth(), $region->getHeight());
 
@@ -435,24 +429,5 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
         } while ($currentWidth != $targetWidth || $currentHeight != $targetHeight);
 
         return $src;
-    }
-
-
-    /**
-     * Removes a given region from the image.
-     * @param Image $image The image to crop.
-     * @param Region $regionToCrop The region to crop from the image.
-     * @return Image The cropped image.
-     */
-    public static function cropImage(Image $image, Region $regionToCrop) {
-        $croppedImage = Scalr::crop($image, $regionToCrop->getLeft(),
-                $regionToCrop->getTop(), $regionToCrop->getWidth(),
-                $regionToCrop->getHeight());
-
-        if ($image->getType() == $croppedImage->getType()) {
-            return $croppedImage;
-        }
-
-        return self::copyImageWithType($croppedImage, $image->getType());
     }
 }

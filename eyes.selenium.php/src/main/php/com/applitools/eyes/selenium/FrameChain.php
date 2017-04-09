@@ -122,7 +122,7 @@ class FrameChain
         if (count($this->frames) == 0) {
             throw new NoFramesException("No frames in frame chain");
         }
-        return new Location($this->frames[0]->getParentScrollPosition());
+        return clone ($this->frames[0]->getParentScrollPosition());
     }
 
     /**

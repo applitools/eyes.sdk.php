@@ -41,7 +41,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         //$firstFrame = $frameIterator->next();
         $frames = $frameChain->getFrames();
         $logger->verbose("Done!");
-        $locationInScreenshot = new Location('','',array_pop($frames)->getLocation());
+        $locationInScreenshot = clone (array_pop($frames)->getLocation());
         // We only consider scroll of the default content if this is
         // a viewport screenshot.
         if ($screenshotType == ScreenshotType::VIEWPORT) {
@@ -94,7 +94,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             $this->screenshotType = ScreenshotType::ENTIRE_FRAME;
             $this->scrollPosition = new Location(0, 0);
             $this->frameLocationInScreenshot = new Location(0, 0);
-            $this->frameWindow = new Region(new Location(0, 0), $entireFrameSize);
+            $this->frameWindow = Region::CreateFromLocationAndSize(Location::getZero(), $entireFrameSize);
         } else {
             parent::__construct($image);
             ArgumentGuard::notNull($logger, "logger");
@@ -155,8 +155,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             }
             $this->frameLocationInScreenshot = $frameLocationInScreenshot;
             $logger->verbose("Calculating frame window..");
-            $this->frameWindow = new Region(null, null, null, null,
-                                        $frameLocationInScreenshot, $frameSize);
+            $this->frameWindow = Region::CreateFromLocationAndSize($frameLocationInScreenshot, $frameSize);
 /*
             //FIXME
             //$this->frameWindow->intersect(new Region(/*FIXME0, 0, $image->getWidth(), $image->getHeight()));
@@ -220,9 +219,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 CoordinatesType::SCREENSHOT_AS_IS,
                 CoordinatesType::CONTEXT_AS_IS);
 
-        $frameLocationInSubScreenshot =
-            new Location(-$contextAsIsRegionLocation->getX(),
-                -$contextAsIsRegionLocation->getY());
+        $frameLocationInSubScreenshot = new Location(-$contextAsIsRegionLocation->getX(), -$contextAsIsRegionLocation->getY());
 
         $result = new EyesWebDriverScreenshot($this->logger,
             $this->driver, $subScreenshotImage, $this->screenshotType,
@@ -238,15 +235,15 @@ class EyesWebDriverScreenshot extends EyesScreenshot
      * @param string $from Origin CoordinatesType.
      * @param string $to Target CoordinatesType.
      * @return Location The Converted location.
+     * @throws CoordinatesTypeConversionException
      */
     public function convertLocation(Location $location, $from, $to)
     {
-
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($from, "from");
         ArgumentGuard::notNull($to, "to");
 
-        $result = new Location(null, null, $location);
+        $result = clone $location;
 
         if ($from == $to) {
             return $result;
@@ -361,7 +358,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                                          $resultCoordinatesType = null)
     {
         if ($region->isEmpty()) {
-            return new Region('','','','','','',$region);
+            return clone $region;
         }
 
         if ($resultCoordinatesType == null) {
@@ -381,8 +378,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
 
             // If the request is screenshot based, we intersect with the image
             case CoordinatesType::SCREENSHOT_AS_IS:
-                $intersectedRegion->intersect(new Region(0, 0,
-                    $this->image->width(), $this->image->height()));
+                $intersectedRegion->intersect(Region::CreateFromLTWH(0, 0, $this->image->width(), $this->image->height()));
                 break;
 
             default:
@@ -406,17 +402,20 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     /**
      * Gets the elements region in the screenshot.
      *
-     * @param WebDriverElement $element The element which region we want to intersect.
+     * @param EyesRemoteWebElement $element The element which region we want to intersect.
      * @return Region The intersected region, in {@code SCREENSHOT_AS_IS} coordinates type.
      */
-    public function getIntersectedRegionElement(WebDriverElement $element) //FIXME need to change back the title
+    public function getIntersectedRegionElement(EyesRemoteWebElement $element) //FIXME need to change back the title
     {
         ArgumentGuard::notNull($element, "element");
 
-        $pl = $element->getLocation();
+        /*$pl = $element->getLocation();
         $ds = $element->getSize();
 
-        $elementRegion = new Region($pl->getX(), $pl->getY(), $ds->getWidth(), $ds->getHeight());
+        $elementRegion = Region::CreateFromLTWH($pl->getX(), $pl->getY(), $ds->getWidth(), $ds->getHeight());*/
+
+
+        $elementRegion = $element->getClientAreaBounds();
 
         // Since the element coordinates are in context relative
         $elementRegion = $this->getIntersectedRegion($elementRegion, CoordinatesType::CONTEXT_RELATIVE);

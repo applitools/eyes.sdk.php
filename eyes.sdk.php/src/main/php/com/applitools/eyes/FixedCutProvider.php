@@ -10,51 +10,51 @@ use Gregwar\Image\Image;
 class FixedCutProvider implements CutProvider
 {
 
-    private $header;
-    private $footer;
+    private $top;
+    private $bottom;
     private $left;
     private $right;
 
-    public function __construct($header, $footer, $left, $right)
+    public function __construct($top, $bottom, $left, $right)
     {
-        $this->header = $header;
-        $this->footer = $footer;
+        $this->top = $top;
+        $this->bottom = $bottom;
         $this->left = $left;
         $this->right = $right;
     }
 
     public function cut(Image $image)
     {
-        if ($this->header > 0) {
+        /*if ($this->$top > 0) {
             $image = ImageUtils::cropImage($image,
-                new Region(0, $this->header, $image->width(), $image->height() - $this->header));
+                Region::CreateFromLTWH(0, $this->header, $image->width(), $image->height() - $this->$top));
         }
 
-        if ($this->footer > 0) {
+        if ($this->$bottom > 0) {
             $image = ImageUtils::cropImage($image,
-                new Region(0, 0, $image->width(), $image->height() - $this->footer));
+                Region::CreateFromLTWH(0, 0, $image->width(), $image->height() - $this->$bottom));
         }
 
         if ($this->left > 0) {
             $image = ImageUtils::cropImage($image,
-                new Region($this->left, 0, $image->width() - $this->left, $image->height()));
+                Region::CreateFromLTWH($this->left, 0, $image->width() - $this->left, $image->height()));
         }
 
         if ($this->right > 0) {
             $image = ImageUtils::cropImage($image,
-                new Region(0, 0, $image->width() - $this->right, $image->height()));
-        }
+                Region::CreateFromLTWH(0, 0, $image->width() - $this->right, $image->height()));
+        }*/
 
-        return $image;
+        return $image->crop($this->left, $this->top, $image->width() - $this->left - $this->right, $image->height() - $this->top - $this->bottom);
     }
 
     public function scale($scaleRatio)
     {
-        $scaledHeader = (int)ceil($this->header * $scaleRatio);
-        $scaledFooter = (int)ceil($this->footer * $scaleRatio);
+        $scaledTop = (int)ceil($this->top * $scaleRatio);
+        $scaledBottom = (int)ceil($this->bottom * $scaleRatio);
         $scaledLeft = (int)ceil($this->left * $scaleRatio);
         $scaledRight = (int)ceil($this->right * $scaleRatio);
 
-        return new FixedCutProvider($scaledHeader, $scaledFooter, $scaledLeft, $scaledRight);
+        return new FixedCutProvider($scaledTop, $scaledBottom, $scaledLeft, $scaledRight);
     }
 }

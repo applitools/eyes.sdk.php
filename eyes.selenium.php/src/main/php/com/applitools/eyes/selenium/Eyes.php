@@ -404,7 +404,7 @@ class Eyes extends EyesBase
         }
 
         $targetRegion = null;
-        if ($region instanceof Region){
+        if ($region instanceof Region) {
             $targetRegion = $region;
         } else if ($region instanceof WebDriverElement) {
             $this->checkRegionByElement($region, $matchTimeout, $tag, $stitchContent);
@@ -500,7 +500,8 @@ class Eyes extends EyesBase
         $this->logger->verbose("Done!");
     }
 
-    private function findElementMixed($element) {
+    private function findElementMixed($element)
+    {
 
         $targetElement = null;
         if ($element instanceof WebDriverElement) {
@@ -509,7 +510,7 @@ class Eyes extends EyesBase
             $targetElement = $this->driver->findElement($element);
         } else if (is_string($element)) {
             $targetElement = self::findElement($this->driver, $element);
-        } else if ($element instanceof Frame){
+        } else if ($element instanceof Frame) {
             $targetElement = $element->getReference();
         } else {
             throw new \Exception("couldn't find target element");
@@ -528,7 +529,7 @@ class Eyes extends EyesBase
      * @param bool $stitchContent If {@code true}, stitch the internal content of the region (i.e., perform {@link #checkElement(By, int, String)} on the region.
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
      */
-    public function checkRegionInFrame($frame, $element,  $tag = null, $stitchContent = false, $matchTimeout = null)
+    public function checkRegionInFrame($frame, $element, $tag = null, $stitchContent = false, $matchTimeout = null)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log("checkRegionInFrame($frame, $element, $matchTimeout, '$tag', $stitchContent): Ignored");
@@ -608,11 +609,14 @@ class Eyes extends EyesBase
             // FIXME - Scaling should be handled in a single place instead
 //FIXME meed to test print_r($this->driver->getFrameChain())            $this->updateScalingParams();
             $this->logger->log("Getting screenshot as base64..");
-            $screenshot64 = $this->driver->getScreenshotAs(/*OutputType::*/"BASE64");
+            $screenshot64 = $this->driver->getScreenshotAs(/*OutputType::*/
+                "BASE64");
 
             $this->logger->log("Done! Creating image object...");
 
-            $screenshotImage = /*FIXME need to check ImageUtils::imageFromBase64(*/$screenshot64/*)*/;
+            $screenshotImage = /*FIXME need to check ImageUtils::imageFromBase64(*/
+                $screenshot64/*)*/
+            ;
             $scaleProvider = $this->updateScalingParams()->getScaleProvider($screenshotImage->width());
 
             $screenshotImage = ImageUtils::scaleImage($screenshotImage, $scaleProvider->getScaleRatio());
@@ -819,22 +823,8 @@ class Eyes extends EyesBase
             // Set overflow to "hidden".
             $eyesElement->setOverflow("hidden");
 
-            $p = $eyesElement->getLocation();
-
-            $d = $element->getSize();
-
-            $borderLeftWidth = $eyesElement->getBorderLeftWidth();
-            $borderRightWidth = $eyesElement->getBorderRightWidth();
-            $borderTopWidth = $eyesElement->getBorderTopWidth();
-            $borderBottomWidth = $eyesElement->getBorderBottomWidth();
-
-            $elementRegion = new Region(
-                $p->getX() + $borderLeftWidth,
-                $p->getY() + $borderTopWidth,
-                $d->getWidth() - $borderLeftWidth - $borderRightWidth,
-                $d->getHeight() - $borderTopWidth - $borderBottomWidth);
-
-            $this->logger->log("Element region: " . json_encode($elementRegion));
+            $elementRegion = $eyesElement->getClientAreaBounds();
+            $this->logger->log("Element region: $elementRegion");
 
             $this->regionToCheck = new RegionProvider();
             $this->regionToCheck->setRegion($elementRegion);
@@ -903,7 +893,7 @@ class Eyes extends EyesBase
         $pl = $element->getLocation();
         $ds = $element->getSize();
 
-        $elementRegion = new Region($pl->getX(), $pl->getY(), $ds->getWidth(), $ds->getHeight());
+        $elementRegion = Region::CreateFromLTWH($pl->getX(), $pl->getY(), $ds->getWidth(), $ds->getHeight());
 
         // Triggers are actually performed on the previous window.
         if ($this->lastScreenshot == null) {
@@ -972,7 +962,7 @@ class Eyes extends EyesBase
         $pl = $element->getLocation();
         $ds = $element->getSize();
 
-        $elementRegion = new Region($pl->getX(), $pl->getY(), $ds->getWidth(), $ds->getHeight());
+        $elementRegion = Region::CreateFromLTWH($pl->getX(), $pl->getY(), $ds->getWidth(), $ds->getHeight());
 
         $this->addTextTrigger($elementRegion, $text);
     }
@@ -1057,7 +1047,7 @@ class Eyes extends EyesBase
 //print_r($scaleProviderFactory); die();
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
                     $originProvider, $this->getPositionProvider(),
-                    $scaleProviderFactory, $this->cutProviderHandler->get(),
+                    $scaleProviderFactory,
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
                 $this->logger->log("Building screenshot object...");
 
@@ -1074,7 +1064,6 @@ class Eyes extends EyesBase
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
                     new ScrollPositionProvider($this->logger, $this->driver),
                     $this->positionProvider, $scaleProviderFactory,
-                    $this->cutProviderHandler->get(),
                     $this->getWaitBeforeScreenshots(), $screenshotFactory);
 
                 $this->driver->switchTo()->frames($originalFrame);

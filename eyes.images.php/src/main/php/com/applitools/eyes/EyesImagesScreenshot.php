@@ -1,4 +1,5 @@
 <?php
+
 namespace Applitools;
 
 use Applitools\Exceptions\CoordinatesTypeConversionException;
@@ -22,18 +23,15 @@ class EyesImagesScreenshot extends EyesScreenshot
     public function __construct(Image $image = null, Location $location = null)
     {
         parent::__construct($image);
-        if (!empty($image)) {
-            if (empty($location)) {
-                $location = new Location(0, 0);
-                $rectangleSize = new RectangleSize($image->width(), $image->height());
-                $this->bounds = new Region($location, $rectangleSize);                              
-            }
+        if (!empty($image) && empty($location)) {
+            $location = Location::getZero();
+            $rectangleSize = new RectangleSize($image->width(), $image->height());
+            $this->bounds = Region::CreateFromLocationAndSize($location, $rectangleSize);
         }
     }
 
     public function getSubScreenshot(Region $region, $coordinatesType, $throwIfClipped)
     {
-
         ArgumentGuard::notNull($region, "region");
         ArgumentGuard::notNull($coordinatesType, "coordinatesType");
 
@@ -59,12 +57,11 @@ class EyesImagesScreenshot extends EyesScreenshot
 
     protected function convertLocation(Location $location, $from, $to)
     {
-
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($from, "from");
         ArgumentGuard::notNull($to, "to");
 
-        $result = new Location($location);
+        $result = clone $location;
 
         if ($from == $to) {
             return $result;
@@ -103,20 +100,23 @@ class EyesImagesScreenshot extends EyesScreenshot
 
         if (!$this->bounds . contains($location)) {
             throw new OutOfBoundsException(sprintf(
-                "Location %s ('%s') is not visible in screenshot!", $location,$coordinatesType));
+                "Location %s ('%s') is not visible in screenshot!", $location, $coordinatesType));
         }
 
         return $this->convertLocation($location, CoordinatesType::CONTEXT_RELATIVE, CoordinatesType::SCREENSHOT_AS_IS);
     }
 
-    protected function getIntersectedRegion(Region $region, $originalCoordinatesType, $resultCoordinatesType)
+    /**
+     * @inheritdoc
+     */
+    public function getIntersectedRegion(Region $region, $originalCoordinatesType, $resultCoordinatesType)
     {
-
         ArgumentGuard::notNull($region, "region");
-        ArgumentGuard::notNull($originalCoordinatesType, "coordinatesType");
+        ArgumentGuard::notNull($originalCoordinatesType, "$originalCoordinatesType");
+        ArgumentGuard::notNull($resultCoordinatesType, "$resultCoordinatesType");
 
         if ($region->isEmpty()) {
-            return new Region($region);
+            return clone $region;
         }
 
         $intersectedRegion = $this->convertRegionLocation($region, $originalCoordinatesType, CoordinatesType::CONTEXT_RELATIVE);
