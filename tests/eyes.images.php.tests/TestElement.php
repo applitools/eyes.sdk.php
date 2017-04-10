@@ -1,0 +1,41 @@
+<?php
+
+use Applitools\Images\Eyes;
+use Applitools\RectangleSize;
+use Gregwar\Image\Image;
+use Applitools\Region;
+use Applitools\Location;
+
+class TestElement extends PHPUnit_Framework_TestCase
+{
+    public function testSearch()
+    {
+        $eyes = new Eyes();
+        $eyes->setApiKey($_SERVER['APPLITOOLS_API_KEY']);
+        $eyes->setHostOS("Windows7");
+        $eyes->setHostApp("My maxthon browser");
+
+        try {
+            // Start visual testing
+            $eyes->open("Applitools Test", "Sanity Test");
+
+            // Load page image and validate
+            $img = "yourpath/element-test/ElementTestPage/minions-800x500_2.jpg";
+            // Visual validation point #1
+            $eyes->checkImage($img, "Contact-us page");
+
+            // Load another page and validate
+            $img = "yourpath/element-test/ElementTestPage/minions-800x500.jpg";
+            // Visual validation point #2
+            $eyes->checkRegion($img, new Region(100,100,200,200), "Resources page");
+
+            $eyes->AddMouseTrigger("click", new Region(0,0,50,50), new Location(150, 150));
+
+            // End visual testing. Validate visual correctness.
+            $eyes->close();
+        } finally {
+            $eyes->abortIfNotClosed();
+        }
+    }
+}
+
