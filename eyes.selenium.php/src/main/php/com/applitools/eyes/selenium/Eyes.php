@@ -611,7 +611,7 @@ class Eyes extends EyesBase
             // FIXME - Scaling should be handled in a single place instead
 //FIXME meed to test print_r($this->driver->getFrameChain())            $this->updateScalingParams();
             $this->logger->log("Getting screenshot as base64..");
-            $screenshot64 = $this->driver->getScreenshotAs(/*OutputType::*/"BASE64");
+            $screenshot64 = $this->driver->getScreenshotAsBase64();
 
             $this->logger->log("Done! Creating image object...");
 
@@ -1060,7 +1060,7 @@ class Eyes extends EyesBase
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);
             } else {
                 $this->logger->verbose("Screenshot requested...");
-                $screenshot64 = $this->driver->getScreenshotAs("BASE64"/*OutputType:: FIXME it's not base 64*/);
+                $screenshot64 = $this->driver->getScreenshotAsBase64();
                 $this->logger->log("Done! Creating image object...");
                 $screenshotImage = $screenshot64;//FIXME ImageUtils::imageFromBase64($screenshot64);
                 $this->logger->log("Done!");
