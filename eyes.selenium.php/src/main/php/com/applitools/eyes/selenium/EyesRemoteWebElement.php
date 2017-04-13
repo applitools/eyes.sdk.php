@@ -85,7 +85,6 @@ class EyesRemoteWebElement extends RemoteWebElement
     public function getBounds()
     {
         $rect = $this->eyesDriver->executeScript(self::JS_GET_BOUNDING_CLIENT_RECT, array($this));
-        $this->logger->verbose(var_export($rect, true));
         return Region::CreateFromLTWH($rect['left'], $rect['top'], $rect['width'], $rect['height']);
     }
 

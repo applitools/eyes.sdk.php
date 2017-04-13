@@ -477,7 +477,7 @@ class Eyes extends EyesBase
 
         ArgumentGuard::notNull($element, "element");
 
-        $this->logger->verbose("CheckRegion(element, $matchTimeout, '$tag')");
+        $this->logger->verbose("checkRegionByElement(element, $matchTimeout, '$tag', $stitchContent)");
 
         if ($stitchContent) {
             $this->checkElement($element, $matchTimeout, $tag);
@@ -611,14 +611,11 @@ class Eyes extends EyesBase
             // FIXME - Scaling should be handled in a single place instead
 //FIXME meed to test print_r($this->driver->getFrameChain())            $this->updateScalingParams();
             $this->logger->log("Getting screenshot as base64..");
-            $screenshot64 = $this->driver->getScreenshotAs(/*OutputType::*/
-                "BASE64");
+            $screenshot64 = $this->driver->getScreenshotAs(/*OutputType::*/"BASE64");
 
             $this->logger->log("Done! Creating image object...");
 
-            $screenshotImage = /*FIXME need to check ImageUtils::imageFromBase64(*/
-                $screenshot64/*)*/
-            ;
+            $screenshotImage = /*FIXME need to check ImageUtils::imageFromBase64(*/$screenshot64/*)*/;
             $scaleProvider = $this->updateScalingParams()->getScaleProvider($screenshotImage->width());
 
             $screenshotImage = ImageUtils::scaleImage($screenshotImage, $scaleProvider->getScaleRatio());
@@ -633,15 +630,6 @@ class Eyes extends EyesBase
 
             $this->regionToCheck->setCoordinatesType(CoordinatesType::SCREENSHOT_AS_IS);
 
-            /*{FIXME need to check
-            public Region getRegion() {
-                    return screenshot.getFrameWindow();
-                }
-
-                public CoordinatesType getCoordinatesType() {
-                    return CoordinatesType.SCREENSHOT_AS_IS;
-                }
-            };*/
             parent::checkWindowBase($this->regionToCheck, $tag, false, $matchTimeout);
         } finally {
             $this->checkFrameOrElement = false;
@@ -776,7 +764,7 @@ class Eyes extends EyesBase
         ArgumentGuard::notNull($framePath, "framePath");
         ArgumentGuard::greaterThanZero($framePath['length'], "framePath.length");
         $this->logger->log(sprintf("checkFrame(framePath, %d, '%s')", $matchTimeout, $tag));
-        $originalFrameChain = $this->driver->getFrameChain();
+        //$originalFrameChain = $this->driver->getFrameChain();
         // We'll switch into the PARENT frame of the frame we want to check, and call check frame.
         $this->logger->log("Switching to parent frame according to frames path..");
 
