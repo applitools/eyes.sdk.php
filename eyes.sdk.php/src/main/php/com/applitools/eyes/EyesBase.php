@@ -3,6 +3,7 @@
 namespace Applitools;
 
 use Applitools\Exceptions\EyesException;
+use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
 use Facebook\WebDriver\WebDriver;
@@ -328,11 +329,12 @@ abstract class EyesBase
         $cursorInScreenshot = clone $cursor;
         // First we need to getting the cursor's coordinates relative to the
         // context (and not to the control).
-        $cursorInScreenshot->offset(null, null, $control->getLocation());
+        $loc = $control->getLocation();
+        $cursorInScreenshot->offset($loc->getX(), $loc->getY());
         try {
             $cursorInScreenshot = $this->lastScreenshot->getLocationInScreenshot(
                 $cursorInScreenshot, CoordinatesType::CONTEXT_RELATIVE);
-        } catch (EyesOutOfBoundsException $e) {
+        } catch (OutOfBoundsException $e) {
             $this->logger->verbose(sprintf("Ignoring %s (out of bounds)", $action));
             return;
         }
@@ -1055,7 +1057,7 @@ abstract class EyesBase
             $actionThread->start();
         }
 
-        $startTime = System::currentTimeMillis(); // microtime()??
+        $startTime = microtime() / 1000; //convert microseconds to milliseconds
 
         // A callback which will call getAppOutput
         $appOutputProvider = new AppOutputProviderRedeclared(); //FIXME need to check
@@ -1079,7 +1081,7 @@ abstract class EyesBase
             $this->logger->verbose("Making sure 'action' thread had finished...");
             try {
                 $actionThread->join(30000);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->verbose(
                     "Got interrupted while waiting for 'action' to finish!");
             }

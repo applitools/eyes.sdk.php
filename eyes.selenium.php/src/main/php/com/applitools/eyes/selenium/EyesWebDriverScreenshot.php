@@ -9,13 +9,10 @@ namespace Applitools;
 use Applitools\Exceptions\CoordinatesTypeConversionException;
 use Applitools\Exceptions\EyesDriverOperationException;
 use Applitools\Exceptions\OutOfBoundsException;
-use Facebook\WebDriver\WebDriverElement;
 use Gregwar\Image\Image;
 
 class EyesWebDriverScreenshot extends EyesScreenshot
 {
-
-    //private enum ScreenshotType {VIEWPORT, ENTIRE_FRAME} //FIXME
 
     private $logger; //Logger
     private $driver; //EyesWebDriver
@@ -53,6 +50,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         end($frames);
         while (prev($frames)) {
             $logger->verbose("Getting next frame...");
+            /** @var Frame $frame */
             $frame = current($frameIterator);
             $logger->verbose("Done!");
             $frameLocation = $frame->getLocation();
@@ -202,9 +200,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
             $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
 
-        if ($asIsSubScreenshotRegion->isEmpty() ||
-            ($throwIfClipped && ($asIsSubScreenshotRegion->getSize() != $region->getSize()))
-        ) {
+        if ($asIsSubScreenshotRegion->isEmpty() || ($throwIfClipped && !$asIsSubScreenshotRegion->getSize()->equals($region->getSize()))) {
             throw new OutOfBoundsException(sprintf(
                 "Region [%s, (%s)] is out of screenshot bounds [%s]",
                 json_encode($region), $coordinatesType, $this->frameWindow));

@@ -436,7 +436,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $this->frameChain;
     }
 
-    public function getScreenshotAs(/*OutputType<X>*/$xOutputType)
+    public function getScreenshotAsBase64()
     {
         $image64 = $this->driver->takeScreenshot();
         $screenshot64 = ImageUtils::imageFromBytes($image64);

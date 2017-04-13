@@ -120,7 +120,8 @@ class FrameChain
     {
         $result = new Location(0, 0);
         foreach ($this->frames as $frame) {
-            $result->offset($frame->getLocation());
+            $loc = $frame->getLocation();
+            $result->offset($loc->getX(), $loc->getY());
         }
         return $result;
     }
