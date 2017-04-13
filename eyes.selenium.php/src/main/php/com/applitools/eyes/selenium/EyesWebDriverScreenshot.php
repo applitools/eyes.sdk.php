@@ -152,7 +152,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 }
             }
             $this->frameLocationInScreenshot = $frameLocationInScreenshot;
-            $logger->verbose("Calculating frame window..");
+            $logger->verbose("Calculating frame window...");
             $this->frameWindow = Region::CreateFromLocationAndSize($frameLocationInScreenshot, $frameSize);
 /*
             //FIXME

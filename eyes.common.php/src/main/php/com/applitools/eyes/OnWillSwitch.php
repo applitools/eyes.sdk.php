@@ -3,7 +3,6 @@
 namespace Applitools;
 
 use Facebook\WebDriver\Remote\RemoteWebElement;
-use Facebook\WebDriver\WebDriver;
 
 interface OnWillSwitch {
     /**
@@ -15,8 +14,6 @@ interface OnWillSwitch {
      * @return
      */
     public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame, Logger $logger, EyesWebDriver $driver);
-
-
 }
 
 ?>

@@ -20,7 +20,7 @@ class TakesScreenshotImageProvider implements ImageProvider {
     public function getImage() {
         $this->logger->verbose("Getting screenshot as base64...");
         $screenshot64 = $this->tsInstance->getScreenshotAsBase64();
-        $this->logger->verbose("Done getting base64! Creating Image..");
+        $this->logger->verbose("Done getting base64! Creating Image...");
         return $screenshot64;
     }
 }

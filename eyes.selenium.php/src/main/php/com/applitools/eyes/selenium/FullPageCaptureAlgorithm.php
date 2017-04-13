@@ -151,7 +151,7 @@ class FullPageCaptureAlgorithm
 
         $stitchedImage = Image::create($entireSize->getWidth(), $entireSize->getHeight());
 
-        $this->logger->verbose("Done! Adding initial screenshot..");
+        $this->logger->verbose("Done! Adding initial screenshot...");
         // Starting with the screenshot we already captured at (0,0).
         $initialPart = clone $image;
         $this->logger->verbose("Initial part:(0,0)[{$initialPart->width()} x {$initialPart->height()}]");

@@ -2,15 +2,19 @@
 namespace Applitools;
 
 use Facebook\WebDriver\Remote\RemoteWebElement;
-use Facebook\WebDriver\WebDriver;
 
 class OnWillSwitchSelenium implements OnWillSwitch {
-    private $frameChain; //FrameChain FIXME
+
+    /** @var FrameChain */
+    private $frameChain;
 
     public function __construct(FrameChain $frameChain){
-        $this->frameChain = $frameChain; //FIXME need to check
+        $this->frameChain = $frameChain;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame = null, Logger $logger, EyesWebDriver $driver) {
         $logger->verbose("willSwitchToFrame()");
 
