@@ -98,7 +98,7 @@ class EyesImagesScreenshot extends EyesScreenshot
         $location = $this->convertLocation($location, $coordinatesType,
             CoordinatesType::CONTEXT_RELATIVE);
 
-        if (!$this->bounds . contains($location)) {
+        if (!$this->bounds->containsLocation($location)) {
             throw new OutOfBoundsException(sprintf(
                 "Location %s ('%s') is not visible in screenshot!", $location, $coordinatesType));
         }

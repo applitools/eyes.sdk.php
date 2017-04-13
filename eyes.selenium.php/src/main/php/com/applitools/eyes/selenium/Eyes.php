@@ -357,7 +357,7 @@ class Eyes extends EyesBase
             $timeout = $deadline + self::RESPONSE_TIME_DEFAULT_DIFF_FROM_DEADLINE;
         }
         if (!empty($viewportSize)) {
-            $this->setViewportSize($driver, $viewportSize);
+            $this->setViewportSize($viewportSize, $driver);
         }
         $this->open($driver, $appName, $testName, SessionType::PROGRESSION);
         $runnableAction = null;
@@ -982,7 +982,7 @@ class Eyes extends EyesBase
      *
      * {@inheritDoc}
      */
-    protected function setViewportSize(WebDriver $driver = null, RectangleSize $size)
+    protected function setViewportSize(RectangleSize $size, WebDriver $driver = null)
     {
         if (!empty($driver)) {
             ArgumentGuard::notNull($driver, "driver");
