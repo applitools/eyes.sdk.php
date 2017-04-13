@@ -7,16 +7,18 @@ class Logger
     /** @var LogHandler */
     private $logHandler;
 
-    public function __construct(LogHandler $handler = null) {
-        if(empty($handler)){
+    public function __construct(LogHandler $handler = null)
+    {
+        if (empty($handler)) {
             $this->logHandler = new NullLogHandler();
-        }else{
+        } else {
             $this->logHandler = $handler;
         }
     }
 
     public function log($message)
-    { $aa = $this->getPrefix() . $message;
+    {
+        $aa = $this->getPrefix() . $message;
         $this->logHandler->onMessage(false, $aa);
     }
 
@@ -24,7 +26,8 @@ class Logger
     /**
      * @return LogHandler The currently set log handler.
      */
-    public function getLogHandler() {
+    public function getLogHandler()
+    {
         return $this->logHandler;
     }
 
@@ -32,12 +35,14 @@ class Logger
     {
         $this->logHandler->onMessage(true, $this->getPrefix() . $message);
     }
+
     /**
      * Sets the log handler.
      * @param LogHandler $handler The log handler to set. If you want a log handler which
      *                does nothing, use {@link Applitools\NullLogHandler}.
      */
-    public function setLogHandler(LogHandler $handler) {
+    public function setLogHandler(LogHandler $handler)
+    {
         ArgumentGuard::notNull($handler, "handler");
         $this->logHandler = $handler;
     }
@@ -46,13 +51,12 @@ class Logger
      *
      * @return string The name of the method which called the logger, if possible, or an empty string.
      */
-    private function getPrefix() {
-
-
+    private function getPrefix()
+    {
         $deb = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
         $prefix = "";
-        if(count($deb) >= 3){
-            $prefix = "caller->" . $deb[2]['function']." ";
+        if (count($deb) >= 3) {
+            $prefix = "caller: " . $deb[2]['class'] . '->' . $deb[2]['function'] . " ";
         }
 
         return $prefix;
