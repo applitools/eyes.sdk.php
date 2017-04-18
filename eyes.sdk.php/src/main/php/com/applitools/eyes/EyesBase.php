@@ -49,6 +49,9 @@ abstract class EyesBase
     /** @var  EyesScreenshot */
     protected $lastScreenshot;
 
+    /** @var  DebugScreenshotsProvider */
+    protected $debugScreenshotsProvider;
+
     /** @var SimplePropertyHandler */
     protected $scaleProviderHandler;
 
@@ -98,6 +101,7 @@ abstract class EyesBase
         $this->saveFailedTests = false;
         $this->agentId = null;
         $this->lastScreenshot = null;
+        $this->debugScreenshotsProvider = new NullDebugScreenshotProvider();
     }
 
     /**
@@ -796,6 +800,62 @@ abstract class EyesBase
     {
         return $this->scaleProviderHandler->get()->getScaleRatio();
     }
+
+    /**
+     * @param $saveDebugScreenshots If true, will save all screenshots to local directory.
+     */
+    public function setSaveDebugScreenshots($saveDebugScreenshots) {
+        $prev = $this->debugScreenshotsProvider;
+        if ($saveDebugScreenshots) {
+            $this->debugScreenshotsProvider = new FileDebugScreenshotsProvider();
+        } else {
+            $this->debugScreenshotsProvider = new NullDebugScreenshotProvider();
+        }
+        $this->debugScreenshotsProvider->setPrefix($prev->getPrefix());
+        $this->debugScreenshotsProvider->setPath($prev->getPath());
+    }
+
+    /**
+     *
+     * @return True if screenshots saving enabled.
+     */
+    public function getSaveDebugScreenshots() {
+        return !($this->debugScreenshotsProvider instanceof NullDebugScreenshotProvider);
+    }
+
+
+    /**
+     * @param $pathToSave Path where you want to save the debug screenshots.
+     */
+
+    public function setDebugScreenshotsPath($pathToSave) {
+        $this->debugScreenshotsProvider->setPath($pathToSave);
+    }
+
+    /**
+     *
+     * @return The path where you want to save the debug screenshots.
+     */
+    public function getDebugScreenshotsPath() {
+        return $this->debugScreenshotsProvider->getPath();
+    }
+
+    /**
+     * @param $prefix The prefix for the screenshots' names.
+     */
+    public function setDebugScreenshotsPrefix($prefix) {
+        $this->debugScreenshotsProvider->setPrefix($prefix);
+    }
+
+    /**
+     *
+     * @return The prefix for the screenshots' names.
+     */
+    public function getDebugScreenshotsPrefix() {
+        return $this->debugScreenshotsProvider->getPrefix();
+    }
+
+
 
     /**
      * Set whether or not failed tests are saved by default.

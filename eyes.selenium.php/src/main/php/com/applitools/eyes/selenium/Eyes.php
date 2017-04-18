@@ -1046,7 +1046,7 @@ class Eyes extends EyesBase
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
                     $originProvider, $this->getPositionProvider(),
                     $scaleProviderFactory,
-                    $this->getWaitBeforeScreenshots(), $screenshotFactory);
+                    $this->getWaitBeforeScreenshots(), $this->debugScreenshotsProvider, $screenshotFactory);
                 $this->logger->log("Building screenshot object...");
 
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
@@ -1062,7 +1062,7 @@ class Eyes extends EyesBase
                 $fullPageImage = $algo->getStitchedRegion($imageProvider, $regionProvider,
                     new ScrollPositionProvider($this->logger, $this->driver),
                     $this->positionProvider, $scaleProviderFactory,
-                    $this->getWaitBeforeScreenshots(), $screenshotFactory);
+                    $this->getWaitBeforeScreenshots(), $this->debugScreenshotsProvider, $screenshotFactory);
 
                 $this->driver->switchTo()->frames($originalFrame);
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);
@@ -1071,9 +1071,18 @@ class Eyes extends EyesBase
                 $screenshot64 = $this->driver->getScreenshotAsBase64();
                 $this->logger->log("Done! Creating image object...");
                 $screenshotImage = $screenshot64;
+
+                $this->debugScreenshotsProvider->save($screenshotImage, "original");
+
                 $this->logger->log("Done!");
                 //FIXME
                 //$screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
+
+                $screenshotImage = ImageUtils::scaleImage($screenshotImage, $this->scaleProvider);
+                $this->debugScreenshotsProvider->save($screenshotImage, "scaled");
+                $screenshotImage = $this->cutProviderHandler->get()->cut($screenshotImage);
+                $this->debugScreenshotsProvider->save($screenshotImage, "cut");
+
                 $this->logger->verbose("Creating screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
             }
