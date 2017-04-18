@@ -246,10 +246,12 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $this->driver->getWindowHandle();
     }
 
-    
+    /**
+     * @return EyesTargetLocator
+     */
     public function switchTo() {
         $this->logger->verbose("switchTo()");
-        $willSwitch = new OnWillSwitchSelenium($this->frameChain); //FIXME need to check
+        $willSwitch = new OnWillSwitchSelenium($this->frameChain, $this->logger, $this); //FIXME need to check
         return new EyesTargetLocator($this->logger, $this, $this->driver->switchTo(), $willSwitch);
     }
     

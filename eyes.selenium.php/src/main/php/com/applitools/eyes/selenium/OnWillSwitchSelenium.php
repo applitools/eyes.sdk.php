@@ -8,27 +8,39 @@ class OnWillSwitchSelenium implements OnWillSwitch {
     /** @var FrameChain */
     private $frameChain;
 
-    public function __construct(FrameChain $frameChain){
+    /** @var EyesWebDriver */
+    private $driver;
+
+    /** @var  Logger */
+    private $logger;
+
+    /** @var ScrollPositionProvider */
+    private $scrollPositionProvider;
+
+    public function __construct(FrameChain $frameChain, Logger $logger, EyesWebDriver $driver){
         $this->frameChain = $frameChain;
+        $this->logger = $logger;
+        $this->driver = $driver;
+        $this->scrollPositionProvider = new ScrollPositionProvider($this->logger, $this->driver);
     }
 
     /**
      * @inheritdoc
      */
-    public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame = null, Logger $logger, EyesWebDriver $driver) {
-        $logger->verbose("willSwitchToFrame()");
+    public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame = null) {
+        $this->logger->verbose("willSwitchToFrame($targetType,...)");
 
         switch($targetType) {
             case TargetType::DEFAULT_CONTENT:
-                $logger->verbose("Default content.");
+                $this->logger->verbose("Default content.");
                 $this->frameChain->clear();
                 break;
             case TargetType::PARENT_FRAME:
-                $logger->verbose("Parent frame.");
+                $this->logger->verbose("Parent frame.");
                 $this->frameChain->pop();
                 break;
             default: // Switching into a frame
-                $logger->verbose("Frame");
+                $this->logger->verbose("Frame");
     
                 $frameId = $targetFrame->getId();
 
@@ -37,19 +49,17 @@ class OnWillSwitchSelenium implements OnWillSwitch {
                 if ($targetFrame instanceof EyesRemoteWebElement) {
                     $eyesFrame = $targetFrame;
                 } else {
-                    $eyesFrame = new EyesRemoteWebElement($logger, $driver, $targetFrame);
+                    $eyesFrame = new EyesRemoteWebElement($this->logger, $this->driver, $targetFrame);
                 }
 
                 $rect = $eyesFrame->getClientAreaBounds();
                 $pl = $rect->getLocation();
                 $innerSize = $rect->getSize();
 
-                $scrollPositionProvider = new ScrollPositionProvider($logger, $driver);
-
-                $frame = new Frame($logger, $targetFrame, $frameId, $pl, $innerSize, $scrollPositionProvider->getCurrentPosition());
+                $frame = new Frame($this->logger, $targetFrame, $frameId, $pl, $innerSize, $pl);//$currentLocation);
 
                 $this->frameChain->push($frame);
         }
-        $logger->verbose("Done!");
+        $this->logger->verbose("Done!");
     }
 }

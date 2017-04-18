@@ -9,8 +9,11 @@ use Facebook\WebDriver\JavaScriptExecutor;
 class ScrollPositionProvider implements PositionProvider
 {
 
-    protected $logger; //Logger
-    protected $executor; //JavascriptExecutor
+    /** @var Logger */
+    protected $logger;
+
+    /** @var JavaScriptExecutor */
+    protected $executor;
 
     public function __construct(Logger $logger, JavascriptExecutor $executor)
     {
@@ -58,14 +61,16 @@ class ScrollPositionProvider implements PositionProvider
         $this->logger->verbose("Entire size: $result");
         return $result;
     }
-    
-    public function getState(){
+
+    public function getState()
+    {
         return new ScrollPositionMemento($this->getCurrentPosition());
     }
 
-    public function restoreState(PositionMemento $state = null) {
-        if(empty($state)){
-            $state = new ScrollPositionMemento(new Location(0,0));
+    public function restoreState(PositionMemento $state = null)
+    {
+        if (empty($state)) {
+            $state = new ScrollPositionMemento(new Location(0, 0));
         }
         $this->setPosition(new Location($state->getX(), $state->getY()));
     }

@@ -221,7 +221,6 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         return $result;
     }
 
-
     /**
      * @param Location $location The location to convert.
      * @param string $from Origin CoordinatesType.
@@ -234,6 +233,10 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($from, "from");
         ArgumentGuard::notNull($to, "to");
+
+        $this->logger->verbose("convertLocation ($location, $from, $to)");
+        $this->logger->verbose("scroll position: $this->scrollPosition");
+        $this->logger->verbose("frame location in screenshot: $this->frameLocationInScreenshot");
 
         $result = clone $location;
 
@@ -248,13 +251,11 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         // screenshot as-is might be different, e.g.,
         // if it is actually a sub-screenshot of a region).
         if ($this->frameChain->size() == 0 &&
-            $this->screenshotType == ScreenshotType::ENTIRE_FRAME
-        ) {
-            if (($from == CoordinatesType::CONTEXT_RELATIVE
-                    || $from == CoordinatesType::CONTEXT_AS_IS)
-                && $to == CoordinatesType::SCREENSHOT_AS_IS
-            ) {
+            $this->screenshotType == ScreenshotType::ENTIRE_FRAME) {
+            $this->logger->verbose("frameChain size: {$this->frameChain->size()}");
 
+            if (($from == CoordinatesType::CONTEXT_RELATIVE || $from == CoordinatesType::CONTEXT_AS_IS) &&
+                $to == CoordinatesType::SCREENSHOT_AS_IS) {
                 // If this is not a sub-screenshot, this will have no effect.
                 $result->offset($this->frameLocationInScreenshot->getX(), $this->frameLocationInScreenshot->getY());
 
@@ -263,6 +264,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
 
                 $result->offset(-$this->frameLocationInScreenshot->getX(), -$this->frameLocationInScreenshot->getY());
             }
+
+            $this->logger->verbose("result (inside frame): $result");
+
             return $result;
         }
 
@@ -286,8 +290,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 switch ($to) {
                     case CoordinatesType::SCREENSHOT_AS_IS:
                         // First, convert context-relative to context-as-is.
-                        $result->offset(-$this->scrollPosition->getX(),
-                            -$this->scrollPosition->getY());
+                        // $result->offset(-$this->scrollPosition->getX(), -$this->scrollPosition->getY());
                         // Now convert context-as-is to screenshot-as-is.
                         $result->offset($this->frameLocationInScreenshot->getX(), $this->frameLocationInScreenshot->getY());
                         break;
@@ -305,16 +308,13 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 switch ($to) {
                     case CoordinatesType::CONTEXT_RELATIVE:
                         // First convert to context-as-is.
-                        $result->offset(-$this->frameLocationInScreenshot->getX(),
-                            -$this->frameLocationInScreenshot->getY());
+                        $result->offset(-$this->frameLocationInScreenshot->getX(), -$this->frameLocationInScreenshot->getY());
                         // Now convert to context-relative.
-                        $result->offset($this->scrollPosition->getX(),
-                            $this->scrollPosition->getY());
+                        $result->offset($this->scrollPosition->getX(), $this->scrollPosition->getY());
                         break;
 
                     case CoordinatesType::CONTEXT_AS_IS:
-                        $result->offset(-$this->frameLocationInScreenshot->getX(),
-                            -$this->frameLocationInScreenshot->getY());
+                        $result->offset(-$this->frameLocationInScreenshot->getX(), -$this->frameLocationInScreenshot->getY());
                         break;
 
                     default:
@@ -325,6 +325,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             default:
                 throw new CoordinatesTypeConversionException($from, $to);
         }
+
+        $this->logger->verbose("result: $result");
+
         return $result;
     }
 

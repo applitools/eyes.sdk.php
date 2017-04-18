@@ -546,6 +546,11 @@ class Eyes extends EyesBase
 
         $targetFrame = $this->findElementMixed($frame);
 
+        $this->logger->log("Switching to frame with name/id: '{$targetFrame->getID()}' ...");
+
+        $locationAsPoint = $targetFrame->getLocation();
+        $this->regionVisibilityStrategy->moveToRegion($this->getPositionProvider(), new Location($locationAsPoint->getX(), $locationAsPoint->getY()));
+
         $this->driver->switchTo()->frame($targetFrame);
 
         $targetElement = $this->findElementMixed($element);
@@ -558,6 +563,8 @@ class Eyes extends EyesBase
 
         $this->logger->log("Switching back to parent frame");
         $this->driver->switchTo()->parentFrame();
+
+        $this->regionVisibilityStrategy->returnToOriginalPosition($this->getPositionProvider());
         $this->logger->log("Done!");
     }
 
@@ -574,7 +581,7 @@ class Eyes extends EyesBase
                 $this->logger->log("Failed to extract device pixel ratio! Using default.");
                 $this->devicePixelRatio = self::DEFAULT_DEVICE_PIXEL_RATIO;
             }
-            $this->logger->log(sprintf("Device pixel ratio: %f", $this->devicePixelRatio));
+            $this->logger->log("Device pixel ratio: {$this->devicePixelRatio}");
 
             $this->logger->log("Setting scale provider..");
             try {
@@ -671,6 +678,9 @@ class Eyes extends EyesBase
 
         $this->logger->log("Switching back to parent frame");
         $this->driver->switchTo()->parentFrame();
+
+        $this->regionVisibilityStrategy->returnToOriginalPosition($this->getPositionProvider());
+
         $this->logger->log("Done!");
     }
 
@@ -802,6 +812,11 @@ class Eyes extends EyesBase
         }
 
         $originalPositionProvider = $this->getPositionProvider();
+        $scrollPositionProvider = new ScrollPositionProvider($this->logger, $this->driver);
+        $originalScrollPosition = $scrollPositionProvider->getCurrentPosition();
+        $loc = $eyesElement->getLocation();
+        $scrollPositionProvider->setPosition(new Location($loc->getX(), $loc->getY()));
+
         try {
             $this->checkFrameOrElement = true;
             $this->setPositionProvider(new ElementPositionProvider($this->logger, $this->driver, $element));
@@ -823,6 +838,7 @@ class Eyes extends EyesBase
             }
 
             $this->checkFrameOrElement = false;
+            $scrollPositionProvider->setPosition($originalScrollPosition);
             $this->setPositionProvider($originalPositionProvider);
             $this->regionToCheck = null;
         }

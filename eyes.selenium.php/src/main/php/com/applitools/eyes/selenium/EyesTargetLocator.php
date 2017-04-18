@@ -85,7 +85,7 @@ class EyesTargetLocator implements WebDriverTargetLocator
 
         if ($chain->size() > 0) {
             $this->logger->verbose("Making preparations...");
-            $this->onWillSwitch->willSwitchToFrame(TargetType::PARENT_FRAME, null, $this->logger, $this->driver);
+            $this->onWillSwitch->willSwitchToFrame(TargetType::PARENT_FRAME);
             $this->logger->verbose("Done! Switching to parent frame...");
             if ($chain->size() > 0) {
                 $this->logger->verbose("switching to current frame. chain size: {$chain->size()}");
@@ -122,7 +122,7 @@ class EyesTargetLocator implements WebDriverTargetLocator
                     $this->logger->verbose("Scrolling by parent scroll position..");
                     $this->scrollPosition->setPosition($frame->getParentScrollPosition());
                     $this->logger->verbose("Done! Switching to frame...");
-                    $this->driver->switchTo()->frame($frame->getReference());
+                    $this->frame($frame->getReference());
                     $this->logger->verbose("Done!");
                 }
             }
@@ -131,7 +131,7 @@ class EyesTargetLocator implements WebDriverTargetLocator
             $this->logger->verbose("EyesTargetLocator.frames(framesPath)");
             foreach ($framesPath as $frameNameOrId) {
                 $this->logger->verbose("Switching to frame...");
-                $this->driver->switchTo()->frame($frameNameOrId);
+                $this->frame($frameNameOrId);
                 $this->logger->verbose("Done!");
             }
         }
@@ -158,7 +158,7 @@ class EyesTargetLocator implements WebDriverTargetLocator
         $this->logger->verbose("EyesTargetLocator.defaultContent()");
         if ($this->driver->getFrameChain()->size() != 0) {
             $this->logger->verbose("Making preparations..");
-            $this->onWillSwitch->willSwitchToFrame(TargetType::DEFAULT_CONTENT, null, $this->logger, $this->driver);
+            $this->onWillSwitch->willSwitchToFrame(TargetType::DEFAULT_CONTENT, null);
             $this->logger->verbose("Done! Switching to default content..");
             $this->targetLocator->defaultContent();
             $this->logger->verbose("Done!");
