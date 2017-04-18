@@ -739,6 +739,9 @@ abstract class EyesBase
             $scaleProvider = new NullScaleProvider();
             $this->scaleProviderHandler->set($scaleProvider);
             $this->setScaleMethod(ScaleMethod::getDefault());
+
+            $this->ensureRunningSession();
+
             $this->isOpen = true;
         } catch (EyesException $e) {
             $this->logger->log($e->getMessage());
@@ -857,8 +860,6 @@ abstract class EyesBase
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
         $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
-
-        $this->ensureRunningSession();
 
         $this->logger->log("Calling match window...");
 
