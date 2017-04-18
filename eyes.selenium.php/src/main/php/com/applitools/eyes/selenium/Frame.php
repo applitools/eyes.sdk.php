@@ -44,9 +44,7 @@ class Frame {
         ArgumentGuard::notNull($size, "size");
         ArgumentGuard::notNull($parentScrollPosition, "parentScrollPosition");
 
-        $logger->verbose(sprintf(
-                "Frame(logger, reference, %s, %s, %s, %s)", $frameId,
-                json_encode($location), json_encode($size), json_encode($parentScrollPosition)));
+        $logger->verbose("Frame(logger, reference, $frameId, $location, $size, $parentScrollPosition)");
 
         $this->logger = $logger;
         $this->reference = $reference;

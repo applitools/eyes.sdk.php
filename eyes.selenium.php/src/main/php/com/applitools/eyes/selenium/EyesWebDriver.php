@@ -28,7 +28,9 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
     private $driver; //RemoteWebDriver
     private $touch; //TouchScreen
     private $elementsIds; //Map<String, WebElement>
-    private $frameChain; //FrameChain
+
+    /** @var FrameChain */
+    private $frameChain;
     private $rotation; //ImageRotation
     private $defaultContentViewportSize; //RectangleSize
 

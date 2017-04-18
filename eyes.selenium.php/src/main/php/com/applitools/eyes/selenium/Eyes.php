@@ -38,10 +38,12 @@ class Eyes extends EyesBase
     protected $driver;
     private $doNotGetTitle;
 
-
     private $forceFullPageScreenshot;
     private $checkFrameOrElement;
-    private $regionToCheck; //RegionProvider
+
+    /** @var RegionProvider */
+    private $regionToCheck;
+
     private $hideScrollbars;
     private $rotation; //ImageRotation
     private $devicePixelRatio;
@@ -245,8 +247,7 @@ class Eyes extends EyesBase
      * @return EyesWebDriver|WebDriver     A wrapped WebDriver which enables Eyes trigger recording and frame handling.
      * @throws EyesException
      */
-    public function open(WebDriver $driver, $appName, $testName,
-                         RectangleSize $viewportSize = null, $sessionType = null)
+    public function open(WebDriver $driver, $appName, $testName, RectangleSize $viewportSize = null, $sessionType = null)
     {
         if ($this->getIsDisabled()) {
             $this->logger->verbose("Ignored");
@@ -648,7 +649,7 @@ class Eyes extends EyesBase
     public function checkFrame($frameNameOrId, $matchTimeout, $tag)
     {
         if ($this->getIsDisabled()) {
-            $this->logger->log("CheckFrame('$frameNameOrId', $matchTimeout, '$tag'): Ignored");
+            $this->logger->log("checkFrame('$frameNameOrId', $matchTimeout, '$tag'): Ignored");
             return;
         }
         if (empty($matchTimeout)) {
@@ -1096,7 +1097,7 @@ class Eyes extends EyesBase
     {
         $userAgent = $this->driver->getUserAgent();
         if ($userAgent != null) {
-            return "useragent:" . $userAgent;
+            return "useragent: $userAgent";
         }
 
         return null;

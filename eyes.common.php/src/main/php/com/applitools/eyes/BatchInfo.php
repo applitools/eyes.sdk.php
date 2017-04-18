@@ -16,8 +16,8 @@ class BatchInfo
     /**
      * Creates a new BatchInfo instance.
      *
-     * @param name      Name of batch or {@code null} if anonymous.
-     * @param startedAt Batch start time
+     * @param string $name      Name of batch or {@code null} if anonymous.
+     * @param mixed $startedAt Batch start time
      */
     public function __construct($name, $startedAt = null)
     {
@@ -27,9 +27,8 @@ class BatchInfo
         $this->startedAt = (empty($startedAt) ? date("Y-m-d\TH:i:s\Z") : $startedAt);
     }
 
-
     /**
-     * @return The name of the batch or {@code null} if anonymous.
+     * @return string The name of the batch or {@code null} if anonymous.
      */
     public function getName()
     {
@@ -37,7 +36,7 @@ class BatchInfo
     }
 
     /**
-     * @return The id of the current batch.
+     * @return int The id of the current batch.
      */
     public function getId()
     {
@@ -47,7 +46,7 @@ class BatchInfo
     /**
      * Sets a unique identifier for the batch. Sessions with batch info which
      * includes the same ID will be grouped together.
-     * @param id The batch's ID
+     * @param string $id The batch's ID
      */
     public function setId($id)
     {
@@ -56,16 +55,16 @@ class BatchInfo
     }
 
     /**
-     * @return The batch start date and time in ISO 8601 format.
+     * @return mixed The batch start date and time in ISO 8601 format.
      */
     public function getStartedAt()
     {
         return $this->startedAt;
     }
 
-    public function toString()
+    public function __toString()
     {
-        return "'" . $this->name . "' - " . $this->startedAt;
+        return "'$this->name' - $this->startedAt";
     }
 
     public function getAsArray(){

@@ -63,14 +63,14 @@ class EyesTargetLocator implements WebDriverTargetLocator
             $frameElement = $frames[0];
         } else if (is_string($selector)) {
             $nameOrId = $selector;
-            $this->logger->verbose(sprintf("EyesTargetLocator.frame('%s')", json_encode($nameOrId)));
+            $this->logger->verbose("EyesTargetLocator->frame('$nameOrId')");
             $frameElement = Eyes::findElement($this->driver, $nameOrId);
         } else {
             throw new \InvalidArgumentException("Can't handle selector of type " . get_class($selector));
         }
 
-        $this->logger->verbose("Making preparations..");
-        $this->onWillSwitch->willSwitchToFrame(TargetType::FRAME, $frameElement, $this->logger, $this->driver);
+        $this->logger->verbose("Making preparations...");
+        $this->onWillSwitch->willSwitchToFrame(TargetType::FRAME, $frameElement);
         $this->logger->verbose("Done! Switching to frame...");
         $this->targetLocator->frame($frameElement);
         $this->logger->verbose("Done!");

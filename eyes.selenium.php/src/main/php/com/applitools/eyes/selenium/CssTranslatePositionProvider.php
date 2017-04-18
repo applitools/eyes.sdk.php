@@ -9,9 +9,14 @@ use Facebook\WebDriver\JavaScriptExecutor;
  */
 class CssTranslatePositionProvider implements PositionProvider {
 
-    private $logger; //Logger
-    private $executor; //JavascriptExecutor
-    private $lastSetPosition; //Location cache.
+    /** @var Logger */
+    private $logger;
+
+    /** @var JavaScriptExecutor */
+    private $executor;
+
+    /** @var Location */
+    private $lastSetPosition;
 
     public function __construct(Logger $logger, JavascriptExecutor $executor) {
         ArgumentGuard::notNull($logger, "logger");
@@ -41,8 +46,7 @@ class CssTranslatePositionProvider implements PositionProvider {
     }
 
     public function getState() {
-        return new CssTranslatePositionMemento(
-                EyesSeleniumUtils::getCurrentTransform($this->executor));
+        return new CssTranslatePositionMemento(EyesSeleniumUtils::getCurrentTransform($this->executor));
     }
 
     public function restoreState(PositionMemento $state = null) {

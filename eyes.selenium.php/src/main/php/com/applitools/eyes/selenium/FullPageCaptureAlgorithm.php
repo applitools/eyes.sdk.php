@@ -34,8 +34,7 @@ class FullPageCaptureAlgorithm
      * @param PositionProvider $positionProvider A provider of the scrolling implementation.
      * @param ScaleProviderFactory $scaleProviderFactory The provider which performs the necessary scaling.
      * @param int $waitBeforeScreenshots Time to wait before each screenshot (milliseconds).
-     * @param EyesScreenshotFactory $screenshotFactory The factory to use for creating screenshots
-     *                          from the images.
+     * @param EyesScreenshotFactory $screenshotFactory The factory to use for creating screenshots from the images.
      * @return Image
      * @throws EyesException
      */
@@ -101,7 +100,7 @@ class FullPageCaptureAlgorithm
         // the screenshot (e.g., when body width/height are set to 100%, and
         // an internal div is set to value which is larger than the viewport).
         $regionInScreenshot->intersect(Region::CreateFromLTWH(0, 0, $image->width(), $image->height()));
-        $this->logger->verbose("Region after intersect: $regionInScreenshot");
+        $this->logger->verbose("Region after intersect: $regionInScreenshot ; image size: {$image->width()}x{$image->height()}");
 
         $partWidth = $image->width();
         $partHeight = $image->height();

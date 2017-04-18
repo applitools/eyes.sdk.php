@@ -107,8 +107,8 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param driver The driver for which to check if it represents a mobile device.
-     * @return {@code true} if the platform running the test is a mobile platform. {@code false} otherwise.
+     * @param WebDriver $driver The driver for which to check if it represents a mobile device.
+     * @return bool {@code true} if the platform running the test is a mobile platform. {@code false} otherwise.
      */
     public static function isMobileDevice(WebDriver $driver)
     {
@@ -116,9 +116,9 @@ class EyesSeleniumUtils
     }
 
     /**
-     * @param driver The driver for which to check the orientation.
-     * @return {@code true} if this is a mobile device and is in landscape
-     * orientation. {@code false} otherwise.
+     * @param WebDriver $driver The driver for which to check the orientation.
+     * @return bool if this is a mobile device and is in landscape if this is a mobile device and is in landscape
+     * @throws EyesDriverOperationException
      */
     public static function isLandscapeOrientation(WebDriver $driver)
     {
@@ -144,7 +144,7 @@ class EyesSeleniumUtils
                 }
 
                 return $orientation == ScreenOrientation::LANDSCAPE;
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 throw new EyesDriverOperationException(
                     "Failed to get orientation!", $e);
             }
@@ -298,7 +298,7 @@ class EyesSeleniumUtils
      */
     public static function setViewportSize(Logger $logger, WebDriver $driver, RectangleSize $size)
     {
-        $logger->log("setViewportSize(" . json_encode($size) . ")");
+        $logger->log("setViewportSize($size)");
 
         ArgumentGuard::notNull($size, "size");
 
@@ -308,7 +308,7 @@ class EyesSeleniumUtils
 
         $actualViewportSize = self::extractViewportSize($logger, $driver);
 
-        $logger->log("Initial viewport size:" . json_encode($actualViewportSize));
+        $logger->log("Initial viewport size: $actualViewportSize");
 
         // If the viewport size is already the required size
         if ($size->getWidth() == $actualViewportSize->getWidth() &&
@@ -319,26 +319,26 @@ class EyesSeleniumUtils
         }
 
         $browserSize = $driver->manage()->window()->getSize();
-        $logger->log("Current browser size: " . json_encode($browserSize));
+        $logger->log("Current browser size: {$browserSize->getWidth()}x{$browserSize->getHeight()}");
         $requiredBrowserSize = new WebDriverDimension($browserSize->getWidth() + ($size->getWidth() - $actualViewportSize->getWidth()),
             $browserSize->getHeight() + ($size->getHeight() - $actualViewportSize->getHeight()));
-        $logger->log("Trying to set browser size to: " . json_encode($requiredBrowserSize));
+        $logger->log("Trying to set browser size to: {$requiredBrowserSize->getWidth()}x{$requiredBrowserSize->getHeight()}");
 
         $retriesLeft = self::RETRIES;
         do {
             $driver->manage()->window()->setSize($requiredBrowserSize);
             GeneralUtils::sleep(self::SLEEP);
             $browserSize = $driver->manage()->window()->getSize();
-            $logger->log("Current browser size: " . json_encode($browserSize));
-        } while (--$retriesLeft > 0 && $browserSize != $requiredBrowserSize);
+            $logger->log("Current browser size: {$browserSize->getWidth()}x{$browserSize->getHeight()}");
+        } while (--$retriesLeft > 0 && !$browserSize->equals($requiredBrowserSize));
 
-        if ($browserSize != $requiredBrowserSize) {
+        if (!$browserSize->equals($requiredBrowserSize)) {
             throw new EyesException("Failed to set browser size!");
         }
 
         $actualViewportSize = self::extractViewportSize($logger, $driver);
-        $logger->log("Current viewport size: " . json_encode($actualViewportSize));
-        if ($actualViewportSize != $size) {
+        $logger->log("Current viewport size: $actualViewportSize");
+        if (!$actualViewportSize->equals($size)) {
             // Additional attempt. This Solves the "maximized browser" bug
             // (border size for maximized browser sometimes different than
             // non-maximized, so the original browser size calculation is
@@ -348,28 +348,28 @@ class EyesSeleniumUtils
             $requiredBrowserSize = new WebDriverDimension($browserSize->getWidth() + ($size->getWidth() - $actualViewportSize->getWidth()),
                 $browserSize->getHeight() + ($size->getHeight() - $actualViewportSize->getHeight()));
 
-            $logger->log("Browser size: " . json_encode($browserSize));
-            $logger->log("Required browser size: " . json_encode($requiredBrowserSize));
+            $logger->log("Browser size: {$browserSize->getWidth()}x{$browserSize->getHeight()}");
+            $logger->log("Required browser size: {$requiredBrowserSize->getWidth()}x{$requiredBrowserSize->getHeight()}");
 
             $retriesLeft = self::RETRIES;
             do {
                 $driver->manage()->window()->setSize($requiredBrowserSize);
                 GeneralUtils::sleep(self::SLEEP);
                 $actualViewportSize = self::extractViewportSize($logger, $driver);
-                $logger->log("Browser size: " . json_encode($driver->manage()->window()->getSize()));
-                $logger->log("Viewport size: " . json_encode($actualViewportSize));
+                $logger->log("Browser size: {$driver->manage()->window()->getSize()}");
+                $logger->log("Viewport size: $actualViewportSize");
             } while (--$retriesLeft > 0 && !$actualViewportSize != $size);
         }
 
-        if ($actualViewportSize != $size) {
+        if (!$actualViewportSize->equals($size)) {
             throw new EyesException("Failed to set the viewport size.");
         }
     }
 
     /**
      *
-     * @param driver The driver to test.
-     * @return {@code true} if the driver is an Android driver.
+     * @param WebDriver $driver The driver to test.
+     * @return bool {@code true} if the driver is an Android driver.
      * {@code false} otherwise.
      */
     public static function isAndroid(WebDriver $driver)
@@ -379,8 +379,8 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param driver The driver to test.
-     * @return {@code true} if the driver is an iOS driver.
+     * @param WebDriver $driver The driver to test.
+     * @return bool {@code true} if the driver is an iOS driver.
      * {@code false} otherwise.
      */
     public static function isIOS(WebDriver $driver)
@@ -391,7 +391,7 @@ class EyesSeleniumUtils
     /**
      *
      * @param RemoteWebDriver $driver The driver to get the platform version from.
-     * @return The plaform version or {@code null} if it is undefined.
+     * @return string The platform version or {@code null} if it is undefined.
      */
     public static function getPlatformVersion(RemoteWebDriver $driver)
     {

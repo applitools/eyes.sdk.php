@@ -8,7 +8,9 @@ namespace Applitools;
 class ImageMatchSettings
 {
     private $matchLevel; //MatchLevel
-    private $exact; //ExactMatchSettings
+
+    /** @var ExactMatchSettings */
+    private $exact;
 
     public function __construct($matchLevel = null, ExactMatchSettings $exact = null)
     {
@@ -55,9 +57,8 @@ class ImageMatchSettings
         $this->exact = $exact;
     }
 
-    public function toString()
+    public function __toString()
     {
-        return sprintf("Match level: %s, Exact match settings: %s",
-            $this->matchLevel, $this->exact);
+        return "Match level: {$this->matchLevel}, Exact match settings: {$this->exact}";
     }
 }

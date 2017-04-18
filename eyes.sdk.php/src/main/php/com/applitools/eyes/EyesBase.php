@@ -23,13 +23,20 @@ abstract class EyesBase
     /** @var RunningSession */
     private $runningSession;
 
-    protected $viewportSize;/*RectangleSize*/
-    private $batch;/*BatchInfo*/
+    /** @var RectangleSize */
+    protected $viewportSize;
+
+    /** @var  BatchInfo */
+    private $batch;
+
     private $sessionType;/*it should be class to*/
     private $currentAppName;
     private $appName;
     private $testName;
+
+    /** @var ImageMatchSettings */
     private $defaultMatchSettings;
+
     private $baselineName;
     private $branchName;
     private $parentBranchName;
@@ -60,7 +67,6 @@ abstract class EyesBase
 
     public function __construct($serverUrl)
     {
-
         if ($this->getIsDisabled()) {
             $this->userInputs = array();
             return;
@@ -93,7 +99,6 @@ abstract class EyesBase
         $this->agentId = null;
         $this->lastScreenshot = null;
     }
-
 
     /**
      * @param string $hostOS The host OS running the AUT.
@@ -706,7 +711,7 @@ abstract class EyesBase
             ArgumentGuard::notNull($testName, "testName");
 
             $this->logger->log("Agent = " . $this->getFullAgentId());
-            $this->logger->verbose(sprintf("openBase('%s', '%s', '%s')", $appName, $testName, json_encode($viewportSize)));
+            $this->logger->verbose("openBase('$appName', '$testName', '$viewportSize')");
 
             if ($this->getApiKey() == null) {
                 $errMsg = "API key is missing! Please set it using setApiKey()";
@@ -714,12 +719,11 @@ abstract class EyesBase
                 throw new EyesException($errMsg);
             }
 
-            $this->logger->log(sprintf("Eyes server URL is '%s'", $this->serverConnector->getServerUrl()));
-            $this->logger->verbose(sprintf("Timeout = '%d'", $this->serverConnector->getTimeout()));
-            $this->logger->log(sprintf("matchTimeout = '%d' ", $this->matchTimeout));
-            $this->logger->log(sprintf("Default match settings = '%s' ", json_encode($this->defaultMatchSettings)));
-            $this->logger->log(sprintf("FailureReports = '%s' ", $this->failureReports));
-
+            $this->logger->log("Eyes server URL is '{$this->serverConnector->getServerUrl()}'");
+            $this->logger->verbose("Timeout = {$this->serverConnector->getTimeout()}");
+            $this->logger->log("matchTimeout = '{$this->matchTimeout}' ");
+            $this->logger->log("Default match settings = '{$this->defaultMatchSettings}'");
+            $this->logger->log("FailureReports = '{$this->failureReports}'");
 
             if ($this->isOpen) {
                 $this->abortIfNotClosed();
@@ -737,7 +741,7 @@ abstract class EyesBase
             $this->setScaleMethod(ScaleMethod::getDefault());
             $this->isOpen = true;
         } catch (EyesException $e) {
-            $this->logger->log(sprintf("%s", $e->getMessage()));
+            $this->logger->log($e->getMessage());
             $this->logger->getLogHandler()->close();
             throw $e;
         }
@@ -893,7 +897,7 @@ abstract class EyesBase
             return;
         }
 
-        $this->logger->log("No running session, calling start session..");
+        $this->logger->log("No running session, calling start session...");
         $this->startSession();
         $this->logger->log("Done!");
 
@@ -1044,7 +1048,7 @@ abstract class EyesBase
             $deadline, $timeout, $matchInterval));
 
         if ($this->runningSession == null) {
-            $this->logger->verbose("No running session, calling start session..");
+            $this->logger->verbose("No running session, calling start session...");
             $this->startSession();
             $this->logger->verbose("Done!");
         }
@@ -1052,7 +1056,7 @@ abstract class EyesBase
         //If there's an action to do
         $actionThread = null;
         if ($action != null) {
-            $this->logger->verbose("Starting webdriver action.");
+            $this->logger->verbose("Starting WebDriver action.");
             $actionThread = new Thread($action);
             $actionThread->start();
         }
@@ -1108,13 +1112,13 @@ abstract class EyesBase
             $this->logger->log("No batch set");
             $testBatch = new BatchInfo(null);
         } else {
-            $this->logger->log("Batch is " . json_encode($this->batch));
+            $this->logger->log("Batch is $this->batch");
             $testBatch = $this->batch;
         }
 
         $appEnv = $this->getAppEnvironment();
 
-        $this->logger->log("Application environment is " . serialize($this->getAppEnvironment()));
+        $this->logger->log("Application environment is $appEnv");
 
         $this->sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
             $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $appEnv,
@@ -1124,7 +1128,8 @@ abstract class EyesBase
         $this->runningSession = $this->serverConnector->startSession($this->sessionStartInfo);
         $this->logger->log("Server session ID is " . $this->runningSession->getId());
 
-        $testInfo = "'" . $this->testName . "' of '" . $this->getAppName() . "' " . serialize($appEnv);
+        $testInfo = "'{$this->testName}' of '{$this->getAppName()}' $appEnv";
+
         if ($this->runningSession->getIsNewSession()) {
             $this->logger->log("--- New test started - " . $testInfo);
             $this->shouldMatchWindowRunOnceOnTimeout = true;
@@ -1132,9 +1137,7 @@ abstract class EyesBase
             $this->logger->log("--- Test started - " . $testInfo);
             $this->shouldMatchWindowRunOnceOnTimeout = false;
         }
-
     }
-
 
     /**
      * Ends the test.
@@ -1151,7 +1154,7 @@ abstract class EyesBase
                 $this->logger->verbose("Ignored");
                 return null;
             }
-            $this->logger->verbose(sprintf("close(%b)", $throwEx));
+            $this->logger->verbose("close($throwEx)");
             ArgumentGuard::isValidState($this->isOpen, "Eyes not open");
 
             $this->isOpen = false;
