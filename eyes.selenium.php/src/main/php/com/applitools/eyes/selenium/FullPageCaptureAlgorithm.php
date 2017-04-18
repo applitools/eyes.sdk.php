@@ -23,7 +23,15 @@ class FullPageCaptureAlgorithm
         $this->logger = $logger;
     }
 
-    /**
+
+    private static function saveDebugScreenshotPart(DebugScreenshotsProvider $debugScreenshotsProvider, Image $image,
+        Region $region, $name) {
+        $suffix = "part-" + $name . "-" . $region->getLeft() . "_" . $region->getTop() . "_" . $region->getWidth() . "x"
+        . $region->getHeight();
+        $debugScreenshotsProvider->save($image, $suffix);
+    }
+
+/**
      * Returns a stitching of a region.
      *
      * @param ImageProvider $imageProvider The provider for the screenshot.
@@ -35,6 +43,7 @@ class FullPageCaptureAlgorithm
      * @param ScaleProviderFactory $scaleProviderFactory The provider which performs the necessary scaling.
      * @param CutProvider $cutProvider
      * @param int $waitBeforeScreenshots Time to wait before each screenshot (milliseconds).
+     * @param DebugScreenshotsProvider $debugScreenshotsProvider The factory to use for creating debug screenshots
      * @param EyesScreenshotFactory $screenshotFactory The factory to use for creating screenshots
      *                          from the images.
      * @return Image
@@ -45,6 +54,7 @@ class FullPageCaptureAlgorithm
                                       RegionProvider $regionProvider, PositionProvider $originProvider,
                                       PositionProvider $positionProvider, ScaleProviderFactory $scaleProviderFactory,
                                       CutProvider $cutProvider, $waitBeforeScreenshots,
+                                      DebugScreenshotsProvider $debugScreenshotsProvider,
                                       EyesScreenshotFactory $screenshotFactory)
     {
         $this->logger->verbose("getStitchedRegion()");
@@ -78,6 +88,7 @@ class FullPageCaptureAlgorithm
 
         /** @var Image $image */
         $image = $imageProvider->getImage();
+        $debugScreenshotsProvider->save($image, "original");
 
         // FIXME - scaling should be refactored
         $scaleProvider = $scaleProviderFactory->getScaleProvider($image->width());
@@ -88,6 +99,7 @@ class FullPageCaptureAlgorithm
 
         $cutProvider = $cutProvider->scale($pixelRatio);
         $image = $cutProvider->cut($image);
+        $debugScreenshotsProvider->save($image, "original-cut");
 
         $this->logger->verbose("Done! Creating screenshot object...");
         // We need the screenshot to be able to convert the region to
@@ -115,6 +127,7 @@ class FullPageCaptureAlgorithm
 
         if (!$regionInScreenshot->isEmpty()) {//  FIXME do not crop image before full screenshot be prepared
             $image = ImageUtils::getImagePart($image, $regionInScreenshot);
+            $this->saveDebugScreenshotPart($debugScreenshotsProvider, $image, $regionProvider->getRegion(), "before-scaled");
             $partWidth = $regionInScreenshot->getWidth();
             $partHeight = $regionInScreenshot->getHeight();
         }
@@ -196,11 +209,15 @@ class FullPageCaptureAlgorithm
 
             // FIXME - cropping should be overlaid (see previous comment re cropping)
             $partImage = $cutProvider->cut($partImage);
+            $debugScreenshotsProvider->save($partImage,
+                "original-scrolled-" . $positionProvider->getCurrentPosition()->toStringForFilename());
 
             $this->logger->verbose("Done!");
 
             if (!$regionInScreenshot->isEmpty()) {
                 $partImage = ImageUtils::getImagePart($partImage, $regionInScreenshot);
+                $this->saveDebugScreenshotPart($debugScreenshotsProvider, $partImage, $partRegion, "original-scrolled-"
+                    . $positionProvider->getCurrentPosition()->toStringForFilename());
             }
 //            $partImage = ImageUtils::scaleImage($partImage, $scaleProvider->getScaleRatio());
             // Stitching the current part.
@@ -236,6 +253,7 @@ class FullPageCaptureAlgorithm
             $stitchedImage = ImageUtils::getImagePart($stitchedImage, new Region(0, 0, $actualImageWidth, $actualImageHeight));
             $this->logger->verbose("Done!");
         }
+        $debugScreenshotsProvider->save($stitchedImage, "stitched");
         return $stitchedImage;
     }
 }

@@ -455,4 +455,18 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
 
         return self::copyImageWithType($croppedImage, $image->getType());
     }
+
+
+    /**
+     * Save image to local file system
+     * @param $image The image to save.
+     * @param $filename The path to save image
+     */
+    public static function saveImage(Image $image, $filename) {
+        try {
+            $image->save($filename,"png",100);
+        } catch (IOException $e) {
+            throw new EyesException("Failed to save image", $e);
+        }
+    }
 }
