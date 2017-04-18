@@ -13,15 +13,22 @@ use Facebook\WebDriver\WebDriverDimension;
 use Facebook\WebDriver\WebDriverElement;
 use Facebook\WebDriver\WebDriverPoint;
 
-class EyesRemoteWebElement extends RemoteWebElement {
-    private $logger; //Logger
-    private $eyesDriver; //EyesWebDriver
-    private $webElement; //RemoteWebElement
-    private $executeMethod; //Method
+class EyesRemoteWebElement extends RemoteWebElement
+{
+    /** @var Logger */
+    private $logger;
+
+    /** @var EyesWebDriver */
+    private $eyesDriver;
+
+    /** @var WebDriverElement */
+    private $webElement;
+
+    /** @var \ReflectionMethod */
+    private $executeMethod;
 
     const JS_GET_COMPUTED_STYLE_FORMATTED_STR =
-        " return arguments;"
-        /* "var elem = arguments[0];" .
+        " return arguments;"/* "var elem = arguments[0];" .
          "var styleProp = '%s';" .
          "if (window.getComputedStyle) {" .
              "return window.getComputedStyle(arguments, null).getPropertyValue(styleProp);" .
@@ -29,36 +36,33 @@ class EyesRemoteWebElement extends RemoteWebElement {
          "   return elem.currentStyle[styleProp];" .
          "} else {" .
              "return null;" .
-         "}"*/;
+         "}"*/
+    ;
 
-    const JS_GET_SCROLL_LEFT =
-        "return arguments[0].scrollLeft;";
+    const JS_GET_SCROLL_LEFT = "return arguments[0].scrollLeft;";
+    const JS_GET_SCROLL_TOP = "return arguments[0].scrollTop;";
+    const JS_GET_SCROLL_WIDTH = "return arguments[0].scrollWidth;";
+    const JS_GET_SCROLL_HEIGHT = "return arguments[0].scrollHeight;";
 
-    const JS_GET_SCROLL_TOP =
-        "return arguments[0].scrollTop;";
+    const JS_GET_CLIENT_WIDTH = "return arguments[0].clientWidth;";
+    const JS_GET_CLIENT_HEIGHT = "return arguments[0].clientHeight;";
 
-    const JS_GET_SCROLL_WIDTH =
-        "return arguments[0].scrollWidth;";
-
-    const JS_GET_SCROLL_HEIGHT =
-        "return arguments[0].scrollHeight;";
+    const JS_GET_BOUNDING_CLIENT_RECT = "return arguments[0].getBoundingClientRect();";
 
     const JS_SCROLL_TO_FORMATTED_STR =
         "arguments[0].scrollLeft = %d;" .
         "arguments[0].scrollTop = %d;";
 
-    const JS_GET_OVERFLOW =
-        "return arguments[0].style.overflow;";
+    const JS_GET_OVERFLOW = "return arguments[0].style.overflow;";
+    const JS_SET_OVERFLOW_FORMATTED_STR = "arguments[0].style.overflow = '%s'";
 
-    const JS_SET_OVERFLOW_FORMATTED_STR =
-        "arguments[0].style.overflow = '%s'";
-
-    public function __construct(Logger $logger, EyesWebDriver $eyesDriver, WebDriverElement $webElement) {
-        //parent::__construct(); FIXME need to check
-
+    public function __construct(Logger $logger, EyesWebDriver $eyesDriver, WebDriverElement $webElement)
+    {
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($eyesDriver, "eyesDriver");
         ArgumentGuard::notNull($webElement, "webElement");
+
+        parent::__construct(new RemoteExecuteMethod($eyesDriver->getRemoteWebDriver()), $webElement->getID());
 
         $this->logger = $logger;
         $this->eyesDriver = $eyesDriver;
@@ -78,30 +82,30 @@ class EyesRemoteWebElement extends RemoteWebElement {
         }
     }
 
-    public function getBounds() {
-        $left = $this->webElement->getLocation()->getX();
-        $top = $this->webElement->getLocation()->getY();
-        $width = 0;
-        $height = 0;
+    public function getBounds()
+    {
+        $rect = $this->eyesDriver->executeScript(self::JS_GET_BOUNDING_CLIENT_RECT, array($this));
+        return Region::CreateFromLTWH($rect['left'], $rect['top'], $rect['width'], $rect['height']);
+    }
 
-        try {
-            $width = $this->webElement->getSize()->getWidth();
-            $height = $this->webElement->getSize()->getHeight();
-        } catch (\Exception $ex) {
-            // Not supported on all platforms.
-        }
+    public function getClientAreaBounds(){
+        $bounds = $this->getBounds();
 
-        if ($left < 0) {
-            $width = max(0, $width + $left);
-            $left = 0;
-        }
+        $clientWidth = $this->getClientWidth();
+        $clientHeight = $this->getClientHeight();
 
-        if ($top < 0) {
-            $height = max(0, $height + $top);
-            $top = 0;
-        }
+        $this->logger->verbose("element rect: $bounds");
 
-        return new Region($left, $top, $width, $height);
+        $borderLeftWidth = $this->getBorderLeftWidth();
+        $borderTopWidth = $this->getBorderTopWidth();
+
+        $elementRegion = Region::CreateFromLTWH(
+            round($bounds->getLeft() + $borderLeftWidth),
+            round($bounds->getTop() + $borderTopWidth),
+            $clientWidth,
+            $clientHeight);
+
+        return $elementRegion;
     }
 
     /**
@@ -109,7 +113,8 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * @param string $propStyle The style property which value we would like to extract.
      * @return mixed The value of the style property of the element, or {@code null}.
      */
-    public function getComputedStyle($propStyle) {
+    public function getComputedStyle($propStyle)
+    {
         $scriptToExec = sprintf
         (self::JS_GET_COMPUTED_STYLE_FORMATTED_STR, $propStyle);
         return $this->eyesDriver->getRemoteWebDriver()->executeScript($scriptToExec);
@@ -120,43 +125,65 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * @param string $propStyle
      * @return float The integer value of a computed style.
      */
-    public function getComputedStyleInteger($propStyle) {
+    public function getComputedStyleInteger($propStyle)
+    {
         $computedStyle = $this->getComputedStyle($propStyle);
-        return intval(round(floatval(str_replace("px","", trim($computedStyle)))));
+        return intval(round(floatval(str_replace("px", "", trim($computedStyle)))));
     }
 
     /**
      * @return float The value of the scrollLeft property of the element.
      */
-    public function getScrollLeft() {
+    public function getScrollLeft()
+    {
         return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_LEFT, array($this));
     }
 
     /**
      * @return float The value of the scrollTop property of the element.
      */
-    public function getScrollTop() {
+    public function getScrollTop()
+    {
         return $this->eyesDriver->executeScript(self::JS_GET_SCROLL_TOP, array($this));
     }
 
     /**
      * @return float The value of the scrollWidth property of the element.
      */
-    public function getScrollWidth() {
+    public function getScrollWidth()
+    {
         return $this->webElement->getAttribute('scrollWidth');
     }
 
     /**
      * @return float The value of the scrollHeight property of the element.
      */
-    public function getScrollHeight() {
+    public function getScrollHeight()
+    {
         return $this->webElement->getAttribute('scrollHeight');
+    }
+
+    /**
+     * @return float The value of the clientWidth property of the element.
+     */
+    public function getClientWidth()
+    {
+        return $this->webElement->getAttribute('clientWidth');
+    }
+
+    /**
+     * @return float The value of the clientHeight property of the element.
+     */
+    public function getClientHeight()
+    {
+        return $this->webElement->getAttribute('clientHeight');
     }
 
     /**
      * @return float The width of the left border.
      */
-    public function getBorderLeftWidth() {
+    public function getBorderLeftWidth()
+    {
         //return $this->getComputedStyleInteger("border-left-width");
         return str_replace('px', '', $this->getCssValue("border-left-width")); //FIXME need to optimize
     }
@@ -164,7 +191,8 @@ class EyesRemoteWebElement extends RemoteWebElement {
     /**
      * @return float The width of the right border.
      */
-    public function getBorderRightWidth() {
+    public function getBorderRightWidth()
+    {
         //return $this->getComputedStyleInteger("border-right-width");
         return str_replace('px', '', $this->getCssValue("border-right-width")); //FIXME need to optimize
     }
@@ -172,7 +200,8 @@ class EyesRemoteWebElement extends RemoteWebElement {
     /**
      * @return float The width of the top border.
      */
-    public function getBorderTopWidth() {
+    public function getBorderTopWidth()
+    {
         //return $this->getComputedStyleInteger("border-top-width");
         return str_replace('px', '', $this->getCssValue("border-top-width")); //FIXME need to optimize
     }
@@ -180,7 +209,8 @@ class EyesRemoteWebElement extends RemoteWebElement {
     /**
      * @return float The width of the bottom border.
      */
-    public function getBorderBottomWidth() {
+    public function getBorderBottomWidth()
+    {
         //return $this->getComputedStyleInteger("border-bottom-width");
         return str_replace('px', '', $this->getCssValue("border-bottom-width")); //FIXME need to optimize
     }
@@ -189,15 +219,16 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * Scrolls to the specified location inside the element.
      * @param Location $location The location to scroll to.
      */
-    public function scrollTo(Location $location) {
-        $this->eyesDriver->executeScript(sprintf(self::JS_SCROLL_TO_FORMATTED_STR,
-            $location->getX(), $location->getY()), array($this));
+    public function scrollTo(Location $location)
+    {
+        $this->eyesDriver->executeScript(sprintf(self::JS_SCROLL_TO_FORMATTED_STR, $location->getX(), $location->getY()), array($this));
     }
 
     /**
      * @return string The overflow of the element.
      */
-    public function getOverflow() {
+    public function getOverflow()
+    {
         return $this->getCssValue("overflow");
         //return $this->eyesDriver->getRemoteWebDriver()->executeScript(self::JS_GET_OVERFLOW, array(array(":id" => $this->getId())));
 
@@ -207,55 +238,65 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * Sets the overflow of the element.
      * @param string $overflow The overflow to set.
      */
-    public function setOverflow($overflow) {
+    public function setOverflow($overflow)
+    {
 
         $this->eyesDriver->executeScript(sprintf(self::JS_SET_OVERFLOW_FORMATTED_STR,
             $overflow), array($this));
     }
 
-    public function click() {
+    public function click()
+    {
         // Letting the driver know about the current action.
         $currentControl = $this->getBounds();
         $this->eyesDriver->getEyes()->addMouseTrigger(MouseAction::Click, $this);
-        $this->logger->verbose(sprintf("click(%s)", $currentControl));
+        $this->logger->verbose("click($currentControl)");
 
         $this->webElement->click();
     }
 
-    public function getWrappedDriver() {
+    public function getWrappedDriver()
+    {
         return $this->eyesDriver;
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->webElement->getId();
     }
 
-    public function setParent(RemoteWebDriver $parent) {
+    public function setParent(RemoteWebDriver $parent)
+    {
         $this->webElement->setParent($parent);
     }
 
-    public function execute($command, /*Map<String, ?> */$parameters = array()) {
+    public function execute($command, $parameters = array())
+    {
         try { //FIXME need to check
             return $this->eyesDriver->getRemoteWebDriver()->execute($command, $parameters);
-        } catch (Exception $e) {
-            throw new EyesException("Failed to invoke 'execute' method!", $e);
+        } catch (\Exception $e) {
+            throw new EyesException("Failed to invoke 'execute' method!",0, $e);
         }
-
     }
 
-    public function setId($id) {
+    public function setId($id)
+    {
         $this->webElement->setId($id);
     }
 
-    public function setFileDetector(FileDetector $detector) {
+    public function setFileDetector(FileDetector $detector)
+    {
         $this->webElement->setFileDetector($detector);
     }
 
-    public function submit() {
+    public function submit()
+    {
         $this->webElement->submit();
     }
 
-    public function sendKeys(/*CharSequence... */$keysToSend) {
+    public function sendKeys(/*CharSequence... */
+        $keysToSend)
+    {
         foreach ($keysToSend as $keys) {
             $this->eyesDriver->getEyes()->addTextTrigger($this, $keys);
         }
@@ -263,31 +304,38 @@ class EyesRemoteWebElement extends RemoteWebElement {
         $this->webElement->sendKeys($keysToSend);
     }
 
-    public function clear() {
+    public function clear()
+    {
         $this->webElement->clear();
     }
 
-    public function getTagName() {
+    public function getTagName()
+    {
         return $this->webElement->getTagName();
     }
 
-    public function getAttribute($name) {
+    public function getAttribute($name)
+    {
         return $this->webElement->getAttribute($name);
     }
 
-    public function isSelected() {
+    public function isSelected()
+    {
         return $this->webElement->isSelected();
     }
 
-    public function isEnabled() {
+    public function isEnabled()
+    {
         return $this->webElement->isEnabled();
     }
 
-    public function getText() {
+    public function getText()
+    {
         return $this->webElement->getText();
     }
 
-    public function getCssValue($propertyName) {
+    public function getCssValue($propertyName)
+    {
         return $this->webElement->getCssValue($propertyName);
     }
 
@@ -298,11 +346,13 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * @param WebDriverElement $elementToWrap
      * @return EyesRemoteWebElement|WebDriverElement
      */
-    private function wrapElement(WebDriverElement $elementToWrap) {
+    private function wrapElement(WebDriverElement $elementToWrap)
+    {
         $resultElement = $elementToWrap; //FIXME clone?
         if ($elementToWrap instanceof RemoteWebElement) {
             $resultElement = new EyesRemoteWebElement($this->logger, $this->eyesDriver,
-                    /*(RemoteWebElement) */$elementToWrap);
+                /*(RemoteWebElement) */
+                $elementToWrap);
         }
         return $resultElement;
     }
@@ -314,110 +364,132 @@ class EyesRemoteWebElement extends RemoteWebElement {
      * @param $elementsToWrap
      * @return array
      */
-    private function wrapElements($elementsToWrap) {
+    private function wrapElements($elementsToWrap)
+    {
         // This list will contain the found elements wrapped with our class.
         $wrappedElementsList = array();
 
         foreach ($elementsToWrap as $currentElement) {
             if ($currentElement instanceof RemoteWebElement) {
-                $wrappedElementsList->add(new EyesRemoteWebElement($this->logger,
-                        $this->eyesDriver, /*(RemoteWebElement) */$currentElement));
+                $wrappedElementsList[] = new EyesRemoteWebElement($this->logger, $this->eyesDriver, $currentElement);
             } else {
-                $wrappedElementsList->add($currentElement);
+                $wrappedElementsList[] = $currentElement;
             }
         }
 
         return $wrappedElementsList;
     }
 
-    public function findElements(WebDriverBy $by) {
+    public function findElements(WebDriverBy $by)
+    {
         return $this->wrapElements($this->webElement->findElements($by));
     }
 
-    public function findElement(WebDriverBy $by) {
+    public function findElement(WebDriverBy $by)
+    {
         return $this->wrapElement($this->webElement->findElement($by));
     }
 
-    public function findElementById($using) {
-        return $this->wrapElement($this->webElement->findElementById($using));
+    public function findElementById($using)
+    {
+        return $this->findElement(WebDriverBy::id($using));
     }
 
-    public function findElementsById($using) {
-        return $this->wrapElements($this->webElement->findElementsById($using));
+    public function findElementsById($using)
+    {
+        return $this->findElements(WebDriverBy::id($using));
     }
 
-    public function findElementByLinkText($using) {
-        return $this->wrapElement($this->webElement->findElementByLinkText($using));
+    public function findElementByLinkText($using)
+    {
+        return $this->findElement(WebDriverBy::linkText($using));
     }
 
-    public function findElementsByLinkText($using) {
-        return $this->wrapElements($this->webElement->findElementsByLinkText($using));
+    public function findElementsByLinkText($using)
+    {
+        return $this->findElements(WebDriverBy::linkText($using));
     }
 
-    public function findElementByName($using) {
-        return $this->wrapElement($this->webElement->findElementByName($using));
+    public function findElementByName($using)
+    {
+        return $this->findElement(WebDriverBy::name($using));
     }
 
-    public function findElementsByName($using) {
-        return $this->wrapElements($this->webElement->findElementsByName($using));
+    public function findElementsByName($using)
+    {
+        return $this->findElements(WebDriverBy::name($using));
     }
 
-    public function findElementByClassName($using) {
-        return $this->wrapElement($this->webElement->findElementByClassName($using));
+    public function findElementByClassName($using)
+    {
+        return $this->findElement(WebDriverBy::className($using));
     }
 
-    public function findElementsByClassName($using) {
-        return $this->wrapElements($this->webElement->findElementsByClassName($using));
+    public function findElementsByClassName($using)
+    {
+        return $this->findElements(WebDriverBy::className($using));
     }
 
-    public function findElementByCssSelector($using) {
-        return $this->wrapElement($this->webElement->findElementByCssSelector($using));
+    public function findElementByCssSelector($using)
+    {
+        return $this->findElement(WebDriverBy::cssSelector($using));
     }
 
-    public function findElementsByCssSelector($using) {
-        return $this->wrapElements($this->webElement->findElementsByCssSelector($using));
+    public function findElementsByCssSelector($using)
+    {
+        return $this->findElements(WebDriverBy::cssSelector($using));
     }
 
-    public function findElementByXPath($using) {
-        return $this->wrapElement($this->webElement->findElementByXPath($using));
+    public function findElementByXPath($using)
+    {
+        return $this->findElement(WebDriverBy::xpath($using));
     }
 
-    public function findElementsByXPath($using) {
-        return $this->wrapElements($this->webElement->findElementsByXPath($using));
+    public function findElementsByXPath($using)
+    {
+        return $this->findElements(WebDriverBy::xpath($using));
     }
 
-    public function findElementByPartialLinkText($using) {
-        return $this->wrapElement($this->webElement->findElementByPartialLinkText($using));
+    public function findElementByPartialLinkText($using)
+    {
+        return $this->findElement(WebDriverBy::partialLinkText($using));
     }
 
-    public function findElementsByPartialLinkText($using) {
-        return $this->wrapElements($this->webElement->findElementsByPartialLinkText($using));
+    public function findElementsByPartialLinkText($using)
+    {
+        return $this->findElements(WebDriverBy::partialLinkText($using));
     }
 
-    public function findElementByTagName($using) {
-        return $this->wrapElement($this->webElement->findElementByTagName($using));
+    public function findElementByTagName($using)
+    {
+        return $this->findElement(WebDriverBy::tagName($using));
     }
 
-    public function findElementsByTagName($using) {
-        return $this->wrapElements($this->webElement->findElementsByTagName($using));
+    public function findElementsByTagName($using)
+    {
+        return $this->findElements(WebDriverBy::tagName($using));
     }
 
-    public function equals(WebDriverElement $other) {
+    public function equals(WebDriverElement $other)
+    {
         return ($other instanceof RemoteWebElement) && ($this->webElement->equals($other));
     }
 
-    public function hashCode() {
+    public function hashCode()
+    {
         return $this->webElement->hashCode();
     }
 
-    public function isDisplayed() {
+    public function isDisplayed()
+    {
         return $this->webElement->isDisplayed();
     }
 
     /**
      * @inheritdoc
      */
-    public function getLocation() {
+    public function getLocation()
+    {
         // This is workaround: Selenium currently just removes the value
         // after the decimal dot (instead of rounding up), which causes
         // incorrect locations to be returned when using ChromeDriver (with
@@ -426,17 +498,19 @@ class EyesRemoteWebElement extends RemoteWebElement {
         // client and instead of using "rawPoint.get(...).intValue()" we
         // return the double value, and use "ceil".
         $response = $this->execute(DriverCommand::GET_ELEMENT_LOCATION,
-            array(":id"=>$this->getId()));//ImmutableMap::of("id", $elementId));
+            array(":id" => $this->getId()));//ImmutableMap::of("id", $elementId));
         //$rawPoint = $response->getValue();
-        $x = floor($response["x"]);
-        $y = floor($response["y"]);
+        $this->logger->verbose("{$response['x']},{$response['y']}");
+        $x = round($response["x"]);
+        $y = round($response["y"]);
         return new WebDriverPoint($x, $y);
 
         // TODO: Use the command delegation instead. (once the bug is fixed).
 //        return webElement.getLocation();
     }
 
-    public function getSize() {
+    public function getSize()
+    {
         // This is workaround: Selenium currently just removes the value
         // after the decimal dot (instead of rounding up), which might cause
         // incorrect size to be returned . So, we copied the code from the
@@ -444,7 +518,7 @@ class EyesRemoteWebElement extends RemoteWebElement {
         // we return the double value, and use "ceil".
         $elementId = $this->getId();
         $response = $this->execute(DriverCommand::GET_ELEMENT_SIZE,
-            array(":id"=>$elementId));//ImmutableMap::of("id", elementId));
+            array(":id" => $elementId));//ImmutableMap::of("id", elementId));
         //$rawSize = $response->getValue();
         $width = floor($response["width"]);
         $height = floor($response["height"]);
@@ -454,11 +528,13 @@ class EyesRemoteWebElement extends RemoteWebElement {
 //        return webElement.getSize();
     }
 
-    public function getCoordinates() {
+    public function getCoordinates()
+    {
         return $this->webElement->getCoordinates();
     }
 
-    public function toString() {
+    public function toString()
+    {
         return "EyesRemoteWebElement:" . $this->webElement->toString();
     }
 }

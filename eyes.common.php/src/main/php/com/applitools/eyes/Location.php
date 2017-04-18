@@ -6,36 +6,29 @@ namespace Applitools;
  * A location in a two-dimensional plane.
  */
 class Location
-{ //implements Cloneable just possible to clone?
+{
     private $x;
     private $y;
 
-    //private $ZERO;
+    private static $ZERO;
 
     /**
      * Creates a Location instance.
-     * @param Location $other A location instance from which to create the location.
      * @param int $x The X coordinate of this location.
      * @param int $y The Y coordinate of this location.
      */
-    public function __construct($x = null, $y = null, Location $other = null)
+    public function __construct($x = null, $y = null)
     {
-        if(!empty($other)){
-            ArgumentGuard::notNull($other, "other");
-
-            $this->x = $other->getX();
-            $this->y = $other->getY();
-        }else{
-            //ArgumentGuard::notNull($x, "x"); //FIXME need to check
-            //ArgumentGuard::notNull($y, "y");
-            //$this->ZERO = new Location(0, 0);
-            $this->x = $x;
-            $this->y = $y;
-        }
+        $this->x = $x;
+        $this->y = $y;
     }
 
-    public static function getZero(){ //FIXME instead of self::ZERO
-        return new Location(0, 0);
+    public static function getZero()
+    {
+        if (self::$ZERO == null) {
+            self::$ZERO = new Location(0, 0);
+        }
+        return self::$ZERO;
     }
 
     public function equals($other)
@@ -48,12 +41,12 @@ class Location
             return false;
         }
 
-        return ($this->getX() == $other->getX()) && ($this->getY() == $other->getY());
+        return ($this->x == $other->x) && ($this->y == $other->y);
     }
 
     public function hashCode()
     {
-        return $this->getX() + $this->getY();
+        return $this->x + $this->y;
     }
 
     /**
@@ -64,10 +57,10 @@ class Location
      */
     public function offset($dx = null, $dy = null, Location $amount = null)
     {
-        if(!empty($amount)){
-            $this->x += $amount->getX();
-            $this->y += $amount->getY();
-        }else{
+        if (!empty($amount)) {
+            $this->x += $amount->x;
+            $this->y += $amount->y;
+        } else {
             ArgumentGuard::notNull($dx, "x");
             ArgumentGuard::notNull($dy, "y");
             $this->x += $dx;

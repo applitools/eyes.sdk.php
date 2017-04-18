@@ -119,7 +119,7 @@ class BordersAwareElementContentLocationProvider {
             $topBorderWidth = 0;
         }
 
-        $contentLocation = new Location(null, null, $location);
+        $contentLocation = clone $location;
         $contentLocation->offset($leftBorderWidth, $topBorderWidth);
         $logger->verbose("Done!");
         return $contentLocation;

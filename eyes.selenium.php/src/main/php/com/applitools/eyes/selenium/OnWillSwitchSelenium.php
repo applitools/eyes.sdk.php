@@ -2,48 +2,64 @@
 namespace Applitools;
 
 use Facebook\WebDriver\Remote\RemoteWebElement;
-use Facebook\WebDriver\WebDriver;
 
 class OnWillSwitchSelenium implements OnWillSwitch {
-    private $frameChain; //FrameChain FIXME
 
-    public function __construct(FrameChain $frameChain){
-        $this->frameChain = $frameChain; //FIXME need to check
+    /** @var FrameChain */
+    private $frameChain;
+
+    /** @var EyesWebDriver */
+    private $driver;
+
+    /** @var  Logger */
+    private $logger;
+
+    /** @var ScrollPositionProvider */
+    private $scrollPositionProvider;
+
+    public function __construct(FrameChain $frameChain, Logger $logger, EyesWebDriver $driver){
+        $this->frameChain = $frameChain;
+        $this->logger = $logger;
+        $this->driver = $driver;
+        $this->scrollPositionProvider = new ScrollPositionProvider($this->logger, $this->driver);
     }
 
-    public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame = null, Logger $logger, WebDriver $driver) {
-        $logger->verbose("willSwitchToFrame()");
+    /**
+     * @inheritdoc
+     */
+    public function willSwitchToFrame($targetType, RemoteWebElement $targetFrame = null) {
+        $this->logger->verbose("willSwitchToFrame($targetType,...)");
 
         switch($targetType) {
             case TargetType::DEFAULT_CONTENT:
-                $logger->verbose("Default content.");
+                $this->logger->verbose("Default content.");
                 $this->frameChain->clear();
                 break;
             case TargetType::PARENT_FRAME:
-                $logger->verbose("Parent frame.");
+                $this->logger->verbose("Parent frame.");
                 $this->frameChain->pop();
                 break;
             default: // Switching into a frame
-                $logger->verbose("Frame");
+                $this->logger->verbose("Frame");
     
-                $frameId = /*(EyesRemoteWebElement)*/$targetFrame->getId();
-                $pl = $targetFrame->getLocation();
-                $ds = $targetFrame->getSize();
+                $frameId = $targetFrame->getId();
 
-                // Get the frame's content location.
-                $bordersAwareElement = new BordersAwareElementContentLocationProvider();
-                $contentLocation = $bordersAwareElement->getLocation($logger, $targetFrame, new Location($pl->getX(), $pl->getY()));
-                
-                $scrollPositionProvider = new ScrollPositionProvider($logger, $driver);
+                /** @var EyesRemoteWebElement $eyesFrame */
+                $eyesFrame = null;
+                if ($targetFrame instanceof EyesRemoteWebElement) {
+                    $eyesFrame = $targetFrame;
+                } else {
+                    $eyesFrame = new EyesRemoteWebElement($this->logger, $this->driver, $targetFrame);
+                }
 
-                $rectangleSize = new RectangleSize($ds->getWidth(), $ds->getHeight());
+                $rect = $eyesFrame->getClientAreaBounds();
+                $pl = $rect->getLocation();
+                $innerSize = $rect->getSize();
 
-                $frame = new Frame($logger, $targetFrame, $frameId, $contentLocation, $rectangleSize, $scrollPositionProvider->getCurrentPosition());
-
+                $frame = new Frame($this->logger, $targetFrame, $frameId, $pl, $innerSize, $pl);//$currentLocation);
 
                 $this->frameChain->push($frame);
         }
-        $logger->verbose("Done!");
+        $this->logger->verbose("Done!");
     }
-
 }

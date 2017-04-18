@@ -9,8 +9,11 @@ use Facebook\WebDriver\JavaScriptExecutor;
 class ScrollPositionProvider implements PositionProvider
 {
 
-    protected $logger; //Logger
-    protected $executor; //JavascriptExecutor
+    /** @var Logger */
+    protected $logger;
+
+    /** @var JavaScriptExecutor */
+    protected $executor;
 
     public function __construct(Logger $logger, JavascriptExecutor $executor)
     {
@@ -33,7 +36,7 @@ class ScrollPositionProvider implements PositionProvider
         } catch (WebDriverException $e) {
             throw new EyesDriverOperationException("Failed to extract current scroll position!", $e);
         }
-        $this->logger->verbose(sprintf("Current position: %s", json_encode($result)));
+        $this->logger->verbose("Current position: $result");
         return $result;
     }
 
@@ -43,30 +46,31 @@ class ScrollPositionProvider implements PositionProvider
      */
     public function setPosition(Location $location)
     {
-        $this->logger->verbose(sprintf("Scrolling to %s", json_encode($location)));
+        $this->logger->verbose("Scrolling to $location");
         EyesSeleniumUtils::setCurrentScrollPosition($this->executor, $location);
         $this->logger->verbose("Done scrolling!");
     }
 
     /**
      *
-     * @return RectangleSize The entire size of the container which the position is relative
-     * to.
+     * @return RectangleSize The entire size of the container which the position is relative to.
      */
     public function getEntireSize()
     {
         $result = EyesSeleniumUtils::getCurrentFrameContentEntireSize($this->executor);
-        $this->logger->verbose(sprintf("Entire size: %s", json_encode($result)));
+        $this->logger->verbose("Entire size: $result");
         return $result;
     }
-    
-    public function getState(){
+
+    public function getState()
+    {
         return new ScrollPositionMemento($this->getCurrentPosition());
     }
 
-    public function restoreState(PositionMemento $state = null) {
-        if(empty($state)){
-            $state = new ScrollPositionMemento(new Location(0,0));  //FIXME need to check
+    public function restoreState(PositionMemento $state = null)
+    {
+        if (empty($state)) {
+            $state = new ScrollPositionMemento(new Location(0, 0));
         }
         $this->setPosition(new Location($state->getX(), $state->getY()));
     }

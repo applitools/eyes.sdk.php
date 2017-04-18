@@ -22,7 +22,7 @@ class CoordinatesType {
     /**
      * Coordinates are relative to the context. For example, if we are in
      * a context of a frame in a web page, then the coordinates are relative to
-     * the  frame. In this case, if we want to crop an image region based on
+     * the frame. In this case, if we want to crop an image region based on
      * an element's region, we will need to calculate their respective "as
      * is" coordinates.
      */

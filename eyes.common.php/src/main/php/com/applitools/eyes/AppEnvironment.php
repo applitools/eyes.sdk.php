@@ -10,7 +10,9 @@ class AppEnvironment
     private $inferred;
     private $os;
     private $hostingApp;
-    private $displaySize; //RectangleSize class
+
+    /** @var  RectangleSize */
+    private $displaySize;
 
     /**
      * Creates a new AppEnvironment instance.
@@ -29,7 +31,6 @@ class AppEnvironment
         else if (!empty($inferred)){
             $this->setInferred($inferred);
         }
-
     }
 
     /**
@@ -99,13 +100,13 @@ class AppEnvironment
      */
     public function setDisplaySize(RectangleSize $size)
     {
-        $this->displaySize = $size; /*RectangleSize*/
+        $this->displaySize = $size;
     }
 
-    public function toString()
+    public function __toString()
     {
         return "[os = " . ($this->os == null ? "?" : "'" . $this->os . "'") . " hostingApp = "
         . ($this->hostingApp == null ? "?" : "'" . $this->hostingApp . "'")
-        . " displaySize = " . serialize($this->displaySize) . "]";
+        . " displaySize = {$this->displaySize}]";
     }
 }

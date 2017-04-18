@@ -89,6 +89,6 @@ class TestElement extends PHPUnit\Framework\TestCase
      */
     public function testCheckRegion2()
     {
-        self::$eyes->checkRegionBySelector(WebDriverBy::id("overflowing-div-image"), "minions", true);
+        self::$eyes->checkRegion(WebDriverBy::id("overflowing-div-image"), -1, "minions", true);
     }
 }

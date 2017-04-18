@@ -8,13 +8,14 @@ namespace Applitools;
  */
 class RegionProvider
 {
-    private $coordinatesType = null; //FIXME absent in java
-    protected $region; //FIXME absent in java
+    private $coordinatesType = null;
+    protected $region;
+
     public function __construct(Region $region = null)
-    {//FIXME absent in java
-        if(empty($region)){
+    {
+        if (empty($region)) {
             $this->region = Region::getEmpty();
-        }else{
+        } else {
             $this->region = $region;
         }
     }
@@ -28,9 +29,11 @@ class RegionProvider
         return $this->region;
     }
 
-    public function setRegion($region){
+    public function setRegion($region)
+    {
         $this->region = $region;
     }
+
     /**
      *
      * @return CoordinatesType The type of coordinates on which the region is based.

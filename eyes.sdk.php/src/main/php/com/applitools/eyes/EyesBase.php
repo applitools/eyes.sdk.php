@@ -3,6 +3,7 @@
 namespace Applitools;
 
 use Applitools\Exceptions\EyesException;
+use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
 use Facebook\WebDriver\WebDriver;
@@ -22,13 +23,20 @@ abstract class EyesBase
     /** @var RunningSession */
     private $runningSession;
 
-    protected $viewportSize;/*RectangleSize*/
-    private $batch;/*BatchInfo*/
+    /** @var RectangleSize */
+    protected $viewportSize;
+
+    /** @var  BatchInfo */
+    private $batch;
+
     private $sessionType;/*it should be class to*/
     private $currentAppName;
     private $appName;
     private $testName;
+
+    /** @var ImageMatchSettings */
     private $defaultMatchSettings;
+
     private $baselineName;
     private $branchName;
     private $parentBranchName;
@@ -47,9 +55,6 @@ abstract class EyesBase
     /** @var SimplePropertyHandler */
     protected $scaleProviderHandler;
 
-    /** @var SimplePropertyHandler */
-    protected $cutProviderHandler;
-
     /** @var Logger */
     protected $logger;
 
@@ -65,7 +70,6 @@ abstract class EyesBase
 
     public function __construct($serverUrl)
     {
-
         if ($this->getIsDisabled()) {
             $this->userInputs = array();
             return;
@@ -74,13 +78,13 @@ abstract class EyesBase
         ArgumentGuard::notNull($serverUrl, "serverUrl");
 
         $this->logger = new Logger(new PrintLogHandler());
+        ImageUtils::initLogger($this->logger);
+        Region::initLogger($this->logger);
 
         $this->scaleProviderHandler = new SimplePropertyHandler();
         $scaleProvider = new NullScaleProvider();
         $this->scaleProviderHandler->set($scaleProvider);
-        $this->cutProviderHandler = new SimplePropertyHandler();
-        $cutProvider = new NullCutProvider();
-        $this->cutProviderHandler->set($cutProvider);
+
         $this->positionProvider = new InvalidPositionProvider();
         $this->scaleMethod = ScaleMethod::getDefault();
         $this->viewportSize = null;
@@ -99,7 +103,6 @@ abstract class EyesBase
         $this->lastScreenshot = null;
         $this->debugScreenshotsProvider = new NullDebugScreenshotProvider();
     }
-
 
     /**
      * @param string $hostOS The host OS running the AUT.
@@ -332,14 +335,15 @@ abstract class EyesBase
         }
 
         // Getting the location of the cursor in the screenshot
-        $cursorInScreenshot = new Location(null, null, $cursor);
+        $cursorInScreenshot = clone $cursor;
         // First we need to getting the cursor's coordinates relative to the
         // context (and not to the control).
-        $cursorInScreenshot->offset(null, null, $control->getLocation());
+        $loc = $control->getLocation();
+        $cursorInScreenshot->offset($loc->getX(), $loc->getY());
         try {
             $cursorInScreenshot = $this->lastScreenshot->getLocationInScreenshot(
                 $cursorInScreenshot, CoordinatesType::CONTEXT_RELATIVE);
-        } catch (EyesOutOfBoundsException $e) {
+        } catch (OutOfBoundsException $e) {
             $this->logger->verbose(sprintf("Ignoring %s (out of bounds)", $action));
             return;
         }
@@ -378,7 +382,7 @@ abstract class EyesBase
         ArgumentGuard::notNull($text, "text");
 
         // We don't want to change the objects we received.
-        $control = new Region($control);
+        $control = clone $control;
 
         if ($this->lastScreenshot == null) {
             $this->logger->verbose(sprintf("Ignoring '%s' (no screenshot)", $text));
@@ -711,7 +715,7 @@ abstract class EyesBase
             ArgumentGuard::notNull($testName, "testName");
 
             $this->logger->log("Agent = " . $this->getFullAgentId());
-            $this->logger->verbose(sprintf("openBase('%s', '%s', '%s')", $appName, $testName, json_encode($viewportSize)));
+            $this->logger->verbose("openBase('$appName', '$testName', '$viewportSize')");
 
             if ($this->getApiKey() == null) {
                 $errMsg = "API key is missing! Please set it using setApiKey()";
@@ -719,12 +723,11 @@ abstract class EyesBase
                 throw new EyesException($errMsg);
             }
 
-            $this->logger->log(sprintf("Eyes server URL is '%s'", $this->serverConnector->getServerUrl()));
-            $this->logger->verbose(sprintf("Timeout = '%d'", $this->serverConnector->getTimeout()));
-            $this->logger->log(sprintf("matchTimeout = '%d' ", $this->matchTimeout));
-            $this->logger->log(sprintf("Default match settings = '%s' ", json_encode($this->defaultMatchSettings)));
-            $this->logger->log(sprintf("FailureReports = '%s' ", $this->failureReports));
-
+            $this->logger->log("Eyes server URL is '{$this->serverConnector->getServerUrl()}'");
+            $this->logger->verbose("Timeout = {$this->serverConnector->getTimeout()}");
+            $this->logger->log("matchTimeout = '{$this->matchTimeout}' ");
+            $this->logger->log("Default match settings = '{$this->defaultMatchSettings}'");
+            $this->logger->log("FailureReports = '{$this->failureReports}'");
 
             if ($this->isOpen) {
                 $this->abortIfNotClosed();
@@ -740,9 +743,12 @@ abstract class EyesBase
             $scaleProvider = new NullScaleProvider();
             $this->scaleProviderHandler->set($scaleProvider);
             $this->setScaleMethod(ScaleMethod::getDefault());
+
+            $this->ensureRunningSession();
+
             $this->isOpen = true;
         } catch (EyesException $e) {
-            $this->logger->log(sprintf("%s", $e->getMessage()));
+            $this->logger->log($e->getMessage());
             $this->logger->getLogHandler()->close();
             throw $e;
         }
@@ -915,8 +921,6 @@ abstract class EyesBase
         ArgumentGuard::notNull($regionProvider, "regionProvider");
         $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
 
-        $this->ensureRunningSession();
-
         $this->logger->log("Calling match window...");
 
         $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
@@ -954,7 +958,7 @@ abstract class EyesBase
             return;
         }
 
-        $this->logger->log("No running session, calling start session..");
+        $this->logger->log("No running session, calling start session...");
         $this->startSession();
         $this->logger->log("Done!");
 
@@ -1045,22 +1049,6 @@ abstract class EyesBase
     }
 
     /**
-     * Manually set the the sizes to cut from an image before it's validated.
-     *
-     * @param CutProvider $cutProvider the provider doing the cut. If {@code null}, Eyes
-     *                     would automatically infer if cutting is needed.
-     */
-    public function setImageCut(CutProvider $cutProvider)
-    {
-        if ($cutProvider != null) {
-            $this->cutProviderHandler = new ReadOnlyPropertyHandler($this->logger, $cutProvider);
-        } else {
-            $this->cutProviderHandler = new SimplePropertyHandler();
-            $this->cutProviderHandler->set(new NullCutProvider());
-        }
-    }
-
-    /**
      * Compresses a given screenshot.
      *
      * @param EyesScreenshot $screenshot The screenshot to compress.
@@ -1121,7 +1109,7 @@ abstract class EyesBase
             $deadline, $timeout, $matchInterval));
 
         if ($this->runningSession == null) {
-            $this->logger->verbose("No running session, calling start session..");
+            $this->logger->verbose("No running session, calling start session...");
             $this->startSession();
             $this->logger->verbose("Done!");
         }
@@ -1129,12 +1117,12 @@ abstract class EyesBase
         //If there's an action to do
         $actionThread = null;
         if ($action != null) {
-            $this->logger->verbose("Starting webdriver action.");
+            $this->logger->verbose("Starting WebDriver action.");
             $actionThread = new Thread($action);
             $actionThread->start();
         }
 
-        $startTime = System::currentTimeMillis(); // microtime()??
+        $startTime = microtime() / 1000; //convert microseconds to milliseconds
 
         // A callback which will call getAppOutput
         $appOutputProvider = new AppOutputProviderRedeclared(); //FIXME need to check
@@ -1158,7 +1146,7 @@ abstract class EyesBase
             $this->logger->verbose("Making sure 'action' thread had finished...");
             try {
                 $actionThread->join(30000);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->verbose(
                     "Got interrupted while waiting for 'action' to finish!");
             }
@@ -1185,13 +1173,13 @@ abstract class EyesBase
             $this->logger->log("No batch set");
             $testBatch = new BatchInfo(null);
         } else {
-            $this->logger->log("Batch is " . json_encode($this->batch));
+            $this->logger->log("Batch is $this->batch");
             $testBatch = $this->batch;
         }
 
         $appEnv = $this->getAppEnvironment();
 
-        $this->logger->log("Application environment is " . serialize($this->getAppEnvironment()));
+        $this->logger->log("Application environment is $appEnv");
 
         $this->sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
             $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $appEnv,
@@ -1201,7 +1189,8 @@ abstract class EyesBase
         $this->runningSession = $this->serverConnector->startSession($this->sessionStartInfo);
         $this->logger->log("Server session ID is " . $this->runningSession->getId());
 
-        $testInfo = "'" . $this->testName . "' of '" . $this->getAppName() . "' " . serialize($appEnv);
+        $testInfo = "'{$this->testName}' of '{$this->getAppName()}' $appEnv";
+
         if ($this->runningSession->getIsNewSession()) {
             $this->logger->log("--- New test started - " . $testInfo);
             $this->shouldMatchWindowRunOnceOnTimeout = true;
@@ -1209,9 +1198,7 @@ abstract class EyesBase
             $this->logger->log("--- Test started - " . $testInfo);
             $this->shouldMatchWindowRunOnceOnTimeout = false;
         }
-
     }
-
 
     /**
      * Ends the test.
@@ -1228,7 +1215,7 @@ abstract class EyesBase
                 $this->logger->verbose("Ignored");
                 return null;
             }
-            $this->logger->verbose(sprintf("close(%b)", $throwEx));
+            $this->logger->verbose("close($throwEx)");
             ArgumentGuard::isValidState($this->isOpen, "Eyes not open");
 
             $this->isOpen = false;

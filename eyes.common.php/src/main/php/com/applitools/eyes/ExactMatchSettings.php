@@ -23,8 +23,7 @@ class ExactMatchSettings {
     private $minDiffHeight;
 
     /**
-     * The ratio of differing pixels above which images are considered
-     * mismatching.
+     * The ratio of differing pixels above which images are considered mismatching.
      */
     private $matchThreshold;
 
@@ -87,17 +86,15 @@ class ExactMatchSettings {
 
     /**
      *
-     * @param float $matchThreshold The ratio of differing pixels above which images
-     *                       are considered mismatching.
+     * @param float $matchThreshold The ratio of differing pixels above which images are considered mismatching.
      */
     public function setMatchThreshold($matchThreshold) {
         $this->matchThreshold = $matchThreshold;
     }
 
-    public function toString() {
-        return sprintf("[min diff intensity: %d, min diff width %d, " .
-                "min diff height %d, match threshold: %f]", $this->minDiffIntensity,
-                $this->minDiffWidth, $this->minDiffHeight, $this->matchThreshold);
+    public function __toString() {
+        return "[min diff intensity: $this->minDiffIntensity, min diff width: $this->minDiffWidth, " .
+                "min diff height: $this->minDiffHeight, match threshold: $this->matchThreshold]";
     }
 }
 

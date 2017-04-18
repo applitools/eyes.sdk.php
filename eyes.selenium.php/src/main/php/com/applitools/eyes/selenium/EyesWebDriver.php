@@ -28,9 +28,14 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
     private $driver; //RemoteWebDriver
     private $touch; //TouchScreen
     private $elementsIds; //Map<String, WebElement>
-    private $frameChain; //FrameChain
+
+    /** @var FrameChain */
+    private $frameChain;
     private $rotation; //ImageRotation
     private $defaultContentViewportSize; //RectangleSize
+
+    /** @var RemoteExecuteMethod */
+    private $executeMethod;
 
     /**
      * Rotates the image as necessary. The rotation is either manually forced
@@ -93,15 +98,15 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         $this->defaultContentViewportSize = null;
 
         // initializing "touch" if possible
-        $executeMethod = null;
+        $this->executeMethod = null;
         try {
-            $executeMethod = new RemoteExecuteMethod($driver);
+            $this->executeMethod = new RemoteExecuteMethod($driver);
         } catch (\Exception $e) {
             // If an exception occurred, we simply won't instantiate "touch".
         }
-        if (null != $executeMethod) {
-            $this->touch = new EyesTouchScreen($logger, $this,
-                new RemoteTouchScreen($executeMethod));
+
+        if (null != $this->executeMethod) {
+            $this->touch = new EyesTouchScreen($logger, $this, new RemoteTouchScreen($this->executeMethod));
         } else {
             $this->touch = null;
         }
@@ -241,10 +246,12 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $this->driver->getWindowHandle();
     }
 
-    
+    /**
+     * @return EyesTargetLocator
+     */
     public function switchTo() {
         $this->logger->verbose("switchTo()");
-        $willSwitch = new OnWillSwitchSelenium($this->frameChain); //FIXME need to check
+        $willSwitch = new OnWillSwitchSelenium($this->frameChain, $this->logger, $this); //FIXME need to check
         return new EyesTargetLocator($this->logger, $this, $this->driver->switchTo(), $willSwitch);
     }
     
@@ -428,16 +435,12 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $this->defaultContentViewportSize;
     }
 
-    /**
-     *
-     * @return FrameChain A copy of the current frame chain.
-     */
     public function getFrameChain()
     {
-        return new FrameChain($this->logger, $this->frameChain);
+        return $this->frameChain;
     }
 
-    public function getScreenshotAs(/*OutputType<X>*/$xOutputType)
+    public function getScreenshotAsBase64()
     {
         $image64 = $this->driver->takeScreenshot();
         $screenshot64 = ImageUtils::imageFromBytes($image64);
@@ -451,20 +454,6 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $xOutputType->convertFromBase64Png($screenshot64);*/
 
         return $screenshot64;
-    }
-
-    public function getUserAgent()
-    {
-        $userAgent = null;
-        try {
-            $userAgent = $this->driver->executeScript(
-                "return navigator.userAgent");
-            $this->logger->verbose("user agent: " . $userAgent);
-        } catch (\Exception $e) {
-            $this->logger->verbose("Failed to obtain user-agent string");
-            $userAgent = null;
-        }
-        return $userAgent;
     }
 
     private function getSessionId()

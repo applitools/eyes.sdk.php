@@ -9,10 +9,10 @@ class ScrollPositionMemento extends PositionMemento {
 
     /**
      *
-     * @param l The current location to be saved.
+     * @param Location $l The current location to be saved.
      */
     public function __construct(Location $l) {
-        $this->position = new Location(null, null, $l);
+        $this->position = clone $l;
     }
 
     public function getX() {

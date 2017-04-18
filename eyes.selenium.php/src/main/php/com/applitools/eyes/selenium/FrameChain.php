@@ -85,10 +85,11 @@ class FrameChain
     /**
      * Removes the last inserted frame element. Practically means we switched
      * back to the parent of the current frame
+     * @return Frame|null Returns the popped frame
      */
     public function pop()
     {
-        unset($this->frames[count($this->frames) - 1]);
+        return array_pop($this->frames);
     }
 
     /**
@@ -101,6 +102,17 @@ class FrameChain
     }
 
     /**
+     * @return Frame|null Returns the current frame
+     */
+    public function peek()
+    {
+        if (count($this->frames) == 0) {
+            return null;
+        }
+        return $this->frames[count($this->frames) - 1];
+    }
+
+    /**
      *
      * @return Location The location of the current frame in the page.
      */
@@ -108,7 +120,8 @@ class FrameChain
     {
         $result = new Location(0, 0);
         foreach ($this->frames as $frame) {
-            $result->offset($frame->getLocation());
+            $loc = $frame->getLocation();
+            $result->offset($loc->getX(), $loc->getY());
         }
         return $result;
     }
@@ -122,7 +135,7 @@ class FrameChain
         if (count($this->frames) == 0) {
             throw new NoFramesException("No frames in frame chain");
         }
-        return new Location($this->frames[0]->getParentScrollPosition());
+        return clone ($this->frames[0]->getParentScrollPosition());
     }
 
     /**
