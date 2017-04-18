@@ -392,82 +392,82 @@ class EyesRemoteWebElement extends RemoteWebElement
 
     public function findElementById($using)
     {
-        return $this->wrapElement($this->webElement->findElementById($using));
+        return $this->findElement(WebDriverBy::id($using));
     }
 
     public function findElementsById($using)
     {
-        return $this->wrapElements($this->webElement->findElementsById($using));
+        return $this->findElements(WebDriverBy::id($using));
     }
 
     public function findElementByLinkText($using)
     {
-        return $this->wrapElement($this->webElement->findElementByLinkText($using));
+        return $this->findElement(WebDriverBy::linkText($using));
     }
 
     public function findElementsByLinkText($using)
     {
-        return $this->wrapElements($this->webElement->findElementsByLinkText($using));
+        return $this->findElements(WebDriverBy::linkText($using));
     }
 
     public function findElementByName($using)
     {
-        return $this->wrapElement($this->webElement->findElementByName($using));
+        return $this->findElement(WebDriverBy::name($using));
     }
 
     public function findElementsByName($using)
     {
-        return $this->wrapElements($this->webElement->findElementsByName($using));
+        return $this->findElements(WebDriverBy::name($using));
     }
 
     public function findElementByClassName($using)
     {
-        return $this->wrapElement($this->webElement->findElementByClassName($using));
+        return $this->findElement(WebDriverBy::className($using));
     }
 
     public function findElementsByClassName($using)
     {
-        return $this->wrapElements($this->webElement->findElementsByClassName($using));
+        return $this->findElements(WebDriverBy::className($using));
     }
 
     public function findElementByCssSelector($using)
     {
-        return $this->wrapElement($this->webElement->findElementByCssSelector($using));
+        return $this->findElement(WebDriverBy::cssSelector($using));
     }
 
     public function findElementsByCssSelector($using)
     {
-        return $this->wrapElements($this->webElement->findElementsByCssSelector($using));
+        return $this->findElements(WebDriverBy::cssSelector($using));
     }
 
     public function findElementByXPath($using)
     {
-        return $this->wrapElement($this->webElement->findElementByXPath($using));
+        return $this->findElement(WebDriverBy::xpath($using));
     }
 
     public function findElementsByXPath($using)
     {
-        return $this->wrapElements($this->webElement->findElementsByXPath($using));
+        return $this->findElements(WebDriverBy::xpath($using));
     }
 
     public function findElementByPartialLinkText($using)
     {
-        return $this->wrapElement($this->webElement->findElementByPartialLinkText($using));
+        return $this->findElement(WebDriverBy::partialLinkText($using));
     }
 
     public function findElementsByPartialLinkText($using)
     {
-        return $this->wrapElements($this->webElement->findElementsByPartialLinkText($using));
+        return $this->findElements(WebDriverBy::partialLinkText($using));
     }
 
     public function findElementByTagName($using)
     {
-        return $this->wrapElement($this->webElement->findElementByTagName($using));
+        return $this->findElement(WebDriverBy::tagName($using));
     }
 
     public function findElementsByTagName($using)
     {
-        return $this->wrapElements($this->webElement->findElementsByTagName($using));
+        return $this->findElements(WebDriverBy::tagName($using));
     }
 
     public function equals(WebDriverElement $other)

@@ -454,20 +454,6 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $screenshot64;
     }
 
-    public function getUserAgent()
-    {
-        $userAgent = null;
-        try {
-            $userAgent = $this->driver->executeScript(
-                "return navigator.userAgent");
-            $this->logger->verbose("user agent: " . $userAgent);
-        } catch (\Exception $e) {
-            $this->logger->verbose("Failed to obtain user-agent string");
-            $userAgent = null;
-        }
-        return $userAgent;
-    }
-
     private function getSessionId()
     {
         // extract remote web driver information

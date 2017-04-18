@@ -476,4 +476,23 @@ class EyesSeleniumUtils
     {
         self::setTransform($executor, "translate(-{$position->getX()}px, -{$position->getY()}px)");
     }
+
+    /**
+     * Returns the given executor's (which actually represents a web driver) user-agent string.
+     * @param JavaScriptExecutor $executor
+     * @param Logger $logger
+     * @return string|null
+     */
+    public static function getUserAgent(JavaScriptExecutor $executor, Logger $logger)
+    {
+        $userAgent = null;
+        try {
+            $userAgent = $executor->executeScript("return navigator.userAgent");
+            $logger->verbose("user agent: $userAgent");
+        } catch (\Exception $e) {
+            $logger->verbose("Failed to obtain user-agent string");
+            $userAgent = null;
+        }
+        return $userAgent;
+    }
 }

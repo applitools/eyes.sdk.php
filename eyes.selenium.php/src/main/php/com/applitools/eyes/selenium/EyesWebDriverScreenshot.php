@@ -79,9 +79,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                                 Location $frameLocationInScreenshot = null,
                                 RectangleSize $entireFrameSize = null)
     {
+        parent::__construct($image);  //FIXME need to check
 
         if (!empty($entireFrameSize)) {
-            parent::__construct($image);  //FIXME need to check
             ArgumentGuard::notNull($logger, "logger");
             ArgumentGuard::notNull($driver, "driver");
             ArgumentGuard::notNull($entireFrameSize, "entireFrameSize");
@@ -94,7 +94,6 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             $this->frameLocationInScreenshot = new Location(0, 0);
             $this->frameWindow = Region::CreateFromLocationAndSize(Location::getZero(), $entireFrameSize);
         } else {
-            parent::__construct($image);
             ArgumentGuard::notNull($logger, "logger");
             ArgumentGuard::notNull($driver, "driver");
             $this->logger = $logger;
@@ -239,6 +238,8 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         $result = clone $location;
 
         if ($from == $to) {
+            $this->logger->verbose("'from' and 'to' are the same. returning a clone of original location.");
+
             return $result;
         }
 
@@ -255,16 +256,12 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             ) {
 
                 // If this is not a sub-screenshot, this will have no effect.
-                $result->offset($this->frameLocationInScreenshot->getX(),
-                    $this->frameLocationInScreenshot->getY());
+                $result->offset($this->frameLocationInScreenshot->getX(), $this->frameLocationInScreenshot->getY());
 
             } else if ($from == CoordinatesType::SCREENSHOT_AS_IS &&
-                ($to == CoordinatesType::CONTEXT_RELATIVE
-                    || $to == CoordinatesType::CONTEXT_AS_IS)
-            ) {
+                    ($to == CoordinatesType::CONTEXT_RELATIVE || $to == CoordinatesType::CONTEXT_AS_IS)) {
 
-                $result->offset(-$this->frameLocationInScreenshot->getX(),
-                    -$this->frameLocationInScreenshot->getY());
+                $result->offset(-$this->frameLocationInScreenshot->getX(), -$this->frameLocationInScreenshot->getY());
             }
             return $result;
         }

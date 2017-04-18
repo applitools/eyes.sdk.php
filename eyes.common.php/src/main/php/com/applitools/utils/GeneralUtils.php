@@ -5,15 +5,10 @@ namespace Applitools;
 /**
  * General purpose utilities.
  */
-class GeneralUtils
+abstract class GeneralUtils
 {
-
     const DATE_FORMAT_ISO8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     const DATE_FORMAT_RFC1123 = "E, dd MMM yyyy HH:mm:ss 'GMT'";
-
-    private function _construnct()
-    {
-    }
 
     /**
      * @param inputStream The stream which content we would like to read.
@@ -89,16 +84,16 @@ class GeneralUtils
     }
 
     /**
-     * Sleeps the input amount of milliseconds.
+     * Sleeps the input amount of microseconds.
      *
-     * @param milliseconds The number of milliseconds to sleep.
+     * @param int $microseconds The number of microsecondsto sleep.
      */
     public static function sleep($microseconds)
     {
         try {
             usleep((int)$microseconds);
-        } catch (Exception $ex) {
-            throw new RuntimeException("sleep interrupted", $ex);
+        } catch (\Exception $ex) {
+            throw new \RuntimeException("sleep interrupted", $ex);
         }
     }
 
@@ -120,14 +115,14 @@ class GeneralUtils
 
     /**
      *
-     * @param start The start time. (Milliseconds)
-     * @param end The end time. (Milliseconds).
-     * @return The elapsed time between the start and end times, rounded up
-     * to a full second, in milliseconds.
+     * @param int $start The start time. (microseconds)
+     * @param int $end The end time. (microseconds).
+     * @return int The elapsed time between the start and end times, rounded up
+     * to a full second, in microseconds.
      */
-    public static function getFullSecondsElapsedTimeMillis($start, $end)
+    public static function getFullSecondsElapsedTimeMicroseconds($start, $end)
     {
-        // return ((long) Math.ceil((end - start) / 1000.0)) * 1000;
+         return (ceil(($end - $start) / 1000000.0)) * 1000000;
     }
 
     /**

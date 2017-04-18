@@ -46,8 +46,7 @@ class EyesImagesScreenshot extends EyesScreenshot
 
         $subScreenshotImage = ImageUtils::getImagePart($this->image, $subScreenshotRegion);
 
-        // Notice that we need the bounds-relative coordinates as parameter
-        // for new sub-screenshot.
+        // Notice that we need the bounds-relative coordinates as parameter for new sub-screenshot.
         $relativeSubScreenshotRegion = $this->convertRegionLocation($subScreenshotRegion,
             CoordinatesType::SCREENSHOT_AS_IS, CoordinatesType::CONTEXT_RELATIVE);
 
