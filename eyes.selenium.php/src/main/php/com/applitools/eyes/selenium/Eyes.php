@@ -982,9 +982,9 @@ class Eyes extends EyesBase
             return;
         }
 
-        ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
+        // ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
 
-        $originalFrame = $this->driver->getFrameChain();
+        //$originalFrame = $this->driver->getFrameChain();
         //FIXME //$this->driver->switchTo()->defaultContent();
 
         try {
