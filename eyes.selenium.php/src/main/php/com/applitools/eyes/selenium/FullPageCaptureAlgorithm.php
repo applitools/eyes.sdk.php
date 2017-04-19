@@ -117,7 +117,7 @@ class FullPageCaptureAlgorithm
 
         if (!$regionInScreenshot->isEmpty()) {//  FIXME do not crop image before full screenshot is prepared
             $image = ImageUtils::getImagePart($image, $regionInScreenshot);
-            $this->saveDebugScreenshotPart($debugScreenshotsProvider, $image, $regionProvider->getRegion(), "before-scaled");
+            self::saveDebugScreenshotPart($debugScreenshotsProvider, $image, $regionProvider->getRegion(), "before-scaled");
             $partWidth = $regionInScreenshot->getWidth();
             $partHeight = $regionInScreenshot->getHeight();
         }
@@ -202,7 +202,7 @@ class FullPageCaptureAlgorithm
 
             if (!$regionInScreenshot->isEmpty()) {
                 $partImage = ImageUtils::getImagePart($partImage, $regionInScreenshot);
-                $this->saveDebugScreenshotPart($debugScreenshotsProvider, $partImage, $partRegion,
+                self::saveDebugScreenshotPart($debugScreenshotsProvider, $partImage, $partRegion,
                     "original-scrolled-" . $positionProvider->getCurrentPosition()->toStringForFilename());
             }
             //$partImage = ImageUtils::scaleImage($partImage, $scaleProvider->getScaleRatio());
