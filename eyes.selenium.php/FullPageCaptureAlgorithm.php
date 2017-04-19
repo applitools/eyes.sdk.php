@@ -202,8 +202,8 @@ class FullPageCaptureAlgorithm
 
             if (!$regionInScreenshot->isEmpty()) {
                 $partImage = ImageUtils::getImagePart($partImage, $regionInScreenshot);
-                self::saveDebugScreenshotPart($debugScreenshotsProvider, $partImage, $partRegion,
-                    "original-scrolled-" . $positionProvider->getCurrentPosition()->toStringForFilename());
+                $pos =  $positionProvider->getCurrentPosition();
+                self::saveDebugScreenshotPart($debugScreenshotsProvider, $partImage, $partRegion, "original-scrolled-{$pos->getX()}_{$pos->getY()}");
             }
             //$partImage = ImageUtils::scaleImage($partImage, $scaleProvider->getScaleRatio());
             // Stitching the current part.
