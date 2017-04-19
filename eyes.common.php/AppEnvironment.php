@@ -87,7 +87,7 @@ class AppEnvironment
 
     /**
      * Gets the display size of the application or {@code null} if unknown.
-     * @return RectangleSize
+     * @return RectangleSize|null
      */
     public function getDisplaySize()
     {
@@ -96,9 +96,9 @@ class AppEnvironment
 
     /**
      * Sets the display size of the application or {@code null} if unknown.
-     * @param RectangleSize $size
+     * @param RectangleSize|null $size
      */
-    public function setDisplaySize(RectangleSize $size)
+    public function setDisplaySize(RectangleSize $size = null)
     {
         $this->displaySize = $size;
     }

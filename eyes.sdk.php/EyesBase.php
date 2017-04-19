@@ -802,7 +802,7 @@ abstract class EyesBase
     }
 
     /**
-     * @param $saveDebugScreenshots If true, will save all screenshots to local directory.
+     * @param bool $saveDebugScreenshots If true, will save all screenshots to local directory.
      */
     public function setSaveDebugScreenshots($saveDebugScreenshots) {
         $prev = $this->debugScreenshotsProvider;
@@ -825,7 +825,7 @@ abstract class EyesBase
 
 
     /**
-     * @param $pathToSave Path where you want to save the debug screenshots.
+     * @param string $pathToSave Path where you want to save the debug screenshots.
      */
 
     public function setDebugScreenshotsPath($pathToSave) {
@@ -834,14 +834,14 @@ abstract class EyesBase
 
     /**
      *
-     * @return The path where you want to save the debug screenshots.
+     * @return string The path where you want to save the debug screenshots.
      */
     public function getDebugScreenshotsPath() {
         return $this->debugScreenshotsProvider->getPath();
     }
 
     /**
-     * @param $prefix The prefix for the screenshots' names.
+     * @param string $prefix The prefix for the screenshots' names.
      */
     public function setDebugScreenshotsPrefix($prefix) {
         $this->debugScreenshotsProvider->setPrefix($prefix);
@@ -849,13 +849,11 @@ abstract class EyesBase
 
     /**
      *
-     * @return The prefix for the screenshots' names.
+     * @return string The prefix for the screenshots' names.
      */
     public function getDebugScreenshotsPrefix() {
         return $this->debugScreenshotsProvider->getPrefix();
     }
-
-
 
     /**
      * Set whether or not failed tests are saved by default.
@@ -974,12 +972,13 @@ abstract class EyesBase
         );
     }
 
+   /*
     /**
      * @param RegionProvider $regionProvider A callback for getting the region of the screenshot which will be set in the application output.
      * @param EyesScreenshot $lastScreenshot Previous application screenshot (used for compression) or {@code null} if not available.
      * @return AppOutputWithScreenshot The updated app output and screenshot.
      */
-    private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot)
+   /* private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot)
     {
 
         $this->logger->verbose("getting screenshot...");
@@ -1005,6 +1004,7 @@ abstract class EyesBase
         $this->logger->verbose("Done!");
         return $result;
     }
+*/
 
     /**
      * @return string The user given agent id of the SDK.
@@ -1079,18 +1079,14 @@ abstract class EyesBase
     /**
      * Runs a timing test.
      *
-     * @param RegionProvider $regionProvider Returns the region to check or the empty
-     *                          rectangle to check the entire window.
-     * @param mixed|null $action An action to run in parallel to starting the
-     *                          test, or {@code null} if no such action is
-     *                          required.
+     * @param RegionProvider $regionProvider Returns the region to check or the empty rectangle to check the entire window.
+     * @param mixed|null $action An action to run in parallel to starting the test, or {@code null} if no such action is required.
      * @param int $deadline The expected amount of time until finding a match. (Seconds)
      * @param int $timeout The maximum amount of time to retry matching. (Seconds)
      * @param int $matchInterval The interval for testing for a match. (Milliseconds)
      * @return ResponseTimeAlgorithm The earliest match found, or {@code null} if no match was found.
      */
-    protected function testResponseTimeBase(
-        RegionProvider $regionProvider, Runnable $action, $deadline, $timeout, $matchInterval)
+    protected function testResponseTimeBase(RegionProvider $regionProvider, Runnable $action, $deadline, $timeout, $matchInterval)
     {
 
         if ($this->getIsDisabled()) {

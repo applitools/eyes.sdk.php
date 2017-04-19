@@ -1,12 +1,14 @@
 <?php
 
+namespace Tests\Applitools\Images;
+
 use Applitools\Images\Eyes;
 use Applitools\RectangleSize;
-use Gregwar\Image\Image;
 use Applitools\Region;
 use Applitools\Location;
+use PHPUnit\Framework\TestCase;
 
-class TestElement extends PHPUnit_Framework_TestCase
+class TestElement extends TestCase
 {
     public function testSearch()
     {
@@ -17,7 +19,7 @@ class TestElement extends PHPUnit_Framework_TestCase
 
         try {
             // Start visual testing
-            $eyes->open("Applitools Test", "Sanity Test");
+            $eyes->open("Applitools Test", "Sanity Test", new RectangleSize(800, 500));
 
             // Load page image and validate
             $img = "yourpath/element-test/ElementTestPage/minions-800x500_2.jpg";
