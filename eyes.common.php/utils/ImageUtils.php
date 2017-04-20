@@ -8,12 +8,14 @@ namespace Applitools;
 use Applitools\Exceptions\EyesException;
 use Gregwar\Image\Image;
 
-class ImageUtils {
+class ImageUtils
+{
 
     /** @var  Logger */
     private static $logger;
 
-    public static function initLogger(Logger $logger){
+    public static function initLogger(Logger $logger)
+    {
         self::$logger = $logger;
     }
 
@@ -24,7 +26,8 @@ class ImageUtils {
      * @return string The PNG bytes representation of the image.
      * @throws EyesException
      */
-    public static function encodeAsPng(Image $image) {
+    public static function encodeAsPng(Image $image)
+    {
         ArgumentGuard::notNull($image, "image");
         $pngData = $image->get('png');
         return $pngData;
@@ -38,30 +41,31 @@ class ImageUtils {
      * @throws EyesException If there was a problem
      * creating the {@code BufferedImage} instance.
      */
-    public static function imageFromFile($path){
+    public static function imageFromFile($path)
+    {
         try {
             $result = ImageIO::read(new File($path));
-        } catch (IOException $e) {
+        } catch (\Exception $e) {
             throw new EyesException("Failed to to load the image bytes from " . $path, $e);
         }
         return $result;
     }
 
     /**
-     * Creates a {@link BufferedImage} from an image file specified by {@code
-     * resource}.
+     * Creates a {@link BufferedImage} from an image file specified by {@code resource}.
      *
-     * @param resource The resource path.
-     * @return A {@code BufferedImage} instance.
+     * @param string resource The resource path.
+     * @return Image A {@code BufferedImage} instance.
      * @throws EyesException If there was a problem
      * creating the {@code BufferedImage} instance.
      */
-    public static function imageFromResource($resource){
+    public static function imageFromResource($resource)
+    {
         try { //FIXME
-            $result = ImageIO::read(ImageUtils::class.getClassLoader() .getResourceAsStream(resource));
-        } catch (IOException $e) {
+            $result = ImageIO::read(ImageUtils::class . getClassLoader() . getResourceAsStream(resource));
+        } catch (\Exception $e) {
             throw new EyesException(
-                    "Failed to to load the image from resource: " . $resource, $e);
+                "Failed to to load the image from resource: " . $resource, $e);
         }
         return $result;
     }
@@ -71,7 +75,8 @@ class ImageUtils {
      * @param Image $image The image from which to get its base64 representation.
      * @return string The base64 representation of the image (bytes encoded as PNG).
      */
-    public static function base64FromImage(Image $image) {
+    public static function base64FromImage(Image $image)
+    {
         ArgumentGuard::notNull($image, "image");
 
         $imageBytes = $image->get('png');
@@ -86,7 +91,8 @@ class ImageUtils {
      * @throws EyesException If there was a problem
      * creating the {@code BufferedImage} instance.
      */
-    public static function imageFromBytes($imageBytes){
+    public static function imageFromBytes($imageBytes)
+    {
         try {
             //FIXME need to check
             $image = new Image();
@@ -104,7 +110,8 @@ class ImageUtils {
      * @param Region $region The region which should be copied from the image.
      * @return Image The part of the image.
      */
-    public static function getImagePart(Image $image, Region $region) {
+    public static function getImagePart(Image $image, Region $region)
+    {
         ArgumentGuard::notNull($image, "image");
 
         if (self::$logger != null) {
@@ -123,7 +130,8 @@ class ImageUtils {
      * @param float $deg The degrees by which to rotate the image.
      * @return Image A rotated image.
      */
-    public static function rotateImage(Image $image, $deg) {
+    public static function rotateImage(Image $image, $deg)
+    {
         /* FIXME
                 ArgumentGuard::notNull($image, "image");
 
@@ -169,7 +177,8 @@ class ImageUtils {
      * @param string $updatedType The type of the copied image. See {@link BufferedImage#getType()}.
      * @return Image A copy of the {@code src} of the requested type.
      */
-    public static function copyImageWithType(Image $src, $updatedType) {
+    public static function copyImageWithType(Image $src, $updatedType)
+    {
         ArgumentGuard::notNull($src, "src");
         $result = new Image($src->width(), $src->height(), $updatedType);
         $g2 = $result->createGraphics();
@@ -186,7 +195,8 @@ class ImageUtils {
      * @return Image If the scale ratio != 1, returns a new scaled image,
      * otherwise, returns the original image.
      */
-    public static function scaleImage(Image $image, $scaleRatio) {
+    public static function scaleImage(Image $image, $scaleRatio)
+    {
         //if you have ScaleProvider use  $scaleProvider->getScaleRatio();
         ArgumentGuard::notNull($image, "image");
         ArgumentGuard::notNull($scaleRatio, "scaleRatio");
@@ -202,7 +212,8 @@ class ImageUtils {
 
         // Verify that the scaled image is the same type as the original.
         //if ($image->getType() == $scaledImage->getType()) {
-            /*FIXME need to check*/    return $scaledImage;
+        /*FIXME need to check*/
+        return $scaledImage;
         //}
 
         //return $this->copyImageWithType($scaledImage, $image->getType());
@@ -217,53 +228,56 @@ class ImageUtils {
      * @return Image If the size of image equal to target size, returns the original image,
      * otherwise, returns a new resized image.
      */
-     public static function resizeImage(Image $image, $targetWidth, $targetHeight) {
-          ArgumentGuard::notNull($image, "image");
-          ArgumentGuard::notNull($targetWidth, "targetWidth");
-          ArgumentGuard::notNull($targetHeight, "targetHeight");
+    public static function resizeImage(Image $image, $targetWidth, $targetHeight)
+    {
+        ArgumentGuard::notNull($image, "image");
+        ArgumentGuard::notNull($targetWidth, "targetWidth");
+        ArgumentGuard::notNull($targetHeight, "targetHeight");
 
-          if ($image->width() == $targetWidth && $image->height() == $targetHeight) {
-              return $image;
-           }
+        if ($image->width() == $targetWidth && $image->height() == $targetHeight) {
+            return $image;
+        }
 
-         // Save original image type
-         //$originalType = $image->getType();
+        // Save original image type
+        //$originalType = $image->getType();
 
-         // If type is different then replace it
-         /*if ($originalType != BufferedImage::TYPE_4BYTE_ABGR) {
-             $image = $this->copyImageWithType($image, BufferedImage::TYPE_4BYTE_ABGR);
-         }*///FIXME is type important?
+        // If type is different then replace it
+        /*if ($originalType != BufferedImage::TYPE_4BYTE_ABGR) {
+            $image = $this->copyImageWithType($image, BufferedImage::TYPE_4BYTE_ABGR);
+        }*///FIXME is type important?
 
-         //$resizedImage;
-         if ($targetWidth > $image->width() || $targetHeight > $image->height()) {
-             $resizedImage = self::scaleImageBicubic($image, $targetWidth, $targetHeight);
-         } else {
-             $resizedImage = self::scaleImageIncrementally($image, $targetWidth, $targetHeight);
-         }
+        //$resizedImage;
+        if ($targetWidth > $image->width() || $targetHeight > $image->height()) {
+            $resizedImage = self::scaleImageBicubic($image, $targetWidth, $targetHeight);
+        } else {
+            $resizedImage = self::scaleImageIncrementally($image, $targetWidth, $targetHeight);
+        }
 
-         // Verify that the scaled image is the same type as the original.
-         // FIXME is type important?
-         /*if ($originalType == $resizedImage->getType()) {
-             return $resizedImage;
-         }
+        // Verify that the scaled image is the same type as the original.
+        // FIXME is type important?
+        /*if ($originalType == $resizedImage->getType()) {
+            return $resizedImage;
+        }
 
-         return $this->copyImageWithType($resizedImage, $originalType);*/
-         return $resizedImage;
+        return $this->copyImageWithType($resizedImage, $originalType);*/
+        return $resizedImage;
     }
 
-    private static function interpolateCubic($x0, $x1, $x2, $x3, $t) {
+    private static function interpolateCubic($x0, $x1, $x2, $x3, $t)
+    {
         $a0 = $x3 - $x2 - $x0 + $x1;
         $a1 = $x0 - $x1 - $a0;
         $a2 = $x2 - $x0;
         return max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($x1)));
     }
 
-    private static function scaleImageBicubic(Image $srcImage, $targetWidth, $targetHeight) {
+    private static function scaleImageBicubic(Image $srcImage, $targetWidth, $targetHeight)
+    {
         $bufDst = imagecreatetruecolor($targetWidth, $targetHeight);//new DataBufferByte($targetWidth * $targetHeight * 4);
         //$wSrc = $srcImage->width();
         //$hSrc = $srcImage->height();
-        $imageName = tempnam(sys_get_temp_dir(),"scale_image_").".png";
-        $srcImage->save($imageName,"png",100);
+        $imageName = tempnam(sys_get_temp_dir(), "scale_image_") . ".png";
+        $srcImage->save($imageName, "png", 100);
         $size = getimagesize($imageName);
         $wSrc = $size[0];
         $hSrc = $size[1];
@@ -279,7 +293,7 @@ class ImageUtils {
         // Pass 1 - interpolate rows
         // buf1 has width of dst2 and height of src
         $buf1 = imagecreatetruecolor($wDst2, $hSrc);
-        imagecolorallocate ($buf1, 255, 255, 255);
+        imagecolorallocate($buf1, 255, 255, 255);
 
         $start = microtime(true);
         $pixels = array();
@@ -291,7 +305,8 @@ class ImageUtils {
                 $pixels[$h][$w] = imagecolorsforindex($bufSrc, $colorIndex);
             }
         }
-echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
+        //echo "=>" . (microtime(true) - $start) . "<=";
+        //echo "OOOOOOO";// die();
 
         $m = $wM * $hM;
 
@@ -301,11 +316,11 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
                 $xPos = floor($x);
                 $t = $x - $xPos;
 
-                foreach ($pixels[$i][$xPos] as $key=>$val) {
-                    $x0 = ($xPos > 0) ? $pixels[$i][$xPos -1][$key] : 2 * $val - $pixels[$i][$xPos + 1][$key];
+                foreach ($pixels[$i][$xPos] as $key => $val) {
+                    $x0 = ($xPos > 0) ? $pixels[$i][$xPos - 1][$key] : 2 * $val - $pixels[$i][$xPos + 1][$key];
                     $x1 = $val;
                     $x2 = $pixels[$i][$xPos + 1][$key];
-                    $x3 = ($xPos < $wSrc - 2) ? $pixels[$i][$xPos+2][$key] : 2 * $pixels[$i][$xPos+1][$key] - $val;
+                    $x3 = ($xPos < $wSrc - 2) ? $pixels[$i][$xPos + 2][$key] : 2 * $pixels[$i][$xPos + 1][$key] - $val;
 
                     $a0 = $x3 - $x2 - $x0 + $x1;
                     $a1 = $x0 - $x1 - $a0;
@@ -315,7 +330,7 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
             }
         }
         $buf2 = imagecreatetruecolor($wDst2, $hDst2);
-        imagecolorallocate ($buf2, 255, 255, 255);
+        imagecolorallocate($buf2, 255, 255, 255);
 
         for ($i = 0; $i < $hDst2; $i++) {
             for ($j = 0; $j < $wDst2; $j++) {
@@ -323,21 +338,21 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
                 $yPos = intval($y);
                 $t = $y - $yPos;
 
-                foreach ($pixels2[$yPos][$j] as $key=>$val) {
-                    $y0 = ($yPos > 0) ? $pixels2[$yPos -1][$j][$key] : 2 * $val - $pixels2[$yPos + 1][$j][$key];
+                foreach ($pixels2[$yPos][$j] as $key => $val) {
+                    $y0 = ($yPos > 0) ? $pixels2[$yPos - 1][$j][$key] : 2 * $val - $pixels2[$yPos + 1][$j][$key];
                     $y1 = $val;
                     $y2 = $pixels2[$yPos + 1][$j][$key];
-                    $y3 = ($yPos < $hSrc - 2) ? $pixels2[$yPos+2][$j][$key] : 2 * $pixels2[$yPos+1][$j][$key] - $val;
+                    $y3 = ($yPos < $hSrc - 2) ? $pixels2[$yPos + 2][$j][$key] : 2 * $pixels2[$yPos + 1][$j][$key] - $val;
 
                     $a0 = $y3 - $y2 - $y0 + $y1;
                     $a1 = $y0 - $y1 - $a0;
                     $a2 = $y2 - $y0;
                     $pix[$key] = max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($y1)));
-                    }
-                if($m > 1){
+                }
+                if ($m > 1) {
                     $pixels3[$i][$j] = $pix;
-                }else{
-                    imagesetpixel($buf2, $j, $i, imagecolorallocatealpha($buf2, $pix["red"],$pix["green"],$pix["blue"],$pix["alpha"]));
+                } else {
+                    imagesetpixel($buf2, $j, $i, imagecolorallocatealpha($buf2, $pix["red"], $pix["green"], $pix["blue"], $pix["alpha"]));
                 }
             }
         }
@@ -363,7 +378,7 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
                         }
                     }
 
-                    imagesetpixel($bufDst, $j, $i, imagecolorallocatealpha($bufDst, round($r / $m),round($g / $m),round($b / $m),round($a / $m)));
+                    imagesetpixel($bufDst, $j, $i, imagecolorallocatealpha($bufDst, round($r / $m), round($g / $m), round($b / $m), round($a / $m)));
                 }
             }
         } else {
@@ -375,7 +390,8 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
         return $dstImage;
     }
 
-    private static function scaleImageIncrementally(Image $src, $targetWidth, $targetHeight) {
+    private static function scaleImageIncrementally(Image $src, $targetWidth, $targetHeight)
+    {
         $hasReassignedSrc = false;
         $currentWidth = $src->width();
         $currentHeight = $src->height();
@@ -410,7 +426,8 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
                 break;
 
             // Render the incremental scaled image.
-            /*BufferedImage*/ $incrementalImage = self::scaleImageBicubic($src, $currentWidth, $currentHeight);
+            /*BufferedImage*/
+            $incrementalImage = self::scaleImageBicubic($src, $currentWidth, $currentHeight);
 
             // Before re-assigning our interim (partially scaled) incrementalImage to be the new src image before we iterate around
             // again to process it down further, we want to flush() the previous src image IF (and only IF) it was one of our own temporary
@@ -434,13 +451,15 @@ echo "=>". (microtime(true) - $start) ."<="; echo "OOOOOOO";// die();
 
     /**
      * Save image to local file system
-     * @param $image The image to save.
-     * @param $filename The path to save image
+     * @param Image $image The image to save.
+     * @param string $filename The path to save image
+     * @throws EyesException
      */
-    public static function saveImage(Image $image, $filename) {
+    public static function saveImage(Image $image, $filename)
+    {
         try {
-            $image->save($filename,"png",100);
-        } catch (IOException $e) {
+            $image->save($filename, "png", 100);
+        } catch (\Exception $e) {
             throw new EyesException("Failed to save image", $e);
         }
     }

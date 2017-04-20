@@ -1075,12 +1075,15 @@ class Eyes extends EyesBase
                 $this->debugScreenshotsProvider->save($screenshotImage, "original");
 
                 $this->logger->log("Done!");
-                //FIXME
-                $screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
+
+                /** @var ScaleProvider $scaleProvider */
+                $scaleProvider = $this->scaleProviderHandler->get();
+                $screenshotImage = $scaleProvider->scaleImage($screenshotImage);
                 $this->debugScreenshotsProvider->save($screenshotImage, "scaled");
 
-                $screenshotImage = $this->cutProviderHandler->get()->cut($screenshotImage);
-                $this->debugScreenshotsProvider->save($screenshotImage, "cut");
+                //$screenshotImage = $screenshotImage->crop($this->left, $this->top, $image->width() - $this->left - $this->right, $image->height() - $this->top - $this->bottom);
+                //$screenshotImage = $this->cutProviderHandler->get()->cut($screenshotImage);
+                //$this->debugScreenshotsProvider->save($screenshotImage, "cut");
 
                 $this->logger->verbose("Creating screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
