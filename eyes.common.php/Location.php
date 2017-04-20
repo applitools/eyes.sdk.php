@@ -88,8 +88,4 @@ class Location
     {
         return "({$this->x}, {$this->y})";
     }
-
-    public function toStringForFilename() {
-        return $this->x . "_" . $this->y;
-    }
 }

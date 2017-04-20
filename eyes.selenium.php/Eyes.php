@@ -226,7 +226,7 @@ class Eyes extends EyesBase
     /**
      *
      * @return float The device pixel ratio, or {@link #UNKNOWN_DEVICE_PIXEL_RATIO}
-     * if the DPR is not known yet or if it wasn't possible to extract it.
+     * if the DPR is not known yet or if it was not possible to extract it.
      */
     public function getDevicePixelRatio()
     {
@@ -962,7 +962,7 @@ class Eyes extends EyesBase
 
         $elementRegion = Region::CreateFromLTWH($pl->getX(), $pl->getY(), $ds->getWidth(), $ds->getHeight());
 
-        $this->addTextTrigger($elementRegion, $text);
+        $this->addTextTriggerControl($elementRegion, $text);
     }
 
     /**
@@ -1075,13 +1075,15 @@ class Eyes extends EyesBase
                 $this->debugScreenshotsProvider->save($screenshotImage, "original");
 
                 $this->logger->log("Done!");
-                //FIXME
-                //$screenshotImage = $this->scaleProviderHandler->get()->scaleImage($screenshotImage);
 
-                $screenshotImage = ImageUtils::scaleImage($screenshotImage, $this->scaleProvider);
+                /** @var ScaleProvider $scaleProvider */
+                $scaleProvider = $this->scaleProviderHandler->get();
+                $screenshotImage = $scaleProvider->scaleImage($screenshotImage);
                 $this->debugScreenshotsProvider->save($screenshotImage, "scaled");
-                $screenshotImage = $this->cutProviderHandler->get()->cut($screenshotImage);
-                $this->debugScreenshotsProvider->save($screenshotImage, "cut");
+
+                //$screenshotImage = $screenshotImage->crop($this->left, $this->top, $image->width() - $this->left - $this->right, $image->height() - $this->top - $this->bottom);
+                //$screenshotImage = $this->cutProviderHandler->get()->cut($screenshotImage);
+                //$this->debugScreenshotsProvider->save($screenshotImage, "cut");
 
                 $this->logger->verbose("Creating screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);

@@ -88,6 +88,15 @@ class EyesRemoteWebElement extends RemoteWebElement
         return Region::CreateFromLTWH($rect['left'], $rect['top'], $rect['width'], $rect['height']);
     }
 
+    /*
+    public function getBounds()
+    {
+        $loc = $this->webElement->getLocation();
+        $size = $this->webElement->getSize();
+        return Region::CreateFromLTWH($loc->getX(), $loc->getY(), $size->getWidth(), $size->getHeight());
+    }
+    */
+
     public function getClientAreaBounds(){
         $bounds = $this->getBounds();
 

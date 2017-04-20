@@ -3,7 +3,7 @@
 namespace Applitools;
 
 /**
- * Encapsulates creation of a conenctivity provider.
+ * Encapsulates creation of a connectivity provider.
  */
 class ServerConnectorFactory
 {
