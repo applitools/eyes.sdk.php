@@ -12,9 +12,14 @@ use Facebook\WebDriver\WebDriverKeyboard;
  */
 class EyesKeyboard implements WebDriverKeyboard {
 
-    private $logger; //Logger
-    private $eyesDriver; //EyesWebDriver
-    private $keyboard; //Keyboard
+    /** @var Logger */
+    private $logger;
+
+    /** @var EyesWebDriver */
+    private $eyesDriver;
+
+    /** @var WebDriverKeyboard */
+    private $keyboard;
 
     public function __construct(Logger $logger, EyesWebDriver $eyesDriver, WebDriverKeyboard $keyboard) {
         ArgumentGuard::notNull($logger, "logger");
@@ -40,7 +45,8 @@ class EyesKeyboard implements WebDriverKeyboard {
             $control = /*(EyesRemoteWebElement)*/$activeElement->getBounds();
         }
 
-        foreach($charSequences as $keys) {
+        $chars = str_split($charSequences);
+        foreach($chars as $keys) {
             $this->eyesDriver->getEyes()->addTextTrigger($control, $keys);
         }
 

@@ -23,16 +23,24 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         SearchContext, TakesScreenshot, HasTouchScreen */  //FIXME
 {
 
-    private $logger; //Logger
-    private $eyes; //Eyes
-    private $driver; //RemoteWebDriver
+    /** @var Logger */
+    private $logger;
+
+    /** @var Eyes */
+    private $eyes;
+
+    /** @var RemoteWebDriver */
+    private $driver;
+
     private $touch; //TouchScreen
     private $elementsIds; //Map<String, WebElement>
 
     /** @var FrameChain */
     private $frameChain;
     private $rotation; //ImageRotation
-    private $defaultContentViewportSize; //RectangleSize
+
+    /** @var RectangleSize */
+    private $defaultContentViewportSize;
 
     /** @var RemoteExecuteMethod */
     private $executeMethod;
