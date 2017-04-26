@@ -8,7 +8,7 @@ use Applitools\Region;
 use Applitools\Location;
 use PHPUnit\Framework\TestCase;
 
-class TestElement extends TestCase
+class TestImages extends TestCase
 {
     public function testSearch()
     {
