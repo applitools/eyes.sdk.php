@@ -10,6 +10,7 @@
          forceCoversAnnotation="false"
          mapTestClassNameToCoveredClassName="false"
          processIsolation="false"
+         bootstrap="vendor/autoload.php"
          stopOnError="false"
          stopOnFailure="false"
          stopOnIncomplete="false"
