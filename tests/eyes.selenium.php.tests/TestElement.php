@@ -24,8 +24,6 @@ class TestElement extends TestCase
      */
     public static function setUpClass()
     {
-        echo $_SERVER['SAUCE_USERNAME'];
-
         self::$webDriver = RemoteWebDriver::create($_SERVER['SELENIUM_SERVER_URL'], DesiredCapabilities::chrome());
 
         $eyes = new Eyes();
