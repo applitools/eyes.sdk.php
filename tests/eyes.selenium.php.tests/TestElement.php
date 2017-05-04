@@ -24,7 +24,7 @@ class TestElement extends TestCase
      */
     public static function setUpClass()
     {
-        self::$webDriver = RemoteWebDriver::create('http://localhost:4444/wd/hub', DesiredCapabilities::chrome());
+        self::$webDriver = RemoteWebDriver::create($_SERVER['SELENIUM_SERVER_URL'], DesiredCapabilities::chrome());
 
         $eyes = new Eyes();
         $eyes->setServerUrl("https://localhost.applitools.com");
