@@ -27,7 +27,10 @@ class TestElement extends TestCase
         self::$webDriver = RemoteWebDriver::create($_SERVER['SELENIUM_SERVER_URL'], DesiredCapabilities::chrome());
 
         $eyes = new Eyes();
-        $eyes->setServerUrl("https://localhost.applitools.com");
+        //https://localhost.applitools.com
+        if (isset($_SERVER['APPLITOOLS_SERVER_URL'])) {
+            $eyes->setServerUrl($_SERVER['APPLITOOLS_SERVER_URL']);
+        }
         //$eyes->setProxy(new \Applitools\ProxySettings("127.0.0.1:8888"));
         $eyes->setApiKey($_SERVER['APPLITOOLS_API_KEY']);
         $eyes->setHideScrollbars(true);
