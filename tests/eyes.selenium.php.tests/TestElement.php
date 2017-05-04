@@ -28,7 +28,9 @@ class TestElement extends TestCase
 
         $eyes = new Eyes();
         //https://localhost.applitools.com
-        $eyes->setServerUrl($_SERVER['APPLITOOLS_SERVER_URL']);
+        if (isset($_SERVER['APPLITOOLS_SERVER_URL'])) {
+            $eyes->setServerUrl($_SERVER['APPLITOOLS_SERVER_URL']);
+        }
         //$eyes->setProxy(new \Applitools\ProxySettings("127.0.0.1:8888"));
         $eyes->setApiKey($_SERVER['APPLITOOLS_API_KEY']);
         $eyes->setHideScrollbars(true);
