@@ -9,11 +9,11 @@ Applitools Eyes SDK For Selenium Php WebDriver
 
     composer require applitools/eyes.sdk.php:dev-master phpunit/phpunit
     
-This will also install PHPUnit, which is necessary to run the example test bellow.
+- This will also install PHPUnit, which is necessary to run the example test bellow.
 
 2. Download and run selenium server.
 
-Server version should be suitable to your browser version.
+- Server version should be suitable to your browser version.
 
 ## Usage
 
