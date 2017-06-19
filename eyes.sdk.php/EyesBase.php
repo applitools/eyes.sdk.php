@@ -55,6 +55,9 @@ abstract class EyesBase
     /** @var SimplePropertyHandler */
     protected $scaleProviderHandler;
 
+    ///** @var SimplePropertyHandler */
+    //protected $cutProviderHandler;
+
     /** @var Logger */
     protected $logger;
 
@@ -706,8 +709,7 @@ abstract class EyesBase
                 return;
             }
 
-            // If there's no default application name, one must be provided
-            // for the current test.
+            // If there's no default application name, one must be provided for the current test.
             if ($appName == null) {
                 ArgumentGuard::notNull($this->appName, "appName");
             }
@@ -717,29 +719,15 @@ abstract class EyesBase
             $this->logger->log("Agent = " . $this->getFullAgentId());
             $this->logger->verbose("openBase('$appName', '$testName', '$viewportSize')");
 
-            if ($this->getApiKey() == null) {
-                $errMsg = "API key is missing! Please set it using setApiKey()";
-                $this->logger->log($errMsg);
-                throw new EyesException($errMsg);
-            }
-
-            $this->logger->log("Eyes server URL is '{$this->serverConnector->getServerUrl()}'");
-            $this->logger->verbose("Timeout = {$this->serverConnector->getTimeout()}");
-            $this->logger->log("matchTimeout = '{$this->matchTimeout}' ");
-            $this->logger->log("Default match settings = '{$this->defaultMatchSettings}'");
-            $this->logger->log("FailureReports = '{$this->failureReports}'");
-
-            if ($this->isOpen) {
-                $this->abortIfNotClosed();
-                $errMsg = "A test is already running";
-                $this->logger->log($errMsg);
-                throw new EyesException($errMsg);
-            }
+            $this->validateApiKey();
+            $this->logOpenBase();
+            $this->validateNoSession();
 
             $this->currentAppName = $appName != null ? $appName : $this->appName;
             $this->testName = $testName;
             $this->viewportSize = $viewportSize;
             $this->sessionType = $sessionType != null ? $sessionType : SessionType::SEQUENTIAL;
+
             $scaleProvider = new NullScaleProvider();
             $this->scaleProviderHandler->set($scaleProvider);
             $this->setScaleMethod(ScaleMethod::getDefault());
@@ -754,6 +742,34 @@ abstract class EyesBase
         }
     }
 
+    private function logOpenBase()
+    {
+        $this->logger->log("Eyes server URL is '{$this->serverConnector->getServerUrl()}'");
+        $this->logger->verbose("Timeout = {$this->serverConnector->getTimeout()}");
+        $this->logger->log("matchTimeout = '{$this->matchTimeout}' ");
+        $this->logger->log("Default match settings = '{$this->defaultMatchSettings}'");
+        $this->logger->log("FailureReports = '{$this->failureReports}'");
+    }
+
+    private function validateApiKey()
+    {
+        if ($this->getApiKey() == null) {
+            $errMsg = "API key is missing! Please set it using setApiKey()";
+            $this->logger->log($errMsg);
+            throw new EyesException($errMsg);
+        }
+    }
+
+    private function validateNoSession()
+    {
+        if ($this->isOpen) {
+            $this->abortIfNotClosed();
+            $errMsg = "A test is already running";
+            $this->logger->log($errMsg);
+            throw new EyesException($errMsg);
+        }
+    }
+    
     /**
      * @param PositionProvider $positionProvider The position provider to be used.
      */
@@ -1345,7 +1361,6 @@ abstract class EyesBase
             $this->logger->getLogHandler()->close();
         }
     }
-
 }
 
 ?>
