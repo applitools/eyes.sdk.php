@@ -80,7 +80,7 @@ abstract class EyesBase
 
         ArgumentGuard::notNull($serverUrl, "serverUrl");
 
-        $this->logger = new Logger(new PrintLogHandler());
+        $this->logger = new Logger();
         ImageUtils::initLogger($this->logger);
         Region::initLogger($this->logger);
 
@@ -769,7 +769,7 @@ abstract class EyesBase
             throw new EyesException($errMsg);
         }
     }
-    
+
     /**
      * @param PositionProvider $positionProvider The position provider to be used.
      */
