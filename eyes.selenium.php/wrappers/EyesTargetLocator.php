@@ -20,32 +20,23 @@ class EyesTargetLocator implements WebDriverTargetLocator
     protected $driver;
     /** @var ScrollPositionProvider */
     private $scrollPosition;
-    /** @var OnWillSwitch */
-    private $onWillSwitch;
     /** @var WebDriverTargetLocator */
     private $targetLocator;
-    /** @var TargetType */
-    protected $targetType;
 
     /**
      * Initialized a new EyesTargetLocator object.
      * @param Logger $logger
      * @param EyesWebDriver $driver The WebDriver from which the targetLocator was received.
      * @param WebDriverTargetLocator $targetLocator The actual TargetLocator object.
-     * @param OnWillSwitch $onWillSwitch A delegate to be called whenever a relevant switch is about to be performed.
      */
-    public function __construct(Logger $logger, EyesWebDriver $driver,
-                                WebDriverTargetLocator $targetLocator, OnWillSwitch $onWillSwitch)
+    public function __construct(Logger $logger, EyesWebDriver $driver, WebDriverTargetLocator $targetLocator)
     {
-        $this->targetType = new TargetType();
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($driver, "driver");
         ArgumentGuard::notNull($targetLocator, "targetLocator");
-        ArgumentGuard::notNull($onWillSwitch, "onWillSwitch");
         $this->logger = $logger;
         $this->driver = $driver;
         $this->targetLocator = $targetLocator;
-        $this->onWillSwitch = $onWillSwitch;
         $this->scrollPosition = new ScrollPositionProvider($logger, $driver);
     }
 
@@ -70,11 +61,32 @@ class EyesTargetLocator implements WebDriverTargetLocator
         }
 
         $this->logger->verbose("Making preparations...");
-        $this->onWillSwitch->willSwitchToFrame(TargetType::FRAME, $frameElement);
+        $this->willSwitchToFrame($frameElement);
         $this->logger->verbose("Done! Switching to frame...");
         $this->targetLocator->frame($frameElement);
         $this->logger->verbose("Done!");
         return $this->driver;
+    }
+
+    private function willSwitchToFrame(RemoteWebElement $targetFrame = null)
+    {
+        $frameId = $targetFrame->getId();
+
+        /** @var EyesRemoteWebElement $eyesFrame */
+        $eyesFrame = null;
+        if ($targetFrame instanceof EyesRemoteWebElement) {
+            $eyesFrame = $targetFrame;
+        } else {
+            $eyesFrame = new EyesRemoteWebElement($this->logger, $this->driver, $targetFrame);
+        }
+
+        $rect = $eyesFrame->getClientAreaBounds();
+        $pl = $rect->getLocation();
+        $innerSize = $rect->getSize();
+
+        $frame = new Frame($this->logger, $targetFrame, $frameId, $pl, $innerSize, $pl);//$currentLocation);
+
+        $this->driver->getFrameChain()->push($frame);
     }
 
     public function parentFrame()
@@ -85,7 +97,7 @@ class EyesTargetLocator implements WebDriverTargetLocator
 
         if ($chain->size() > 0) {
             $this->logger->verbose("Making preparations...");
-            $this->onWillSwitch->willSwitchToFrame(TargetType::PARENT_FRAME);
+            $this->driver->getFrameChain()->pop();
             $this->logger->verbose("Done! Switching to parent frame...");
             if ($chain->size() > 0) {
                 $this->logger->verbose("switching to current frame. chain size: {$chain->size()}");
@@ -141,13 +153,9 @@ class EyesTargetLocator implements WebDriverTargetLocator
 
     public function window($nameOrHandle)
     {
-        $this->logger->verbose("EyesTargetLocator.frames()");
-        $this->logger->verbose("Making preparations..");
-        $this->onWillSwitch->willSwitchToWindow($nameOrHandle);
-        $this->logger->verbose("willSwitchToWindow()");
-        $this->frameChain->clear(); //FIXME need to check
-        $this->logger->verbose("Done!");
-        $this->logger->verbose("Done! Switching to window..");
+        $this->logger->verbose("EyesTargetLocator.window($nameOrHandle)");
+        $this->driver->getFrameChain()->clear(); //FIXME need to check
+        $this->logger->verbose("Done! Switching to window...");
         $this->targetLocator->window($nameOrHandle);
         $this->logger->verbose("Done!");
         return $this->driver;
@@ -158,8 +166,8 @@ class EyesTargetLocator implements WebDriverTargetLocator
         $this->logger->verbose("EyesTargetLocator.defaultContent()");
         if ($this->driver->getFrameChain()->size() != 0) {
             $this->logger->verbose("Making preparations..");
-            $this->onWillSwitch->willSwitchToFrame(TargetType::DEFAULT_CONTENT, null);
-            $this->logger->verbose("Done! Switching to default content..");
+            $this->driver->getFrameChain()->clear();
+            $this->logger->verbose("Done! Switching to default content...");
             $this->targetLocator->defaultContent();
             $this->logger->verbose("Done!");
         }
