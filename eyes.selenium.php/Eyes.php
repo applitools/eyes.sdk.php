@@ -268,6 +268,20 @@ class Eyes extends EyesBase
 
         $this->openBase($appName, $testName, $viewportSize, $sessionType);
 
+        $this->validateDriver($driver);
+        $this->devicePixelRatio = self::UNKNOWN_DEVICE_PIXEL_RATIO;
+        $this->validateStitchMode();
+        $this->driver->setRotation($this->rotation);
+
+        return $this->driver;
+    }
+
+    /**
+     * @param WebDriver $driver
+     * @throws EyesException
+     */
+    private function validateDriver(WebDriver $driver)
+    {
         ArgumentGuard::notNull($driver, "driver");
 
         if ($driver instanceof RemoteWebDriver) {
@@ -279,8 +293,10 @@ class Eyes extends EyesBase
             $this->logger->log($errMsg);
             throw new EyesException($errMsg);
         }
-        $this->devicePixelRatio = self::UNKNOWN_DEVICE_PIXEL_RATIO;
+    }
 
+    private function validateStitchMode()
+    {
         // Setting the correct position provider.
         switch ($this->getStitchMode()) {
             case StitchMode::CSS:
@@ -291,11 +307,7 @@ class Eyes extends EyesBase
                 $scrollPositionNew = new ScrollPositionProvider($this->logger, $this->driver);
                 $this->setPositionProvider($scrollPositionNew);
         }
-        $this->driver->setRotation($this->rotation);
-
-        return $this->driver;
     }
-
 
     /**
      * Takes a snapshot of the application under test and matches it with the expected output.
