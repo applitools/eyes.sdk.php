@@ -4,14 +4,24 @@ namespace Applitools\fluent {
 
     use Applitools\MatchLevel;
     use Applitools\Region;
+    use Prophecy\Exception\InvalidArgumentException;
 
     class CheckSettings implements ICheckSettings, ICheckSettingsInternal
     {
 
+        /** @var Region */
         private $targetRegion;
+
+        /** @var MatchLevel */
         private $matchLevel;
+
+        /** @var bool */
         private $ignoreCaret;
+
+        /** @var bool */
         private $stitchContent = false;
+
+        /** @var int */
         private $timeout = -1;
 
         /**
@@ -25,11 +35,20 @@ namespace Applitools\fluent {
         private $floatingRegions = [];
 
         /**
+         * CheckSettings constructor.
+         * @param Region $region
+         */
+        protected function __construct(Region $region)
+        {
+            $this->targetRegion = $region;
+        }
+
+        /**
          * Adds one or more ignore regions.
          * @param Region[] $regions One or more regions to ignore when validating the screenshot.
          * @return ICheckSettings This instance of the settings object.
          */
-        function ignore(...$regions)
+        public function ignore(...$regions)
         {
             foreach ($regions as $region) {
                 $this->ignoreRegions[] = new IgnoreRegionByRectangle($region);
@@ -41,7 +60,7 @@ namespace Applitools\fluent {
          * Defines that the screenshot will contain the entire element or region, even if it's outside the view.
          * @return ICheckSettings This instance of the settings object.
          */
-        function fully()
+        public function fully()
         {
             $this->stitchContent = true;
             return $this;
@@ -53,7 +72,7 @@ namespace Applitools\fluent {
          * @param Region[] $regions One or more content rectangles.
          * @return ICheckSettings This instance of the settings object.
          */
-        function floating($maxOffset, ...$regions)
+        public function floating($maxOffset, ...$regions)
         {
             foreach ($regions as $r) {
                 $this->addFloatingRegion($r, $maxOffset, $maxOffset, $maxOffset, $maxOffset);
@@ -70,9 +89,9 @@ namespace Applitools\fluent {
          * @param int $maxRightOffset How much the content can move to the right.
          * @return ICheckSettings This instance of the settings object.
          */
-        function addFloatingRegion($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
+        public function addFloatingRegion($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
         {
-            $this->floatingRegions[]=
+            $this->floatingRegions[] =
                 new FloatingRegionByRectangle(
                     new Region(
                         $region->getLeft(),
@@ -89,7 +108,7 @@ namespace Applitools\fluent {
          * @param int $timeoutMilliseconds The timeout to use in milliseconds.
          * @return ICheckSettings This instance of the settings object.
          */
-        function timeout($timeoutMilliseconds)
+        public function timeout($timeoutMilliseconds)
         {
             $this->timeout = $timeoutMilliseconds;
             return $this;
@@ -99,7 +118,7 @@ namespace Applitools\fluent {
          * Shortcut to set the match level to {@code MatchLevel.LAYOUT}.
          * @return ICheckSettings This instance of the settings object.
          */
-        function layout()
+        public function layout()
         {
             $this->matchLevel = MatchLevel::LAYOUT;
             return $this;
@@ -109,7 +128,7 @@ namespace Applitools\fluent {
          * Shortcut to set the match level to {@code MatchLevel.EXACT}.
          * @return ICheckSettings This instance of the settings object.
          */
-        function exact()
+        public function exact()
         {
             $this->matchLevel = MatchLevel::EXACT;
             return $this;
@@ -119,7 +138,7 @@ namespace Applitools\fluent {
          * Shortcut to set the match level to {@code MatchLevel.STRICT}.
          * @return ICheckSettings This instance of the settings object.
          */
-        function strict()
+        public function strict()
         {
             $this->matchLevel = MatchLevel::STRICT;
             return $this;
@@ -129,7 +148,7 @@ namespace Applitools\fluent {
          * Shortcut to set the match level to {@code MatchLevel.CONTENT}.
          * @return ICheckSettings This instance of the settings object.
          */
-        function content()
+        public function content()
         {
             $this->matchLevel = MatchLevel::CONTENT;
             return $this;
@@ -140,7 +159,7 @@ namespace Applitools\fluent {
          * @param MatchLevel $matchLevel The match level to use.
          * @return ICheckSettings This instance of the settings object.
          */
-        function matchLevel($matchLevel)
+        public function matchLevel($matchLevel)
         {
             $this->matchLevel = $matchLevel;
             return $this;
@@ -151,7 +170,7 @@ namespace Applitools\fluent {
          * @param boolean $ignoreCaret Whether or not to detect and ignore a blinking caret in the screenshot.
          * @return ICheckSettings This instance of the settings object.
          */
-        function ignoreCaret($ignoreCaret)
+        public function ignoreCaret($ignoreCaret)
         {
             $this->ignoreCaret = $ignoreCaret;
             return $this;
@@ -160,7 +179,7 @@ namespace Applitools\fluent {
         /**
          * @return Region
          */
-        function getTargetRegion()
+        public function getTargetRegion()
         {
             return $this->targetRegion;
         }
@@ -168,7 +187,7 @@ namespace Applitools\fluent {
         /**
          * @return int
          */
-        function getTimeout()
+        public function getTimeout()
         {
             return $this->timeout;
         }
@@ -176,7 +195,7 @@ namespace Applitools\fluent {
         /**
          * @return bool
          */
-        function getStitchContent()
+        public function getStitchContent()
         {
             return $this->stitchContent;
         }
@@ -184,7 +203,7 @@ namespace Applitools\fluent {
         /**
          * @return MatchLevel
          */
-        function getMatchLevel()
+        public function getMatchLevel()
         {
             return $this->matchLevel;
         }
@@ -192,7 +211,7 @@ namespace Applitools\fluent {
         /**
          * @return IGetRegion[]
          */
-        function getIgnoreRegions()
+        public function getIgnoreRegions()
         {
             return $this->ignoreRegions;
         }
@@ -200,7 +219,7 @@ namespace Applitools\fluent {
         /**
          * @return IGetFloatingRegion[]
          */
-        function getFloatingRegions()
+        public function getFloatingRegions()
         {
             return $this->floatingRegions;
         }
@@ -208,9 +227,17 @@ namespace Applitools\fluent {
         /**
          * @return bool
          */
-        function getIgnoreCaret()
+        public function getIgnoreCaret()
         {
             return $this->ignoreCaret;
+        }
+
+        /**
+         * @param Region $region
+         */
+        protected function updateTargetRegion(Region $region)
+        {
+            $this->targetRegion = $region;
         }
     }
 }

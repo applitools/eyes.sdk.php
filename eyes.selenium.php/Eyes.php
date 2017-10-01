@@ -403,6 +403,13 @@ class Eyes extends EyesBase
     }
 
     /**
+     * @return EyesWebDriver
+     */
+    public function getDriver(){
+        return $this->driver;
+    }
+
+    /**
      * Takes a snapshot of the application under test and matches a specific
      * region within it with the expected output.
      *
