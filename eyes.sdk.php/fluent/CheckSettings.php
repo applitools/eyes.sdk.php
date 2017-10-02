@@ -4,7 +4,6 @@ namespace Applitools\fluent {
 
     use Applitools\MatchLevel;
     use Applitools\Region;
-    use Prophecy\Exception\InvalidArgumentException;
 
     class CheckSettings implements ICheckSettings, ICheckSettingsInternal
     {
@@ -38,7 +37,7 @@ namespace Applitools\fluent {
          * CheckSettings constructor.
          * @param Region $region
          */
-        protected function __construct(Region $region)
+        public function __construct(Region $region = null)
         {
             $this->targetRegion = $region;
         }
@@ -110,7 +109,7 @@ namespace Applitools\fluent {
          */
         public function timeout($timeoutMilliseconds)
         {
-            $this->timeout = $timeoutMilliseconds;
+            $this->timeout = $timeoutMilliseconds / 1000.0;
             return $this;
         }
 
@@ -238,6 +237,11 @@ namespace Applitools\fluent {
         protected function updateTargetRegion(Region $region)
         {
             $this->targetRegion = $region;
+        }
+
+        public function __toString()
+        {
+            return __CLASS__ . " - timeout: " . $this->getTimeout();
         }
     }
 }

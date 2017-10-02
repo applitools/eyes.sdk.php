@@ -6,6 +6,8 @@ use Applitools\Exceptions\EyesException;
 use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
+use Applitools\fluent\ICheckSettings;
+use Applitools\fluent\ICheckSettingsInternal;
 use Facebook\WebDriver\WebDriver;
 use Gregwar\Image\Image;
 
@@ -918,11 +920,11 @@ abstract class EyesBase
      * @param RegionProvider $regionProvider Returns the region to check or the empty rectangle to check the entire window.
      * @param string $tag An optional tag to be associated with the snapshot.
      * @param bool $ignoreMismatch Whether to ignore this check if a mismatch is found.
-     * @param int $retryTimeout The amount of time to retry matching in milliseconds or a negative value to use the default retry timeout.
+     * @param ICheckSettings $checkSettings The check settings to use.
      * @return MatchResult The result of matching the output with the expected output.
      * @throws TestFailedException
      */
-    public function checkWindowBase(RegionProvider $regionProvider, $tag = "", $ignoreMismatch = false, $retryTimeout = null)
+    public function checkWindowBase(RegionProvider $regionProvider, $tag, $ignoreMismatch, ICheckSettings $checkSettings)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log("Ignored");
@@ -933,12 +935,13 @@ abstract class EyesBase
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
-        $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
+
+        $this->logger->log("CheckWindowBase(regionProvider, $tag, $ignoreMismatch, $checkSettings)");
 
         $this->logger->log("Calling match window...");
 
         $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
-            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
+            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $checkSettings);
 
         $this->logger->log("MatchWindow Done!");
 

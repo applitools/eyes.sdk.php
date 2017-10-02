@@ -6,6 +6,9 @@
 namespace Applitools;
 
 
+use Applitools\fluent\ICheckSettings;
+use Applitools\fluent\ICheckSettingsInternal;
+
 class MatchWindowTask
 {
 
@@ -71,12 +74,19 @@ class MatchWindowTask
      * @param string $tag Optional tag to be associated with the match (can be {@code null}).
      * @param bool $shouldMatchWindowRunOnceOnTimeout Force a single match attempt at the end of the match timeout.
      * @param bool $ignoreMismatch Whether to instruct the server to ignore the match attempt in case of a mismatch.
-     * @param int $retryTimeout The amount of time to retry matching in milliseconds or a negative value to use the default retry timeout.
+     * @param ICheckSettings $checkSettings The check settings to use.
      * @return MatchResult Returns the results of the match
      */
     public function matchWindow($userInputs, EyesScreenshot $lastScreenshot = null,
-        RegionProvider $regionProvider, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout)
+        RegionProvider $regionProvider, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, ICheckSettings $checkSettings)
     {
+        ArgumentGuard::notNull($checkSettings, "checkSettings");
+
+        $retryTimeout = -1;
+        if ($checkSettings instanceof ICheckSettingsInternal) {
+            $retryTimeout = $checkSettings->getTimeout();
+        }
+
         if ($retryTimeout === null || $retryTimeout < 0) {
             $retryTimeout = $this->defaultRetryTimeout;
         }

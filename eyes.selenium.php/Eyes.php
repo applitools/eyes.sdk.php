@@ -4,6 +4,12 @@ namespace Applitools;
 
 use Applitools\Exceptions\EyesException;
 use Applitools\Exceptions\TestFailedException;
+use Applitools\fluent\CheckSettings;
+use Applitools\fluent\ICheckSettings;
+use Applitools\fluent\ICheckSettingsInternal;
+use Applitools\fluent\ISeleniumCheckTarget;
+use Applitools\fluent\SeleniumCheckSettings;
+use Applitools\fluent\Target;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverAction;
@@ -22,7 +28,6 @@ class Eyes extends EyesBase
 
     const UNKNOWN_DEVICE_PIXEL_RATIO = 0;
     const DEFAULT_DEVICE_PIXEL_RATIO = 1;
-
 
     const USE_DEFAULT_MATCH_TIMEOUT = -1;
 
@@ -45,11 +50,19 @@ class Eyes extends EyesBase
     private $regionToCheck;
 
     private $hideScrollbars;
-    private $rotation; //ImageRotation
+
+    /** @var ImageRotation */
+    private $rotation;
     private $devicePixelRatio;
-    private $stitchMode; //StitchMode
+
+    /** @var string */
+    private $stitchMode;
     private $waitBeforeScreenshots;
-    private $regionVisibilityStrategy; //RegionVisibilityStrategy
+
+    /** @var RegionVisibilityStrategy */
+    private $regionVisibilityStrategy;
+
+    private $stitchContent;
 
     /**
      * Creates a new (possibly disabled) Eyes instance that interacts with the
@@ -76,7 +89,6 @@ class Eyes extends EyesBase
         $this->waitBeforeScreenshots = self::DEFAULT_WAIT_BEFORE_SCREENSHOTS;
         $this->regionVisibilityStrategy = new MoveToRegionVisibilityStrategy($this->logger);
     }
-
 
     public function getBaseAgentId()
     {
@@ -328,7 +340,10 @@ class Eyes extends EyesBase
         }
         $this->logger->log(sprintf("CheckWindow(%d, '%s')", $matchTimeout, $tag));
         $regionProvider = new RegionProvider();
-        parent::checkWindowBase($regionProvider, $tag, false, $matchTimeout);
+
+        $checkSettings = new CheckSettings();
+        $checkSettings->timeout($matchTimeout);
+        parent::checkWindowBase($regionProvider, $tag, false, $checkSettings);
     }
 
     /**
@@ -410,6 +425,100 @@ class Eyes extends EyesBase
     }
 
     /**
+     * @param string $name
+     * @param ICheckSettings $checkSettings
+     */
+    public function check($name, ICheckSettings $checkSettings){
+        ArgumentGuard::notNull($checkSettings, "checkSettings");
+
+        $this->logger->verbose("check(\"$name\", checkSettings) - begin");
+
+        if ($checkSettings instanceof ICheckSettingsInternal) {
+            $this->stitchContent = $checkSettings->getStitchContent();
+        }
+
+        $targetRegion = $checkSettings->getTargetRegion();
+
+        $switchedToFrameCount = $this->switchToFrame($checkSettings);
+
+        if ($targetRegion != null) {
+            $regionProvider = new RegionProvider($targetRegion);
+            $this->checkWindowBase($regionProvider, $name, false, $checkSettings);
+        } else if ($checkSettings instanceof ISeleniumCheckTarget) {
+            $targetSelector = $checkSettings->getTargetSelector();
+            $targetElement = $checkSettings->getTargetElement();
+            if ($targetElement == null && $targetSelector != null) {
+                $targetElement = $this->driver->findElement($targetSelector);
+            }
+            if ($targetElement != null) {
+                if ($this->stitchContent) {
+                    $this->checkElement_($targetElement, $name, $checkSettings);
+                } else {
+                    $this->checkRegion_($targetElement, $name, $checkSettings);
+                }
+            } else if (count($checkSettings->getFrameChain()) > 0) {
+                $switchedToFrameCount = $this->checkFrameFluent($name, $checkSettings, $switchedToFrameCount);
+            } else {
+                $this->checkWindowBase(NullRegionProvider::getInstance(), $name, false, $checkSettings);
+            }
+        }
+
+        while ($switchedToFrameCount > 0) {
+            $this->driver->switchTo()->parentFrame();
+            $switchedToFrameCount--;
+        }
+
+        $this->stitchContent = false;
+
+        $this->logger->verbose("check - done!");
+    }
+
+    /**
+     * @param ICheckSettings $checkSettings
+     */
+    private function switchToFrame(ICheckSettings $checkSettings)
+    {
+        //TODO - implement
+        return 0;
+    }
+
+    /**
+     * @param string $name
+     * @param ICheckSettings $checkSettings
+     * @param int $switchedToFrameCount
+     */
+    private function checkFrameFluent($name, ICheckSettings $checkSettings, $switchedToFrameCount)
+    {
+        //TODO - implement
+        return $switchedToFrameCount;
+    }
+
+    /**
+     * Takes a snapshot of the application under test and matches a specific
+     * region within it with the expected output.
+     *
+     * @param WebDriverElement $element A non empty region representing the screen region to check.
+     * @param string $name An optional name to be associated with the snapshot.
+     * @param ICheckSettings $checkSettings
+     * @return Region
+     * @throws \Exception
+     */
+    private function checkRegion_(WebDriverElement $element, $name, ICheckSettings $checkSettings)
+    {
+        ArgumentGuard::notNull($element, "element");
+
+        $p = $element->getLocation();
+        $s = $element->getSize();
+
+        $regionProvider = new RegionProvider(Region::CreateFromLTWH($p->getX(), $p->getY(), $s->getWidth(), $s->getHeight()));
+        $regionProvider->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
+
+        $this->checkWindowBase($regionProvider, $name, false, $checkSettings);
+
+        $this->logger->verbose("Done! trying to scroll back to original position...");
+    }
+
+    /**
      * Takes a snapshot of the application under test and matches a specific
      * region within it with the expected output.
      *
@@ -454,7 +563,7 @@ class Eyes extends EyesBase
             $regionProvider,
             $tag,
             false,
-            $matchTimeout
+            Target::window()->timeout($matchTimeout)
         );
         $this->logger->log("Done! trying to scroll back to original position...");
         $this->regionVisibilityStrategy->returnToOriginalPosition($this->positionProvider); /// ????
@@ -518,7 +627,7 @@ class Eyes extends EyesBase
             $fullRegion,
             $tag,
             false,
-            $matchTimeout
+            Target::window()->timeout($matchTimeout)
         );
         $this->logger->verbose("Done! trying to scroll back to original position..");
         $this->regionVisibilityStrategy->returnToOriginalPosition($this->positionProvider);
@@ -657,7 +766,7 @@ class Eyes extends EyesBase
 
             $this->regionToCheck->setCoordinatesType(CoordinatesType::SCREENSHOT_AS_IS);
 
-            parent::checkWindowBase($this->regionToCheck, $tag, false, $matchTimeout);
+            parent::checkWindowBase($this->regionToCheck, $tag, false, Target::window()->timeout($matchTimeout));
         } finally {
             $this->checkFrameOrElement = false;
             $this->regionToCheck = null;
@@ -850,7 +959,7 @@ class Eyes extends EyesBase
 
             $this->regionToCheck = new RegionProvider($elementRegion);
             $this->regionToCheck->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
-            parent::checkWindowBase($this->regionToCheck, $tag, false, $matchTimeout);
+            parent::checkWindowBase($this->regionToCheck, $tag, false, Target::window()->timeout($matchTimeout));
         } finally {
             if ($originalOverflow != null) {
                 $eyesElement->setOverflow($originalOverflow);

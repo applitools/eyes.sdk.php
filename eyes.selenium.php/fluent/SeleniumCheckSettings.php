@@ -92,10 +92,22 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
      * @param WebDriverBy[] $regionSelectors
      * @return $this;
      */
-    public function ignore(...$regionSelectors)
+    public function ignoreBySelector(...$regionSelectors)
     {
         foreach ($regionSelectors as $selector) {
             parent::ignore(new IgnoreRegionBySelector($selector));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Region[] $regions
+     * @return $this;
+     */
+    public function ignore(...$regions){
+        foreach ($regions as $region) {
+            parent::ignore(new IgnoreRegionByRectangle($region));
         }
 
         return $this;
@@ -123,5 +135,10 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     function getFrameChain()
     {
         return $this->frameChain;
+    }
+
+    public function __toString()
+    {
+        return __CLASS__ . " - timeout: " . $this->getTimeout();
     }
 }
