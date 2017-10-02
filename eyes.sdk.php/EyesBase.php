@@ -2,6 +2,7 @@
 
 namespace Applitools;
 
+use Applitools\Exceptions\DiffsFoundException;
 use Applitools\Exceptions\EyesException;
 use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\Exceptions\TestFailedException;
@@ -1260,8 +1261,11 @@ abstract class EyesBase
                 $this->logger->log("--- Failed test ended. See details at " . $sessionResultsUrl);
 
                 if ($throwEx) {
-                    $message = "'{$this->sessionStartInfo->getScenarioIdOrName()}' of '{$this->sessionStartInfo->getAppIdOrName()}'. See details at $sessionResultsUrl";
-                    throw new TestFailedException($results, $message);
+                    $message = "Test '{$this->sessionStartInfo->getScenarioIdOrName()}'" .
+                        " of '{$this->sessionStartInfo->getAppIdOrName()}' detected differences!" .
+                        " See details at $sessionResultsUrl";
+
+                    throw new DiffsFoundException($results, $message);
                 }
                 return $results;
             }
@@ -1269,7 +1273,7 @@ abstract class EyesBase
             if ($isNewSession) {
                 $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
                 $this->logger->verbose("--- New test ended. " . $instructions);
-                if ($throwEx) {
+                if ($throwEx  && !$this->saveNewTests) {
                     $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                         . "' of '" . $this->sessionStartInfo->getAppIdOrName()
                         . "'. " . $instructions;
