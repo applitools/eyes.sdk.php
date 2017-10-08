@@ -1000,40 +1000,6 @@ abstract class EyesBase
         );
     }
 
-   /*
-    /**
-     * @param RegionProvider $regionProvider A callback for getting the region of the screenshot which will be set in the application output.
-     * @param EyesScreenshot $lastScreenshot Previous application screenshot (used for compression) or {@code null} if not available.
-     * @return AppOutputWithScreenshot The updated app output and screenshot.
-     */
-   /* private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot)
-    {
-
-        $this->logger->verbose("getting screenshot...");
-        // Getting the screenshot (abstract function implemented by each SDK).
-        $screenshot = $this->getScreenshot();
-        $this->logger->verbose("Done getting screenshot!");
-
-        // Cropping by region if necessary
-        $region = $this->regionProvider->getRegion();
-
-        if (!$region->isEmpty()) {
-            $screenshot = $screenshot->getSubScreenshot($region,
-                $regionProvider->getCoordinatesType(), false);
-        }
-
-        $this->logger->verbose("Compressing screenshot...");
-        $compressResult = $this->compressScreenshot64($screenshot, $lastScreenshot);
-        $this->logger->verbose("Done! Getting title...");
-        $title = $this->getTitle();
-        $this->logger->verbose("Done!");
-
-        $result = new AppOutputWithScreenshot(new AppOutput($title, $compressResult), $screenshot);
-        $this->logger->verbose("Done!");
-        return $result;
-    }
-*/
-
     /**
      * @return string The user given agent id of the SDK.
      */

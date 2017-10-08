@@ -12,6 +12,7 @@ class TestFluentApi_Chrome_ForceFPS extends TestFluentApi
     public static function setUpClass()
     {
         self::$forceFullPageScreenshot = true;
+        self::$testSuitName = "Eyes Selenium SDK - Fluent API - ForceFPS";
         parent::setUpClass();
     }
 

@@ -13,6 +13,7 @@ use Applitools\fluent\ICheckSettings;
 use Applitools\fluent\ICheckSettingsInternal;
 use Applitools\fluent\ISeleniumCheckTarget;
 use Applitools\fluent\Target;
+use Applitools\ImageUtils;
 use Applitools\Location;
 use Applitools\Logger;
 use Applitools\NullRegionProvider;
@@ -35,11 +36,6 @@ use Facebook\WebDriver\WebDriverElement;
  */
 class Eyes extends EyesBase
 {
-
-    /*public interface WebDriverAction {
-    void drive(WebDriver driver); //FIXME
-    }*/
-
     const UNKNOWN_DEVICE_PIXEL_RATIO = 0;
     const DEFAULT_DEVICE_PIXEL_RATIO = 1;
 
@@ -77,6 +73,10 @@ class Eyes extends EyesBase
     private $regionVisibilityStrategy;
 
     private $stitchContent;
+
+
+    /** @var ElementPositionProvider */
+    private $elementPositionProvider;
 
     /**
      * Creates a new (possibly disabled) Eyes instance that interacts with the
@@ -434,7 +434,8 @@ class Eyes extends EyesBase
     /**
      * @return EyesWebDriver
      */
-    public function getDriver(){
+    public function getDriver()
+    {
         return $this->driver;
     }
 
@@ -442,7 +443,8 @@ class Eyes extends EyesBase
      * @param string $name
      * @param ICheckSettings $checkSettings
      */
-    public function check($name, ICheckSettings $checkSettings){
+    public function check($name, ICheckSettings $checkSettings)
+    {
         ArgumentGuard::notNull($checkSettings, "checkSettings");
 
         $this->logger->verbose("check(\"$name\", checkSettings) - begin");
@@ -509,9 +511,62 @@ class Eyes extends EyesBase
         return $switchedToFrameCount;
     }
 
-    private function checkElement_($targetElement, $name, $checkSettings)
+    /**
+     * @param WebDriverElement $targetElement
+     * @param string $name
+     * @param ICheckSettings $checkSettings
+     */
+    private function checkElement_(WebDriverElement $targetElement, $name, ICheckSettings $checkSettings)
     {
-        //TODO - implement
+        $element = $targetElement;
+        if (!($element instanceof EyesRemoteWebElement)) {
+            $element = new EyesRemoteWebElement($this->logger, $this->driver, $element);
+        }
+
+        $originalPositionProvider = $this->getPositionProvider();
+        $scrollPositionProvider = new ScrollPositionProvider($this->logger, $this->driver);
+        $originalScrollPosition = $scrollPositionProvider->getCurrentPosition();
+
+        $loc = $element->getLocation();
+        $l = new Location($loc->getX(), $loc->getY());
+        $scrollPositionProvider->setPosition($l);
+
+        $originalOverflow = $element->getOverflow();
+
+        try {
+            $this->checkFrameOrElement = true;
+            $displayStyle = $element->getComputedStyle("display");
+            if ($displayStyle != "inline") {
+                $this->elementPositionProvider = new ElementPositionProvider($this->logger, $this->driver, $element);
+            }
+            $element->setOverflow("hidden");
+            //Rectangle rect = eyesElement.GetClientBounds();
+
+            /** @var Region $rect */
+            $rect = $element->getBounds();
+
+            $borderLeftWidth = $element->getComputedStyleInteger("border-left-width");
+            $borderTopWidth = $element->getComputedStyleInteger("border-top-width");
+
+            $this->regionToCheck = new Region($rect->getLeft() + $borderLeftWidth, $rect->getTop() + $borderTopWidth,
+                $element->getClientWidth(), $element->getClientHeight(),
+                CoordinatesType::CONTEXT_RELATIVE);
+
+            $this->logger->verbose("Element region: $this->regionToCheck");
+
+            CheckWindowBase(NullRegionProvider::getInstance(), $name, false, $checkSettings);
+        } finally {
+
+            $element->setOverflow($originalOverflow);
+
+            $this->checkFrameOrElement = false;
+
+            $scrollPositionProvider->setPosition($originalScrollPosition);
+            $this->setPositionProvider($originalPositionProvider);
+            $this->regionToCheck = Region::$empty;
+
+            $this->elementPositionProvider = null;
+        }
     }
 
     /**
@@ -1200,7 +1255,7 @@ class Eyes extends EyesBase
 
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
                     null, null, new RectangleSize($entireFrameOrElement->width(), $entireFrameOrElement->height()));
-            } else if ($this->forceFullPageScreenshot) {
+            } else if ($this->forceFullPageScreenshot || $this->stitchContent) {
                 $this->logger->log("Full page screenshot requested.");
                 // Save the current frame path.
                 $originalFrame = $this->driver->getFrameChain();

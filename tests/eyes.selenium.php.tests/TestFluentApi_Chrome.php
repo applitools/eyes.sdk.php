@@ -12,6 +12,7 @@ class TestFluentApi_Chrome extends TestFluentApi
     public static function setUpClass()
     {
         self::$forceFullPageScreenshot = false;
+        self::$testSuitName = "Eyes Selenium SDK - Fluent API";
         parent::setUpClass();
     }
 

@@ -11,12 +11,6 @@ use Facebook\WebDriver\WebDriverBy;
 
 abstract class TestFluentApi extends TestSetup
 {
-    static function setUpClass()
-    {
-        self::$testSuitName = "Eyes Selenium SDK - Fluent API";
-        parent::setUpClass();
-    }
-
     /**
      * @test
      * @doesNotPerformAssertions

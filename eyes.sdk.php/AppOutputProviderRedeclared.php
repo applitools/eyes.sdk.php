@@ -11,13 +11,13 @@ class AppOutputProviderRedeclared implements AppOutputProvider
     private $logger;
 
     /** @var DebugScreenshotsProvider|NullDebugScreenshotProvider */
-    private $debugScreenshotProvider;
+    private $debugScreenshotsProvider;
 
     public function __construct(EyesBase $eyes, Logger $logger)
     {
         $this->eyes = $eyes;
         $this->logger = $logger;
-        $this->debugScreenshotProvider = $eyes->getDebugScreenshotsProvider();
+        $this->debugScreenshotsProvider = $eyes->getDebugScreenshotsProvider();
     }
 
     /** @inheritdoc */
@@ -28,7 +28,10 @@ class AppOutputProviderRedeclared implements AppOutputProvider
     private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot = null) {
         $this->logger->verbose("getting screenshot...");
         // Getting the screenshot (abstract function implemented by each SDK).
+
+        /** @var EyesScreenshot $screenshot */
         $screenshot = $this->eyes->getScreenshot();
+
         $this->logger->verbose("Done getting screenshot!");
 
         // Cropping by region if necessary
@@ -36,7 +39,8 @@ class AppOutputProviderRedeclared implements AppOutputProvider
 
         if (!$region->isEmpty()) {
             $screenshot = $screenshot->getSubScreenshot($region, $regionProvider->getCoordinatesType(), false);
-            $this->debugScreenshotProvider->save($screenshot->getImage(),"SUB_SCREENSHOT");
+            //TODO - if I uncomment this line, then due to a bug in GregWar/Image it fails to use the same image again.
+            //$this->debugScreenshotsProvider->save($screenshot->getImage(), "SUB_SCREENSHOT");
         }
 
         $this->logger->verbose("Compressing screenshot...");
