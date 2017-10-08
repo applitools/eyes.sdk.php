@@ -475,6 +475,7 @@ class Eyes extends EyesBase
 
     /**
      * @param ICheckSettings $checkSettings
+     * @return int;
      */
     private function switchToFrame(ICheckSettings $checkSettings)
     {
@@ -486,6 +487,7 @@ class Eyes extends EyesBase
      * @param string $name
      * @param ICheckSettings $checkSettings
      * @param int $switchedToFrameCount
+     * @return int;
      */
     private function checkFrameFluent($name, ICheckSettings $checkSettings, $switchedToFrameCount)
     {

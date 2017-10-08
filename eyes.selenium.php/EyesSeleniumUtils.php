@@ -7,6 +7,7 @@ namespace Applitools;
 
 use Applitools\Exceptions\EyesDriverOperationException;
 use Applitools\Exceptions\EyesException;
+use Exception;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Interactions\Internal\WebDriverCoordinates;
 use Facebook\WebDriver\JavaScriptExecutor;
@@ -262,14 +263,14 @@ class EyesSeleniumUtils
     {
         $logger->log("extractViewportSize()");
 
-      /*  try { FIXME need to test. Have sme problems with JS extractor
+        try {
             return self::executeViewportSizeExtraction($driver);
         } catch (Exception $ex) {
-            $logger->verbose(sprintf("Failed to extract viewport size using Javascript: %s", $ex->getMessage()));
-        }*/
+            $logger->verbose("Failed to extract viewport size using Javascript: " . $ex->getMessage());
+        }
         // If we failed to extract the viewport size using JS, will use the
         // window size instead.
-        $logger->log("Using window size as viewport size.");
+        /*$logger->log("Using window size as viewport size.");
         $windowSize = $driver->manage()->window()->getSize();
         $width = $windowSize->getWidth();
         $height = $windowSize->getHeight();
@@ -286,7 +287,7 @@ class EyesSeleniumUtils
             // Not every WebDriver supports querying for orientation.
         }
         $logger->log(sprintf("Done! Size %d x %d", $width, $height));
-        return new RectangleSize($width, $height);
+        return new RectangleSize($width, $height);*/
     }
 
     /**
