@@ -199,6 +199,14 @@ abstract class EyesBase
     }
 
     /**
+     * @return DebugScreenshotsProvider|NullDebugScreenshotProvider
+     */
+    public function getDebugScreenshotsProvider()
+    {
+        return $this->debugScreenshotsProvider;
+    }
+
+    /**
      * @return PositionProvider The currently set position provider.
      */
     protected function getPositionProvider()
@@ -1141,7 +1149,7 @@ abstract class EyesBase
         $startTime = microtime() / 1000; //convert microseconds to milliseconds
 
         // A callback which will call getAppOutput
-        $appOutputProvider = new AppOutputProviderRedeclared(); //FIXME need to check
+        $appOutputProvider = new AppOutputProviderRedeclared($this, $this->logger); //FIXME need to check
 
         if ($this->runningSession->getIsNewSession()) {
             ResponseTimeAlgorithm::runNewProgressionSession($this->logger,

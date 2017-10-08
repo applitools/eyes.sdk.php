@@ -1,6 +1,8 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\ArgumentGuard;
+use Applitools\Logger;
 
 /**
  * A wrapper class for TouchScreen implementation. This class will record
@@ -28,7 +30,7 @@ class EyesTouchScreen /*implements TouchScreen */ /*ATTENTION_MOCK*/
 
     /**
      * A tap action. From our point of view, it is the same as a click.
-     * @param where Where to tap.
+     * @param Coordinates $where Where to tap.
      */
     public function singleTap(Coordinates $where)
     {

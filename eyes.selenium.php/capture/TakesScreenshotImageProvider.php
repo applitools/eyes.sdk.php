@@ -1,5 +1,7 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\ImageProvider;
+use Applitools\Logger;
 
 /**
  * An image provider based on EyesWebDriver.

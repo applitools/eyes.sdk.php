@@ -2,7 +2,8 @@
 
 namespace Tests\Applitools\Selenium;
 
-use Applitools\Eyes;
+use Applitools\Selenium\Eyes;
+use Applitools\MatchLevel;
 use Applitools\PrintLogHandler;
 use Applitools\RectangleSize;
 use Applitools\StitchMode;
@@ -35,6 +36,7 @@ class TestElement extends TestCase
         $eyes->setApiKey($_SERVER['APPLITOOLS_API_KEY']);
         $eyes->setHideScrollbars(true);
         $eyes->setStitchMode(StitchMode::CSS);
+        $eyes->setMatchLevel(MatchLevel::LAYOUT);
         $eyes->setForceFullPageScreenshot(true);
         $eyes->setLogHandler(new PrintLogHandler(true) );
 

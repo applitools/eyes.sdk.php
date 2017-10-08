@@ -1,7 +1,11 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
 use Applitools\Exceptions\EyesException;
+use Applitools\ImageUtils;
+use Applitools\Logger;
+use Applitools\RectangleSize;
 use Facebook\WebDriver\JavaScriptExecutor;
 use Facebook\WebDriver\Remote\RemoteExecuteMethod;
 use Facebook\WebDriver\Remote\RemoteTouchScreen;

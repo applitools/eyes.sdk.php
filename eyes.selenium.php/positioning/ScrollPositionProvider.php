@@ -1,8 +1,14 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
 use Applitools\Exceptions\EyesDriverOperationException;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\PositionMemento;
+use Applitools\PositionProvider;
+use Applitools\RectangleSize;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\JavaScriptExecutor;
 

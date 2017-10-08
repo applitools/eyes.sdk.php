@@ -1,5 +1,7 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\Location;
+use Applitools\PositionMemento;
 
 /**
  * Encapsulates state for {@link ScrollPositionProvider} instances.

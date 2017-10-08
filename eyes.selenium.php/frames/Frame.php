@@ -3,8 +3,12 @@
  * Applitools software.
  */
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\RectangleSize;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 
 /**

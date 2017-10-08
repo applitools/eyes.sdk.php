@@ -1,6 +1,9 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\PositionProvider;
 
 /**
  * An implementation of {@link RegionVisibilityStrategy}, which tries to move
@@ -9,7 +12,8 @@ namespace Applitools;
 class MoveToRegionVisibilityStrategy implements RegionVisibilityStrategy
 {
 
-    private $logger; //Logger
+    /** @var Logger */
+    private $logger;
     private $originalPosition; //PositionMemento
 
     public function __construct(Logger $logger)

@@ -1,8 +1,11 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
 
+use Applitools\ArgumentGuard;
+use Applitools\Location;
+use Applitools\Logger;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 
@@ -19,7 +22,7 @@ class BordersAwareElementContentLocationProvider {
      * @param Location $location The location of the element.
      * @return Location The location of the content of the element.
      */
-    public function getLocation(Logger $logger, RemoteWebElement/*FIXME need to check*/ $element,
+    public function getLocation(Logger $logger, RemoteWebElement $element,
                                 Location $location) {
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($element, "element");
@@ -60,8 +63,8 @@ class BordersAwareElementContentLocationProvider {
                         "Element's class: " .
                         get_class($element));
                 $logger->verbose("Using getCssValue...");
-                //FIXME $propValue = $element->getCssValue("border-left-width");
-                $element->getBorderLeftWidth(); //FIXME
+                $propValue = $element->getCssValue("border-left-width");
+                //$element->getBorderLeftWidth(); //FIXME
                 $logger->verbose("Done!");
             }
             // Convert border value from the format "2px" to int.

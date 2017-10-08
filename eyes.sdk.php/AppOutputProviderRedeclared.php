@@ -10,10 +10,14 @@ class AppOutputProviderRedeclared implements AppOutputProvider
     /** @var  Logger */
     private $logger;
 
+    /** @var DebugScreenshotsProvider|NullDebugScreenshotProvider */
+    private $debugScreenshotProvider;
+
     public function __construct(EyesBase $eyes, Logger $logger)
     {
         $this->eyes = $eyes;
         $this->logger = $logger;
+        $this->debugScreenshotProvider = $eyes->getDebugScreenshotsProvider();
     }
 
     /** @inheritdoc */
@@ -21,7 +25,6 @@ class AppOutputProviderRedeclared implements AppOutputProvider
         return $this->getAppOutputWithScreenshot($regionProvider, $lastScreenshot);
     }
 
-//FIXME this functionality from EyesBase
     private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot = null) {
         $this->logger->verbose("getting screenshot...");
         // Getting the screenshot (abstract function implemented by each SDK).
@@ -29,12 +32,12 @@ class AppOutputProviderRedeclared implements AppOutputProvider
         $this->logger->verbose("Done getting screenshot!");
 
         // Cropping by region if necessary
-        //$region = $regionProvider->getRegion();
+        $region = $regionProvider->getRegion();
 
-        /*if (!$region->isEmpty()) {
-            $screenshot = $screenshot->getSubScreenshot($region,
-                $regionProvider->getCoordinatesType(), false);
-        }*/
+        if (!$region->isEmpty()) {
+            $screenshot = $screenshot->getSubScreenshot($region, $regionProvider->getCoordinatesType(), false);
+            $this->debugScreenshotProvider->save($screenshot->getImage(),"SUB_SCREENSHOT");
+        }
 
         $this->logger->verbose("Compressing screenshot...");
         //FIXME

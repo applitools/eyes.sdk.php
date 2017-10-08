@@ -1,6 +1,11 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
+use Applitools\EyesRemoteWebElement;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\PositionProvider;
 use Facebook\WebDriver\WebDriverElement;
 
 class ElementPositionProvider implements PositionProvider {

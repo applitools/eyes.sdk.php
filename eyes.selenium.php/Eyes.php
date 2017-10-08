@@ -1,15 +1,29 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
+use Applitools\CoordinatesType;
 use Applitools\Exceptions\EyesException;
 use Applitools\Exceptions\TestFailedException;
+use Applitools\EyesBase;
+use Applitools\FixedScaleProviderFactory;
 use Applitools\fluent\CheckSettings;
 use Applitools\fluent\ICheckSettings;
 use Applitools\fluent\ICheckSettingsInternal;
 use Applitools\fluent\ISeleniumCheckTarget;
-use Applitools\fluent\SeleniumCheckSettings;
 use Applitools\fluent\Target;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\NullRegionProvider;
+use Applitools\PrintLogHandler;
+use Applitools\RectangleSize;
+use Applitools\Region;
+use Applitools\RegionProvider;
+use Applitools\ScaleProvider;
+use Applitools\ScaleProviderIdentityFactory;
+use Applitools\SessionType;
+use Applitools\SimplePropertyHandler;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverAction;
@@ -493,6 +507,11 @@ class Eyes extends EyesBase
     {
         //TODO - implement
         return $switchedToFrameCount;
+    }
+
+    private function checkElement_($targetElement, $name, $checkSettings)
+    {
+        //TODO - implement
     }
 
     /**

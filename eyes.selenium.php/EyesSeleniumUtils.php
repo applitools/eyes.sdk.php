@@ -3,10 +3,15 @@
  * Applitools software.
  */
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
 use Applitools\Exceptions\EyesDriverOperationException;
 use Applitools\Exceptions\EyesException;
+use Applitools\GeneralUtils;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\RectangleSize;
 use Exception;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Interactions\Internal\WebDriverCoordinates;
@@ -263,10 +268,12 @@ class EyesSeleniumUtils
     {
         $logger->log("extractViewportSize()");
 
-        try {
-            return self::executeViewportSizeExtraction($driver);
-        } catch (Exception $ex) {
-            $logger->verbose("Failed to extract viewport size using Javascript: " . $ex->getMessage());
+        if ($driver instanceof JavaScriptExecutor) {
+            try {
+                return self::executeViewportSizeExtraction($driver);
+            } catch (Exception $ex) {
+                $logger->verbose("Failed to extract viewport size using Javascript: " . $ex->getMessage());
+            }
         }
         // If we failed to extract the viewport size using JS, will use the
         // window size instead.
@@ -288,6 +295,7 @@ class EyesSeleniumUtils
         }
         $logger->log(sprintf("Done! Size %d x %d", $width, $height));
         return new RectangleSize($width, $height);*/
+        return new RectangleSize(0,0);
     }
 
     /**

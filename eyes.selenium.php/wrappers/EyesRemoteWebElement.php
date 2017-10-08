@@ -1,8 +1,13 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
 use Applitools\Exceptions\EyesException;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\MouseAction;
+use Applitools\Region;
 use Facebook\WebDriver\Remote\DriverCommand;
 use Facebook\WebDriver\Remote\FileDetector;
 use Facebook\WebDriver\Remote\RemoteExecuteMethod;

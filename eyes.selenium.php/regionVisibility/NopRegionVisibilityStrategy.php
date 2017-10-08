@@ -1,18 +1,22 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\PositionProvider;
+
 /**
  * An implementation of {@link RegionVisibilityStrategy} which does nothing.
  */
 class NopRegionVisibilityStrategy implements RegionVisibilityStrategy {
 
-    private $logger; //Logger
+    /** @var Logger */
+    private $logger;
 
     public function __construct($logger) {
         $this->logger = $logger;
     }
 
-    public function moveToRegion(PositionProvider $positionProvider,
-                             Location $location) {
+    public function moveToRegion(PositionProvider $positionProvider, Location $location) {
         $this->logger->verbose("Ignored (no op).");
     }
 

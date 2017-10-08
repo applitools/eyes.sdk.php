@@ -1,6 +1,11 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\ArgumentGuard;
+use Applitools\ImageUtils;
+use Applitools\RectangleSize;
+use Applitools\ScaleMethod;
+use Applitools\ScaleProvider;
 use Gregwar\Image\Image;
 
 /**

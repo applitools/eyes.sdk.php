@@ -2,72 +2,19 @@
 
 namespace Tests\Applitools\Selenium;
 
-use Applitools\BatchInfo;
-use Applitools\Eyes;
+require_once ('TestSetup.php');
+
 use Applitools\fluent\Target;
-use Applitools\PrintLogHandler;
-use Applitools\RectangleSize;
 use Applitools\Region;
-use Applitools\StitchMode;
-use Facebook\WebDriver\Remote\DesiredCapabilities;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
+
 use Facebook\WebDriver\WebDriverBy;
-use PHPUnit\Framework\TestCase;
 
-class TestFluentApi extends TestCase
+abstract class TestFluentApi extends TestSetup
 {
-    /** @var Eyes */
-    private static $eyes;
-
-    /** @var RemoteWebDriver */
-    private static $webDriver;
-
-    /** @var BatchInfo */
-    private static $batchInfo;
-
-    /** @var string */
-    private static $testSuitName;
-
-    /**
-     * @beforeClass
-     */
-    public static function setUpClass()
+    static function setUpClass()
     {
         self::$testSuitName = "Eyes Selenium SDK - Fluent API";
-        self::$batchInfo = new BatchInfo(self::$testSuitName);
-    }
-
-    public function setUp()
-    {
-        $eyes = new Eyes();
-        $eyes->setServerUrl("https://localhost.applitools.com");
-        $eyes->setApiKey($_SERVER['APPLITOOLS_API_KEY']);
-        $eyes->setHideScrollbars(true);
-        $eyes->setStitchMode(StitchMode::CSS);
-        $eyes->setForceFullPageScreenshot(true);
-        $eyes->setLogHandler(new PrintLogHandler(true));
-
-        self::$webDriver = RemoteWebDriver::create($_SERVER['SELENIUM_SERVER_URL'], DesiredCapabilities::chrome());
-        self::$eyes = $eyes;
-        self::$eyes->setBatch(self::$batchInfo);
-    }
-
-    public function init($testName)
-    {
-        self::$eyes->open(self::$webDriver, self::$testSuitName, $testName, new RectangleSize(800, 599));
-        self::$webDriver->get('http://applitools.github.io/demo/TestPages/FramesTestPage/');
-    }
-
-    public function tearDown()
-    {
-        try {
-            if (self::$eyes->getIsOpen()) {
-                self::$eyes->close();
-            }
-        } finally {
-            self::$eyes->abortIfNotClosed();
-            self::$webDriver->quit();
-        }
+        parent::setUpClass();
     }
 
     /**
@@ -77,7 +24,7 @@ class TestFluentApi extends TestCase
     public function TestCheckWindowWithIgnoreRegion_Fluent()
     {
         $this->init(__FUNCTION__);
-        self::$eyes->check("Fluent - Window with Ignore region",
+        $this->eyes->check("Fluent - Window with Ignore region",
             Target::window()
                 ->fully()
                 ->timeout(5000)
@@ -92,7 +39,7 @@ class TestFluentApi extends TestCase
     public function TestCheckRegionWithIgnoreRegion_Fluent()
     {
         $this->init(__FUNCTION__);
-        self::$eyes->check("Fluent - Region with Ignore region",
+        $this->eyes->check("Fluent - Region with Ignore region",
             Target::regionBySelector(WebDriverBy::id("overflowing-div"))
                 ->ignore(new Region(50, 50, 100, 100))
         );

@@ -1,5 +1,9 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
+
+use Applitools\CoordinatesType;
+use Applitools\Region;
+use Applitools\RegionProvider;
 
 class FullRegionProvider extends RegionProvider{
 

@@ -1,9 +1,23 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
+use Applitools\CoordinatesType;
+use Applitools\DebugScreenshotsProvider;
 use Applitools\Exceptions\EyesDriverOperationException;
 use Applitools\Exceptions\EyesException;
+use Applitools\EyesScreenshotFactory;
+use Applitools\GeneralUtils;
+use Applitools\ImageProvider;
+use Applitools\ImageUtils;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\PositionProvider;
+use Applitools\RectangleSize;
+use Applitools\Region;
+use Applitools\RegionProvider;
+use Applitools\ScaleProviderFactory;
 use Gregwar\Image\Image;
 
 class FullPageCaptureAlgorithm

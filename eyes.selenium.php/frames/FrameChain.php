@@ -1,7 +1,11 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\ArgumentGuard;
 use Applitools\Exceptions\NoFramesException;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\RectangleSize;
 
 /**
  * Represents a path to a frame, including their location and scroll.

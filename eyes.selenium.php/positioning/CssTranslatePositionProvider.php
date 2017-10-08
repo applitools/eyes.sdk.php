@@ -1,6 +1,11 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\PositionMemento;
+use Applitools\PositionProvider;
 use Facebook\WebDriver\JavaScriptExecutor;
 
 /**

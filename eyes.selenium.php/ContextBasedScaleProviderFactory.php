@@ -1,5 +1,10 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
+
+use Applitools\PropertyHandler;
+use Applitools\RectangleSize;
+use Applitools\ScaleMethod;
+use Applitools\ScaleProviderFactory;
 
 /**
  * Factory implementation for creating {@link ContextBasedScaleProvider} instances.
@@ -28,8 +33,7 @@ class ContextBasedScaleProviderFactory extends ScaleProviderFactory {
     public function __construct(RectangleSize $topLevelContextEntireSize, RectangleSize $viewportSize,
                                             ScaleMethod $scaleMethod, $devicePixelRatio,
                                             PropertyHandler $scaleProviderHandler) {
-        //super(scaleProviderHandler); //FIXME need to check
-        $this->scaleProviderHandler = $scaleProviderHandler;
+        parent::__construct($scaleProviderHandler);
         $this->topLevelContextEntireSize = $topLevelContextEntireSize;
         $this->viewportSize = $viewportSize;
         $this->scaleMethod = $scaleMethod;

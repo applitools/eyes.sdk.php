@@ -4,11 +4,19 @@
  * Applitools software.
  */
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
+use Applitools\CoordinatesType;
 use Applitools\Exceptions\CoordinatesTypeConversionException;
 use Applitools\Exceptions\EyesDriverOperationException;
 use Applitools\Exceptions\OutOfBoundsException;
+use Applitools\EyesScreenshot;
+use Applitools\ImageUtils;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\RectangleSize;
+use Applitools\Region;
 use Gregwar\Image\Image;
 
 class EyesWebDriverScreenshot extends EyesScreenshot

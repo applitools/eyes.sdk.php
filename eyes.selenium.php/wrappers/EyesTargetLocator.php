@@ -1,8 +1,10 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
 use Applitools\Exceptions\EyesException;
+use Applitools\Logger;
 use Facebook\WebDriver\Exception\NoSuchFrameException;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriver;
