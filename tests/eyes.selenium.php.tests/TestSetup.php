@@ -49,7 +49,7 @@ abstract class TestSetup extends TestCase
         $eyes->setLogHandler(new PrintLogHandler(true));
 
         $eyes->setDebugScreenshotsPath('c:/temp/logs');
-        $eyes->setSaveDebugScreenshots(true);
+        //$eyes->setSaveDebugScreenshots(true);
 
         $this->eyes = $eyes;
     }
