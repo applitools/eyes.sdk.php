@@ -11,6 +11,10 @@ class Region
     private $top;
     private $width;
     private $height;
+
+    /** @var string $coordinatesType */
+    private $coordinatesType = CoordinatesType::SCREENSHOT_AS_IS;
+
     public static $empty;
 
     /** @var Logger */
@@ -35,6 +39,7 @@ class Region
         $this->top = self::$empty->top;
         $this->width = self::$empty->width;
         $this->height = self::$empty->height;
+        $this->coordinatesType = self::$empty->coordinatesType;
     }
 
     public function __construct()
@@ -98,7 +103,22 @@ class Region
         return ($this->getLeft() == $other->getLeft())
             && ($this->getTop() == $other->getTop())
             && ($this->getWidth() == $other->getWidth())
-            && ($this->getHeight() == $other->getHeight());
+            && ($this->getHeight() == $other->getHeight())
+            && ($this->getCoordinatesType() == $other->getCoordinatesType());
+    }
+
+    /**
+     * @return string The type of coordinates on which the region is based.
+     */
+    public function getCoordinatesType()
+    {
+        return $this->coordinatesType;
+    }
+
+    /** @var string $coordinatesType */
+    public function setCoordinatesType($coordinatesType)
+    {
+        $this->coordinatesType = $coordinatesType;
     }
 
     public function hashCode()
@@ -410,6 +430,6 @@ class Region
 
     public function __toString()
     {
-        return "({$this->left} , {$this->top }) {$this->width}x{$this->height}";
+        return "({$this->left} , {$this->top }) {$this->width}x{$this->height}, {$this->coordinatesType}";
     }
 }
