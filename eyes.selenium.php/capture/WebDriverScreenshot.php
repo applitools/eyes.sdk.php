@@ -11,14 +11,17 @@ namespace Applitools\Selenium;
 
 // Different browsers return different parameters in addition to "value".
 
-class WebDriverScreenshot {
+class WebDriverScreenshot
+{
     private $value;
 
-    public function setValue($value) {
+    public function setValue($value)
+    {
         $this->value = $value;
     }
 
-public function getValue() {
+    public function getValue()
+    {
         return $this->value;
     }
 
