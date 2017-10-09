@@ -70,7 +70,7 @@ class MatchWindowTask
      *
      * @param Trigger[] $userInputs User input preceding this match.
      * @param EyesScreenshot|null $lastScreenshot The last screenshot matched or not ignored.
-     * @param RegionProvider $regionProvider Window region to capture.
+     * @param Region $region Window region to capture.
      * @param string $tag Optional tag to be associated with the match (can be {@code null}).
      * @param bool $shouldMatchWindowRunOnceOnTimeout Force a single match attempt at the end of the match timeout.
      * @param bool $ignoreMismatch Whether to instruct the server to ignore the match attempt in case of a mismatch.
@@ -78,7 +78,7 @@ class MatchWindowTask
      * @return MatchResult Returns the results of the match
      */
     public function matchWindow($userInputs, EyesScreenshot $lastScreenshot = null,
-        RegionProvider $regionProvider, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, ICheckSettings $checkSettings)
+        Region $region, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, ICheckSettings $checkSettings)
     {
         ArgumentGuard::notNull($checkSettings, "checkSettings");
 
@@ -105,7 +105,7 @@ class MatchWindowTask
             }
 
             // Getting the screenshot.
-            $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
+            $appOutput = $this->appOutputProvider->getAppOutput($region, $lastScreenshot);
 
             $matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch);
 
@@ -118,7 +118,7 @@ class MatchWindowTask
 
             // We intentionally start the timer after(!) taking the screenshot,
             // so less time is "wasted" on the transfer of the image.
-            $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
+            $appOutput = $this->appOutputProvider->getAppOutput($region, $lastScreenshot);
 
             // Start the retry timer.
             $start = microtime(true);
@@ -131,7 +131,7 @@ class MatchWindowTask
                 // Wait before trying again.
                 GeneralUtils::sleep(self::MATCH_INTERVAL);
 
-                $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
+                $appOutput = $this->appOutputProvider->getAppOutput($region, $lastScreenshot);
 
                 // Notice the ignoreMismatch here is true
                 $matchResult = $this->performMatch($userInputs, $appOutput, $tag, true);
@@ -140,7 +140,7 @@ class MatchWindowTask
             // if we're here because we haven't found a match yet, try once more
             if (!$matchResult->getAsExpected()) {
 
-                $appOutput = $this->appOutputProvider->getAppOutput($regionProvider, $lastScreenshot);
+                $appOutput = $this->appOutputProvider->getAppOutput($region, $lastScreenshot);
 
                 $matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch);
             }

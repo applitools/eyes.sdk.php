@@ -16,7 +16,6 @@ use Applitools\Logger;
 use Applitools\PositionProvider;
 use Applitools\RectangleSize;
 use Applitools\Region;
-use Applitools\RegionProvider;
 use Applitools\ScaleProviderFactory;
 use Gregwar\Image\Image;
 
@@ -47,8 +46,7 @@ class FullPageCaptureAlgorithm
      * Returns a stitching of a region.
      *
      * @param ImageProvider $imageProvider The provider for the screenshot.
-     * @param RegionProvider $regionProvider A provider of the region to stitch. If {@code
-     *                       getRegion} returns {@code Region.EMPTY}, the entire image will be stitched.
+     * @param Region $region The region to stitch. If {@code Region::EMPTY}, the entire image will be stitched.
      * @param PositionProvider $originProvider A provider for scrolling to initial position
      *                       before starting the actual stitching.
      * @param PositionProvider $positionProvider A provider of the scrolling implementation.
@@ -61,7 +59,7 @@ class FullPageCaptureAlgorithm
      */
 
     public function getStitchedRegion(ImageProvider $imageProvider,
-                                      RegionProvider $regionProvider, PositionProvider $originProvider,
+                                      Region $region, PositionProvider $originProvider,
                                       PositionProvider $positionProvider, ScaleProviderFactory $scaleProviderFactory,
                                       $waitBeforeScreenshots,
                                       DebugScreenshotsProvider $debugScreenshotsProvider,
@@ -69,14 +67,12 @@ class FullPageCaptureAlgorithm
     {
         $this->logger->verbose("getStitchedRegion()");
 
-        ArgumentGuard::notNull($regionProvider, "regionProvider");
+        ArgumentGuard::notNull($region, "region");
         ArgumentGuard::notNull($positionProvider, "positionProvider");
 
-        $this->logger->verbose("Region to check: {$regionProvider->getRegion()}");
-        $this->logger->verbose("Coordinates type: {$regionProvider->getCoordinatesType()}");
+        $this->logger->verbose("Region to check: $region");
 
-        // Saving the original position (in case we were already in the
-        // outermost frame).
+        // Saving the original position (in case we were already in the outermost frame).
         $originalPosition = $originProvider->getState();
 
         $setPositionRetries = 3;
@@ -114,8 +110,7 @@ class FullPageCaptureAlgorithm
         $this->logger->verbose("Done! Getting region in screenshot...");
 
         $regionInScreenshot = $screenshot->convertRegionLocation(
-            $regionProvider->getRegion(),
-            $regionProvider->getCoordinatesType(),
+            $region, $region->getCoordinatesType(),
             CoordinatesType::SCREENSHOT_AS_IS);
 
         $this->logger->verbose("Done! Region in screenshot: $regionInScreenshot");
@@ -131,7 +126,7 @@ class FullPageCaptureAlgorithm
 
         if (!$regionInScreenshot->isEmpty()) {//  FIXME do not crop image before full screenshot is prepared
             $image = ImageUtils::getImagePart($image, $regionInScreenshot);
-            self::saveDebugScreenshotPart($debugScreenshotsProvider, $image, $regionProvider->getRegion(), "before-scaled");
+            self::saveDebugScreenshotPart($debugScreenshotsProvider, $image, $region, "before-scaled");
             $partWidth = $regionInScreenshot->getWidth();
             $partHeight = $regionInScreenshot->getHeight();
         }

@@ -21,24 +21,22 @@ class AppOutputProviderRedeclared implements AppOutputProvider
     }
 
     /** @inheritdoc */
-    public function getAppOutput(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot = null){
-        return $this->getAppOutputWithScreenshot($regionProvider, $lastScreenshot);
+    public function getAppOutput(Region $region, EyesScreenshot $lastScreenshot = null){
+        return $this->getAppOutputWithScreenshot($region, $lastScreenshot);
     }
 
-    private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot = null) {
+    private function getAppOutputWithScreenshot(Region $region, EyesScreenshot $lastScreenshot = null) {
         $this->logger->verbose("getting screenshot...");
-        // Getting the screenshot (abstract function implemented by each SDK).
 
+        // Getting the screenshot (abstract function implemented by each SDK).
         /** @var EyesScreenshot $screenshot */
         $screenshot = $this->eyes->getScreenshot();
 
         $this->logger->verbose("Done getting screenshot!");
 
         // Cropping by region if necessary
-        $region = $regionProvider->getRegion();
-
         if (!$region->isEmpty()) {
-            $screenshot = $screenshot->getSubScreenshot($region, $regionProvider->getCoordinatesType(), false);
+            $screenshot = $screenshot->getSubScreenshot($region, $region->getCoordinatesType(), false);
             //TODO - if I uncomment this line, then due to a bug in GregWar/Image it fails to use the same image again.
             //$this->debugScreenshotsProvider->save($screenshot->getImage(), "SUB_SCREENSHOT");
         }
