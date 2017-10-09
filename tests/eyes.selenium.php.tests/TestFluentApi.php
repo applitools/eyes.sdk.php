@@ -2,11 +2,10 @@
 
 namespace Tests\Applitools\Selenium;
 
-require_once ('TestSetup.php');
+require_once('TestSetup.php');
 
-use Applitools\fluent\Target;
 use Applitools\Region;
-
+use Applitools\Selenium\fluent\Target;
 use Facebook\WebDriver\WebDriverBy;
 
 abstract class TestFluentApi extends TestSetup
@@ -38,13 +37,19 @@ abstract class TestFluentApi extends TestSetup
                 ->ignore(new Region(50, 50, 100, 100))
         );
     }
-    /*
-    @Test
-    public void TestCheckFrame_Fully_Fluent()
+
+
+    /**
+     * @test
+     * @doesNotPerformAssertions
+     */
+    public function TestCheckFrame_Fully_Fluent()
     {
-    eyes . check("Fluent - Full Frame", Target . frame("frame1") . fully());
+        $this->init(__FUNCTION__);
+        $this->eyes->check("Fluent - Full Frame", Target::frameByNameOrId("frame1")->fully());
     }
 
+    /*
     @Test
         public void TestCheckFrame_Fluent(){
     eyes . check("Fluent - Frame", Target . frame("frame1"));
