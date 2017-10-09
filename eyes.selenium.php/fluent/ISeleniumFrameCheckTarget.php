@@ -1,6 +1,6 @@
 <?php
 
-namespace Applitools\fluent;
+namespace Applitools\Selenium\fluent;
 
 
 use Facebook\WebDriver\WebDriverBy;

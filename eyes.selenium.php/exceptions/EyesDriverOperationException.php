@@ -1,6 +1,8 @@
 <?php
 
-namespace Applitools\Exceptions;
+namespace Applitools\Selenium\Exceptions;
+
+use Applitools\Exceptions\EyesException;
 
 /**
  * Encapsulates an error when trying to perform an action using WebDriver.

@@ -8,9 +8,6 @@ use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
 use Applitools\fluent\ICheckSettings;
-use Applitools\fluent\ICheckSettingsInternal;
-use Facebook\WebDriver\WebDriver;
-use Gregwar\Image\Image;
 
 abstract class EyesBase
 {
@@ -926,7 +923,7 @@ abstract class EyesBase
     /**
      * Takes a snapshot of the application under test and matches it with the expected output.
      *
-     * @param RegionProvider $regionProvider Returns the region to check or the empty rectangle to check the entire window.
+     * @param RegionProvider $regionProvider Returns the region to check or an empty rectangle to check the entire window.
      * @param string $tag An optional tag to be associated with the snapshot.
      * @param bool $ignoreMismatch Whether to ignore this check if a mismatch is found.
      * @param ICheckSettings $checkSettings The check settings to use.

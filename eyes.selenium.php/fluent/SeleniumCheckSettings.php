@@ -1,7 +1,9 @@
 <?php
 
-namespace Applitools\fluent;
+namespace Applitools\Selenium\fluent;
 
+use Applitools\fluent\CheckSettings;
+use Applitools\fluent\IgnoreRegionByRectangle;
 use Applitools\Region;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverElement;

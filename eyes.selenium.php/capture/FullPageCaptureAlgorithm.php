@@ -5,7 +5,7 @@ namespace Applitools\Selenium;
 use Applitools\ArgumentGuard;
 use Applitools\CoordinatesType;
 use Applitools\DebugScreenshotsProvider;
-use Applitools\Exceptions\EyesDriverOperationException;
+use Applitools\Selenium\Exceptions\EyesDriverOperationException;
 use Applitools\Exceptions\EyesException;
 use Applitools\EyesScreenshotFactory;
 use Applitools\GeneralUtils;

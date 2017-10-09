@@ -1,10 +1,11 @@
 <?php
 
-namespace Applitools\fluent;
+namespace Applitools\Selenium\fluent;
 
-use Applitools\Eyes;
 use Applitools\EyesBase;
+use Applitools\fluent\IGetRegion;
 use Applitools\Region;
+use Applitools\Selenium\Eyes;
 use Facebook\WebDriver\WebDriverBy;
 
 class IgnoreRegionBySelector implements IGetRegion
