@@ -37,7 +37,8 @@ class FullPageCaptureAlgorithm
     }
 
 
-    private static function saveDebugScreenshotPart(DebugScreenshotsProvider $debugScreenshotsProvider, Image $image, Region $region, $name) {
+    private static function saveDebugScreenshotPart(DebugScreenshotsProvider $debugScreenshotsProvider, Image &$image, Region $region, $name)
+    {
         $suffix = "part-{$name}-{$region->getLeft()}_{$region->getTop()}_{$region->getWidth()}x{$region->getHeight()}";
         $debugScreenshotsProvider->save($image, $suffix);
     }

@@ -42,5 +42,5 @@ abstract class DebugScreenshotsProvider {
         return $this->path;
     }
 
-    abstract public function save(Image $image, $suffix);
+    abstract public function save(Image &$image, $suffix);
 }

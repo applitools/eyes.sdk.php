@@ -171,23 +171,6 @@ class ImageUtils
     }
 
     /**
-     * Creates a copy of an image with an updated image type.
-     *
-     * @param Image $src The image to copy.
-     * @param string $updatedType The type of the copied image. See {@link BufferedImage#getType()}.
-     * @return Image A copy of the {@code src} of the requested type.
-     */
-    public static function copyImageWithType(Image $src, $updatedType)
-    {
-        ArgumentGuard::notNull($src, "src");
-        $result = new Image($src->width(), $src->height(), $updatedType);
-        $g2 = $result->createGraphics();
-        $g2->drawRenderedImage($src, null);
-        $g2->dispose();
-        return $result;
-    }
-
-    /**
      * Scales an image by the given ratio
      *
      * @param Image $image The image to scale.
@@ -453,12 +436,15 @@ class ImageUtils
      * Save image to local file system
      * @param Image $image The image to save.
      * @param string $filename The path to save image
+     * @return Image
      * @throws EyesException
      */
-    public static function saveImage(Image $image, $filename)
+    public static function saveImage(Image &$image, $filename)
     {
         try {
             $image->save($filename, "png", 100);
+            $image = new Image($filename);
+            return $image;
         } catch (\Exception $e) {
             throw new EyesException("Failed to save image", $e);
         }

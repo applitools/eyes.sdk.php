@@ -9,8 +9,9 @@ use Gregwar\Image\Image;
  */
 class FileDebugScreenshotsProvider extends DebugScreenshotsProvider {
 
-    public function save(Image $image, $suffix) {
+    public function save(Image &$image, $suffix) {
         $filename = $this->getPath() . $this->getPrefix() . microtime() . "_" . $suffix . ".png";
-        ImageUtils::saveImage($image, str_replace(" ", "_", $filename));
+        $image = ImageUtils::saveImage($image, str_replace(" ", "_", $filename));
+        return $image;
     }
 }
