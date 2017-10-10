@@ -148,6 +148,18 @@ class Region
     }
 
     /**
+     * Get a region which is a scaled version of the current region.
+     * IMPORTANT: This also scales the LOCATION(!!) of the region (not just its size).
+     *
+     * @param double $scaleRatio The ratio by which to scale the region.
+     * @return Region A new region which is a scaled version of the current region.
+     */
+    public function scale($scaleRatio)
+    {
+        return Region::CreateFromLocationAndSize($this->getLocation()->scale($scaleRatio), $this->getSize()->scale($scaleRatio));
+    }
+
+    /**
      *
      * @return RectangleSize The (top,left) position of the current region.
      */

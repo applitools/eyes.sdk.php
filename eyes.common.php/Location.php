@@ -84,6 +84,18 @@ class Location
         return $this->y;
     }
 
+    /**
+     * Get a scaled location.
+     *
+     * @param double $scaleRatio The ratio by which to scale the results.
+     * @return Location A scaled copy of the current location.
+     */
+    public function scale($scaleRatio)
+    {
+        return new Location((int)ceil($this->x * $scaleRatio), (int)ceil($this->y * $scaleRatio));
+    }
+
+
     public function __toString()
     {
         return "({$this->x}, {$this->y})";
