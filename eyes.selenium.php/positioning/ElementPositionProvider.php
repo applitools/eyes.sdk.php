@@ -2,10 +2,11 @@
 namespace Applitools\Selenium;
 
 use Applitools\ArgumentGuard;
-use Applitools\EyesRemoteWebElement;
 use Applitools\Location;
 use Applitools\Logger;
+use Applitools\PositionMemento;
 use Applitools\PositionProvider;
+use Applitools\RectangleSize;
 use Facebook\WebDriver\WebDriverElement;
 
 class ElementPositionProvider implements PositionProvider {
