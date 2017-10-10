@@ -73,7 +73,15 @@ class Eyes extends EyesBase
     /** @var RegionVisibilityStrategy */
     private $regionVisibilityStrategy;
 
+    /** @var  bool */
     private $stitchContent;
+
+    /**
+     * @return bool
+     */
+    public function shouldStitchContent(){
+        return $this->stitchContent;
+    }
 
 
     /** @var ElementPositionProvider */
