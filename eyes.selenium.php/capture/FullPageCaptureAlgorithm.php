@@ -44,7 +44,7 @@ class FullPageCaptureAlgorithm
         $debugScreenshotsProvider->save($image, $suffix);
     }
 
-/**
+    /**
      * Returns a stitching of a region.
      *
      * @param ImageProvider $imageProvider The provider for the screenshot.
@@ -101,7 +101,7 @@ class FullPageCaptureAlgorithm
         // FIXME - scaling should be refactored
         $scaleProvider = $scaleProviderFactory->getScaleProvider($image->width());
         // Notice that we want to cut/crop an image before we scale it, we need to change
-        //$pixelRatio = 1 / $scaleProvider->getScaleRatio();
+        $pixelRatio = 1 / $scaleProvider->getScaleRatio();
 
         $this->logger->verbose("Done! Creating screenshot object...");
         // We need the screenshot to be able to convert the region to
@@ -111,27 +111,15 @@ class FullPageCaptureAlgorithm
 
         $this->logger->verbose("Done! Getting region in screenshot...");
 
-        $regionInScreenshot = $screenshot->convertRegionLocation(
-            $region, $region->getCoordinatesType(),
-            CoordinatesType::SCREENSHOT_AS_IS);
-
-        $this->logger->verbose("Done! Region in screenshot: $regionInScreenshot");
-
-        // Handling a specific case where the region is actually larger than
-        // the screenshot (e.g., when body width/height are set to 100%, and
-        // an internal div is set to value which is larger than the viewport).
-        $regionInScreenshot->intersect(Region::CreateFromLTWH(0, 0, $image->width(), $image->height()));
-        $this->logger->verbose("Region after intersect: $regionInScreenshot ; image size: {$image->width()}x{$image->height()}");
-
-        $partWidth = $image->width();
-        $partHeight = $image->height();
+        $regionInScreenshot = $this->getRegionInScreenshot($region, $image, $pixelRatio, $screenshot /*, $regionPositionCompensation*/);
 
         if (!$regionInScreenshot->isEmpty()) {//  FIXME do not crop image before full screenshot is prepared
             $image = ImageUtils::getImagePart($image, $regionInScreenshot);
             self::saveDebugScreenshotPart($debugScreenshotsProvider, $image, $region, "before-scaled");
-            $partWidth = $regionInScreenshot->getWidth();
-            $partHeight = $regionInScreenshot->getHeight();
         }
+
+        $image = ImageUtils::scaleImage($image, $scaleProvider->getScaleRatio());
+        $debugScreenshotsProvider->save($image, "scaled");
 
         try {
             $entireSize = $positionProvider->getEntireSize();
@@ -141,14 +129,16 @@ class FullPageCaptureAlgorithm
             $entireSize = new RectangleSize($image->width(), $image->height());
             $this->logger->log("Using image size instead: $entireSize");
         }
-        /*
-                // Notice that this might still happen even if we used
-                // "getImagePart", since "entirePageSize" might be that of a frame.
-                if ($image->width() >= $entireSize->getWidth() &&
-                    $image->height() >= $entireSize->getHeight()) {
-                    $originProvider->restoreState($originalPosition);
-                    return $image;
-                }*/
+
+        // Notice that this might still happen even if we used
+        // "getImagePart", since "entirePageSize" might be that of a frame.
+        if ($image->width() >= $entireSize->getWidth() && $image->height() >= $entireSize->getHeight()) {
+            $originProvider->restoreState($originalPosition);
+            return $image;
+        }
+
+        $partWidth = $image->width();
+        $partHeight = $image->height();
 
         // These will be used for storing the actual stitched size (it is
         // sometimes less than the size extracted via "getEntireSize").
@@ -213,7 +203,7 @@ class FullPageCaptureAlgorithm
 
             if (!$regionInScreenshot->isEmpty()) {
                 $partImage = ImageUtils::getImagePart($partImage, $regionInScreenshot);
-                $pos =  $positionProvider->getCurrentPosition();
+                $pos = $positionProvider->getCurrentPosition();
                 self::saveDebugScreenshotPart($debugScreenshotsProvider, $partImage, $partRegion, "original-scrolled-{$pos->getX()}_{$pos->getY()}");
             }
             //$partImage = ImageUtils::scaleImage($partImage, $scaleProvider->getScaleRatio());
@@ -248,5 +238,36 @@ class FullPageCaptureAlgorithm
         }
         $debugScreenshotsProvider->save($stitchedImage, "stitched");
         return $stitchedImage;
+    }
+
+    /**
+     * @param Region $region
+     * @param Image $image
+     * @param double $pixelRatio
+     * @param EyesScreenshot $screenshot
+     * @return Region
+     */
+    private function getRegionInScreenshot(Region $region, Image $image, $pixelRatio, EyesScreenshot $screenshot)
+    {
+        /** @var Region */
+        $regionInScreenshot = $screenshot->getIntersectedRegion($region, $region->getCoordinatesType(), CoordinatesType::SCREENSHOT_AS_IS);
+
+        $this->logger->verbose("Done! Region in screenshot: $regionInScreenshot");
+        $regionInScreenshot = $regionInScreenshot->scale($pixelRatio);
+        $this->logger->verbose("Scaled region: $regionInScreenshot");
+
+        /*if ($regionPositionCompensation == null) {
+            $regionPositionCompensation = new NullRegionPositionCompensation();
+        }
+
+        regionInScreenshot = regionPositionCompensation.compensateRegionPosition(regionInScreenshot, pixelRatio);*/
+
+        // Handling a specific case where the region is actually larger than
+        // the screenshot (e.g., when body width/height are set to 100%, and
+        // an internal div is set to value which is larger than the viewport).
+        $regionInScreenshot->intersect(Region::CreateFromLTWH(0, 0, $image->width(), $image->height()));
+        $this->logger->verbose("Region after intersect: $regionInScreenshot");
+
+        return $regionInScreenshot;
     }
 }
