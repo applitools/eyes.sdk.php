@@ -427,22 +427,21 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
             return $this->defaultContentViewportSize;
         }
 
-        //$currentFrames = clone $this->getFrameChain();
-//FIXME
+        $currentFrames = new FrameChain($this->logger, $this->getFrameChain());
+
         // Optimization
-        //if ($currentFrames->size() > 0) {
-        //    $this->switchTo()->defaultContent();
-        //}
+        if ($currentFrames->size() > 0) {
+            $this->switchTo()->defaultContent();
+        }
 
         $this->logger->verbose("Extracting viewport size...");
         $this->defaultContentViewportSize = EyesSeleniumUtils::extractViewportSize($this->logger, $this);
         $this->logger->verbose("Done! Viewport size: " . json_encode($this->defaultContentViewportSize));
 
-        //if ($currentFrames->size() > 0) {
-        //    $this->frameChain = clone $currentFrames; //FIXME need to check
-            /*$locator = $this->switchTo();
-            $locator->frames($currentFrames);*/
-        //}
+        if ($currentFrames->size() > 0) {
+            $this->switchTo()->frames($currentFrames);
+        }
+
         return $this->defaultContentViewportSize;
     }
 
