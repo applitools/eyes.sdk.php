@@ -9,6 +9,8 @@ namespace Applitools\Selenium;
 use Applitools\ArgumentGuard;
 use Applitools\CoordinatesType;
 use Applitools\Exceptions\CoordinatesTypeConversionException;
+use Applitools\Exceptions\EyesException;
+use Applitools\PositionProvider;
 use Applitools\Selenium\Exceptions\EyesDriverOperationException;
 use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\EyesScreenshot;

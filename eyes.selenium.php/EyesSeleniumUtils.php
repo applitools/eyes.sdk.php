@@ -6,12 +6,12 @@
 namespace Applitools\Selenium;
 
 use Applitools\ArgumentGuard;
-use Applitools\Exceptions\EyesDriverOperationException;
 use Applitools\Exceptions\EyesException;
 use Applitools\GeneralUtils;
 use Applitools\Location;
 use Applitools\Logger;
 use Applitools\RectangleSize;
+use Applitools\Selenium\Exceptions\EyesDriverOperationException;
 use Exception;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Interactions\Internal\WebDriverCoordinates;

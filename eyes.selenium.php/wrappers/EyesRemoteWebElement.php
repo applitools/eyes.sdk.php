@@ -3,6 +3,7 @@
 namespace Applitools\Selenium;
 
 use Applitools\ArgumentGuard;
+use Applitools\CoordinatesType;
 use Applitools\Exceptions\EyesException;
 use Applitools\Location;
 use Applitools\Logger;

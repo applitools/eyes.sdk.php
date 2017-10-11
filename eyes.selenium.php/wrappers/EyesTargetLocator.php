@@ -4,7 +4,9 @@ namespace Applitools\Selenium;
 
 use Applitools\ArgumentGuard;
 use Applitools\Exceptions\EyesException;
+use Applitools\Location;
 use Applitools\Logger;
+use Applitools\RectangleSize;
 use Facebook\WebDriver\Exception\NoSuchFrameException;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriver;
