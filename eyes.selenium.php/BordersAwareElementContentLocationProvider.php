@@ -22,7 +22,7 @@ class BordersAwareElementContentLocationProvider {
      * @param Location $location The location of the element.
      * @return Location The location of the content of the element.
      */
-    public function getLocation(Logger $logger, RemoteWebElement $element,
+    public static function getLocation(Logger $logger, RemoteWebElement $element,
                                 Location $location) {
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($element, "element");
