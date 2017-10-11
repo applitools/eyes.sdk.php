@@ -36,9 +36,9 @@ class AppOutputProviderRedeclared implements AppOutputProvider
 
         // Cropping by region if necessary
         if (!$region->isEmpty()) {
-            $screenshot = $screenshot->getSubScreenshot($region, $region->getCoordinatesType(), false);
-            //TODO - if I uncomment this line, then due to a bug in GregWar/Image it fails to use the same image again.
-            //$this->debugScreenshotsProvider->save($screenshot->getImage(), "SUB_SCREENSHOT");
+            $screenshot = $screenshot->getSubScreenshot($region, false);
+            $subScreenshot = $screenshot->getImage();
+            $this->debugScreenshotsProvider->save($subScreenshot, "SUB_SCREENSHOT");
         }
 
         $this->logger->verbose("Compressing screenshot...");
