@@ -210,9 +210,7 @@ class EyesSeleniumUtils
     public static function getCurrentScrollPosition(JavascriptExecutor $executor)
     {
         //noinspection unchecked
-        /*List<Long> */
-        $positionAsList = /*(List<Long>)*/
-            $executor->executeScript(self::JS_GET_CURRENT_SCROLL_POSITION);
+        $positionAsList = $executor->executeScript(self::JS_GET_CURRENT_SCROLL_POSITION);
         return new Location((int)$positionAsList[0], (int)$positionAsList[1]);
     }
 
