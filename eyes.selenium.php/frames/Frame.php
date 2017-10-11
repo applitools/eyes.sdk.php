@@ -19,49 +19,64 @@ use Facebook\WebDriver\Remote\RemoteWebElement;
 class Frame {
     // A user can switch into a frame by either its name,
     // index or by passing the relevant web element.
-    protected $logger; //Logger
-    protected $reference; //WebElement
-    protected $id; //
-    protected $location; //Location
-    protected $size; //RectangleSize
-    protected $parentScrollPosition; //Location
+
+    /** @var Logger */
+    protected $logger;
+
+    /** @var RemoteWebElement */
+    protected $reference;
+
+    /** @var Location */
+    protected $location;
+
+    /** @var RectangleSize */
+    protected $size;
+
+    /** @var RectangleSize */
+    protected $innerSize;
+
+    /** @var Location */
+    protected $parentScrollPosition;
+
+    /** @var Location */
+    protected $originalLocation;
 
     /**
      * @param Logger $logger A Logger instance.
      * @param RemoteWebElement $reference The web element for the frame, used as a reference to
      *                  switch into the frame.
-     * @param mixed $frameId The id of the frame. Can be used later for comparing
-     *                two frames.
      * @param Location $location The location of the frame within the current frame.
      * @param RectangleSize $size The frame element size (i.e., the size of the frame on the
      *             screen, not the internal document size).
+     * @param RectangleSize $innerSize
      * @param Location $parentScrollPosition The scroll position the frame's parent was
      *                             in when the frame was switched to.
+     * @param Location $originalLocation
      */
-    public function __construct(Logger $logger, RemoteWebElement $reference, $frameId, Location $location, RectangleSize $size, Location $parentScrollPosition) {
+    public function __construct(Logger $logger, RemoteWebElement $reference,
+                                Location $location, RectangleSize $size, RectangleSize $innerSize,
+                                Location $parentScrollPosition, Location $originalLocation) {
         ArgumentGuard::notNull($logger, "logger");
         ArgumentGuard::notNull($reference, "reference");
-        ArgumentGuard::notNull($frameId, "frameId");
         ArgumentGuard::notNull($location, "location");
         ArgumentGuard::notNull($size, "size");
+        ArgumentGuard::notNull($innerSize, "innerSize");
         ArgumentGuard::notNull($parentScrollPosition, "parentScrollPosition");
+        ArgumentGuard::notNull($originalLocation, "originalLocation");
 
-        $logger->verbose("Frame(logger, reference, $frameId, $location, $size, $parentScrollPosition)");
+        $logger->verbose("Frame(logger, reference, $location, $size, $parentScrollPosition)");
 
         $this->logger = $logger;
         $this->reference = $reference;
-        $this->id = $frameId;
         $this->parentScrollPosition = $parentScrollPosition;
         $this->size = $size;
+        $this->innerSize = $innerSize;
         $this->location = $location;
+        $this->originalLocation = $originalLocation;
     }
 
     public function getReference() {
         return $this->reference;
-    }
-
-    public function getId() {
-        return $this->id;
     }
 
     public function getLocation() {
@@ -72,8 +87,16 @@ class Frame {
         return $this->size;
     }
 
+    public function getInnerSize() {
+        return $this->innerSize;
+    }
+
     public function getParentScrollPosition() {
         return $this->parentScrollPosition;
+    }
+
+    public function getOriginalLocation() {
+        return $this->originalLocation;
     }
 
     public function __toString()

@@ -1358,7 +1358,7 @@ class Eyes extends EyesBase
             } else if ($this->forceFullPageScreenshot || $this->stitchContent) {
                 $this->logger->log("Full page screenshot requested.");
                 // Save the current frame path.
-                $originalFrame = $this->driver->getFrameChain();
+                $originalFrame = new FrameChain($this->logger, $this->driver->getFrameChain());
                 $this->driver->switchTo()->defaultContent();
                 $algo = new FullPageCaptureAlgorithm($this->logger);
 
