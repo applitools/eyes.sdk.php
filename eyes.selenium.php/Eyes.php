@@ -614,10 +614,9 @@ class Eyes extends EyesBase
         $originalScrollPosition = $scrollPositionProvider->getCurrentPosition();
 
         $loc = $element->getLocation();
-        $l = new Location($loc->getX(), $loc->getY());
-        $scrollPositionProvider->setPosition($l);
+        $p = new Location($loc->getX(), $loc->getY());
 
-        $originalOverflow = $element->getOverflow();
+        $originalOverflow = null;
 
         try {
             $this->checkFrameOrElement = true;
@@ -625,20 +624,21 @@ class Eyes extends EyesBase
             if ($displayStyle != "inline") {
                 $this->elementPositionProvider = new ElementPositionProvider($this->logger, $this->driver, $element);
             }
-            $element->setOverflow("hidden");
-            //Rectangle rect = eyesElement.GetClientBounds();
 
-            /** @var Region $rect */
-            $rect = $element->getBounds();
+            // Set overflow to "hidden".
+            $originalOverflow = $element->getOverflow();
+            $element->setOverflow("hidden");
 
             $borderLeftWidth = $element->getComputedStyleInteger("border-left-width");
             $borderTopWidth = $element->getComputedStyleInteger("border-top-width");
 
+            $elementWidth = $element->getClientWidth();
+            $elementHeight = $element->getClientHeight();
+
             $this->regionToCheck = Region::CreateFromLTWH(
-                    $rect->getLeft() + $borderLeftWidth,
-                    $rect->getTop() + $borderTopWidth,
-                    $element->getClientWidth(),
-                    $element->getClientHeight());
+                    $p->getX() + $borderLeftWidth,
+                    $p->getY() + $borderTopWidth,
+                    $elementWidth, $elementHeight);
 
             $this->regionToCheck->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
 
@@ -646,8 +646,9 @@ class Eyes extends EyesBase
 
             $this->checkWindowBase(NullRegionProvider::getInstance(), $name, false, $checkSettings);
         } finally {
-
-            $element->setOverflow($originalOverflow);
+            if ($originalOverflow != null) {
+                $element->setOverflow($originalOverflow);
+            }
 
             $this->checkFrameOrElement = false;
 

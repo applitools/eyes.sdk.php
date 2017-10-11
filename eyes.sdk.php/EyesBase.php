@@ -947,7 +947,7 @@ abstract class EyesBase
         $this->logger->log("Calling match window...");
 
         $region = $regionProvider->getRegion();
-        $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $region,
+        $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $region,
             $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $checkSettings);
 
         $this->logger->log("MatchWindow Done!");
