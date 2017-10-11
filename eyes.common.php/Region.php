@@ -382,6 +382,7 @@ class Region
      */
     public function intersect(Region $other)
     {
+        self::$logger->verbose("intersecting this region ($this) with $other ...");
 
         // If there's no intersection set this as the Empty region.
         if (!$this->isIntersected($other)) {
@@ -442,6 +443,6 @@ class Region
 
     public function __toString()
     {
-        return "({$this->left} , {$this->top }) {$this->width}x{$this->height}, {$this->coordinatesType}";
+        return "({$this->left}, {$this->top }) {$this->width}x{$this->height}, {$this->coordinatesType}";
     }
 }
