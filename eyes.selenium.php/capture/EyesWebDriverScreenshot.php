@@ -24,45 +24,53 @@ use Gregwar\Image\Image;
 class EyesWebDriverScreenshot extends EyesScreenshot
 {
 
-    private $logger; //Logger
-    private $driver; //EyesWebDriver
-    private $frameChain; //FrameChain
-    private $scrollPosition; //Location
-    private $screenshotType; //ScreenshotType
+    /** @var Logger */
+    private $logger;
+
+    /** @var EyesWebDriver */
+    private $driver;
+
+    /** @var FrameChain */
+    private $frameChain;
+
+    /** @var Location */
+    private $currentFrameScrollPosition;
+
+    /** @var string */
+    private $screenshotType;
 
     // The top/left coordinates of the frame window(!) relative to the top/left
     // of the screenshot. Used for calculations, so can also be outside(!)
     // the screenshot.
-    private $frameLocationInScreenshot; //Location
+    /** @var Location */
+    private $frameLocationInScreenshot;
 
     // The part of the frame window which is visible in the screenshot
-    private $frameWindow; //Region
+    /** @var Region */
+    private $frameWindow;
 
     private static function calcFrameLocationInScreenshot(Logger $logger,
                                                           FrameChain $frameChain,
                                                           $screenshotType = ScreenshotType::ENTIRE_FRAME)
     {
-
-        $logger->verbose("Getting first frame..");
-        //$frameIterator = $frameChain->iterator();
-        //$firstFrame = $frameIterator->next();
         $frames = $frameChain->getFrames();
-        $logger->verbose("Done!");
-        $locationInScreenshot = clone (array_pop($frames)->getLocation());
+        $firstFrame = reset($frames);
+        $locationInScreenshot = clone $firstFrame->getLocation();
         // We only consider scroll of the default content if this is
         // a viewport screenshot.
         if ($screenshotType == ScreenshotType::VIEWPORT) {
-            $defaultContentScroll = array_pop($frames)->getParentScrollPosition();
+            $defaultContentScroll = $firstFrame->getParentScrollPosition();
             $locationInScreenshot->offset(-$defaultContentScroll->getX(), -$defaultContentScroll->getY());
         }
 
-        $logger->verbose("Iterating over frames..");
-        end($frames);
-        while (prev($frames)) {
+        $logger->verbose("Iterating over frames...");
+        $firstFrameIterated = false;
+        foreach ($frames as $frame) {
+            if (!$firstFrameIterated) {
+                $firstFrameIterated = true;
+                continue;
+            }
             $logger->verbose("Getting next frame...");
-            /** @var Frame $frame */
-            $frame = current($frameIterator);
-            $logger->verbose("Done!");
             $frameLocation = $frame->getLocation();
             // For inner frames we must consider the scroll
             $frameParentScrollPosition = $frame->getParentScrollPosition();
@@ -76,12 +84,13 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     }
 
     /**
-     * @param Logger $logger                     A Logger instance.
-     * @param EyesWebDriver $driver                     The web driver used to get the screenshot.
-     * @param Image $image                      The actual screenshot image.
-     * @param string $screenshotType             (Optional) The screenshot's type (e.g., viewport/full page).
-     * @param Location $frameLocationInScreenshot  (Optional) The current frame's location in the screenshot.
+     * @param Logger $logger A Logger instance.
+     * @param EyesWebDriver $driver The web driver used to get the screenshot.
+     * @param Image $image The actual screenshot image.
+     * @param string $screenshotType (Optional) The screenshot's type (e.g., viewport/full page).
+     * @param Location $frameLocationInScreenshot (Optional) The current frame's location in the screenshot.
      * @param RectangleSize $entireFrameSize
+     * @throws EyesException
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
                                 Image $image = null,
@@ -89,88 +98,62 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                                 Location $frameLocationInScreenshot = null,
                                 RectangleSize $entireFrameSize = null)
     {
+        ArgumentGuard::notNull($logger, "logger");
+        ArgumentGuard::notNull($driver, "driver");
+
         parent::__construct($image);  //FIXME need to check
 
+        $this->logger = $logger;
+        $this->driver = $driver;
+
         if (!empty($entireFrameSize)) {
-            ArgumentGuard::notNull($logger, "logger");
-            ArgumentGuard::notNull($driver, "driver");
             ArgumentGuard::notNull($entireFrameSize, "entireFrameSize");
-            $this->logger = $logger;
-            $this->driver = $driver;
             $this->frameChain = $driver->getFrameChain();
             // The frame comprises the entire screenshot.
             $this->screenshotType = ScreenshotType::ENTIRE_FRAME;
-            $this->scrollPosition = new Location(0, 0);
+            $this->currentFrameScrollPosition = new Location(0, 0);
             $this->frameLocationInScreenshot = new Location(0, 0);
             $this->frameWindow = Region::CreateFromLocationAndSize(Location::getZero(), $entireFrameSize);
         } else {
-            ArgumentGuard::notNull($logger, "logger");
-            ArgumentGuard::notNull($driver, "driver");
-            $this->logger = $logger;
-            $this->driver = $driver;
+
+            $this->screenshotType = $this->updateScreenshotType($screenshotType, $image);
             $positionProvider = new ScrollPositionProvider($logger, $driver);
-            $viewportSize = $driver->getDefaultContentViewportSize();
+
             $this->frameChain = $driver->getFrameChain();
-            // If we're inside a frame, then the frame size is given by the frame
-            // chain. Otherwise, it's the size of the entire page.
-            if ($this->frameChain->size() != 0) {
-                $frameSize = $this->frameChain->getCurrentFrameSize();
-            } else {
-                // get entire page size might throw an exception for applications
-                // which don't support Javascript (e.g., Appium). In that case
-                // we'll use the viewport size as the frame's size.
-                try {
-                    $fs = $positionProvider->getEntireSize();
-                } catch (EyesDriverOperationException $e) {
-                    $fs = $viewportSize;
-                }
-                $frameSize = $fs;
-            }
-            // Getting the scroll position. For native Appium apps we can't get the
-            // scroll position, so we use (0,0)
-            try {
-                $sp = $positionProvider->getCurrentPosition();
-            } catch (EyesDriverOperationException $e) {
-                $sp = new Location(0, 0);
-            }
-            $this->scrollPosition = $sp;
+            $frameSize = $this->getFrameSize($positionProvider);
+            $this->currentFrameScrollPosition = $this->getUpdatedScrollPosition($positionProvider);
+            $this->frameLocationInScreenshot = $this->getUpdatedFrameLocationInScreenshot($logger, $frameLocationInScreenshot);
 
-            /*if ($screenshotType == null) { //FIXME image is a string
-                if ($image->getWidth() <= $viewportSize->getWidth() && $image->getHeight() <= $viewportSize->getHeight()
-                ) {
-                    $screenshotType = ScreenshotType::VIEWPORT;
-                } else {
-                    $screenshotType = ScreenshotType::ENTIRE_FRAME;
-                }
-            } */
-            $this->screenshotType = $screenshotType;
-
-            // This is used for frame related calculations.
-            if ($frameLocationInScreenshot == null) {
-                if ($this->frameChain->size() > 0) {
-                    $frameLocationInScreenshot =
-                        $this->calcFrameLocationInScreenshot($logger, $this->frameChain, $this->screenshotType);
-                } else {
-                    $frameLocationInScreenshot = new Location(0, 0);
-                    if ($this->screenshotType == ScreenshotType::VIEWPORT) {
-                        $frameLocationInScreenshot->offset(-$this->scrollPosition->getX(), -$this->scrollPosition->getY());
-                    }
-                }
-            }
-            $this->frameLocationInScreenshot = $frameLocationInScreenshot;
             $logger->verbose("Calculating frame window...");
-            $this->frameWindow = Region::CreateFromLocationAndSize($frameLocationInScreenshot, $frameSize);
-/*
-            //FIXME
-            //$this->frameWindow->intersect(new Region(/*FIXME0, 0, $image->getWidth(), $image->getHeight()));
+            $this->frameWindow = Region::CreateFromLocationAndSize($this->frameLocationInScreenshot, $frameSize);
 
-            if ($this->frameWindow->getWidth() <= 0 ||
-                $this->frameWindow->getHeight() <= 0
-            ) {
+            $this->frameWindow->intersect(Region::CreateFromLTWH(0, 0, $image->width(), $image->height()));
+
+            if ($this->frameWindow->getWidth() <= 0 || $this->frameWindow->getHeight() <= 0) {
                 throw new EyesException("Got empty frame window for screenshot!");
-            }*/
+            }
+
             $logger->verbose("Done!");
         }
+    }
+
+    /**
+     * @param Logger $logger
+     * @param Location|null $frameLocationInScreenshot
+     * @return Location
+     */
+    private function getUpdatedFrameLocationInScreenshot(Logger $logger, Location $frameLocationInScreenshot = null)
+    {
+        $this->logger->verbose("\$frameLocationInScreenshot: $frameLocationInScreenshot");
+        // This is used for frame related calculations.
+        if ($frameLocationInScreenshot == null) {
+            if ($this->frameChain->size() > 0) {
+                $frameLocationInScreenshot = $this->calcFrameLocationInScreenshot($logger, $this->frameChain, $this->screenshotType);
+            } else {
+                $frameLocationInScreenshot = new Location(0, 0);
+            }
+        }
+        return $frameLocationInScreenshot;
     }
 
     /**
@@ -183,6 +166,33 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     }
 
     /**
+     * @param string|null $screenshotType
+     * @param Image $image
+     * @return string
+     */
+    private function updateScreenshotType($screenshotType = null, Image $image)
+    {
+        if ($screenshotType == null) {
+            $viewportSize = $this->driver->getDefaultContentViewportSize();
+
+            $scaleViewport = $this->driver->getEyes()->shouldStitchContent();
+
+            if ($scaleViewport) {
+                $pixelRatio = $this->driver->getEyes()->getDevicePixelRatio();
+                $viewportSize = $viewportSize->scale($pixelRatio);
+            }
+
+            if ($image->width() <= $viewportSize->getWidth() && $image->height() <= $viewportSize->getHeight()) {
+                $screenshotType = ScreenshotType::VIEWPORT;
+            } else {
+                $screenshotType = ScreenshotType::ENTIRE_FRAME;
+            }
+        }
+        return $screenshotType;
+    }
+
+
+    /**
      * @return FrameChain A copy of the frame chain which was available when the
      * screenshot was created.
      */
@@ -191,25 +201,21 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         return new FrameChain($this->logger, $this->frameChain);
     }
 
-    public function getSubScreenshot(Region $region, /*CoordinatesType FIXME*/$coordinatesType, $throwIfClipped)
+    public function getSubScreenshot(Region $region, $throwIfClipped)
     {
-        $this->logger->verbose(sprintf("getSubScreenshot([%s], %s, %b)",
-            json_encode($region), json_encode($coordinatesType), json_encode($throwIfClipped)));
+        $this->logger->verbose("getSubScreenshot($region, $throwIfClipped)");
 
         ArgumentGuard::notNull($region, "region");
-        ArgumentGuard::notNull($coordinatesType, "coordinatesType");
 
         // We calculate intersection based on as-is coordinates.
         /*          $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
                     $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
         */
         $asIsSubScreenshotRegion = $this->getIntersectedRegion($region,
-            $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
+            $region->getCoordinatesType(), CoordinatesType::SCREENSHOT_AS_IS);
 
         if ($asIsSubScreenshotRegion->isEmpty() || ($throwIfClipped && !$asIsSubScreenshotRegion->getSize()->equals($region->getSize()))) {
-            throw new OutOfBoundsException(sprintf(
-                "Region [%s, (%s)] is out of screenshot bounds [%s]",
-                json_encode($region), $coordinatesType, $this->frameWindow));
+            throw new OutOfBoundsException("Region $region is out of screenshot bounds {$this->frameWindow}");
         }
 
         $subScreenshotImage = ImageUtils::getImagePart($this->image, $asIsSubScreenshotRegion);
@@ -245,7 +251,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         ArgumentGuard::notNull($to, "to");
 
         $this->logger->verbose("convertLocation ($location, $from, $to)");
-        $this->logger->verbose("scroll position: $this->scrollPosition");
+        $this->logger->verbose("scroll position: $this->currentFrameScrollPosition");
         $this->logger->verbose("frame location in screenshot: $this->frameLocationInScreenshot");
 
         $result = clone $location;
@@ -261,16 +267,19 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         // screenshot as-is might be different, e.g.,
         // if it is actually a sub-screenshot of a region).
         if ($this->frameChain->size() == 0 &&
-            $this->screenshotType == ScreenshotType::ENTIRE_FRAME) {
+            $this->screenshotType == ScreenshotType::ENTIRE_FRAME
+        ) {
             $this->logger->verbose("frameChain size: {$this->frameChain->size()}");
 
             if (($from == CoordinatesType::CONTEXT_RELATIVE || $from == CoordinatesType::CONTEXT_AS_IS) &&
-                $to == CoordinatesType::SCREENSHOT_AS_IS) {
+                $to == CoordinatesType::SCREENSHOT_AS_IS
+            ) {
                 // If this is not a sub-screenshot, this will have no effect.
                 $result->offset($this->frameLocationInScreenshot->getX(), $this->frameLocationInScreenshot->getY());
 
             } else if ($from == CoordinatesType::SCREENSHOT_AS_IS &&
-                    ($to == CoordinatesType::CONTEXT_RELATIVE || $to == CoordinatesType::CONTEXT_AS_IS)) {
+                ($to == CoordinatesType::CONTEXT_RELATIVE || $to == CoordinatesType::CONTEXT_AS_IS)
+            ) {
 
                 $result->offset(-$this->frameLocationInScreenshot->getX(), -$this->frameLocationInScreenshot->getY());
             }
@@ -284,7 +293,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             case CoordinatesType::CONTEXT_AS_IS:
                 switch ($to) {
                     case CoordinatesType::CONTEXT_RELATIVE:
-                        $result->offset($this->scrollPosition->getX(), $this->scrollPosition->getY());
+                        $result->offset($this->currentFrameScrollPosition->getX(), $this->currentFrameScrollPosition->getY());
                         break;
 
                     case CoordinatesType::SCREENSHOT_AS_IS:
@@ -300,13 +309,13 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 switch ($to) {
                     case CoordinatesType::SCREENSHOT_AS_IS:
                         // First, convert context-relative to context-as-is.
-                        // $result->offset(-$this->scrollPosition->getX(), -$this->scrollPosition->getY());
+                        $result->offset(-$this->currentFrameScrollPosition->getX(), -$this->currentFrameScrollPosition->getY());
                         // Now convert context-as-is to screenshot-as-is.
                         $result->offset($this->frameLocationInScreenshot->getX(), $this->frameLocationInScreenshot->getY());
                         break;
 
                     case CoordinatesType::CONTEXT_AS_IS:
-                        $result->offset(-$this->scrollPosition->getX(), -$this->scrollPosition->getY());
+                        $result->offset(-$this->currentFrameScrollPosition->getX(), -$this->currentFrameScrollPosition->getY());
                         break;
 
                     default:
@@ -320,7 +329,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                         // First convert to context-as-is.
                         $result->offset(-$this->frameLocationInScreenshot->getX(), -$this->frameLocationInScreenshot->getY());
                         // Now convert to context-relative.
-                        $result->offset($this->scrollPosition->getX(), $this->scrollPosition->getY());
+                        $result->offset($this->currentFrameScrollPosition->getX(), $this->currentFrameScrollPosition->getY());
                         break;
 
                     case CoordinatesType::CONTEXT_AS_IS:
@@ -359,7 +368,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
      * @return Region
      * @throws CoordinatesTypeConversionException
      */
-    public function getIntersectedRegion(Region $region, $originalCoordinatesType, $resultCoordinatesType = null)
+    public function getIntersectedRegion(Region $region,
+                                         $originalCoordinatesType,
+                                         $resultCoordinatesType = null)
     {
         if ($region->isEmpty()) {
             return clone $region;
@@ -429,5 +440,42 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         }
 
         return $elementRegion;
+    }
+
+    /**
+     * @param PositionProvider $positionProvider
+     * @return RectangleSize
+     */
+    private function getFrameSize(PositionProvider $positionProvider)
+    {
+        if ($this->frameChain->size() != 0) {
+            $frameSize = $this->frameChain->getCurrentFrameInnerSize();
+        } else {
+            // get entire page size might throw an exception for applications
+            // which don't support Javascript (e.g., Appium). In that case
+            // we'll use the viewport size as the frame's size.
+            try {
+                $frameSize = $positionProvider->getEntireSize();
+            } catch (EyesDriverOperationException $e) {
+                $frameSize = $this->driver->getDefaultContentViewportSize();
+            }
+        }
+        return $frameSize;
+    }
+
+    /**
+     * @param PositionProvider $positionProvider
+     * @return Location
+     */
+    private function getUpdatedScrollPosition(PositionProvider $positionProvider)
+    {
+        // Getting the scroll position. For native Appium apps we can't get the
+        // scroll position, so we use (0,0)
+        try {
+            $sp = $positionProvider->getCurrentPosition();
+        } catch (EyesDriverOperationException $e) {
+            $sp = new Location(0, 0);
+        }
+        return $sp;
     }
 }

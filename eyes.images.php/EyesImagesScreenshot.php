@@ -30,18 +30,15 @@ class EyesImagesScreenshot extends EyesScreenshot
         }
     }
 
-    public function getSubScreenshot(Region $region, $coordinatesType, $throwIfClipped)
+    public function getSubScreenshot(Region $region, $throwIfClipped)
     {
         ArgumentGuard::notNull($region, "region");
-        ArgumentGuard::notNull($coordinatesType, "coordinatesType");
 
         // We want to get the sub-screenshot in as-is coordinates type.
-        $subScreenshotRegion = $this->getIntersectedRegion($region, $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
+        $subScreenshotRegion = $this->getIntersectedRegion($region, $region->getCoordinatesType(), CoordinatesType::SCREENSHOT_AS_IS);
 
         if ($subScreenshotRegion->isEmpty() || ($throwIfClipped && (!$subScreenshotRegion->getSize() == $region->getSize()))) {
-            throw new OutOfBoundsException(sprintf(
-                "Region [%s, (%s)] is out of screenshot bounds [%s]",
-                $region, json_encode($coordinatesType), $this->bounds));
+            throw new OutOfBoundsException("Region $region is out of screenshot bounds {$this->bounds}");
         }
 
         $subScreenshotImage = ImageUtils::getImagePart($this->image, $subScreenshotRegion);
