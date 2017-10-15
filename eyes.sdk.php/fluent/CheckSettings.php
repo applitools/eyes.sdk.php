@@ -31,7 +31,7 @@ namespace Applitools\fluent {
         /**
          * @var IGetFloatingRegion[]
          */
-        private $floatingRegions = [];
+        protected $floatingRegions = [];
 
         /**
          * CheckSettings constructor.
@@ -88,7 +88,7 @@ namespace Applitools\fluent {
          * @param int $maxRightOffset How much the content can move to the right.
          * @return ICheckSettings This instance of the settings object.
          */
-        public function addFloatingRegion($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
+        public function addFloatingRegion(Region $region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
         {
             $this->floatingRegions[] =
                 new FloatingRegionByRectangle(

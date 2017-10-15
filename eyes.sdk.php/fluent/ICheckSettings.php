@@ -37,7 +37,7 @@ namespace Applitools\fluent {
          * @param int $maxRightOffset How much the content can move to the right.
          * @return ICheckSettings This instance of the settings object.
          */
-        function addFloatingRegion($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset);
+        function addFloatingRegion(Region $region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset);
 
         /**
          * Defines the timeout to use when acquiring and comparing screenshots.

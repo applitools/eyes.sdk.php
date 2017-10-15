@@ -2,6 +2,7 @@
 
 namespace Applitools\Selenium\fluent;
 
+use Applitools\Exceptions\EyesException;
 use Applitools\Region;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverElement;
@@ -18,10 +19,10 @@ class Target
     }
 
     /**
-     * @param Region $region
+     * @param Region|WebDriverBy|WebDriverElement $region
      * @return SeleniumCheckSettings
      */
-    public static function region(Region $region)
+    public static function region($region)
     {
         return new SeleniumCheckSettings($region);
     }

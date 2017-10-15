@@ -11,6 +11,6 @@ namespace Applitools\fluent {
          * @param EyesBase $eyesBase
          * @return FloatingMatchSettings
          */
-        function getRegion ($eyesBase);
+        function getRegion (EyesBase $eyesBase);
     }
 }

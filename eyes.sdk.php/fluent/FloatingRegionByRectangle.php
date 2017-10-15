@@ -44,7 +44,7 @@ namespace Applitools\fluent {
          * @param EyesBase $eyesBase
          * @return FloatingMatchSettings
          */
-        function getRegion($eyesBase)
+        function getRegion(EyesBase $eyesBase)
         {
             return new FloatingMatchSettings(
                 $this->rect->getLeft(), $this->rect->getTop(), $this->rect->getWidth(), $this->rect->getHeight(),
