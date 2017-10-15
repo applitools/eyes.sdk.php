@@ -15,6 +15,7 @@ use Applitools\ImageUtils;
 use Applitools\Location;
 use Applitools\Logger;
 use Applitools\NullRegionProvider;
+use Applitools\PositionProvider;
 use Applitools\PrintLogHandler;
 use Applitools\RectangleSize;
 use Applitools\Region;
@@ -79,7 +80,8 @@ class Eyes extends EyesBase
     /**
      * @return bool
      */
-    public function shouldStitchContent(){
+    public function shouldStitchContent()
+    {
         return $this->stitchContent;
     }
 
@@ -636,9 +638,9 @@ class Eyes extends EyesBase
             $elementHeight = $element->getClientHeight();
 
             $this->regionToCheck = Region::CreateFromLTWH(
-                    $p->getX() + $borderLeftWidth,
-                    $p->getY() + $borderTopWidth,
-                    $elementWidth, $elementHeight);
+                $p->getX() + $borderLeftWidth,
+                $p->getY() + $borderTopWidth,
+                $elementWidth, $elementHeight);
 
             $this->regionToCheck->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
 
@@ -1349,7 +1351,7 @@ class Eyes extends EyesBase
                 }
 
                 $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
-                    $originProvider, $this->getPositionProvider(),
+                    $originProvider, $this->getElementPositionProvider(),
                     $scaleProviderFactory,
                     $this->getWaitBeforeScreenshots(), $this->debugScreenshotsProvider, $screenshotFactory);
                 $this->logger->log("Building screenshot object...");
@@ -1477,6 +1479,15 @@ class Eyes extends EyesBase
         $this->logger->log("Done!");
         return $appEnv;
     }
+
+    /**
+     * @return PositionProvider The currently set position provider.
+     */
+    public function getElementPositionProvider()
+    {
+        return $this->elementPositionProvider == null ? $this->positionProvider : $this->elementPositionProvider;
+    }
+
 }
 
 ?>
