@@ -78,8 +78,11 @@ class Eyes extends EyesBase
     /** @var ImageProvider */
     private $imageProvider;
 
-    /** @var  bool */
+    /** @var bool */
     private $stitchContent;
+
+    /** @var IRegionPositionCompensation */
+    private $regionPositionCompensation;
 
     /**
      * @return bool
@@ -315,7 +318,7 @@ class Eyes extends EyesBase
         }
 
         $this->imageProvider = ImageProviderFactory::getImageProvider($userAgent, $this, $this->logger, $this->driver);
-        //$regionPositionCompensation = RegionPositionCompensationFactory::getRegionPositionCompensation($userAgent, $this, $this->logger);
+        $this->regionPositionCompensation = RegionPositionCompensationFactory::getRegionPositionCompensation($userAgent, $this, $this->logger);
 
         $this->openBase($appName, $testName, $viewportSize, $sessionType);
 
@@ -1365,7 +1368,8 @@ class Eyes extends EyesBase
                 $entireFrameOrElement = $algo->getStitchedRegion($this->imageProvider, $this->regionToCheck,
                     $originProvider, $this->getElementPositionProvider(),
                     $scaleProviderFactory,
-                    $this->getWaitBeforeScreenshots(), $this->debugScreenshotsProvider, $screenshotFactory);
+                    $this->getWaitBeforeScreenshots(), $this->debugScreenshotsProvider, $screenshotFactory,
+                    $this->regionPositionCompensation);
                 $this->logger->log("Building screenshot object...");
 
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
@@ -1380,7 +1384,8 @@ class Eyes extends EyesBase
                 $fullPageImage = $algo->getStitchedRegion($this->imageProvider, Region::getEmpty(),
                     new ScrollPositionProvider($this->logger, $this->driver),
                     $this->positionProvider, $scaleProviderFactory,
-                    $this->getWaitBeforeScreenshots(), $this->debugScreenshotsProvider, $screenshotFactory);
+                    $this->getWaitBeforeScreenshots(), $this->debugScreenshotsProvider, $screenshotFactory,
+                    $this->regionPositionCompensation);
 
                 $this->driver->switchTo()->frames($originalFrame);
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);

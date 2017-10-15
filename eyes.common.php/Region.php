@@ -136,15 +136,15 @@ class Region
     }
 
     /**
-     * Offsets the region's location (in place).
+     * Offsets the region's location.
      *
      * @param int $dx The X axis offset.
      * @param int $dy The Y axis offset.
+     * @return Region
      */
     public function offset($dx, $dy)
     {
-        $this->left += $dx;
-        $this->top += $dy;
+        return Region::CreateFromLTWH($this->left + $dx, $this->top + $dy, $this->width, $this->height);
     }
 
     /**

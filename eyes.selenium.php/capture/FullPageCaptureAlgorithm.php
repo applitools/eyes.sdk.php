@@ -56,6 +56,7 @@ class FullPageCaptureAlgorithm
      * @param int $waitBeforeScreenshots Time to wait before each screenshot (milliseconds).
      * @param DebugScreenshotsProvider $debugScreenshotsProvider The factory to use for creating debug screenshots
      * @param EyesScreenshotFactory $screenshotFactory The factory to use for creating screenshots from the images.
+     * @param IRegionPositionCompensation $regionPositionCompensation
      * @return Image
      * @throws EyesException
      */
@@ -65,7 +66,8 @@ class FullPageCaptureAlgorithm
                                       PositionProvider $positionProvider, ScaleProviderFactory $scaleProviderFactory,
                                       $waitBeforeScreenshots,
                                       DebugScreenshotsProvider $debugScreenshotsProvider,
-                                      EyesScreenshotFactory $screenshotFactory)
+                                      EyesScreenshotFactory $screenshotFactory,
+                                      IRegionPositionCompensation $regionPositionCompensation)
     {
         $this->logger->verbose("getStitchedRegion()");
 
@@ -111,7 +113,7 @@ class FullPageCaptureAlgorithm
 
         $this->logger->verbose("Done! Getting region in screenshot...");
 
-        $regionInScreenshot = $this->getRegionInScreenshot($region, $image, $pixelRatio, $screenshot /*, $regionPositionCompensation*/);
+        $regionInScreenshot = $this->getRegionInScreenshot($region, $image, $pixelRatio, $screenshot, $regionPositionCompensation);
 
         if (!$regionInScreenshot->isEmpty()) {//  FIXME do not crop image before full screenshot is prepared
             $image = ImageUtils::getImagePart($image, $regionInScreenshot);
@@ -245,22 +247,28 @@ class FullPageCaptureAlgorithm
      * @param Image $image
      * @param double $pixelRatio
      * @param EyesScreenshot $screenshot
+     * @param IRegionPositionCompensation $regionPositionCompensation
      * @return Region
      */
-    private function getRegionInScreenshot(Region $region, Image $image, $pixelRatio, EyesScreenshot $screenshot)
+    private function getRegionInScreenshot(Region $region, Image $image, $pixelRatio,
+                                           EyesScreenshot $screenshot,
+                                           IRegionPositionCompensation $regionPositionCompensation)
     {
         /** @var Region */
-        $regionInScreenshot = $screenshot->getIntersectedRegion($region, $region->getCoordinatesType(), CoordinatesType::SCREENSHOT_AS_IS);
+        $regionInScreenshot = $screenshot->getIntersectedRegion(
+            $region,
+            $region->getCoordinatesType(),
+            CoordinatesType::SCREENSHOT_AS_IS);
 
         $this->logger->verbose("Done! Region in screenshot: $regionInScreenshot");
         $regionInScreenshot = $regionInScreenshot->scale($pixelRatio);
         $this->logger->verbose("Scaled region: $regionInScreenshot");
 
-        /*if ($regionPositionCompensation == null) {
+        if ($regionPositionCompensation == null) {
             $regionPositionCompensation = new NullRegionPositionCompensation();
         }
 
-        regionInScreenshot = regionPositionCompensation.compensateRegionPosition(regionInScreenshot, pixelRatio);*/
+        $regionInScreenshot = $regionPositionCompensation->compensateRegionPosition($regionInScreenshot, $pixelRatio);
 
         // Handling a specific case where the region is actually larger than
         // the screenshot (e.g., when body width/height are set to 100%, and
