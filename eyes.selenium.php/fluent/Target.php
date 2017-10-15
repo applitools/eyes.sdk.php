@@ -77,4 +77,25 @@ class Target
         $settings->frameByIndex($index);
         return $settings;
     }
+
+    /**
+     * @param WebDriverBy|string|int $frame
+     * @return SeleniumCheckSettings
+     * @throws EyesException
+     */
+    public static function frame($frame)
+    {
+        $settings = new SeleniumCheckSettings();
+        if ($frame instanceof WebDriverBy) {
+            $settings->frameBySelector($frame);
+        } else if (is_string($frame)) {
+            $settings->frameByNameOrId($frame);
+        } else if (is_int($frame)) {
+            $settings->frameByIndex($frame);
+        } else {
+            throw new EyesException("frame selector not supported");
+        }
+
+        return $settings;
+    }
 }

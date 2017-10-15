@@ -2,6 +2,7 @@
 
 namespace Applitools\Selenium\fluent;
 
+use Applitools\Exceptions\EyesException;
 use Applitools\fluent\CheckSettings;
 use Applitools\fluent\IgnoreRegionByRectangle;
 use Applitools\Region;
@@ -32,6 +33,21 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
                 $this->targetElement = $argument;
             }
         }
+    }
+
+    /**
+     * @param WebDriverBy $region
+     * @param $maxUpOffset
+     * @param $maxDownOffset
+     * @param $maxLeftOffset
+     * @param $maxRightOffset
+     * @return $this
+     */
+    public function addFloatingRegionBySelector(WebDriverBy $region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
+    {
+        $this->floatingRegions[] = new FloatingRegionBySelector($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset);
+
+        return $this;
     }
 
     /**
@@ -71,12 +87,40 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     }
 
     /**
-     * @param Region $region
+     * @param WebDriverBy|string|int $frame
+     * @return SeleniumCheckSettings
+     * @throws EyesException
+     */
+    public function frame($frame)
+    {
+        /** @var FrameLocator */
+        $fl = new FrameLocator();
+
+        if ($frame instanceof WebDriverBy) {
+            $fl->setFrameSelector($frame);
+        } else if (is_string($frame)) {
+            $fl->setFrameNameOrId($frame);
+        } else if (is_int($frame)) {
+            $fl->setFrameIndex($frame);
+        } else {
+            throw new EyesException("frame locator not supported");
+        }
+
+        $this->frameChain[] = $fl;
+        return $this;
+    }
+
+    /**
+     * @param Region|WebDriverBy $region
      * @return $this
      */
-    public function region(Region $region)
+    public function region($region)
     {
-        parent::updateTargetRegion($region);
+        if ($region instanceof Region) {
+            parent::updateTargetRegion($region);
+        } else {
+            $this->targetSelector = $region;
+        }
         return $this;
     }
 
@@ -107,7 +151,8 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
      * @param Region[] $regions
      * @return $this;
      */
-    public function ignore(...$regions){
+    public function ignore(...$regions)
+    {
         foreach ($regions as $region) {
             parent::ignore(new IgnoreRegionByRectangle($region));
         }
