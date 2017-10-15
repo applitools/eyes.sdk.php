@@ -31,7 +31,7 @@ abstract class TestSetup extends TestCase
     protected static $forceFullPageScreenshot;
 
     /** @var WebDriver */
-    private $webDriver;
+    protected $webDriver;
 
     public static function setUpClass()
     {
