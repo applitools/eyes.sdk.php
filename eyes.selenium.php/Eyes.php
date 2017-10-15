@@ -11,6 +11,7 @@ use Applitools\FixedScaleProviderFactory;
 use Applitools\fluent\CheckSettings;
 use Applitools\fluent\ICheckSettings;
 use Applitools\fluent\ICheckSettingsInternal;
+use Applitools\ImageProvider;
 use Applitools\ImageUtils;
 use Applitools\Location;
 use Applitools\Logger;
@@ -73,6 +74,9 @@ class Eyes extends EyesBase
 
     /** @var RegionVisibilityStrategy */
     private $regionVisibilityStrategy;
+
+    /** @var ImageProvider */
+    private $imageProvider;
 
     /** @var  bool */
     private $stitchContent;
@@ -302,6 +306,16 @@ class Eyes extends EyesBase
         }
 
         $this->driver = $driver; // temporarily, so setViewportSize will work.
+
+        $uaString = $this->driver->getUserAgent();
+        if ($uaString != null) {
+            $userAgent = UserAgent::ParseUserAgentString($uaString, true);
+        } else {
+            $userAgent = null;
+        }
+
+        $this->imageProvider = ImageProviderFactory::getImageProvider($userAgent, $this, $this->logger, $this->driver);
+        //$regionPositionCompensation = RegionPositionCompensationFactory::getRegionPositionCompensation($userAgent, $this, $this->logger);
 
         $this->openBase($appName, $testName, $viewportSize, $sessionType);
 
@@ -591,8 +605,7 @@ class Eyes extends EyesBase
 
         $this->logger->verbose("checkFullFrameOrElement()");
 
-        $imageProvider = new TakesScreenshotImageProvider($this->logger, $this->driver);
-        $regionProvider = new FullFrameOrElementRegionProvider($this->logger, $this, $imageProvider);
+        $regionProvider = new FullFrameOrElementRegionProvider($this->logger, $this, $this->imageProvider);
 
         $this->checkWindowBase($regionProvider, $name, false, $checkSettings);
 
@@ -917,7 +930,7 @@ class Eyes extends EyesBase
             $this->checkFrameOrElement = true;
 
             $this->logger->log("Getting screenshot as base64..");
-            $screenshotImage = $this->driver->getScreenshotAsBase64();
+            $screenshotImage = $this->driver->getScreenshot();
 
             $this->logger->log("Done! Creating image object...");
 
@@ -1337,7 +1350,6 @@ class Eyes extends EyesBase
             $originalOverflow = EyesSeleniumUtils::hideScrollbars($this->driver, 200);
         }
         try {
-            $imageProvider = new TakesScreenshotImageProvider($this->logger, $this->driver);
             $screenshotFactory = new EyesWebDriverScreenshotFactory($this->logger, $this->driver);
 
             if ($this->checkFrameOrElement) {
@@ -1350,7 +1362,7 @@ class Eyes extends EyesBase
                     $originProvider = $this->positionProvider;
                 }
 
-                $entireFrameOrElement = $algo->getStitchedRegion($imageProvider, $this->regionToCheck,
+                $entireFrameOrElement = $algo->getStitchedRegion($this->imageProvider, $this->regionToCheck,
                     $originProvider, $this->getElementPositionProvider(),
                     $scaleProviderFactory,
                     $this->getWaitBeforeScreenshots(), $this->debugScreenshotsProvider, $screenshotFactory);
@@ -1365,7 +1377,7 @@ class Eyes extends EyesBase
                 $this->driver->switchTo()->defaultContent();
                 $algo = new FullPageCaptureAlgorithm($this->logger);
 
-                $fullPageImage = $algo->getStitchedRegion($imageProvider, Region::getEmpty(),
+                $fullPageImage = $algo->getStitchedRegion($this->imageProvider, Region::getEmpty(),
                     new ScrollPositionProvider($this->logger, $this->driver),
                     $this->positionProvider, $scaleProviderFactory,
                     $this->getWaitBeforeScreenshots(), $this->debugScreenshotsProvider, $screenshotFactory);
@@ -1374,9 +1386,7 @@ class Eyes extends EyesBase
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $fullPageImage);
             } else {
                 $this->logger->verbose("Screenshot requested...");
-                $screenshot64 = $this->driver->getScreenshotAsBase64();
-                $this->logger->log("Done! Creating image object...");
-                $screenshotImage = $screenshot64;
+                $screenshotImage = $this->imageProvider->getImage();
 
                 $this->debugScreenshotsProvider->save($screenshotImage, "original");
 

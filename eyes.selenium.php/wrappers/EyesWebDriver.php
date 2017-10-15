@@ -1,4 +1,5 @@
 <?php
+
 namespace Applitools\Selenium;
 
 use Applitools\ArgumentGuard;
@@ -207,7 +208,7 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         $webElement = $this->driver->findElement($by);
 
         //$this->driver->switchTo()->frame($webElement);
-        
+
         if ($webElement instanceof RemoteWebElement) {
             $webElement = new EyesRemoteWebElement($this->logger, $this,
                 /*(RemoteWebElement)*/
@@ -261,11 +262,12 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
     /**
      * @return EyesTargetLocator
      */
-    public function switchTo() {
+    public function switchTo()
+    {
         $this->logger->verbose("switchTo()");
         return new EyesTargetLocator($this->logger, $this, $this->driver->switchTo());
     }
-    
+
     public function navigate()
     {
         return $this->driver->navigate();
@@ -450,20 +452,11 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $this->frameChain;
     }
 
-    public function getScreenshotAsBase64()
+    public function getScreenshot()
     {
         $image64 = $this->driver->takeScreenshot();
-        $screenshot64 = ImageUtils::imageFromBytes($image64);
-      /*  // Get the image as base64.    FIXME
-        $screenshot64 = $this->driver->getScreenshotAs(OutputType::BASE64);
-        $screenshot = ImageUtils::imageFromBase64($screenshot64);
-        $screenshot = $this->normalizeRotation($this->logger, $this->driver, $screenshot, $this->rotation);
-
-        // Return the image in the requested format.
-        $screenshot64 = ImageUtils::base64FromImage($screenshot);
-        return $xOutputType->convertFromBase64Png($screenshot64);*/
-
-        return $screenshot64;
+        $image = ImageUtils::imageFromBytes($image64);
+        return $image;
     }
 
     private function getSessionId()
@@ -471,16 +464,34 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         // extract remote web driver information
         return $this->driver->getSessionId();
     }
+
     public function takeScreenshot($save_as = null)
     {
         // TODO: Implement takeScreenshot() method. //FIXME
     }
+
     public function execute($name, $params)
     {
         // TODO: Implement execute() method. //FIXME
     }
+
     public function wait($timeout_in_second = 30, $interval_in_millisecond = 250)
     {
         // TODO: Implement wait() method. //FIXME
     }
+
+
+    public function getUserAgent()
+    {
+        $userAgent = null;
+        try {
+            $userAgent = $this->driver->executeScript("return navigator.userAgent");
+            $this->logger->verbose("user agent: $userAgent");
+        } catch (\Exception $e) {
+            $this->logger->verbose("Failed to obtain user-agent string");
+            $userAgent = null;
+        }
+        return $userAgent;
+    }
+
 }
