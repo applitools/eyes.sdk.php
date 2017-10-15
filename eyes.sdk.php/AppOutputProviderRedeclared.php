@@ -10,31 +10,36 @@ class AppOutputProviderRedeclared implements AppOutputProvider
     /** @var  Logger */
     private $logger;
 
+    /** @var DebugScreenshotsProvider|NullDebugScreenshotProvider */
+    private $debugScreenshotsProvider;
+
     public function __construct(EyesBase $eyes, Logger $logger)
     {
         $this->eyes = $eyes;
         $this->logger = $logger;
+        $this->debugScreenshotsProvider = $eyes->getDebugScreenshotsProvider();
     }
 
     /** @inheritdoc */
-    public function getAppOutput(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot = null){
-        return $this->getAppOutputWithScreenshot($regionProvider, $lastScreenshot);
+    public function getAppOutput(Region $region, EyesScreenshot $lastScreenshot = null){
+        return $this->getAppOutputWithScreenshot($region, $lastScreenshot);
     }
 
-//FIXME this functionality from EyesBase
-    private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot = null) {
+    private function getAppOutputWithScreenshot(Region $region, EyesScreenshot $lastScreenshot = null) {
         $this->logger->verbose("getting screenshot...");
+
         // Getting the screenshot (abstract function implemented by each SDK).
+        /** @var EyesScreenshot $screenshot */
         $screenshot = $this->eyes->getScreenshot();
+
         $this->logger->verbose("Done getting screenshot!");
 
         // Cropping by region if necessary
-        //$region = $regionProvider->getRegion();
-
-        /*if (!$region->isEmpty()) {
-            $screenshot = $screenshot->getSubScreenshot($region,
-                $regionProvider->getCoordinatesType(), false);
-        }*/
+        if (!$region->isEmpty()) {
+            $screenshot = $screenshot->getSubScreenshot($region, false);
+            $subScreenshot = $screenshot->getImage();
+            $this->debugScreenshotsProvider->save($subScreenshot, "SUB_SCREENSHOT");
+        }
 
         $this->logger->verbose("Compressing screenshot...");
         //FIXME

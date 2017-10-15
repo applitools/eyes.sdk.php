@@ -1,6 +1,6 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
 class StitchMode
 {

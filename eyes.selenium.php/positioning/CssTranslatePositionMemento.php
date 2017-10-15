@@ -1,5 +1,7 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
+
+use Applitools\PositionMemento;
 
 /**
  * Encapsulates state for {@link CssTranslatePositionProvider} instances.

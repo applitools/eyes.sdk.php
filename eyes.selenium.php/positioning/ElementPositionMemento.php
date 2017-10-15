@@ -1,5 +1,7 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\Location;
+use Applitools\PositionMemento;
 
 /**
  * Encapsulates state for {@link ElementPositionProvider} instances.
@@ -9,7 +11,7 @@ class ElementPositionMemento extends PositionMemento {
 
     /**
      *
-     * @param l The current location to be saved.
+     * @param $l Location The current location to be saved.
      */
     public function __construct(Location $l) {
         $this->position = new Location($l->getX(),$l->getY());

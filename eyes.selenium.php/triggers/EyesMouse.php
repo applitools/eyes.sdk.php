@@ -1,6 +1,11 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\ArgumentGuard;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\MouseAction;
+use Applitools\Region;
 use Facebook\WebDriver\Interactions\Internal\WebDriverCoordinates;
 use Facebook\WebDriver\WebDriverMouse;
 
@@ -73,7 +78,7 @@ class EyesMouse implements WebDriverMouse {
 
     public function mouseUp(WebDriverCoordinates $where) {
         $location = EyesSeleniumUtils::getPageLocation($where);
-        $this->logger.verbose("mouseUp(" . json_encode($location) . ")");
+        $this->logger->verbose("mouseUp(" . json_encode($location) . ")");
 
         $this->moveIfNeeded($where);
         $this->addMouseTrigger(MouseAction::Up);

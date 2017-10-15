@@ -26,11 +26,10 @@ abstract class EyesScreenshot {
     * Returns a part of the screenshot based on the given region.
     *
     * @param Region $region          The region for which we should get the sub screenshot.
-    * @param string $coordinatesType How should the region be calculated on the screenshot image.
     * @param bool $throwIfClipped  Throw an EyesException if the region is not fully contained in the screenshot.
-    * @return Image A screenshot instance containing the given region.
+    * @return EyesScreenshot A screenshot instance containing the given region.
     */
-    public abstract function getSubScreenshot(Region $region, /*CoordinatesType FIXME*/$coordinatesType, $throwIfClipped);
+    public abstract function getSubScreenshot(Region $region, $throwIfClipped);
 
     /**
     * Converts a location's coordinates with the {@code from} coordinates type

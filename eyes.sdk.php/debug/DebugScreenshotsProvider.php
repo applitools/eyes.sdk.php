@@ -30,7 +30,7 @@ abstract class DebugScreenshotsProvider {
 
     public function setPath($path) {
         if ($path != null) {
-            $path = ($path[strlen($path)-1] = "/") ? $path : $path . '/';
+            $path = ($path[strlen($path)-1] == "/") ? $path : $path . '/';
         } else {
             $path = self::DEFAULT_PATH;
         }
@@ -42,5 +42,5 @@ abstract class DebugScreenshotsProvider {
         return $this->path;
     }
 
-    abstract public function save(Image $image, $suffix);
+    abstract public function save(Image &$image, $suffix);
 }

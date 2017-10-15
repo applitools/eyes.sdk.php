@@ -1,7 +1,12 @@
 <?php
 
-namespace Applitools;
-use Applitools\Exceptions\NoFramesException;
+namespace Applitools\Selenium;
+
+use Applitools\ArgumentGuard;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\RectangleSize;
+use Applitools\Selenium\Exceptions\NoFramesException;
 
 /**
  * Represents a path to a frame, including their location and scroll.
@@ -31,7 +36,7 @@ class FrameChain
         }
 
         for ($i = 0; $i < $lc1; ++$i) {
-            if (!($c1->frames[$i]->equals($c2->frames[$i]))){
+            if (!($c1->frames[$i]->equals($c2->frames[$i]))) {
                 return false;
             }
         }
@@ -46,20 +51,17 @@ class FrameChain
      */
     public function __construct(Logger $logger, FrameChain $other = null)
     {
-      /*  if(empty($this->frames) && !($this->frames instanceof ArrayIterator)){
-            $this->frames = new ArrayIterator();
-        }*/    //FIXME need to check
         ArgumentGuard::notNull($logger, "logger");
         $this->logger = $logger;
-        if (empty($other)) {
-            $this->frames = array();
-        } else {
-            $logger->verbose(sprintf("Frame chain copy constructor (size %d)", $other->size()));
+        $this->frames = [];
+        if (!empty($other)) {
+            $logger->verbose("Frame chain copy constructor (size {$other->size()})");
 
             foreach ($other->frames as $otherFrame) {
-                $this->frames[] = new Frame($logger, $otherFrame->getReference(),
-                    $otherFrame->getId(), $otherFrame->getLocation(),
-                    $otherFrame->getSize(), $otherFrame->getParentScrollPosition());
+                $this->frames[] = clone $otherFrame;
+                /*new Frame($logger, $otherFrame->getReference(), $otherFrame->getLocation(),
+                    $otherFrame->getSize(),  $otherFrame->getInnerSize(),
+                    $otherFrame->getParentScrollPosition(), $otherFrame->getOriginalLocation());*/
             }
             $logger->verbose("Done!");
         }
@@ -79,7 +81,7 @@ class FrameChain
      */
     public function clear()
     {
-        $this->frames = array();
+        $this->frames = [];
     }
 
     /**
@@ -146,6 +148,17 @@ class FrameChain
     {
         $this->logger->verbose("getCurrentFrameSize()");
         $result = $this->frames[count($this->frames) - 1]->getSize();
+        $this->logger->verbose("Done!");
+        return $result;
+    }
+
+    /**
+     * @return RectangleSize The inner size of the current frame.
+     */
+    public function getCurrentFrameInnerSize()
+    {
+        $this->logger->verbose("GetCurrentFrameInnerSize()");
+        $result = $this->frames[count($this->frames) - 1]->getInnerSize();
         $this->logger->verbose("Done!");
         return $result;
     }

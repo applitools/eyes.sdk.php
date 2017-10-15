@@ -9,7 +9,8 @@ use Gregwar\Image\Image;
  */
 class NullDebugScreenshotProvider extends DebugScreenshotsProvider {
 
-    public function save(Image $image, $suffix) {
+    public function save(Image &$image, $suffix) {
         // Do nothing.
+        return $image;
     }
 }

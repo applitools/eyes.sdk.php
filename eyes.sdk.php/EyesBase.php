@@ -2,12 +2,12 @@
 
 namespace Applitools;
 
+use Applitools\Exceptions\DiffsFoundException;
 use Applitools\Exceptions\EyesException;
 use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
-use Facebook\WebDriver\WebDriver;
-use Gregwar\Image\Image;
+use Applitools\fluent\ICheckSettings;
 
 abstract class EyesBase
 {
@@ -193,6 +193,14 @@ abstract class EyesBase
     public function getParentBranchName()
     {
         return $this->parentBranchName;
+    }
+
+    /**
+     * @return DebugScreenshotsProvider|NullDebugScreenshotProvider
+     */
+    public function getDebugScreenshotsProvider()
+    {
+        return $this->debugScreenshotsProvider;
     }
 
     /**
@@ -915,14 +923,14 @@ abstract class EyesBase
     /**
      * Takes a snapshot of the application under test and matches it with the expected output.
      *
-     * @param RegionProvider $regionProvider Returns the region to check or the empty rectangle to check the entire window.
+     * @param RegionProvider $regionProvider Returns the region to check or an empty rectangle to check the entire window.
      * @param string $tag An optional tag to be associated with the snapshot.
      * @param bool $ignoreMismatch Whether to ignore this check if a mismatch is found.
-     * @param int $retryTimeout The amount of time to retry matching in milliseconds or a negative value to use the default retry timeout.
+     * @param ICheckSettings $checkSettings The check settings to use.
      * @return MatchResult The result of matching the output with the expected output.
      * @throws TestFailedException
      */
-    public function checkWindowBase(RegionProvider $regionProvider, $tag = "", $ignoreMismatch = false, $retryTimeout = null)
+    public function checkWindowBase(RegionProvider $regionProvider, $tag, $ignoreMismatch, ICheckSettings $checkSettings)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log("Ignored");
@@ -933,12 +941,14 @@ abstract class EyesBase
 
         ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
         ArgumentGuard::notNull($regionProvider, "regionProvider");
-        $this->logger->log(sprintf("CheckWindowBase(regionProvider, '%s', %b, %d)", $tag, $ignoreMismatch, $retryTimeout));
+
+        $this->logger->log("CheckWindowBase(regionProvider, $tag, $ignoreMismatch, $checkSettings)");
 
         $this->logger->log("Calling match window...");
 
-        $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $this->lastScreenshot, $regionProvider,
-            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $retryTimeout);
+        $region = $regionProvider->getRegion();
+        $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $region,
+            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $checkSettings);
 
         $this->logger->log("MatchWindow Done!");
 
@@ -987,40 +997,6 @@ abstract class EyesBase
             $appOutputProviderRedeclared
         );
     }
-
-   /*
-    /**
-     * @param RegionProvider $regionProvider A callback for getting the region of the screenshot which will be set in the application output.
-     * @param EyesScreenshot $lastScreenshot Previous application screenshot (used for compression) or {@code null} if not available.
-     * @return AppOutputWithScreenshot The updated app output and screenshot.
-     */
-   /* private function getAppOutputWithScreenshot(RegionProvider $regionProvider, EyesScreenshot $lastScreenshot)
-    {
-
-        $this->logger->verbose("getting screenshot...");
-        // Getting the screenshot (abstract function implemented by each SDK).
-        $screenshot = $this->getScreenshot();
-        $this->logger->verbose("Done getting screenshot!");
-
-        // Cropping by region if necessary
-        $region = $this->regionProvider->getRegion();
-
-        if (!$region->isEmpty()) {
-            $screenshot = $screenshot->getSubScreenshot($region,
-                $regionProvider->getCoordinatesType(), false);
-        }
-
-        $this->logger->verbose("Compressing screenshot...");
-        $compressResult = $this->compressScreenshot64($screenshot, $lastScreenshot);
-        $this->logger->verbose("Done! Getting title...");
-        $title = $this->getTitle();
-        $this->logger->verbose("Done!");
-
-        $result = new AppOutputWithScreenshot(new AppOutput($title, $compressResult), $screenshot);
-        $this->logger->verbose("Done!");
-        return $result;
-    }
-*/
 
     /**
      * @return string The user given agent id of the SDK.
@@ -1137,7 +1113,7 @@ abstract class EyesBase
         $startTime = microtime() / 1000; //convert microseconds to milliseconds
 
         // A callback which will call getAppOutput
-        $appOutputProvider = new AppOutputProviderRedeclared(); //FIXME need to check
+        $appOutputProvider = new AppOutputProviderRedeclared($this, $this->logger); //FIXME need to check
 
         if ($this->runningSession->getIsNewSession()) {
             ResponseTimeAlgorithm::runNewProgressionSession($this->logger,
@@ -1257,8 +1233,11 @@ abstract class EyesBase
                 $this->logger->log("--- Failed test ended. See details at " . $sessionResultsUrl);
 
                 if ($throwEx) {
-                    $message = "'{$this->sessionStartInfo->getScenarioIdOrName()}' of '{$this->sessionStartInfo->getAppIdOrName()}'. See details at $sessionResultsUrl";
-                    throw new TestFailedException($results, $message);
+                    $message = "Test '{$this->sessionStartInfo->getScenarioIdOrName()}'" .
+                        " of '{$this->sessionStartInfo->getAppIdOrName()}' detected differences!" .
+                        " See details at $sessionResultsUrl";
+
+                    throw new DiffsFoundException($results, $message);
                 }
                 return $results;
             }
@@ -1266,7 +1245,7 @@ abstract class EyesBase
             if ($isNewSession) {
                 $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
                 $this->logger->verbose("--- New test ended. " . $instructions);
-                if ($throwEx) {
+                if ($throwEx  && !$this->saveNewTests) {
                     $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                         . "' of '" . $this->sessionStartInfo->getAppIdOrName()
                         . "'. " . $instructions;

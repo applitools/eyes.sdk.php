@@ -1,5 +1,5 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
 
 class ScreenshotType{
     const VIEWPORT = "VIEWPORT";

@@ -3,7 +3,9 @@
  * Applitools SDK for Selenium integration.
  */
 
-namespace Applitools\Exceptions;
+namespace Applitools\Selenium\Exceptions;
+
+use Applitools\Exceptions\EyesException;
 
 class NoFramesException extends EyesException {
 

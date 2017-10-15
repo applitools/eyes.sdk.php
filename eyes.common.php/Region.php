@@ -11,6 +11,10 @@ class Region
     private $top;
     private $width;
     private $height;
+
+    /** @var string $coordinatesType */
+    private $coordinatesType = CoordinatesType::SCREENSHOT_AS_IS;
+
     public static $empty;
 
     /** @var Logger */
@@ -35,6 +39,7 @@ class Region
         $this->top = self::$empty->top;
         $this->width = self::$empty->width;
         $this->height = self::$empty->height;
+        $this->coordinatesType = self::$empty->coordinatesType;
     }
 
     public function __construct()
@@ -98,7 +103,22 @@ class Region
         return ($this->getLeft() == $other->getLeft())
             && ($this->getTop() == $other->getTop())
             && ($this->getWidth() == $other->getWidth())
-            && ($this->getHeight() == $other->getHeight());
+            && ($this->getHeight() == $other->getHeight())
+            && ($this->getCoordinatesType() == $other->getCoordinatesType());
+    }
+
+    /**
+     * @return string The type of coordinates on which the region is based.
+     */
+    public function getCoordinatesType()
+    {
+        return $this->coordinatesType;
+    }
+
+    /** @var string $coordinatesType */
+    public function setCoordinatesType($coordinatesType)
+    {
+        $this->coordinatesType = $coordinatesType;
     }
 
     public function hashCode()
@@ -125,6 +145,18 @@ class Region
     {
         $this->left += $dx;
         $this->top += $dy;
+    }
+
+    /**
+     * Get a region which is a scaled version of the current region.
+     * IMPORTANT: This also scales the LOCATION(!!) of the region (not just its size).
+     *
+     * @param double $scaleRatio The ratio by which to scale the region.
+     * @return Region A new region which is a scaled version of the current region.
+     */
+    public function scale($scaleRatio)
+    {
+        return Region::CreateFromLocationAndSize($this->getLocation()->scale($scaleRatio), $this->getSize()->scale($scaleRatio));
     }
 
     /**
@@ -350,6 +382,7 @@ class Region
      */
     public function intersect(Region $other)
     {
+        self::$logger->verbose("intersecting this region ($this) with $other ...");
 
         // If there's no intersection set this as the Empty region.
         if (!$this->isIntersected($other)) {
@@ -410,6 +443,6 @@ class Region
 
     public function __toString()
     {
-        return "({$this->left} , {$this->top }) {$this->width}x{$this->height}";
+        return "({$this->left}, {$this->top }) {$this->width}x{$this->height}, {$this->coordinatesType}";
     }
 }

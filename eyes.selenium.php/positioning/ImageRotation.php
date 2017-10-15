@@ -1,5 +1,5 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
 
 /**
  * Encapsulates rotation data for images.

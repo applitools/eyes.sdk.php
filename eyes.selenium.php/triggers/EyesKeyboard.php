@@ -2,8 +2,11 @@
 /*
  * Applitools SDK for Selenium integration.
  */
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
+use Applitools\Logger;
+use Applitools\Region;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverKeyboard;
 

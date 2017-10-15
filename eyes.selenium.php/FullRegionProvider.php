@@ -1,5 +1,9 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
+
+use Applitools\CoordinatesType;
+use Applitools\Region;
+use Applitools\RegionProvider;
 
 class FullRegionProvider extends RegionProvider{
 
@@ -24,8 +28,11 @@ class FullRegionProvider extends RegionProvider{
      */
     public function getRegion()
     {
-        $elementRegion = $this->element->getClientAreaBounds();
-        return $elementRegion;
+        $loc = $this->element->getLocation();
+        $size = $this->element->getSize();
+        $region = Region::CreateFromLTWH($loc->getX(), $loc->getY(), $size->getWidth(), $size->getHeight());
+        $region->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
+        return $region;
     }
 
     /**

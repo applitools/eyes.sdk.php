@@ -1,5 +1,7 @@
 <?php
-namespace Applitools;
+namespace Applitools\Selenium;
+use Applitools\EyesScreenshotFactory;
+use Applitools\Logger;
 use Gregwar\Image\Image;
 
 /**

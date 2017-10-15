@@ -1,6 +1,9 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
+
+use Applitools\Location;
+use Applitools\PositionProvider;
 
 /**
  * Encapsulates implementations for providing region visibility during

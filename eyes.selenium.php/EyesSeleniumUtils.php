@@ -3,10 +3,16 @@
  * Applitools software.
  */
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
-use Applitools\Exceptions\EyesDriverOperationException;
+use Applitools\ArgumentGuard;
 use Applitools\Exceptions\EyesException;
+use Applitools\GeneralUtils;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\RectangleSize;
+use Applitools\Selenium\Exceptions\EyesDriverOperationException;
+use Exception;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Interactions\Internal\WebDriverCoordinates;
 use Facebook\WebDriver\JavaScriptExecutor;
@@ -204,9 +210,7 @@ class EyesSeleniumUtils
     public static function getCurrentScrollPosition(JavascriptExecutor $executor)
     {
         //noinspection unchecked
-        /*List<Long> */
-        $positionAsList = /*(List<Long>)*/
-            $executor->executeScript(self::JS_GET_CURRENT_SCROLL_POSITION);
+        $positionAsList = $executor->executeScript(self::JS_GET_CURRENT_SCROLL_POSITION);
         return new Location((int)$positionAsList[0], (int)$positionAsList[1]);
     }
 
@@ -262,14 +266,16 @@ class EyesSeleniumUtils
     {
         $logger->log("extractViewportSize()");
 
-      /*  try { FIXME need to test. Have sme problems with JS extractor
-            return self::executeViewportSizeExtraction($driver);
-        } catch (Exception $ex) {
-            $logger->verbose(sprintf("Failed to extract viewport size using Javascript: %s", $ex->getMessage()));
-        }*/
+        if ($driver instanceof JavaScriptExecutor) {
+            try {
+                return self::executeViewportSizeExtraction($driver);
+            } catch (Exception $ex) {
+                $logger->verbose("Failed to extract viewport size using Javascript: " . $ex->getMessage());
+            }
+        }
         // If we failed to extract the viewport size using JS, will use the
         // window size instead.
-        $logger->log("Using window size as viewport size.");
+        /*$logger->log("Using window size as viewport size.");
         $windowSize = $driver->manage()->window()->getSize();
         $width = $windowSize->getWidth();
         $height = $windowSize->getHeight();
@@ -286,7 +292,8 @@ class EyesSeleniumUtils
             // Not every WebDriver supports querying for orientation.
         }
         $logger->log(sprintf("Done! Size %d x %d", $width, $height));
-        return new RectangleSize($width, $height);
+        return new RectangleSize($width, $height);*/
+        return new RectangleSize(0,0);
     }
 
     /**

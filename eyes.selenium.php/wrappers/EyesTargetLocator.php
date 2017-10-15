@@ -1,8 +1,12 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
 use Applitools\Exceptions\EyesException;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\RectangleSize;
 use Facebook\WebDriver\Exception\NoSuchFrameException;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriver;
@@ -70,8 +74,6 @@ class EyesTargetLocator implements WebDriverTargetLocator
 
     private function willSwitchToFrame(RemoteWebElement $targetFrame = null)
     {
-        $frameId = $targetFrame->getId();
-
         /** @var EyesRemoteWebElement $eyesFrame */
         $eyesFrame = null;
         if ($targetFrame instanceof EyesRemoteWebElement) {
@@ -80,11 +82,28 @@ class EyesTargetLocator implements WebDriverTargetLocator
             $eyesFrame = new EyesRemoteWebElement($this->logger, $this->driver, $targetFrame);
         }
 
-        $rect = $eyesFrame->getClientAreaBounds();
-        $pl = $rect->getLocation();
-        $innerSize = $rect->getSize();
+        $pl = $eyesFrame->getLocation();
+        $ds = $eyesFrame->getSize();
 
-        $frame = new Frame($this->logger, $targetFrame, $frameId, $pl, $innerSize, $pl);//$currentLocation);
+        $clientWidth = $eyesFrame->getClientWidth();
+        $clientHeight = $eyesFrame->getClientHeight();
+
+        $location = new Location($pl->getX(), $pl->getY());
+
+        // Get the frame's content location.
+        $contentLocation = BordersAwareElementContentLocationProvider::getLocation($this->logger, $targetFrame, $location);
+
+        $originalLocation = $this->scrollPosition->getCurrentPosition();
+        $this->scrollPosition->setPosition($location);
+
+        $currentLocation = $this->scrollPosition->getCurrentPosition();
+
+        $frame = new Frame($this->logger, $targetFrame,
+            $contentLocation,
+            new RectangleSize($ds->getWidth(), $ds->getHeight()),
+            new RectangleSize($clientWidth, $clientHeight),
+            $currentLocation,
+            $originalLocation);
 
         $this->driver->getFrameChain()->push($frame);
     }
@@ -154,7 +173,7 @@ class EyesTargetLocator implements WebDriverTargetLocator
     public function window($nameOrHandle)
     {
         $this->logger->verbose("EyesTargetLocator.window($nameOrHandle)");
-        $this->driver->getFrameChain()->clear(); //FIXME need to check
+        $this->driver->getFrameChain()->clear();
         $this->logger->verbose("Done! Switching to window...");
         $this->targetLocator->window($nameOrHandle);
         $this->logger->verbose("Done!");

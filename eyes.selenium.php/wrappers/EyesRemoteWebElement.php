@@ -1,8 +1,14 @@
 <?php
 
-namespace Applitools;
+namespace Applitools\Selenium;
 
+use Applitools\ArgumentGuard;
+use Applitools\CoordinatesType;
 use Applitools\Exceptions\EyesException;
+use Applitools\Location;
+use Applitools\Logger;
+use Applitools\MouseAction;
+use Applitools\Region;
 use Facebook\WebDriver\Remote\DriverCommand;
 use Facebook\WebDriver\Remote\FileDetector;
 use Facebook\WebDriver\Remote\RemoteExecuteMethod;
@@ -28,16 +34,15 @@ class EyesRemoteWebElement extends RemoteWebElement
     private $executeMethod;
 
     const JS_GET_COMPUTED_STYLE_FORMATTED_STR =
-        " return arguments;"/* "var elem = arguments[0];" .
+         "var elem = arguments[0];" .
          "var styleProp = '%s';" .
          "if (window.getComputedStyle) {" .
-             "return window.getComputedStyle(arguments, null).getPropertyValue(styleProp);" .
+             "return window.getComputedStyle(elem, null).getPropertyValue(styleProp);" .
          "} else if (elem.currentStyle) {" .
          "   return elem.currentStyle[styleProp];" .
          "} else {" .
              "return null;" .
-         "}"*/
-    ;
+         "}";
 
     const JS_GET_SCROLL_LEFT = "return arguments[0].scrollLeft;";
     const JS_GET_SCROLL_TOP = "return arguments[0].scrollTop;";
@@ -87,16 +92,16 @@ class EyesRemoteWebElement extends RemoteWebElement
         $rect = $this->eyesDriver->executeScript(self::JS_GET_BOUNDING_CLIENT_RECT, array($this));
         return Region::CreateFromLTWH($rect['left'], $rect['top'], $rect['width'], $rect['height']);
     }
-
-    /*
+/*
     public function getBounds()
     {
         $loc = $this->webElement->getLocation();
         $size = $this->webElement->getSize();
-        return Region::CreateFromLTWH($loc->getX(), $loc->getY(), $size->getWidth(), $size->getHeight());
+        $region = Region::CreateFromLTWH($loc->getX(), $loc->getY(), $size->getWidth(), $size->getHeight());
+        $region->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
+        return $region;
     }
-    */
-
+*/
     public function getClientAreaBounds(){
         $bounds = $this->getBounds();
 
@@ -126,8 +131,7 @@ class EyesRemoteWebElement extends RemoteWebElement
     {
         $scriptToExec = sprintf
         (self::JS_GET_COMPUTED_STYLE_FORMATTED_STR, $propStyle);
-        return $this->eyesDriver->getRemoteWebDriver()->executeScript($scriptToExec);
-        // return $this->eyesDriver->getRemoteWebDriver()->execute($scriptToExec);
+        return $this->eyesDriver->executeScript($scriptToExec, [$this]);
     }
 
     /**
