@@ -6,7 +6,7 @@ use Applitools\Selenium\Eyes;
 use Applitools\MatchLevel;
 use Applitools\PrintLogHandler;
 use Applitools\RectangleSize;
-use Applitools\StitchMode;
+use Applitools\Selenium\StitchMode;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
