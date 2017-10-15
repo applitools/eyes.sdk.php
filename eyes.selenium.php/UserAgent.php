@@ -8,12 +8,12 @@ use Exception;
 class UserAgent
 {
     const MAJOR_MINOR = "(?<major>[^ .;_)]+)[_.](?<minor>[^ .;_)]+)";
-    const PRODUCT = "(?:(?<product>%s)/" . self::MAJOR_MINOR . ")";
+    const PRODUCT = "#(?:(?<product>%s)/" . self::MAJOR_MINOR . ")#";
 
     // Browser Regexes
     private static $VALUES_FOR_BROWSER_REGEX_EXCEPT_IE = ["Opera", "Chrome", "Safari", "Firefox", "Edge"];
 
-    const IE_BROWSER_REGEX = "(?:MS(?<product>IE) " . self::MAJOR_MINOR . ")";
+    const IE_BROWSER_REGEX = "#(?:MS(?<product>IE) " . self::MAJOR_MINOR . ")#";
 
     private $OS;
     private $OSMajorVersion;
@@ -24,7 +24,6 @@ class UserAgent
 
     private static function getBrowserRegexes()
     {
-
         $browserRegexes = [];
 
         for ($i = 0; $i < count(self::$VALUES_FOR_BROWSER_REGEX_EXCEPT_IE); $i++) {
@@ -43,21 +42,21 @@ class UserAgent
     private static $VERSION_REGEX;
 
     private static $OS_REGEXES = [
-        "/(?:(?<os>Windows) NT " . self::MAJOR_MINOR . ")/",
-        "/(?:(?<os>Windows XP))/",
-        "/(?:(?<os>Windows 2000))/",
-        "/(?:(?<os>Windows NT))/",
-        "/(?:(?<os>Windows))/",
-        "/(?:(?<os>Mac OS X) " . self::MAJOR_MINOR . ")/",
-        "/(?:(?<os>Android) " . self::MAJOR_MINOR . ")/",
-        "/(?:(?<os>CPU(?: i[a-zA-Z]+)? OS) " . self::MAJOR_MINOR . ")/",
-        "/(?:(?<os>Mac OS X))/",
-        "/(?:(?<os>Mac_PowerPC))/",
-        "/(?:(?<os>Linux))/",
-        "/(?:(?<os>CrOS))/",
-        "/(?:(?<os>SymbOS))/"];
+        "#(?:(?<os>Windows) NT " . self::MAJOR_MINOR . ")#",
+        "#(?:(?<os>Windows XP))#",
+        "#(?:(?<os>Windows 2000))#",
+        "#(?:(?<os>Windows NT))#",
+        "#(?:(?<os>Windows))#",
+        "#(?:(?<os>Mac OS X) " . self::MAJOR_MINOR . ")#",
+        "#(?:(?<os>Android) " . self::MAJOR_MINOR . ")#",
+        "#(?:(?<os>CPU(?: i[a-zA-Z]+)? OS) " . self::MAJOR_MINOR . ")#",
+        "#(?:(?<os>Mac OS X))#",
+        "#(?:(?<os>Mac_PowerPC))#",
+        "#(?:(?<os>Linux))#",
+        "#(?:(?<os>CrOS))#",
+        "#(?:(?<os>SymbOS))#"];
 
-    private static $HIDDEN_IE_REGEX = "(?:(?:rv:" . self::MAJOR_MINOR . "\\) like Gecko))";
+    private static $HIDDEN_IE_REGEX = "#(?:(?:rv:" . self::MAJOR_MINOR . "\\) like Gecko))#";
 
     private static $EDGE_REGEX;
 
