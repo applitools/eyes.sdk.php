@@ -25,6 +25,8 @@
         <testsuite name="Test Fluent API">
             <file>TestFluentApi_Chrome.php</file>
             <file>TestFluentApi_Chrome_ForceFPS.php</file>
+            <file>TestFluentApi_Firefox.php</file>
+            <file>TestFluentApi_Firefox_ForceFPS.php</file>
         </testsuite>
     </testsuites>
 

@@ -26,6 +26,7 @@ use Applitools\ScaleProvider;
 use Applitools\ScaleProviderIdentityFactory;
 use Applitools\Selenium\fluent\FrameLocator;
 use Applitools\Selenium\fluent\ISeleniumCheckTarget;
+use Applitools\Selenium\fluent\Target;
 use Applitools\SessionType;
 use Applitools\SimplePropertyHandler;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
@@ -308,7 +309,7 @@ class Eyes extends EyesBase
             }
         }
 
-        $this->driver = $driver; // temporarily, so setViewportSize will work.
+        $this->initDriver($driver);
 
         $uaString = $this->driver->getUserAgent();
         if ($uaString != null) {
@@ -328,6 +329,19 @@ class Eyes extends EyesBase
         $this->driver->setRotation($this->rotation);
 
         return $this->driver;
+    }
+
+    private function initDriver($driver)
+    {
+        if ($driver instanceof RemoteWebDriver) {
+            $this->driver = new EyesWebDriver($this->logger, $this, $driver);
+        } else if ($driver instanceof EyesWebDriver) {
+            $this->driver = $driver;
+        } else {
+            $errMsg = "Driver is not a RemoteWebDriver (" . get_class($driver) . ")";
+            $this->logger->log($errMsg);
+            throw new EyesException($errMsg);
+        }
     }
 
     /**
@@ -1502,7 +1516,6 @@ class Eyes extends EyesBase
     {
         return $this->elementPositionProvider == null ? $this->positionProvider : $this->elementPositionProvider;
     }
-
 }
 
 ?>
