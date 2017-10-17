@@ -60,7 +60,7 @@ class FileLogger implements LogHandler
             $currentTime = date("H:i:s");
 
             try {
-                fwrite($this->file, "$currentTime Eyes: $logString");
+                fwrite($this->file, "$currentTime Eyes: $logString\n");
             } catch (\Exception $e) {
                 throw new EyesException("Failed to write log to file!", $e);
             }
