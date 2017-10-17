@@ -70,6 +70,9 @@ abstract class EyesBase
     /** @var PositionProvider */
     protected $positionProvider;
 
+    /** @var PropertyData[] */
+    private $properties = [];
+
 
     public function __construct($serverUrl)
     {
@@ -1171,7 +1174,7 @@ abstract class EyesBase
 
         $this->sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
             $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $appEnv,
-            $this->defaultMatchSettings, $this->branchName, $this->parentBranchName);
+            $this->defaultMatchSettings, $this->branchName, $this->parentBranchName, $this->properties);
 
         $this->logger->log("Starting server session...");
         $this->runningSession = $this->serverConnector->startSession($this->sessionStartInfo);
@@ -1339,6 +1342,26 @@ abstract class EyesBase
             $currentAppName = null;
             $this->logger->getLogHandler()->close();
         }
+    }
+
+    /**
+     * Adds a property to be sent to the server.
+     *
+     * @param string $name The property name.
+     * @param string $value The property value.
+     */
+    public function addProperty($name, $value)
+    {
+        $pd = new PropertyData($name, $value);
+        $this->properties[] = $pd;
+    }
+
+    /**
+     * Clears the list of custom properties.
+     */
+    public function clearProperties()
+    {
+        $this->properties = [];
     }
 }
 

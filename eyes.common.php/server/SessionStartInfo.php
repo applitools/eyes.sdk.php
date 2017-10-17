@@ -18,6 +18,9 @@ class SessionStartInfo
     private $parentBranchName;
     private $defaultMatchSettings;
 
+    /** @var PropertyData[] */
+    private $properties;
+
     public function __construct($agentId,
                                 $sessionType,
                                 $appIdOrName, $verId,
@@ -26,14 +29,9 @@ class SessionStartInfo
                                 $envName,
                                 AppEnvironment $environment,
                                 ImageMatchSettings $defaultMatchSettings,
-                                $branchName, $parentBranchName)
+                                $branchName, $parentBranchName,
+                                $properties)
     {
-        /*ArgumentGuard.notNullOrEmpty(agentId, "agentId");
-        ArgumentGuard.notNullOrEmpty(appIdOrName, "appIdOrName");
-        ArgumentGuard.notNullOrEmpty(scenarioIdOrName, "scenarioIdOrName");
-        ArgumentGuard.notNull(batchInfo, "batchInfo");
-        ArgumentGuard.notNull(environment, "environment");
-        ArgumentGuard.notNull(defaultMatchSettings, "defaultMatchSettings");*/
         $this->agentId = $agentId;
         $this->sessionType = $sessionType;
         $this->appIdOrName = $appIdOrName;
@@ -45,23 +43,7 @@ class SessionStartInfo
         $this->defaultMatchSettings = $defaultMatchSettings; // class
         $this->branchName = $branchName;
         $this->parentBranchName = $parentBranchName;
-
-        //huge mock/ should be deleted   //FIXME
-
-
-        /*  $this->appIdOrName = "App Id 1111";
-          $this->scenarioIdOrName = "Scenario Name 1111";
-          $this->branchName = "Branch name ";
-          $this->batchInfo = array("startedAt"=>date("Y-m-d\TH:i:s\Z"));
-          $this->environment = array(
-                  "displaySize" => array(
-                      "width" => 1280,
-                      "height" => 800
-                  )
-          );
-          $this->agentId = "mysdk/1.3";*/
-
-
+        $this->properties = $properties;
     }
 
     public function getAgentId()
@@ -117,5 +99,10 @@ class SessionStartInfo
     public function getDefaultMatchSettings()
     {
         return $this->defaultMatchSettings;
+    }
+
+    public function getProperties()
+    {
+        return $this->properties;
     }
 }

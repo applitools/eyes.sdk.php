@@ -129,7 +129,8 @@ class ServerConnector implements ServerConnectorInterface
                 ],
 
                 "matchLevel" => $sessionStartInfo->getDefaultMatchSettings()->getMatchLevel(),
-                "agentId" => $sessionStartInfo->getAgentId()
+                "agentId" => $sessionStartInfo->getAgentId(),
+                "properties" => $sessionStartInfo->getProperties()
             ]
         ];
         $params = json_encode($params);
