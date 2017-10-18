@@ -10,13 +10,20 @@ namespace Applitools;
  */
 class MatchWindowData
 {
-
     // TODO Remove redundancy: userInputs and ignoreMismatch should only be inside Options. (requires server version update).
     private $userInputs; //Trigger[]
-    private $appOutput; //AppOutput
+
+    /** @var AppOutput */
+    private $appOutput;
+
+    /** @var string */
     private $tag;
+
+    /** @var bool */
     private $ignoreMismatch;
-    private $options; //Options
+
+    /** @var Options */
+    private $options;
 
     /**
      * @param array $userInputs A list of triggers between the previous matchWindow call and the current matchWindow call. Can be array of size 0, but MUST NOT be null.

@@ -7,10 +7,21 @@ namespace Applitools;
  */
 class ImageMatchSettings
 {
+    /** @var null|string */
     private $matchLevel; //MatchLevel
 
     /** @var ExactMatchSettings */
     private $exact;
+
+    /** @var bool */
+    private $ignoreCaret;
+
+    /** @var Region[] */
+    private $ignoreRegions = [];
+
+    /** @var FloatingMatchSettings[] */
+    private $floatingMatchSettings = [];
+
 
     public function __construct($matchLevel = null, ExactMatchSettings $exact = null)
     {
@@ -19,6 +30,7 @@ class ImageMatchSettings
         }
         $this->matchLevel = $matchLevel;
         $this->exact = $exact;
+        $this->ignoreCaret = null;
     }
 
     /**
@@ -60,5 +72,53 @@ class ImageMatchSettings
     public function __toString()
     {
         return "Match level: {$this->matchLevel}, Exact match settings: {$this->exact}";
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIgnoreCaret()
+    {
+        return $this->ignoreCaret;
+    }
+
+    /**
+     * @param bool $ignoreCaret
+     */
+    public function setIgnoreCaret($ignoreCaret)
+    {
+        $this->ignoreCaret = $ignoreCaret;
+    }
+
+    /**
+     * @return Region[]
+     */
+    public function getIgnoreRegions()
+    {
+        return $this->ignoreRegions;
+    }
+
+    /**
+     * @param Region[] $ignoreRegions
+     */
+    public function setIgnoreRegions($ignoreRegions)
+    {
+        $this->ignoreRegions = $ignoreRegions;
+    }
+
+    /**
+     * @return FloatingMatchSettings[]
+     */
+    public function getFloatingMatchSettings()
+    {
+        return $this->floatingMatchSettings;
+    }
+
+    /**
+     * @param FloatingMatchSettings[] $floatingMatchSettings
+     */
+    public function setFloatingMatchSettings($floatingMatchSettings)
+    {
+        $this->floatingMatchSettings = $floatingMatchSettings;
     }
 }

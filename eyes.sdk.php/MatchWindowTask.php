@@ -67,16 +67,19 @@ class MatchWindowTask
      * @param AppOutputWithScreenshot $appOutput The application output to be matched.
      * @param string $tag Optional tag to be associated with the match (can be {@code null}).
      * @param bool $ignoreMismatch Whether to instruct the server to ignore the match attempt in case of a mismatch.
+     * @param ImageMatchSettings $imageMatchSettings
      * @return MatchResult The match result.
      */
     protected function performMatch(
         $userInputs,
         AppOutputWithScreenshot $appOutput,
-        $tag, $ignoreMismatch)
+        $tag, $ignoreMismatch, ImageMatchSettings $imageMatchSettings)
     {
         // Prepare match data.
         $data = new MatchWindowData($userInputs, $appOutput->getAppOutput(), $tag, $ignoreMismatch,
-            new Options($tag, $userInputs, $ignoreMismatch, false, false, false));
+            new Options($tag, $userInputs, $ignoreMismatch,
+                false, false, false,
+                $imageMatchSettings));
         // Perform match.
         return $this->serverConnector->matchWindow($this->runningSession, $data);
     }
@@ -244,7 +247,7 @@ class MatchWindowTask
     {
         $appOutput = $this->appOutputProvider->getAppOutput($region, $this->lastScreenshot);
         $screenshot = $appOutput->getScreenshot();
-        $this->matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch/*, $imageMatchSettings*/);
+        $this->matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch, $imageMatchSettings);
         return $screenshot;
     }
 

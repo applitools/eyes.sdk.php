@@ -3,6 +3,7 @@
 namespace Applitools;
 
 use Applitools\Exceptions\EyesException;
+use Exception;
 
 class ServerConnector implements ServerConnectorInterface
 {
@@ -27,7 +28,7 @@ class ServerConnector implements ServerConnectorInterface
         $this->logger = $logger;
         $this->sdkName = $sdkName;
         $this->serverUrl = $serverUrl;
-        $this->endPoint = $serverUrl.self::API_PATH;
+        $this->endPoint = $serverUrl . self::API_PATH;
     }
 
     /**
@@ -121,7 +122,7 @@ class ServerConnector implements ServerConnectorInterface
                 "scenarioIdOrName" => $sessionStartInfo->getScenarioIdOrName(),
                 "batchInfo" => $sessionStartInfo->getBatchInfo(),
                 "environment" => [
-                    "inferred" =>  $sessionStartInfo->getEnvironment()->getInferred(),
+                    "inferred" => $sessionStartInfo->getEnvironment()->getInferred(),
                     "displaySize" => [
                         "width" => $sessionStartInfo->getEnvironment()->getDisplaySize()->getWidth(),
                         "height" => $sessionStartInfo->getEnvironment()->getDisplaySize()->getHeight()
@@ -135,20 +136,20 @@ class ServerConnector implements ServerConnectorInterface
         ];
         $params = json_encode($params);
 
-/*
-        try {
-//FIXME
-            // since the web API requires a root property for this message
-            //jsonMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true); ?????
-            //$postData = jsonMapper.writeValueAsString(sessionStartInfo);
+        /*
+                try {
+        //FIXME
+                    // since the web API requires a root property for this message
+                    //jsonMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true); ?????
+                    //$postData = jsonMapper.writeValueAsString(sessionStartInfo);
 
-            // returning the root property addition back to false (default)
-            //jsonMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-        } catch (Exception $e) { ///use IOException
-            throw new Exception("Failed to convert " .    //eyesException
-                "sessionStartInfo into Json string!", $e);
-        }
-*/
+                    // returning the root property addition back to false (default)
+                    //jsonMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+                } catch (Exception $e) { ///use IOException
+                    throw new Exception("Failed to convert " .    //eyesException
+                        "sessionStartInfo into Json string!", $e);
+                }
+        */
         try {
             $this->ch = curl_init();
             curl_setopt($this->ch, CURLOPT_URL, "{$this->endPoint}.json?apiKey={$this->apiKey}");
@@ -188,7 +189,7 @@ class ServerConnector implements ServerConnectorInterface
             $runningSession->setUrl($result['url']);
         }
 
-        if($information['http_code'] == 201){
+        if ($information['http_code'] == 201) {
             $runningSession->setIsNewSession(true);
         }
 
@@ -220,7 +221,10 @@ class ServerConnector implements ServerConnectorInterface
         $this->logger->log("base64 data length: " . strlen($base64data));
         $this->logger->log("image data length: " . strlen($imageData));
 
-        $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json?apiKey=".$this->apiKey;
+        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . ".json?apiKey=" . $this->apiKey;
+
+        $options = $matchData->getOptions();
+        $matchSettings = $options->getImageMatchSettings();
 
         try {
             $params = [
@@ -229,6 +233,32 @@ class ServerConnector implements ServerConnectorInterface
                 ],
                 "tag" => $matchData->getTag(),
                 "ignoreMismatch" => $matchData->getIgnoreMismatch(),
+                "options" => [
+                    "name" => $options->getName(),
+                    "forceMatch" => $options->getForceMatch(),
+                    "forceMismatch" => $options->getForceMismatch(),
+                    "ignoreMatch" => $options->getIgnoreMatch(),
+                    "ignoreMismatch" => $options->getIgnoreMismatch(),
+                    "imageMatchSettings" => [
+                        "matchLevel" => $matchSettings->getMatchLevel(),
+                        "ignoreCaret" => $matchSettings->isIgnoreCaret(),
+                        "exact" => [
+                            "minDiffIntensity" => $matchSettings->getExact()->getMinDiffIntensity(),
+                            "minDiffWidth" => $matchSettings->getExact()->getMinDiffWidth(),
+                            "minDiffHeight" => $matchSettings->getExact()->getMinDiffHeight(),
+                            "matchThreshold" => $matchSettings->getExact()->getMatchThreshold()
+                        ]
+//                        "ignore"=>[
+//                            $matchSettings->getIgnoreRegions()
+//                        ],
+//                        "floating"=>[
+//                            $matchSettings->getFloatingMatchSettings()
+//                        ]
+                    ]
+                ],
+                "userInputs" => [
+                    //"triggerType"=>[]
+                ]
             ];
             $json = json_encode($params);
             $params = pack('N', strlen($json)) . $json . $imageData;
@@ -257,17 +287,17 @@ class ServerConnector implements ServerConnectorInterface
             $validStatusCodes = array('200', '201');
             if (in_array($information['http_code'], $validStatusCodes)) {
                 $this->logger->verbose("matchWindow(): Server request success.");
-            }else{
+            } else {
                 $this->logger->verbose("matchWindow(): Server request failed. Code: " . $information['http_code']);
-                throw new \Exception('Invalid status code. Code: '  . $information['http_code']);
+                throw new Exception('Invalid status code. Code: ' . $information['http_code']);
             }
             $result = new MatchResult();
-            if(!empty($response)){
+            if (!empty($response)) {
                 $res = json_decode($response);
                 $result->setAsExpected($res->asExpected == "true" ? true : false);
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->log("Failed sending checkWindow request. code: {$e->getCode()}. message: {$e->getMessage()}");
             throw new EyesException("Failed sending checkWindow request!", $e->getCode(), $e);
         }
@@ -278,10 +308,10 @@ class ServerConnector implements ServerConnectorInterface
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
 
-        $runningSessionsEndpoint = $this->endPoint .'/'. $runningSession->getId().".json?apiKey=".$this->apiKey;
+        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . ".json?apiKey=" . $this->apiKey;
 
         curl_reset($this->ch);
-        curl_setopt($this->ch, CURLOPT_URL,"{$runningSessionsEndpoint}&isAborted=false&updateBaseline={$runningSession->getIsNewSession()}");
+        curl_setopt($this->ch, CURLOPT_URL, "{$runningSessionsEndpoint}&isAborted=false&updateBaseline={$runningSession->getIsNewSession()}");
 
         if ($this->proxySettings != null) {
             curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
@@ -296,16 +326,16 @@ class ServerConnector implements ServerConnectorInterface
         );
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
 
-        $server_output = curl_exec ($this->ch);
+        $server_output = curl_exec($this->ch);
         $information = curl_getinfo($this->ch);
         $validStatusCodes = array('200', '201');
         if (in_array($information['http_code'], $validStatusCodes)) {
             $this->logger->verbose("stopSession(): Session was stopped");
-        }else{
-            $this->logger->verbose("stopSession(): status ".$information['http_code'] . ". Closing was failed");
+        } else {
+            $this->logger->verbose("stopSession(): status " . $information['http_code'] . ". Closing was failed");
             throw new \Exception('Invalid status code.');
         }
-        curl_close ($this->ch);
+        curl_close($this->ch);
         //FIXME may be need to use parseResponseWithJsonData for preparing result
         return new TestResults(json_decode($server_output, true));
     }
