@@ -8,7 +8,8 @@ namespace Applitools;
 /**
  * Encapsulates a mouse trigger.
  */
-class MouseTrigger extends Trigger {
+class MouseTrigger extends Trigger
+{
     private $mouseAction; //MouseAction
     private $control; //Region
 
@@ -18,7 +19,8 @@ class MouseTrigger extends Trigger {
     private $location; //Location
 
 
-    public function __construct($mouseAction, Region $control, Location $location) {
+    public function __construct($mouseAction, Region $control, Location $location)
+    {
 
         ArgumentGuard::notNull($mouseAction, "mouseAction");
         ArgumentGuard::notNull($control, "control");
@@ -28,23 +30,28 @@ class MouseTrigger extends Trigger {
         $this->location = $location;
     }
 
-    public function getMouseAction() {
+    public function getMouseAction()
+    {
         return $this->mouseAction;
     }
 
-    public function getControl() {
+    public function getControl()
+    {
         return $this->control;
     }
 
-    public function getLocation() {
+    public function getLocation()
+    {
         return $this->location;
     }
 
-    public function getTriggerType() {
+    public function getTriggerType()
+    {
         return Trigger::Mouse;
     }
 
-    public function toString() {
+    public function toString()
+    {
         return sprintf("%s [%s] %s", $this->mouseAction, $$this->control, $this->location);
     }
 
