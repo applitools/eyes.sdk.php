@@ -21,7 +21,7 @@ abstract class TestFluentApi extends TestSetup
             Target::window()
                 ->fully()
                 ->timeout(5000)
-                ->ignore(new Region(50, 50, 100, 100))
+                ->ignore(Region::CreateFromLTWH(50, 50, 100, 100))
         );
     }
 
@@ -34,7 +34,7 @@ abstract class TestFluentApi extends TestSetup
         $this->init(__FUNCTION__);
         $this->eyes->check("Fluent - Region with Ignore region",
             Target::regionBySelector(WebDriverBy::id("overflowing-div"))
-                ->ignore(new Region(50, 50, 100, 100))
+                ->ignore(Region::CreateFromLTWH(50, 50, 100, 100))
         );
     }
 
@@ -109,13 +109,13 @@ abstract class TestFluentApi extends TestSetup
             ->region(WebDriverBy::id("inner-frame-div"))
             ->fully()
             ->timeout(5000)
-            ->ignore(new Region(50, 50, 100, 100)));
+            ->ignore(Region::CreateFromLTWH(50, 50, 100, 100)));
 
         $this->eyes->check("Fluent - Inner frame div 2", Target::frame("frame1")
             ->region(WebDriverBy:: id("inner-frame-div"))
             ->fully()
-            ->ignore(new Region(50, 50, 100, 100))
-            ->ignore(new Region(70, 170, 90, 90)));
+            ->ignore(Region::CreateFromLTWH(50, 50, 100, 100))
+            ->ignore(Region::CreateFromLTWH(70, 170, 90, 90)));
 
         $this->eyes->check("Fluent - Inner frame div 3", Target::frame("frame1")
             ->region(WebDriverBy::id("inner-frame-div"))
@@ -129,7 +129,7 @@ abstract class TestFluentApi extends TestSetup
         $this->eyes->check("Fluent - Full frame with floating region", Target::frame("frame1")
             ->fully()
             ->layout()
-            ->floating(25, new Region(200, 200, 150, 150)));
+            ->floating(25, Region::CreateFromLTWH(200, 200, 150, 150)));
     }
 
     /**
