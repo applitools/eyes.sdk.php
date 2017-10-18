@@ -831,7 +831,8 @@ abstract class EyesBase
     /**
      * @param bool $saveDebugScreenshots If true, will save all screenshots to local directory.
      */
-    public function setSaveDebugScreenshots($saveDebugScreenshots) {
+    public function setSaveDebugScreenshots($saveDebugScreenshots)
+    {
         $prev = $this->debugScreenshotsProvider;
         if ($saveDebugScreenshots) {
             $this->debugScreenshotsProvider = new FileDebugScreenshotsProvider();
@@ -846,7 +847,8 @@ abstract class EyesBase
      *
      * @return True if screenshots saving enabled.
      */
-    public function getSaveDebugScreenshots() {
+    public function getSaveDebugScreenshots()
+    {
         return !($this->debugScreenshotsProvider instanceof NullDebugScreenshotProvider);
     }
 
@@ -855,7 +857,8 @@ abstract class EyesBase
      * @param string $pathToSave Path where you want to save the debug screenshots.
      */
 
-    public function setDebugScreenshotsPath($pathToSave) {
+    public function setDebugScreenshotsPath($pathToSave)
+    {
         $this->debugScreenshotsProvider->setPath($pathToSave);
     }
 
@@ -863,14 +866,16 @@ abstract class EyesBase
      *
      * @return string The path where you want to save the debug screenshots.
      */
-    public function getDebugScreenshotsPath() {
+    public function getDebugScreenshotsPath()
+    {
         return $this->debugScreenshotsProvider->getPath();
     }
 
     /**
      * @param string $prefix The prefix for the screenshots' names.
      */
-    public function setDebugScreenshotsPrefix($prefix) {
+    public function setDebugScreenshotsPrefix($prefix)
+    {
         $this->debugScreenshotsProvider->setPrefix($prefix);
     }
 
@@ -878,7 +883,8 @@ abstract class EyesBase
      *
      * @return string The prefix for the screenshots' names.
      */
-    public function getDebugScreenshotsPrefix() {
+    public function getDebugScreenshotsPrefix()
+    {
         return $this->debugScreenshotsProvider->getPrefix();
     }
 
