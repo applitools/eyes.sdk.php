@@ -8,6 +8,7 @@ use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
 use Applitools\fluent\ICheckSettings;
+use Applitools\fluent\ICheckSettingsInternal;
 
 abstract class EyesBase
 {
@@ -955,31 +956,16 @@ abstract class EyesBase
 
         $this->logger->log("Calling match window...");
 
-        $region = $regionProvider->getRegion();
-        $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $region,
-            $tag, $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $checkSettings);
+        $result = $this->matchWindow($regionProvider, $tag, $ignoreMismatch, $checkSettings);
 
         $this->logger->log("MatchWindow Done!");
 
-        if (!$result->getAsExpected()) {
-            if (!$ignoreMismatch) {
-                $this->clearUserInputs();
-                $this->lastScreenshot = $result->getScreenshot();
-            }
-
-            $this->shouldMatchWindowRunOnceOnTimeout = true;
-
-            if (!$this->runningSession->getIsNewSession()) {
-                $this->logger->log("Mismatch! ($tag)");
-            }
-
-            if ($this->getFailureReports() == "FailureReports::IMMEDIATE") {
-                throw new TestFailedException("Mismatch found in '{$this->sessionStartInfo->getScenarioIdOrName()}' of '{$this->sessionStartInfo->getAppIdOrName()}'");
-            }
-        } else { // Match successful
+        if (!$ignoreMismatch) {
             $this->clearUserInputs();
             $this->lastScreenshot = $result->getScreenshot();
         }
+
+        $this->validateResult($tag, $result);
 
         $this->logger->log("Done!");
         return $result;
@@ -1254,7 +1240,7 @@ abstract class EyesBase
             if ($isNewSession) {
                 $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
                 $this->logger->verbose("--- New test ended. " . $instructions);
-                if ($throwEx  && !$this->saveNewTests) {
+                if ($throwEx && !$this->saveNewTests) {
                     $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
                         . "' of '" . $this->sessionStartInfo->getAppIdOrName()
                         . "'. " . $instructions;
@@ -1369,6 +1355,95 @@ abstract class EyesBase
     {
         $this->properties = [];
     }
+
+    /**
+     * @param string $tag
+     * @param MatchResult $result
+     * @throws TestFailedException
+     */
+    private function validateResult($tag, $result)
+    {
+        if (!$result->getAsExpected()) {
+            $this->shouldMatchWindowRunOnceOnTimeout = true;
+
+            if (!$this->runningSession->getIsNewSession()) {
+                $this->logger->log("Mismatch! ($tag)");
+            }
+
+            if ($this->getFailureReports() == "FailureReports::IMMEDIATE") {
+                throw new TestFailedException("Mismatch found in '{$this->sessionStartInfo->getScenarioIdOrName()}' of '{$this->sessionStartInfo->getAppIdOrName()}'");
+            }
+        } else { // Match successful
+            $this->clearUserInputs();
+            $this->lastScreenshot = $result->getScreenshot();
+        }
+    }
+
+
+    /**
+     * @param RegionProvider $regionProvider
+     * @param string $tag
+     * @param bool $ignoreMismatch
+     * @param ICheckSettings $checkSettings
+     * @return MatchResult
+     */
+    private function matchWindow(RegionProvider $regionProvider, $tag, $ignoreMismatch, ICheckSettings $checkSettings)
+    {
+        $retryTimeout = -1;
+        $imageMatchSettings = null;
+        if ($checkSettings instanceof ICheckSettingsInternal) {
+            $retryTimeout = $checkSettings->getTimeout();
+
+            $matchLevel = $checkSettings->getMatchLevel();
+            $matchLevel = ($matchLevel == null) ? $this->getDefaultMatchSettings()->getMatchLevel() : $matchLevel;
+
+            $imageMatchSettings = new ImageMatchSettings($matchLevel, null);
+
+            $this->collectIgnoreRegions($checkSettings, $imageMatchSettings);
+            $this->collectFloatingRegions($checkSettings, $imageMatchSettings);
+
+            $ignoreCaret = $checkSettings->getIgnoreCaret();
+            $imageMatchSettings->setIgnoreCaret(($ignoreCaret == null) ? $this->getDefaultMatchSettings()->isIgnoreCaret() : $ignoreCaret);
+        }
+
+        $this->logger->verbose("Calling match window...");
+
+        $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $regionProvider->getRegion(), $tag,
+            $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $imageMatchSettings, $retryTimeout);
+
+        return $result;
+    }
+
+    /**
+     * @param ICheckSettingsInternal $checkSettings
+     * @param ImageMatchSettings $imageMatchSettings
+     */
+    private function collectIgnoreRegions(ICheckSettingsInternal $checkSettings, ImageMatchSettings $imageMatchSettings)
+    {
+        /** @var Region[] $ignoreRegions */
+        $ignoreRegions = [];
+
+        foreach ($checkSettings->getIgnoreRegions() as $ignoreRegionProvider) {
+            $ignoreRegions[] = $ignoreRegionProvider->getRegion($this);
+        }
+        $imageMatchSettings->setIgnoreRegions($ignoreRegions);
+    }
+
+    /**
+     * @param ICheckSettingsInternal $checkSettings
+     * @param ImageMatchSettings $imageMatchSettings
+     */
+    private function collectFloatingRegions(ICheckSettingsInternal $checkSettings, ImageMatchSettings $imageMatchSettings)
+    {
+        /** @var FloatingMatchSettings[] $floatingRegions */
+        $floatingRegions = [];
+
+        foreach ($checkSettings->getFloatingRegions() as $floatingRegionProvider) {
+            $floatingRegions[] = $floatingRegionProvider->getRegion($this);
+        }
+        $imageMatchSettings->setFloatingMatchSettings($floatingRegions);
+    }
+
 }
 
 ?>

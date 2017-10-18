@@ -93,29 +93,21 @@ class MatchWindowTask
      * @param string $tag Optional tag to be associated with the match (can be {@code null}).
      * @param bool $shouldMatchWindowRunOnceOnTimeout Force a single match attempt at the end of the match timeout.
      * @param bool $ignoreMismatch Whether to instruct the server to ignore the match attempt in case of a mismatch.
-     * @param ICheckSettings $checkSettings The check settings to use.
+     * @param ImageMatchSettings $imageMatchSettings
+     * @param int $retryTimeout
      * @return MatchResult Returns the results of the match
      */
-    public function matchWindow($userInputs, Region $region, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, ICheckSettings $checkSettings)
+    public function matchWindow($userInputs, Region $region, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch,
+                                ImageMatchSettings $imageMatchSettings, $retryTimeout)
     {
-        ArgumentGuard::notNull($checkSettings, "checkSettings");
-
-        $retryTimeout = -1;
-        if ($checkSettings instanceof ICheckSettingsInternal) {
-            $retryTimeout = $checkSettings->getTimeout();
-        }
-
         if ($retryTimeout === null || $retryTimeout < 0) {
             $retryTimeout = $this->defaultRetryTimeout;
         }
 
         $this->logger->log("retryTimeout = $retryTimeout");
 
-
-        $imageMatchSettings = null; // TODO - implement
         $screenshot = $this->takeScreenshot($userInputs, $region, $tag,
             $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $imageMatchSettings, $retryTimeout);
-
 
         if ($ignoreMismatch) {
             return $this->matchResult;
