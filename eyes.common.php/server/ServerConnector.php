@@ -136,20 +136,6 @@ class ServerConnector implements ServerConnectorInterface
         ];
         $params = json_encode($params);
 
-        /*
-                try {
-        //FIXME
-                    // since the web API requires a root property for this message
-                    //jsonMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true); ?????
-                    //$postData = jsonMapper.writeValueAsString(sessionStartInfo);
-
-                    // returning the root property addition back to false (default)
-                    //jsonMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-                } catch (Exception $e) { ///use IOException
-                    throw new Exception("Failed to convert " .    //eyesException
-                        "sessionStartInfo into Json string!", $e);
-                }
-        */
         try {
             $this->ch = curl_init();
             curl_setopt($this->ch, CURLOPT_URL, "{$this->endPoint}.json?apiKey={$this->apiKey}");
@@ -239,28 +225,15 @@ class ServerConnector implements ServerConnectorInterface
                     "forceMismatch" => $options->getForceMismatch(),
                     "ignoreMatch" => $options->getIgnoreMatch(),
                     "ignoreMismatch" => $options->getIgnoreMismatch(),
-                    "imageMatchSettings" => [
-                        "matchLevel" => $matchSettings->getMatchLevel(),
-                        "ignoreCaret" => $matchSettings->isIgnoreCaret(),
-                        "exact" => [
-                            "minDiffIntensity" => $matchSettings->getExact()->getMinDiffIntensity(),
-                            "minDiffWidth" => $matchSettings->getExact()->getMinDiffWidth(),
-                            "minDiffHeight" => $matchSettings->getExact()->getMinDiffHeight(),
-                            "matchThreshold" => $matchSettings->getExact()->getMatchThreshold()
-                        ]
-//                        "ignore"=>[
-//                            $matchSettings->getIgnoreRegions()
-//                        ],
-//                        "floating"=>[
-//                            $matchSettings->getFloatingMatchSettings()
-//                        ]
-                    ]
+                    "imageMatchSettings" => $this->getImageMatchSettingsAsFormattedArray($matchSettings),
+                    "userInputs" => $options->getUserInputsAsFormattedArray()
                 ],
-                "userInputs" => [
-                    //"triggerType"=>[]
-                ]
+                "userInputs" => []
             ];
             $json = json_encode($params);
+
+            $this->logger->verbose($json);
+
             $params = pack('N', strlen($json)) . $json . $imageData;
 
             curl_reset($this->ch);
@@ -338,6 +311,28 @@ class ServerConnector implements ServerConnectorInterface
         curl_close($this->ch);
         //FIXME may be need to use parseResponseWithJsonData for preparing result
         return new TestResults(json_decode($server_output, true));
+    }
+
+    private function getImageMatchSettingsAsFormattedArray(ImageMatchSettings $matchSettings)
+    {
+        $retVal = [
+            "matchLevel" => $matchSettings->getMatchLevel(),
+            "ignoreCaret" => $matchSettings->isIgnoreCaret(),
+            "ignore" => $matchSettings->getIgnoreRegionsAsFormattedArray(),
+            "floating" => $matchSettings->getFloatingMatchSettingsAsFormattedArray()
+        ];
+
+        $exact = $matchSettings->getExact();
+        if ($exact != null) {
+            $retVal["exact"] = [
+                "minDiffIntensity" => $exact->getMinDiffIntensity(),
+                "minDiffWidth" => $exact->getMinDiffWidth(),
+                "minDiffHeight" => $exact->getMinDiffHeight(),
+                "matchThreshold" => $exact->getMatchThreshold()
+            ];
+        }
+
+        return $retVal;
     }
 }
 

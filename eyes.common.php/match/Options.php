@@ -30,7 +30,7 @@ class Options
 
     /**
      * @param string $name The tag of the window to be matched.
-     * @param array $userInputs A list of triggers between the previous matchWindow call and the current matchWindow call. Can be array of size 0, but MUST NOT be null.
+     * @param Trigger[] $userInputs A list of triggers between the previous matchWindow call and the current matchWindow call. Can be array of size 0, but MUST NOT be null.
      * @param bool $ignoreMismatch Tells the server whether or not to store a mismatch for the current window as window in the session.
      * @param bool $ignoreMatch Tells the server whether or not to store a match for the current window as window in the session.
      * @param bool $forceMismatch Forces the server to skip the comparison process and mark the current window as a mismatch.
@@ -107,6 +107,17 @@ class Options
     public function getImageMatchSettings()
     {
         return $this->imageMatchSettings;
+    }
+
+    public function getUserInputsAsFormattedArray()
+    {
+        $retVal = [];
+
+        foreach ($this->userInputs as $trigger) {
+            $retVal[] = $trigger->getAsFormattedArray();
+        }
+
+        return $retVal;
     }
 }
 

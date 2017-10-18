@@ -10,13 +10,14 @@ namespace Applitools;
  */
 abstract class Trigger {
 
-    private $TriggerType; //FIXME
     const Unknown = "Unknown";
     const Mouse = "Mouse";
     const Text = "Text";
     const Keyboard = "Keyboard"; 
 
     public abstract function getTriggerType();
+
+    public abstract function getAsFormattedArray();
 }
 
 ?>

@@ -26,7 +26,7 @@ class IgnoreRegionBySelector implements IGetRegion
     {
         if ($eyesBase instanceof Eyes) {
             $element = $eyesBase->getDriver()->findElement($this->selector);
-            return new Region(
+            return Region::CreateFromLTWH(
                 $element->getLocation()->getX(),
                 $element->getLocation()->getY(),
                 $element->getSize()->getWidth(),

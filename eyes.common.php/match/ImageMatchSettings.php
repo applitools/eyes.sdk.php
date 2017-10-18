@@ -121,4 +121,40 @@ class ImageMatchSettings
     {
         $this->floatingMatchSettings = $floatingMatchSettings;
     }
+
+    public function getIgnoreRegionsAsFormattedArray()
+    {
+        $retVal = [];
+
+        foreach ($this->ignoreRegions as $r) {
+            $retVal[] = [
+                "left" => $r->getLeft(),
+                "top" => $r->getTop(),
+                "width" => $r->getWidth(),
+                "height" => $r->getHeight()
+            ];
+        }
+
+        return $retVal;
+    }
+
+    public function getFloatingMatchSettingsAsFormattedArray()
+    {
+        $retVal = [];
+
+        foreach ($this->floatingMatchSettings as $r) {
+            $retVal[] = [
+                "left" => $r->left,
+                "top" => $r->top,
+                "width" => $r->width,
+                "height" => $r->height,
+                "maxUpOffset" => $r->maxUpOffset,
+                "maxDownOffset" => $r->maxDownOffset,
+                "maxLeftOffset" => $r->maxLeftOffset,
+                "maxRightOffset" => $r->maxRightOffset
+            ];
+        }
+
+        return $retVal;
+    }
 }

@@ -912,7 +912,7 @@ abstract class EyesBase
     /**
      * @return string The current title of of the AUT.
      */
-    protected abstract function getTitle();
+    public abstract function getTitle();
 
     /**
      * @return True if failed tests are saved by default.

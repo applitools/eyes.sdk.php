@@ -42,7 +42,7 @@ class Region
         $this->coordinatesType = self::$empty->coordinatesType;
     }
 
-    public function __construct()
+    private function __construct()
     {
     }
 

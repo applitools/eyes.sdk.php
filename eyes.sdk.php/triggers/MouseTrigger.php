@@ -47,6 +47,24 @@ class MouseTrigger extends Trigger {
     public function toString() {
         return sprintf("%s [%s] %s", $this->mouseAction, $$this->control, $this->location);
     }
+
+    public function getAsFormattedArray()
+    {
+        return [
+            "triggerType" => $this->getTriggerType(),
+            "mouseAction" => $this->getMouseAction(),
+            "location" => [
+                "x" => $this->location->getX(),
+                "y" => $this->location->getY()
+            ],
+            "control" => [
+                "left" => $this->control->getLeft(),
+                "top" => $this->control->getTop(),
+                "width" => $this->control->getWidth(),
+                "height" => $this->control->getHeight()
+            ]
+        ];
+    }
 }
 
 ?>

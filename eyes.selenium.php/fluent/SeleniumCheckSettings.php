@@ -148,13 +148,17 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     }
 
     /**
-     * @param Region[] $regions
+     * @param array $regions
      * @return $this;
      */
     public function ignore(...$regions)
     {
         foreach ($regions as $region) {
-            parent::ignore(new IgnoreRegionByRectangle($region));
+            if ($region instanceof Region) {
+                $this->ignoreRegions[] = new IgnoreRegionByRectangle($region);
+            } else if ($region instanceof WebDriverBy) {
+                $this->ignoreRegions[] = new IgnoreRegionBySelector($region);
+            }
         }
 
         return $this;

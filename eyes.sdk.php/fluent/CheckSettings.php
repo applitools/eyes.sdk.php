@@ -4,6 +4,8 @@ namespace Applitools\fluent {
 
     use Applitools\MatchLevel;
     use Applitools\Region;
+    use Applitools\Selenium\fluent\IgnoreRegionBySelector;
+    use Facebook\WebDriver\WebDriverBy;
 
     class CheckSettings implements ICheckSettings, ICheckSettingsInternal
     {
@@ -26,7 +28,7 @@ namespace Applitools\fluent {
         /**
          * @var IGetRegion[]
          */
-        private $ignoreRegions = [];
+        protected $ignoreRegions = [];
 
         /**
          * @var IGetFloatingRegion[]
@@ -50,7 +52,9 @@ namespace Applitools\fluent {
         public function ignore(...$regions)
         {
             foreach ($regions as $region) {
-                $this->ignoreRegions[] = new IgnoreRegionByRectangle($region);
+                if ($region instanceof Region) {
+                    $this->ignoreRegions[] = new IgnoreRegionByRectangle($region);
+                }
             }
             return $this;
         }
@@ -92,7 +96,7 @@ namespace Applitools\fluent {
         {
             $this->floatingRegions[] =
                 new FloatingRegionByRectangle(
-                    new Region(
+                    Region::CreateFromLTWH(
                         $region->getLeft(),
                         $region->getTop(),
                         $region->getLeft() + $region->getWidth(),
