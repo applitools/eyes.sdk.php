@@ -1250,7 +1250,12 @@ abstract class EyesBase
                     $this->logger->log("--- Failed test ended. See details at $sessionResultsUrl");
                     if ($throwEx)
                     {
-                        throw new DiffsFoundException($results, $this->sessionStartInfo->getScenarioIdOrName(), $this->sessionStartInfo->getAppIdOrName(), $sessionResultsUrl);
+                        $instructions = "See details at: " . $sessionResultsUrl;
+                        $message = "Test '{$this->sessionStartInfo->getScenarioIdOrName()}'" .
+                            "' of '{$this->sessionStartInfo->getAppIdOrName()}" .
+                            "' detected differences! " . $instructions;
+
+                        throw new DiffsFoundException($results, $message);
                     }
                 }
             }
