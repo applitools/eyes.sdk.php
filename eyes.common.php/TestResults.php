@@ -17,6 +17,7 @@ class TestResults {
     private $noneMatches;
     private $url;
     private $isNew;
+    private $status;
 
     function __construct($data = null) {
         if(is_array($data)){
@@ -116,6 +117,14 @@ class TestResults {
     }
 
     /**
+     * @return string The test result status.
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
      * @param int $steps The number of visual checkpoints in the test.
      */
     public function setSteps($steps) {
@@ -202,9 +211,17 @@ class TestResults {
         $this->isNew = $isNew;
     }
 
+    /**
+     * @param string $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
     public function toString() {
         $isNewTestStr = $this->isNew ? "New test" : "Existing test";
-        return $isNewTestStr . " [ steps: " . $this->getSteps()
+        return $isNewTestStr . "(" . $this->getStatus() . ")" . " [ steps: " . $this->getSteps()
                 . ", matches: " . $this->getMatches()
                 . ", mismatches:" . $this->getMismatches() . ", missing: "
                 . $this->getMissing() . "] , URL: " . $this->getUrl();

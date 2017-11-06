@@ -74,6 +74,15 @@ abstract class EyesBase
     /** @var PropertyData[] */
     private $properties = [];
 
+    /** @var bool */
+    private $saveNewTests = true;
+
+    /** @var bool */
+    private $saveFailedTests;
+
+    /** @var string */
+    private $agentId;
+
 
     public function __construct($serverUrl)
     {
@@ -1223,31 +1232,29 @@ abstract class EyesBase
             $results->setUrl($sessionResultsUrl);
             $this->logger->verbose($results->toString());
 
-            if (!$isNewSession && (0 < $results->getMismatches() || 0 < $results->getMissing())) {
+            if ($results->getStatus() == TestResultsStatus::Unresolved) {
+                if ($results->isNew()) {
+                    $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
+                    $this->logger->log("--- New test ended. " . $instructions);
+                    if ($throwEx && !$this->saveNewTests)
+                    {
+                        $message = "'{$this->sessionStartInfo->getScenarioIdOrName()}'" .
+                        "' of '{$this->sessionStartInfo->getAppIdOrName()}" .
+                        "'. $instructions";
 
-                $this->logger->log("--- Failed test ended. See details at " . $sessionResultsUrl);
-
-                if ($throwEx) {
-                    $message = "Test '{$this->sessionStartInfo->getScenarioIdOrName()}'" .
-                        " of '{$this->sessionStartInfo->getAppIdOrName()}' detected differences!" .
-                        " See details at $sessionResultsUrl";
-
-                    throw new DiffsFoundException($results, $message);
+                        throw new NewTestException($results, $message);
+                    }
                 }
-                return $results;
+                else
+                {
+                    $this->logger->log("--- Failed test ended. See details at $sessionResultsUrl");
+                    if ($throwEx)
+                    {
+                        throw new DiffsFoundException($results, $this->sessionStartInfo->getScenarioIdOrName(), $this->sessionStartInfo->getAppIdOrName(), $sessionResultsUrl);
+                    }
+                }
             }
 
-            if ($isNewSession) {
-                $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
-                $this->logger->verbose("--- New test ended. " . $instructions);
-                if ($throwEx && !$this->saveNewTests) {
-                    $message = "'" . $this->sessionStartInfo->getScenarioIdOrName()
-                        . "' of '" . $this->sessionStartInfo->getAppIdOrName()
-                        . "'. " . $instructions;
-                    throw new NewTestException($results, $message);
-                }
-                return $results;
-            }
             // Test passed
             $this->logger->verbose("--- Test passed. See details at " . $sessionResultsUrl);
             return $results;
@@ -1264,8 +1271,7 @@ abstract class EyesBase
     /**
      * Ends the test.
      *
-     * @param bool $isDeadlineExceeded If {@code true} the test will fail (unless
-     *                           it's a new test).
+     * @param bool $isDeadlineExceeded If {@code true} the test will fail (unless it's a new test).
      * @throws TestFailedException
      * @throws NewTestException
      */
