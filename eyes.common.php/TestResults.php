@@ -113,7 +113,7 @@ class TestResults {
      * @return bool Whether or not this test passed.
      */
     public function isPassed() {
-        return (!$this->isNew() && $this->getMismatches() == 0 && $this->getMissing() == 0);
+        return ($this->status == TestResultsStatus::Passed);
     }
 
     /**
