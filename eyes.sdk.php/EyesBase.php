@@ -1236,32 +1236,40 @@ abstract class EyesBase
                 if ($results->isNew()) {
                     $instructions = "Please approve the new baseline at " . $sessionResultsUrl;
                     $this->logger->log("--- New test ended. " . $instructions);
-                    if ($throwEx && !$this->saveNewTests)
-                    {
+                    if ($throwEx) {
                         $message = "'{$this->sessionStartInfo->getScenarioIdOrName()}'" .
-                        "' of '{$this->sessionStartInfo->getAppIdOrName()}" .
-                        "'. $instructions";
+                            "' of '{$this->sessionStartInfo->getAppIdOrName()}" .
+                            "'. $instructions";
 
                         throw new NewTestException($results, $message);
                     }
-                }
-                else
-                {
-                    $this->logger->log("--- Failed test ended. See details at $sessionResultsUrl");
-                    if ($throwEx)
-                    {
+                } else {
+                    $this->logger->log("--- Differences found. See details at $sessionResultsUrl");
+                    if ($throwEx) {
                         $instructions = "See details at: " . $sessionResultsUrl;
                         $message = "Test '{$this->sessionStartInfo->getScenarioIdOrName()}'" .
-                            "' of '{$this->sessionStartInfo->getAppIdOrName()}" .
-                            "' detected differences! " . $instructions;
+                            " of '{$this->sessionStartInfo->getAppIdOrName()}'" .
+                            " detected differences! " . $instructions;
 
                         throw new DiffsFoundException($results, $message);
                     }
                 }
+            } else if ($results->getStatus() == TestResultsStatus::Failed) {
+                $this->logger->log("--- Failed test ended. See details at $sessionResultsUrl");
+
+                if ($throwEx) {
+                    $message = "'{$this->sessionStartInfo->getScenarioIdOrName()}'" .
+                        " of '{$this->sessionStartInfo->getAppIdOrName()}'." .
+                        " See details at $sessionResultsUrl";
+
+                    throw new TestFailedException($results, $message);
+                }
+
+            } else {
+                // Test passed
+                $this->logger->verbose("--- Test passed. See details at " . $sessionResultsUrl);
             }
 
-            // Test passed
-            $this->logger->verbose("--- Test passed. See details at " . $sessionResultsUrl);
             return $results;
         } finally {
             // Making sure that we reset the running session even if an

@@ -59,6 +59,20 @@ class TestServerStatus extends TestCase
     /**
      * @test
      * @doesNotPerformAssertions
+     * @expectedException \Applitools\Exceptions\DiffsFoundException
+     */
+    public function TestSessionSummary_Status_Diff()
+    {
+        $driver = $this->eyes->open($this->webDriver, "TestServerStatus", "TestServerStatus", new RectangleSize(800, 599));
+
+        $driver->get("http://applitools.github.io/demo/TestPages/FramesTestPage/");
+        $this->eyes->check("TestSessionSummary_Status_Diff", Target::window());
+        $this->localTearDown();
+    }
+
+    /**
+     * @test
+     * @doesNotPerformAssertions
      * @expectedException \Applitools\Exceptions\NewTestException
      */
     public function TestSessionSummary_Status_New()
