@@ -145,7 +145,7 @@ class Eyes extends EyesBase
      * @param Region $control The control on which the trigger is activated (context relative coordinates).
      * @param Location $cursor  The cursor's position relative to the control.
      */
-    public function addMouseTrigger($action, Region $control, Location $cursor)
+    public function addMouseTriggerCursor($action, Region $control, Location $cursor)
     {
         $this->addMouseTriggerBase($action, $control, $cursor);
     }

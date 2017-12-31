@@ -7,6 +7,7 @@ use Applitools\Logger;
 use Applitools\MouseAction;
 use Applitools\Region;
 use Facebook\WebDriver\Interactions\Internal\WebDriverCoordinates;
+use Facebook\WebDriver\Remote\WebDriverCapabilityType;
 use Facebook\WebDriver\WebDriverMouse;
 
 /**
@@ -34,8 +35,7 @@ class EyesMouse implements WebDriverMouse {
     /**
      * Moves the mouse according to the coordinates, if required.
      *
-     * @param where Optional. The coordinates to move to. If null,
-     *              mouse position does not changes.
+     * @param $where WebDriverCoordinates Optional. The coordinates to move to. If null, mouse position does not changes.
      */
     protected function moveIfNeeded(WebDriverCoordinates $where) {
         if ($where != null) {
@@ -144,7 +144,7 @@ class EyesMouse implements WebDriverMouse {
     protected function addMouseTrigger($action) {
         // Notice we send a copy of 'mouseLocation' to make sure the callee
         // will not change its values thus affecting our internal state.
-        $this->eyesDriver->getEyes()->addMouseTrigger(
+        $this->eyesDriver->getEyes()->addMouseTriggerCursor(
                 $action, Region::getEmpty(), $this->mouseLocation);
     }
 }

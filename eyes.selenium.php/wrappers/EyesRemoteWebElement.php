@@ -262,7 +262,7 @@ class EyesRemoteWebElement extends RemoteWebElement
     {
         // Letting the driver know about the current action.
         $currentControl = $this->getBounds();
-        $this->eyesDriver->getEyes()->addMouseTrigger(MouseAction::Click, $this);
+        $this->eyesDriver->getEyes()->addMouseTriggerElement(MouseAction::Click, $this);
         $this->logger->verbose("click($currentControl)");
 
         $this->webElement->click();
