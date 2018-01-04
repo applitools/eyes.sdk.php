@@ -36,6 +36,9 @@ abstract class TestSetup extends TestCase
     public static function setUpClass()
     {
         self::$batchInfo = new BatchInfo(self::$testSuitName);
+        if (isSet($_SERVER['APPLITOOLS_BATCH_ID'])) {
+            self::$batchInfo->setId($_SERVER['APPLITOOLS_BATCH_ID']);
+        }
     }
 
     public function oneTimeSetUp()
