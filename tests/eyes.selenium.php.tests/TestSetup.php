@@ -44,7 +44,7 @@ abstract class TestSetup extends TestCase
     public function oneTimeSetUp()
     {
         $eyes = new Eyes();
-        $eyes->setServerUrl("https://localhost.applitools.com");
+        $eyes->setServerUrl($_SERVER['APPLITOOLS_SERVER_URL']);
         $eyes->setApiKey($_SERVER['APPLITOOLS_API_KEY']);
         $eyes->setHideScrollbars(true);
         $eyes->setStitchMode(StitchMode::CSS);
