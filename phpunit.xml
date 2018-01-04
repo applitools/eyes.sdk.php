@@ -22,8 +22,9 @@
          verbose="false">
 
     <testsuites>
-        <testsuite name="Selenium Tests">
-            <file>tests/eyes.selenium.php.tests/TestElement.php</file>
+        <testsuite name="Test Fluent API">
+            <file>tests/TestFluentApi_Chrome.php</file>
+            <file>tests/TestFluentApi_Chrome_ForceFPS.php</file>
         </testsuite>
         <!-- <testsuite name="Images Tests">
             <file>tests/eyes.images.php.tests/TestImages.php</file>
