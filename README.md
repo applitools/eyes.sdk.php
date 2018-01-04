@@ -7,7 +7,7 @@ Applitools Eyes SDK For Selenium Php WebDriver
 
 1. Install Applitools sdk.php using Composer:
 
-	```bash
+    ```bash
     composer require applitools/eyes.sdk.php:dev-master phpunit/phpunit
     ```
     
