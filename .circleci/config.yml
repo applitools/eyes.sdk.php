@@ -35,6 +35,10 @@ jobs:
          command: sudo docker-php-ext-install zip
 
       - run:
+          name: Install PHP libpng-dev
+          command: sudo apt-get install -y libpng-dev
+
+      - run:
          name: Install PHP gd
          command: sudo docker-php-ext-install gd
 
