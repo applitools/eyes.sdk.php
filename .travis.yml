@@ -6,6 +6,8 @@ php:
 sudo: false
 before_install:
   - "export DISPLAY=:99.0"
+  - "export APPLITOOLS_BATCH_ID=`echo $TRAVIS_COMMIT`"
+  - "echo $APPLITOOLS_BATCH_ID"
   - "sh -e /etc/init.d/xvfb start"
 install:
   - "composer install"

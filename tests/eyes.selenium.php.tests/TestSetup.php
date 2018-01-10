@@ -36,12 +36,17 @@ abstract class TestSetup extends TestCase
     public static function setUpClass()
     {
         self::$batchInfo = new BatchInfo(self::$testSuitName);
+        if (isSet($_SERVER['APPLITOOLS_BATCH_ID'])) {
+            self::$batchInfo->setId($_SERVER['APPLITOOLS_BATCH_ID']);
+        }
     }
 
     public function oneTimeSetUp()
     {
         $eyes = new Eyes();
-        $eyes->setServerUrl("https://localhost.applitools.com");
+        if (isset($_SERVER['APPLITOOLS_SERVER_URL'])) {
+            $eyes->setServerUrl($_SERVER['APPLITOOLS_SERVER_URL']);
+        }
         $eyes->setApiKey($_SERVER['APPLITOOLS_API_KEY']);
         $eyes->setHideScrollbars(true);
         $eyes->setStitchMode(StitchMode::CSS);
