@@ -26,6 +26,14 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
+      - run:
+         name: Install PHP libzip-dev
+         command: sudo apt-get install -y libzip-dev
+
+      - run:
+         name: Install PHP zip
+         command: sudo docker-php-ext-install zip
+
       - run: composer install -n --prefer-dist
 
       - save_cache:
