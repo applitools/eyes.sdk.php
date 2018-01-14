@@ -115,9 +115,11 @@ class UserAgent
             }
 
             $result->OS = $osmatch["os"];
-            if (count($osmatch) > 1) {
-                $result->OSMajorVersion = $osmatch["major"];
-                $result->OSMinorVersion = $osmatch["minor"];
+            if (isset($osmatch['major'])) {
+                $result->OSMajorVersion = $osmatch['major'];
+            }
+            if (isset($osmatch['minor'])) {
+                $result->OSMinorVersion = $osmatch['minor'];
             }
         }
 
