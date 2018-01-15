@@ -1,0 +1,12 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+init:
+- ps: $env:APPLITOOLS_BATCH_ID = $env:APPVEYOR_REPO_COMMIT
+environment:
+  SAUCE_USERNAME: matan
+  SAUCE_ACCESS_KEY:
+    secure: i5USwP8S2L5wWmQO0c4LiYjxuU/gFn8PWvYUPzZ4382Llwf79QpO00DiG90k4oJe
+  SELENIUM_SERVER_URL:
+    secure: eOMCrkAsbQDkUcwesFyy97SEVMk6nd43NUKDGqXF8GTDSm8L13FfbXXIti274fDp863aJhsWAmNoazpS3QGWxWCEMB2COVLwzDbHhuiOmTGSbL10ZGa7SoK91biD/c6p
+build:
+  verbosity: minimal
