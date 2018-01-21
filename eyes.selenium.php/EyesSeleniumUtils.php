@@ -363,7 +363,8 @@ class EyesSeleniumUtils
                 $driver->manage()->window()->setSize($requiredBrowserSize);
                 GeneralUtils::sleep(self::SLEEP);
                 $actualViewportSize = self::extractViewportSize($logger, $driver);
-                $logger->log("Browser size: {$driver->manage()->window()->getSize()}");
+                $browserSize = $driver->manage()->window()->getSize();
+                $logger->log("Browser size: {$browserSize->getWidth()}x{$browserSize->getHeight()}");
                 $logger->log("Viewport size: $actualViewportSize");
             } while (--$retriesLeft > 0 && !$actualViewportSize != $size);
         }
