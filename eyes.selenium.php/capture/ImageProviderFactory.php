@@ -15,7 +15,7 @@ class ImageProviderFactory
      * @param EyesWebDriver $driver
      * @return ImageProvider
      */
-    public static function getImageProvider(UserAgent $ua, Eyes $eyes, Logger $logger, EyesWebDriver $driver)
+    public static function getImageProvider(UserAgent $ua = null, Eyes $eyes, Logger $logger, EyesWebDriver $driver)
     {
         if ($ua != null) {
             if ($ua->getBrowser() == BrowserNames::Firefox) {

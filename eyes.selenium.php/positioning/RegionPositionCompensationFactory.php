@@ -12,7 +12,7 @@ class RegionPositionCompensationFactory
      * @param Logger $logger
      * @return IRegionPositionCompensation
      */
-    public static function getRegionPositionCompensation(UserAgent $userAgent, Eyes $eyes, Logger $logger)
+    public static function getRegionPositionCompensation(UserAgent $userAgent = null, Eyes $eyes, Logger $logger)
     {
         if ($userAgent != null) {
             if ($userAgent->getBrowser() == BrowserNames::Firefox) {
