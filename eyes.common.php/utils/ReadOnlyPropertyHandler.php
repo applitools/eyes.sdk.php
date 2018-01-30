@@ -9,7 +9,7 @@ class ReadOnlyPropertyHandler implements PropertyHandler
     private $logger; //Logger
     private $obj;
 
-    public function ReadOnlyPropertyHandler(Logger $logger, $obj)
+    public function __construct(Logger $logger, $obj)
     {
         $this->logger = $logger;
         $this->obj = $obj;

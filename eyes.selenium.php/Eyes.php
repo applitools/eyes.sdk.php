@@ -1257,7 +1257,7 @@ class Eyes extends EyesBase
      * @param Region $control The control's context-relative region.
      * @param string $text The trigger's text.
      */
-    protected function addTextTriggerControl(Region $control, $text)
+    public function addTextTriggerControl(Region $control, $text)
     {
         if ($this->getIsDisabled()) {
             $this->logger->verbose("Ignoring '$text' (disabled)");
@@ -1285,7 +1285,7 @@ class Eyes extends EyesBase
      * @param WebDriverElement $element The element for which we sent keys.
      * @param string $text The trigger's text.
      */
-    protected function addTextTriggerElement(WebDriverElement $element, $text)
+    public function addTextTriggerElement(WebDriverElement $element, $text)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log("Ignoring '$text' (disabled)");

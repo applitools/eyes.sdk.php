@@ -310,8 +310,9 @@ class EyesRemoteWebElement extends RemoteWebElement
     public function sendKeys(/*CharSequence... */
         $keysToSend)
     {
-        foreach ($keysToSend as $keys) {
-            $this->eyesDriver->getEyes()->addTextTrigger($this, $keys);
+        $chars = str_split($keysToSend);
+        foreach ($chars as $key) {
+            $this->eyesDriver->getEyes()->addTextTriggerElement($this, $key);
         }
 
         $this->webElement->sendKeys($keysToSend);
