@@ -17,6 +17,7 @@ abstract class TestFluentApi extends TestSetup
     public function TestCheckWindowWithIgnoreRegion_Fluent()
     {
         $this->init(__FUNCTION__);
+        $this->webDriver->findElement(WebDriverBy::tagName("input"))->sendKeys("My Input");
         $this->eyes->check("Fluent - Window with Ignore region",
             Target::window()
                 ->fully()
