@@ -4,6 +4,7 @@ namespace Tests\Applitools\Selenium;
 
 require_once ('TestFluentApi.php');
 
+use Applitools\RectangleSize;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 
 class TestFluentApi_Firefox extends TestFluentApi
@@ -18,6 +19,8 @@ class TestFluentApi_Firefox extends TestFluentApi
 
     public function setUp()
     {
+        $this->viewportSize = new RectangleSize(800, 599);
+
         $this->desiredCapabilities = DesiredCapabilities::firefox();
     }
 }

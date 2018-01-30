@@ -33,6 +33,10 @@ abstract class TestSetup extends TestCase
     /** @var WebDriver */
     protected $webDriver;
 
+    protected $viewportSize = null;
+
+    protected $scaleRatio = 1.0;
+
     public static function setUpClass()
     {
         self::$batchInfo = new BatchInfo(self::$testSuitName);
@@ -68,7 +72,8 @@ abstract class TestSetup extends TestCase
         $webDriver = RemoteWebDriver::create($_SERVER['SELENIUM_SERVER_URL'], $this->desiredCapabilities);
         $this->eyes->setBatch(self::$batchInfo);
 
-        $this->webDriver = $this->eyes->open($webDriver, self::$testSuitName, $testName, new RectangleSize(800, 599));
+        $this->eyes->setScaleRatio($this->scaleRatio);
+        $this->webDriver = $this->eyes->open($webDriver, self::$testSuitName, $testName, $this->viewportSize);
         $this->webDriver->get('http://applitools.github.io/demo/TestPages/FramesTestPage/');
     }
 
