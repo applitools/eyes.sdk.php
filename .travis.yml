@@ -7,7 +7,7 @@ sudo: false
 before_install:
   - "export DISPLAY=:99.0"
   - "export APPLITOOLS_BATCH_ID=`echo $TRAVIS_COMMIT`"
-  - "printenv"
+  - "printenv | sort"
   - "sh -e /etc/init.d/xvfb start"
 install:
   - "composer install"
