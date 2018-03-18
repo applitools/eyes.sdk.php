@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/php:7.1.5-browsers
+      - image: circleci/php:7.1-node-browsers
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -26,6 +26,22 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
+      - run:
+         name: Install PHP libzip-dev
+         command: sudo apt-get install -y libzip-dev
+
+      - run:
+         name: Install PHP zip
+         command: sudo docker-php-ext-install zip
+
+      - run:
+          name: Install PHP libpng-dev
+          command: sudo apt-get install -y libpng-dev
+
+      - run:
+         name: Install PHP gd
+         command: sudo docker-php-ext-install gd
+
       - run: composer install -n --prefer-dist
 
       - save_cache:
@@ -36,4 +52,4 @@ jobs:
       - run: "export APPLITOOLS_BATCH_ID=`echo $CIRCLE_SHA1` ; echo $APPLITOOLS_BATCH_ID"
 
       # run tests!
-      - run: phpunit
+      - run: ./vendor/bin/phpunit
