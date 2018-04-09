@@ -128,7 +128,8 @@ class ServerConnector implements ServerConnectorInterface
                         "height" => $sessionStartInfo->getEnvironment()->getDisplaySize()->getHeight()
                     ]
                 ],
-
+                "branchName" => $sessionStartInfo->getBranchName(),
+                "parentBranchName" => $sessionStartInfo->getParentBranchName(),
                 "matchLevel" => $sessionStartInfo->getDefaultMatchSettings()->getMatchLevel(),
                 "agentId" => $sessionStartInfo->getAgentId(),
                 "properties" => $sessionStartInfo->getProperties()
