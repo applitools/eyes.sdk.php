@@ -139,7 +139,7 @@ class ServerConnector implements ServerConnectorInterface
 
         try {
             $this->ch = curl_init();
-            curl_setopt($this->ch, CURLOPT_URL, "{$this->endPoint}.json?apiKey={$this->apiKey}");
+            curl_setopt($this->ch, CURLOPT_URL, "{$this->endPoint}.json?apiKey={$this->getApiKey()}");
 
             if ($this->proxySettings != null) {
                 curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
@@ -208,7 +208,7 @@ class ServerConnector implements ServerConnectorInterface
         $this->logger->log("base64 data length: " . strlen($base64data));
         $this->logger->log("image data length: " . strlen($imageData));
 
-        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . ".json?apiKey=" . $this->apiKey;
+        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . ".json?apiKey=" . $this->getApiKey();
 
         $options = $matchData->getOptions();
         $matchSettings = $options->getImageMatchSettings();
@@ -282,7 +282,7 @@ class ServerConnector implements ServerConnectorInterface
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
 
-        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . ".json?apiKey=" . $this->apiKey;
+        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . ".json?apiKey=" . $this->getApiKey();
 
         curl_reset($this->ch);
         curl_setopt($this->ch, CURLOPT_URL, "{$runningSessionsEndpoint}&aborted={$isAborted}&updateBaseline={$save}");
