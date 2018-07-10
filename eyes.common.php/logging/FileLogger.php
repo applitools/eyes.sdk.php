@@ -41,9 +41,13 @@ class FileLogger implements LogHandler
                 } catch (\Exception $e) {
                 }
             }
+            $logDir = dirname($this->filename);
+            if (!file_exists($logDir)) {
+                mkdir($logDir, 0777, true);
+            }
             $this->file = fopen($this->filename, $this->append ? "a" : "c");
         } catch (\Exception $e) {
-            throw new EyesException("Failed to create log file!", $e);
+            throw new EyesException("Failed to create log file!", 0, $e);
         }
     }
 

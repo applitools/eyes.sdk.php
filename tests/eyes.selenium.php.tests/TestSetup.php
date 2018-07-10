@@ -12,6 +12,7 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriver;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Runner\Exception;
 
 abstract class TestSetup extends TestCase
 {
@@ -34,6 +35,8 @@ abstract class TestSetup extends TestCase
     /** @var WebDriver */
     protected $webDriver;
 
+    private $logsPath = ".";
+
     protected $viewportSize = null;
 
     protected $scaleRatio = 1.0;
@@ -52,31 +55,44 @@ abstract class TestSetup extends TestCase
         if (isset($_SERVER['APPLITOOLS_SERVER_URL'])) {
             $eyes->setServerUrl($_SERVER['APPLITOOLS_SERVER_URL']);
         }
-        $eyes->setApiKey($_SERVER['APPLITOOLS_API_KEY']);
         $eyes->setHideScrollbars(true);
         $eyes->setStitchMode(StitchMode::CSS);
         $eyes->setForceFullPageScreenshot(self::$forceFullPageScreenshot);
-        $eyes->setLogHandler(new PrintLogHandler(true));
-        $eyes->setLogHandler(new FileLogger("c:/temp/logs/PHP_Tests.log",true, true));
-
-        $eyes->setDebugScreenshotsPath('c:/temp/logs');
-        //$eyes->setSaveDebugScreenshots(true);
 
         $this->eyes = $eyes;
     }
 
     public function init($testName)
     {
-        $this->oneTimeSetUp();
+        try {
+            $this->oneTimeSetUp();
 
-        $this->eyes->setDebugScreenshotsPrefix($testName);
+            if (!isset($_SERVER["CI"])) {
+                $date = date("Y_m_d H_i_s");
 
-        $webDriver = RemoteWebDriver::create($_SERVER['SELENIUM_SERVER_URL'], $this->desiredCapabilities);
-        $this->eyes->setBatch(self::$batchInfo);
+                if (isset($_SERVER["APPLITOOLS_LOGS_PATH"])) {
+                    $this->logsPath = $_SERVER["APPLITOOLS_LOGS_PATH"];
+                }
 
-        $this->eyes->setScaleRatio($this->scaleRatio);
-        $this->webDriver = $this->eyes->open($webDriver, self::$testSuitName, $testName, $this->viewportSize);
-        $this->webDriver->get('http://applitools.github.io/demo/TestPages/FramesTestPage/');
+                $logPath = $this->logsPath . DIRECTORY_SEPARATOR . "PHP" . DIRECTORY_SEPARATOR . "$testName $date";
+                $logFilename = $logPath . DIRECTORY_SEPARATOR . "log.log";
+                $this->eyes->setLogHandler(new FileLogger($logFilename, false, true));
+                $this->eyes->setSaveDebugScreenshots(true);
+                $this->eyes->setDebugScreenshotsPath($logPath);
+                $this->eyes->setDebugScreenshotsPrefix($testName);
+            } else {
+                $this->eyes->setLogHandler(new PrintLogHandler(true));
+            }
+
+            $webDriver = RemoteWebDriver::create($_SERVER['SELENIUM_SERVER_URL'], $this->desiredCapabilities);
+            $this->eyes->setBatch(self::$batchInfo);
+
+            $this->eyes->setScaleRatio($this->scaleRatio);
+            $this->webDriver = $this->eyes->open($webDriver, self::$testSuitName, $testName, $this->viewportSize);
+            $this->webDriver->get('http://applitools.github.io/demo/TestPages/FramesTestPage/');
+        } catch (Exception $ex) {
+            echo $ex->getMessage();
+        }
     }
 
     public function tearDown()

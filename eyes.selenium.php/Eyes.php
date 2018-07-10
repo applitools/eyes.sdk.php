@@ -302,9 +302,9 @@ class Eyes extends EyesBase
             if (empty($driver)) {
                 //FIXME need to extract  EyesSeleniumUtils::extractViewportSize
             } else { //FIXME need to optimize code
+                $size = $driver->manage()->window()->getSize();
                 $viewportSize = new RectangleSize(
-                    $driver->manage()->window()->getSize()->getWidth(),
-                    $driver->manage()->window()->getSize()->getHeight()
+                    $size->getWidth(), $size->getHeight()
                 );
             }
         }

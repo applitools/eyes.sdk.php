@@ -124,7 +124,7 @@ class TestIOSDevices extends TestCase
         $sauceUrl = "http://ondemand.saucelabs.com/wd/hub";
         $driver = RemoteWebDriver::create($sauceUrl, $caps, null, 240000);
 
-        if (isset($_SERVER["CI"])) {
+        if (!isset($_SERVER["CI"])) {
             $date = date("Y_m_d H_i_s");
             $logPath = $this->logsPath . DIRECTORY_SEPARATOR . "PHP" . DIRECTORY_SEPARATOR . "IOSTest $testName $date";
             $logFilename = $logPath . DIRECTORY_SEPARATOR . "log.log";
