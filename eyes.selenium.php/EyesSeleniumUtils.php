@@ -13,6 +13,7 @@ use Applitools\Logger;
 use Applitools\RectangleSize;
 use Applitools\Selenium\Exceptions\EyesDriverOperationException;
 use Exception;
+use Facebook\WebDriver\Exception\UnknownServerException;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Interactions\Internal\WebDriverCoordinates;
 use Facebook\WebDriver\JavaScriptExecutor;
@@ -309,9 +310,13 @@ class EyesSeleniumUtils
 
         ArgumentGuard::notNull($size, "size");
 
-        // We move the window to (0,0) to have the best chance to be able to
-        // set the viewport size as requested.
-        $driver->manage()->window()->setPosition(new WebDriverPoint(0, 0));
+        try {
+            // We move the window to (0,0) to have the best chance to be able to
+            // set the viewport size as requested.
+            $driver->manage()->window()->setPosition(new WebDriverPoint(0, 0));
+        } catch (UnknownServerException $ex){
+            $logger->log("Can't move window. " . $ex->getMessage());
+        }
 
         $actualViewportSize = self::extractViewportSize($logger, $driver);
 

@@ -61,11 +61,12 @@ namespace Applitools\fluent {
 
         /**
          * Defines that the screenshot will contain the entire element or region, even if it's outside the view.
+         * @param bool $stitch
          * @return ICheckSettings This instance of the settings object.
          */
-        public function fully()
+        public function fully($stitch = true)
         {
-            $this->stitchContent = true;
+            $this->stitchContent = $stitch;
             return $this;
         }
 

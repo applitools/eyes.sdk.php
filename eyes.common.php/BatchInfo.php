@@ -16,14 +16,14 @@ class BatchInfo
     /**
      * Creates a new BatchInfo instance.
      *
-     * @param string $name      Name of batch or {@code null} if anonymous.
+     * @param string $name Name of batch or {@code null} if anonymous.
      * @param mixed $startedAt Batch start time
      */
-    public function __construct($name, $startedAt = null)
+    public function __construct($name = null, $startedAt = null)
     {
         //ArgumentGuard::notNull($startedAt, "startedAt"); //FIXME
-        $this->id = rand(); //FIXME
-        $this->name = $name;
+        $this->id = isset($_SERVER["APPLITOOLS_BATCH_ID"]) ? $_SERVER["APPLITOOLS_BATCH_ID"] : uniqid();
+        $this->name = isset($name) ? $name : (isset($_SERVER["APPLITOOLS_BATCH_NAME"]) ? $_SERVER["APPLITOOLS_BATCH_NAME"] : null);
         $this->startedAt = (empty($startedAt) ? date("Y-m-d\TH:i:s\Z") : $startedAt);
     }
 
@@ -67,7 +67,8 @@ class BatchInfo
         return "'$this->name' - $this->startedAt";
     }
 
-    public function getAsArray(){
+    public function getAsArray()
+    {
         return get_object_vars($this);
     }
 }

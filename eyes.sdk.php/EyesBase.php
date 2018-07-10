@@ -1174,8 +1174,13 @@ abstract class EyesBase
         $this->logger->log("Application environment is $appEnv");
 
         $this->sessionStartInfo = new SessionStartInfo($this->getBaseAgentId(), $this->sessionType,
-            $this->getAppName(), null, $this->testName, $testBatch, $this->baselineName, $appEnv,
-            $this->defaultMatchSettings, $this->branchName, $this->parentBranchName, $this->properties);
+            $this->getAppName(), null, $this->testName, $testBatch,
+            isset($this->baselineName) ? $this->baselineName : (isset($_SERVER["APPLITOOLS_BASELINE_BRANCH"]) ? $_SERVER["APPLITOOLS_BASELINE_BRANCH"] : null),
+            $appEnv,
+            $this->defaultMatchSettings,
+            isset($this->branchName) ? $this->branchName : (isset($_SERVER["APPLITOOLS_BRANCH"]) ? $_SERVER["APPLITOOLS_BRANCH"] : null),
+            isset($this->parentBranchName) ? $this->parentBranchName : (isset($_SERVER["APPLITOOLS_PARENT_BRANCH"]) ? $_SERVER["APPLITOOLS_PARENT_BRANCH"] : null),
+            $this->properties);
 
         $this->logger->log("Starting server session...");
         $this->runningSession = $this->serverConnector->startSession($this->sessionStartInfo);

@@ -3,6 +3,7 @@
 namespace Tests\Applitools\Selenium;
 
 use Applitools\BatchInfo;
+use Applitools\FileLogger;
 use Applitools\PrintLogHandler;
 use Applitools\RectangleSize;
 use Applitools\Selenium\Eyes;
@@ -56,6 +57,7 @@ abstract class TestSetup extends TestCase
         $eyes->setStitchMode(StitchMode::CSS);
         $eyes->setForceFullPageScreenshot(self::$forceFullPageScreenshot);
         $eyes->setLogHandler(new PrintLogHandler(true));
+        $eyes->setLogHandler(new FileLogger("c:/temp/logs/PHP_Tests.log",true, true));
 
         $eyes->setDebugScreenshotsPath('c:/temp/logs');
         //$eyes->setSaveDebugScreenshots(true);

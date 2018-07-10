@@ -93,7 +93,7 @@ class ServerConnector implements ServerConnectorInterface
      */
     public function getApiKey()
     {
-        return $this->apiKey;
+        return isset($this->apiKey) ? $this->apiKey : (isset($_SERVER["APPLITOOLS_API_KEY"]) ? $_SERVER["APPLITOOLS_API_KEY"] : null);
     }
 
 
