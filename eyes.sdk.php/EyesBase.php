@@ -9,6 +9,7 @@ use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
 use Applitools\fluent\ICheckSettings;
 use Applitools\fluent\ICheckSettingsInternal;
+use PHPUnit\Runner\Exception;
 
 abstract class EyesBase
 {
@@ -82,6 +83,9 @@ abstract class EyesBase
 
     /** @var string */
     private $agentId;
+
+    /** @var  boolean */
+    private $isViewportSizeSet;
 
 
     public function __construct($serverUrl)
@@ -1155,11 +1159,7 @@ abstract class EyesBase
     {
         $this->logger->log("startSession()");
 
-        if ($this->viewportSize == null) {
-            $this->viewportSize = $this->getViewportSize();
-        } else {
-            $this->setViewportSize($this->viewportSize);
-        }
+        $this->ensureViewportSize();
 
         if ($this->batch == null) {
             $this->logger->log("No batch set");
@@ -1194,6 +1194,22 @@ abstract class EyesBase
         } else {
             $this->logger->log("--- Test started - " . $testInfo);
             $this->shouldMatchWindowRunOnceOnTimeout = false;
+        }
+    }
+
+    private function ensureViewportSize()
+    {
+        if (!$this->isViewportSizeSet) {
+            try {
+                if ($this->viewportSize == null) {
+                    $this->viewportSize = $this->getViewportSize();
+                } else {
+                    $this->setViewportSize($this->viewportSize);
+                }
+                $this->isViewportSizeSet = true;
+            } catch (Exception $e) {
+                $this->isViewportSizeSet = false;
+            }
         }
     }
 

@@ -298,16 +298,6 @@ class Eyes extends EyesBase
             $this->logger->verbose("Ignored");
             return $driver;
         }
-        if (empty($viewportSize)) {
-            if (empty($driver)) {
-                //FIXME need to extract  EyesSeleniumUtils::extractViewportSize
-            } else { //FIXME need to optimize code
-                $size = $driver->manage()->window()->getSize();
-                $viewportSize = new RectangleSize(
-                    $size->getWidth(), $size->getHeight()
-                );
-            }
-        }
 
         $this->initDriver($driver);
 
@@ -1316,7 +1306,6 @@ class Eyes extends EyesBase
             ArgumentGuard::notNull($this->driver, "driver");
             return EyesSeleniumUtils::extractViewportSize($this->logger, $this->driver);
         } else {
-            ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
             return $this->driver->getDefaultContentViewportSize();
         }
     }
