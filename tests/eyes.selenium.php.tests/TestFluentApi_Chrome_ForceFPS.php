@@ -22,7 +22,11 @@ class TestFluentApi_Chrome_ForceFPS extends TestFluentApi
         $this->viewportSize = new RectangleSize(800, 599);
 
         $options = new ChromeOptions();
-        $options->addArguments(["disable-infobars"]);
+
+        if (strcasecmp("TRUE", $_SERVER["APPLITOOLS_RUN_HEADLESS"]) == 0) {
+            $options->addArguments(["headless"]);
+        }
+
         $this->desiredCapabilities = $options->toCapabilities();
     }
 }

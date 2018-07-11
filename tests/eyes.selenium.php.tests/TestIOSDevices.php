@@ -89,13 +89,15 @@ class TestIOSDevices extends TestCase
     }
 
     /**
+     * @test
      * @dataProvider data
+     * @doesNotPerformAssertions
      * @param string $deviceName
      * @param string $deviceOrientation
      * @param string $platformVersion
      * @param boolean $fully
      */
-    public function testIOSSafariCrop($deviceName, $platformVersion, $deviceOrientation, $fully)
+    public function TestIOSSafariCrop($deviceName, $platformVersion, $deviceOrientation, $fully)
     {
         $this->logsPath = $_SERVER["APPLITOOLS_LOGS_PATH"];
         $this->eyes = new Eyes();
@@ -119,7 +121,7 @@ class TestIOSDevices extends TestCase
             $testName .= " fully";
         }
 
-        $caps->setCapability("name", "$testName ({$this->eyes->getBaseAgentId()})");
+        $caps->setCapability("name", "$testName ({$this->eyes->getFullAgentId()})");
 
         $sauceUrl = "http://ondemand.saucelabs.com/wd/hub";
         $driver = RemoteWebDriver::create($sauceUrl, $caps, null, 240000);

@@ -83,8 +83,12 @@ abstract class TestSetup extends TestCase
             } else {
                 $this->eyes->setLogHandler(new PrintLogHandler(true));
             }
+            $seleniumServerUrl = $_SERVER['SELENIUM_SERVER_URL'];
+            if (strcasecmp($seleniumServerUrl, "http://ondemand.saucelabs.com/wd/hub") == 0) {
+                $this->desiredCapabilities->setCapability("name", "$testName ({$this->eyes->getFullAgentId()})");
+            }
 
-            $webDriver = RemoteWebDriver::create($_SERVER['SELENIUM_SERVER_URL'], $this->desiredCapabilities);
+            $webDriver = RemoteWebDriver::create($seleniumServerUrl, $this->desiredCapabilities);
             $this->eyes->setBatch(self::$batchInfo);
 
             $this->eyes->setScaleRatio($this->scaleRatio);

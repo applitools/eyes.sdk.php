@@ -42,7 +42,7 @@ class Eyes extends EyesBase
 
     public function getBaseAgentId()
     {
-        return "eyes.images.php/0.2";
+        return "eyes.images.php/1.2.5";
     }
 
     /**

@@ -500,7 +500,7 @@ abstract class EyesBase
     /**
      * @return string The full agent id composed of both the base agent id and the user given agent id.
      */
-    protected function getFullAgentId()
+    public function getFullAgentId()
     {
         $agentId = $this->getAgentId();
         if ($agentId == null) {
