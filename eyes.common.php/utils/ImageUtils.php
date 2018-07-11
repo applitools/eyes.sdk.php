@@ -443,6 +443,7 @@ class ImageUtils
     {
         try {
             $image->save($filename, "png", 100);
+            self::$logger->verbose("saving image $filename");
             $image = new Image($filename);
             return $image;
         } catch (\Exception $e) {
