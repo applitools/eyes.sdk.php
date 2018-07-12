@@ -491,11 +491,17 @@ abstract class EyesBase
         return $this->baselineName;
     }
 
-
     /**
      * @return string The base agent id of the SDK.
      */
     protected abstract function getBaseAgentId();
+
+    /**
+     * @return string The SDK version.
+     */
+    protected function getVersion() {
+        return "1.2.6";
+    }
 
     /**
      * @return string The full agent id composed of both the base agent id and the user given agent id.
@@ -1074,82 +1080,6 @@ abstract class EyesBase
         }
 
         return base64_encode($compressedScreenshot); //FIXME just need to check
-    }
-
-    /**
-     * Runs a timing test.
-     *
-     * @param RegionProvider $regionProvider Returns the region to check or the empty rectangle to check the entire window.
-     * @param mixed|null $action An action to run in parallel to starting the test, or {@code null} if no such action is required.
-     * @param int $deadline The expected amount of time until finding a match. (Seconds)
-     * @param int $timeout The maximum amount of time to retry matching. (Seconds)
-     * @param int $matchInterval The interval for testing for a match. (Milliseconds)
-     * @return ResponseTimeAlgorithm The earliest match found, or {@code null} if no match was found.
-     */
-    protected function testResponseTimeBase(RegionProvider $regionProvider, Runnable $action, $deadline, $timeout, $matchInterval)
-    {
-
-        if ($this->getIsDisabled()) {
-            $this->logger->verbose("Ignored");
-            return null;
-        }
-
-        ArgumentGuard::isValidState($this->getIsOpen(), "Eyes not open");
-        ArgumentGuard::notNull($regionProvider, "regionProvider");
-        ArgumentGuard::greaterThanZero($deadline, "deadline");
-        ArgumentGuard::greaterThanZero($timeout, "timeout");
-        ArgumentGuard::greaterThanZero($matchInterval, "matchInterval");
-
-        $this->logger->verbose(sprintf(
-            "testResponseTimeBase(regionProvider, %d, %d, %d)",
-            $deadline, $timeout, $matchInterval));
-
-        if ($this->runningSession == null) {
-            $this->logger->verbose("No running session, calling start session...");
-            $this->startSession();
-            $this->logger->verbose("Done!");
-        }
-
-        //If there's an action to do
-        $actionThread = null;
-        if ($action != null) {
-            $this->logger->verbose("Starting WebDriver action.");
-            $actionThread = new Thread($action);
-            $actionThread->start();
-        }
-
-        $startTime = microtime() / 1000; //convert microseconds to milliseconds
-
-        // A callback which will call getAppOutput
-        $appOutputProvider = new AppOutputProviderRedeclared($this, $this->logger); //FIXME need to check
-
-        if ($this->runningSession->getIsNewSession()) {
-            ResponseTimeAlgorithm::runNewProgressionSession($this->logger,
-                $this->serverConnector, $this->runningSession, $appOutputProvider,
-                $regionProvider, $startTime, $deadline);
-            // Since there's never a match for a new session..
-            $result = null;
-        } else {
-            $result =
-                ResponseTimeAlgorithm::runProgressionSessionForExistingBaseline(
-                    $this->logger, $this->serverConnector, $this->runningSession,
-                    $appOutputProvider, $regionProvider, $startTime,
-                    $deadline, $timeout, $matchInterval);
-        }
-
-        if ($actionThread != null) {
-            // FIXME - Replace join with wait to according to the parameters
-            $this->logger->verbose("Making sure 'action' thread had finished...");
-            try {
-                $actionThread->join(30000);
-            } catch (\Exception $e) {
-                $this->logger->verbose(
-                    "Got interrupted while waiting for 'action' to finish!");
-            }
-        }
-
-        $this->logger->verbose("Done!");
-        return $result;
     }
 
     /**

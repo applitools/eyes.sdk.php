@@ -252,7 +252,7 @@ class EyesSeleniumUtils
      * @param JavaScriptExecutor $executor The executor to use.
      * @return RectangleSize The viewport size.
      */
-    public static function executeViewportSizeExtraction(JavascriptExecutor $executor) //FIXME
+    public static function executeViewportSizeExtraction(JavaScriptExecutor $executor) //FIXME
     {
         $vsAsList = $executor->executeScript(self::JS_GET_VIEWPORT_SIZE);
         return new RectangleSize((int)$vsAsList[0], (int)$vsAsList[1]);
@@ -274,13 +274,14 @@ class EyesSeleniumUtils
                 $logger->verbose("Failed to extract viewport size using Javascript: " . $ex->getMessage());
             }
         }
-        // If we failed to extract the viewport size using JS, will use the
-        // window size instead.
-        /*$logger->log("Using window size as viewport size.");
+
+        $logger->verbose("Using window size as viewport size.");
+
+        /** @var WebDriverDimension $windowSize */
         $windowSize = $driver->manage()->window()->getSize();
+
         $width = $windowSize->getWidth();
         $height = $windowSize->getHeight();
-
         try {
             if (EyesSeleniumUtils::isLandscapeOrientation($driver) && $height > $width) {
                 //noinspection SuspiciousNameCombination
@@ -292,9 +293,8 @@ class EyesSeleniumUtils
         } catch (WebDriverException $e) {
             // Not every WebDriver supports querying for orientation.
         }
-        $logger->log(sprintf("Done! Size %d x %d", $width, $height));
-        return new RectangleSize($width, $height);*/
-        return new RectangleSize(0,0);
+        $logger->verbose("Done! Size $width x $height");
+        return new RectangleSize($width, $height);
     }
 
     /**
@@ -314,7 +314,7 @@ class EyesSeleniumUtils
             // We move the window to (0,0) to have the best chance to be able to
             // set the viewport size as requested.
             $driver->manage()->window()->setPosition(new WebDriverPoint(0, 0));
-        } catch (UnknownServerException $ex){
+        } catch (UnknownServerException $ex) {
             $logger->log("Can't move window. " . $ex->getMessage());
         }
 
@@ -456,7 +456,7 @@ class EyesSeleniumUtils
     public static function setTransforms(JavascriptExecutor $executor, $transforms)
     {
         $script = "";
-        foreach ($transforms as $key=>$entry) {
+        foreach ($transforms as $key => $entry) {
             $script .= "document.documentElement.style['$key'] = '$entry';";
         }
         $executor->executeScript($script);

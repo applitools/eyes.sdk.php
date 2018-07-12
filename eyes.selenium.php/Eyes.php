@@ -125,7 +125,7 @@ class Eyes extends EyesBase
 
     public function getBaseAgentId()
     {
-        return "eyes.selenium.php/1.2.5";
+        return "eyes.selenium.php/{$this->getVersion()}";
     }
 
     /**

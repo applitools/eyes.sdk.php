@@ -21,9 +21,6 @@ require_once('TestDataProvider.php');
 class TestIOSDevices extends TestCase
 {
 
-    /** @var Eyes */
-    protected $eyes;
-
     private $logsPath = ".";
 
     public function data()
@@ -99,57 +96,116 @@ class TestIOSDevices extends TestCase
      */
     public function TestIOSSafariCrop($deviceName, $platformVersion, $deviceOrientation, $fully)
     {
-        $this->logsPath = $_SERVER["APPLITOOLS_LOGS_PATH"];
-        $this->eyes = new Eyes();
-
-        $this->eyes->setBatch(TestDataProvider::$BatchInfo);
-
         $caps = new DesiredCapabilities();
 
-        $caps->setCapability("appiumVersion", "1.7.2");
-        $caps->setCapability("deviceName", $deviceName);
-        $caps->setCapability("deviceOrientation", $deviceOrientation);
-        $caps->setCapability("platformVersion", $platformVersion);
-        $caps->setCapability("platformName", "iOS");
-        $caps->setCapability("browserName", "Safari");
-
-        $caps->setCapability("username", $_SERVER["SAUCE_USERNAME"]);
-        $caps->setCapability("accesskey", $_SERVER["SAUCE_ACCESS_KEY"]);
+        $eyes = $this->initEyes($deviceName, $platformVersion, $deviceOrientation, $fully, $caps);
 
         $testName = "$deviceName $platformVersion $deviceOrientation";
         if ($fully) {
             $testName .= " fully";
         }
 
-        $caps->setCapability("name", "$testName ({$this->eyes->getFullAgentId()})");
+        $caps->setCapability("name", "$testName ({$eyes->getFullAgentId()})");
+        $caps->setCapability("browserName", "Safari");
 
         $sauceUrl = "http://ondemand.saucelabs.com/wd/hub";
         $driver = RemoteWebDriver::create($sauceUrl, $caps, null, 240000);
 
+        try {
+            $this->initLogging($eyes, $testName);
+            $driver->get("https://www.applitools.com/customers");
+            $eyes->open($driver, "Eyes Selenium SDK - iOS Safari Cropping", $testName);
+            $eyes->check("Initial view", Target::region(WebDriverBy::cssSelector(".horizontal-page"))->fully($fully));
+            $eyes->close();
+        } finally {
+            $eyes->abortIfNotClosed();
+            $driver->quit();
+        }
+    }
+
+    /**
+     * @test
+     * @dataProvider data
+     * @doesNotPerformAssertions
+     * @param string $deviceName
+     * @param string $deviceOrientation
+     * @param string $platformVersion
+     * @param boolean $fully
+     */
+    public function TestIOSNativeApp($deviceName, $platformVersion, $deviceOrientation, $fully)
+    {
+        $caps = new DesiredCapabilities();
+
+        $eyes = $this->initEyes($deviceName, $platformVersion, $deviceOrientation, $fully, $caps);
+
+        $testName = "$deviceName Native $platformVersion $deviceOrientation";
+        if ($fully) {
+            $testName .= " fully";
+        }
+
+        $caps->setCapability("name", "$testName ({$eyes->getFullAgentId()})");
+        $caps->setCapability("app", "https://store.applitools.com/download/iOS.TestApp.app.zip");
+
+        $sauceUrl = "http://ondemand.saucelabs.com/wd/hub";
+        $driver = RemoteWebDriver::create($sauceUrl, $caps, null, 240000);
+
+        try {
+            $this->initLogging($eyes, $testName);
+            $eyes->open($driver, "Eyes Selenium SDK - iOS Safari Native App", $testName);
+            $eyes->checkWindow("Native App");
+            $eyes->close();
+        } finally {
+            $eyes->abortIfNotClosed();
+            $driver->quit();
+        }
+    }
+
+    /**
+     * @param string $deviceName
+     * @param string $platformVersion
+     * @param string $deviceOrientation
+     * @param bool $fully
+     * @param DesiredCapabilities $caps
+     * @return Eyes
+     */
+    private function initEyes($deviceName, $platformVersion, $deviceOrientation, $fully, $caps)
+    {
+        $this->logsPath = $_SERVER["APPLITOOLS_LOGS_PATH"];
+        $eyes = new Eyes();
+
+        $eyes->setBatch(TestDataProvider::$BatchInfo);
+
+        $caps->setCapability("appiumVersion", "1.7.2");
+        $caps->setCapability("deviceName", $deviceName);
+        $caps->setCapability("deviceOrientation", $deviceOrientation);
+        $caps->setCapability("platformVersion", $platformVersion);
+        $caps->setCapability("platformName", "iOS");
+
+        $caps->setCapability("username", $_SERVER["SAUCE_USERNAME"]);
+        $caps->setCapability("accesskey", $_SERVER["SAUCE_ACCESS_KEY"]);
+
+        $eyes->setStitchMode(StitchMode::SCROLL);
+        $eyes->addProperty("Orientation", $deviceOrientation);
+        $eyes->addProperty("Stitched", $fully ? "True" : "False");
+        return $eyes;
+    }
+
+    /**
+     * @param Eyes $eyes
+     * @param string $testName
+     */
+    private function initLogging($eyes, $testName)
+    {
         if (!isset($_SERVER["CI"])) {
             $date = date("Y_m_d H_i_s");
             $logPath = $this->logsPath . DIRECTORY_SEPARATOR . "PHP" . DIRECTORY_SEPARATOR . "IOSTest $testName $date";
             $logFilename = $logPath . DIRECTORY_SEPARATOR . "log.log";
-            $this->eyes->setLogHandler(new FileLogger($logFilename, false, true));
-            $this->eyes->setSaveDebugScreenshots(true);
-            $this->eyes->setDebugScreenshotsPath($logPath);
+            $eyes->setLogHandler(new FileLogger($logFilename, false, true));
+            $eyes->setSaveDebugScreenshots(true);
+            $eyes->setDebugScreenshotsPath($logPath);
         } else {
-            $this->eyes->setLogHandler(new PrintLogHandler(true));
-        }
-
-        $this->eyes->setStitchMode(StitchMode::SCROLL);
-
-        $this->eyes->addProperty("Orientation", $deviceOrientation);
-        $this->eyes->addProperty("Stitched", $fully ? "True" : "False");
-
-        try {
-            $driver->get("https://www.applitools.com/customers");
-            $this->eyes->open($driver, "Eyes Selenium SDK - iOS Safari Cropping", $testName);
-            $this->eyes->check("Initial view", Target::region(WebDriverBy::cssSelector(".horizontal-page"))->fully($fully));
-            $this->eyes->close();
-        } finally {
-            $this->eyes->abortIfNotClosed();
-            $driver->quit();
+            $eyes->setLogHandler(new PrintLogHandler(true));
         }
     }
+
 }
