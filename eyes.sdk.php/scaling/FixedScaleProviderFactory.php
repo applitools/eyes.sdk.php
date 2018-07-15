@@ -16,10 +16,9 @@ class FixedScaleProviderFactory extends ScaleProviderFactory
     /**
      * FixedScaleProviderFactory constructor.
      * @param float $scaleRatio
-     * @param ScaleMethod $scaleMethod
      * @param PropertyHandler $scaleProviderHandler
      */
-    public function __construct($scaleRatio, ScaleMethod $scaleMethod, PropertyHandler $scaleProviderHandler) {
+    public function __construct($scaleRatio, PropertyHandler $scaleProviderHandler) {
         parent::__construct($scaleProviderHandler);
         $this->scaleRatio = $scaleRatio;
     }

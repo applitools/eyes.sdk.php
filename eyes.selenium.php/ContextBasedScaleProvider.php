@@ -4,7 +4,6 @@ namespace Applitools\Selenium;
 use Applitools\ArgumentGuard;
 use Applitools\ImageUtils;
 use Applitools\RectangleSize;
-use Applitools\ScaleMethod;
 use Applitools\ScaleProvider;
 use Gregwar\Image\Image;
 
@@ -18,7 +17,6 @@ class ContextBasedScaleProvider implements ScaleProvider {
     const ALLOWED_DCES_DEVIATION = 10;
     const UNKNOWN_SCALE_RATIO = 0;
 
-    private $scaleMethod; //ScaleMethod
     private $scaleRatio;
     private $devicePixelRatio;
     private $topLevelContextEntireSize; //RectangleSize
@@ -29,16 +27,13 @@ class ContextBasedScaleProvider implements ScaleProvider {
      * @param RectangleSize $topLevelContextEntireSize The total size of the top level context.
      *                                  E.g., for selenium this would be the document size of the top level frame.
      * @param RectangleSize $viewportSize The viewport size.
-     * @param ScaleMethod $scaleMethod
      * @param float $devicePixelRatio The device pixel ratio of the platform on which the application is running.
      */
     public function __construct(
-            RectangleSize $topLevelContextEntireSize, RectangleSize $viewportSize,
-            ScaleMethod $scaleMethod, $devicePixelRatio) {
+            RectangleSize $topLevelContextEntireSize, RectangleSize $viewportSize, $devicePixelRatio) {
 
         $this->topLevelContextEntireSize = $topLevelContextEntireSize;
         $this->viewportSize = $viewportSize;
-        $this->scaleMethod = $scaleMethod;
         $this->devicePixelRatio = $devicePixelRatio;
 
         // Since we need the image size to decide what the scale ratio is.
@@ -78,5 +73,4 @@ class ContextBasedScaleProvider implements ScaleProvider {
             $this->scaleRatio = 1 / $this->devicePixelRatio;
         }
     }
-
 }

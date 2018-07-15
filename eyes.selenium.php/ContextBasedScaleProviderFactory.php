@@ -13,7 +13,6 @@ class ContextBasedScaleProviderFactory extends ScaleProviderFactory {
 
     private $topLevelContextEntireSize; //RectangleSize
     private $viewportSize; //RectangleSize
-    private $scaleMethod; //ScaleMethod
     private $devicePixelRatio;
 
     /**
@@ -24,25 +23,21 @@ class ContextBasedScaleProviderFactory extends ScaleProviderFactory {
      *                                  would be the document size of the top
      *                                  level frame.
      * @param RectangleSize $viewportSize The viewport size.
-     * @param ScaleMethod $scaleMethod The method used for scaling.
      * @param float $devicePixelRatio The device pixel ratio of the
      *                                  platform on which the application is
      *                                  running.
      * @param PropertyHandler $scaleProviderHandler
      */
     public function __construct(RectangleSize $topLevelContextEntireSize, RectangleSize $viewportSize,
-                                            ScaleMethod $scaleMethod, $devicePixelRatio,
-                                            PropertyHandler $scaleProviderHandler) {
+                                            $devicePixelRatio, PropertyHandler $scaleProviderHandler) {
         parent::__construct($scaleProviderHandler);
         $this->topLevelContextEntireSize = $topLevelContextEntireSize;
         $this->viewportSize = $viewportSize;
-        $this->scaleMethod = $scaleMethod;
         $this->devicePixelRatio = $devicePixelRatio;
     }
 
     protected function getScaleProviderImpl($imageToScaleWidth) {
-        $scaleProvider = new ContextBasedScaleProvider($this->topLevelContextEntireSize, $this->viewportSize,
-                $this->scaleMethod, $this->devicePixelRatio);
+        $scaleProvider = new ContextBasedScaleProvider($this->topLevelContextEntireSize, $this->viewportSize, $this->devicePixelRatio);
         $scaleProvider->updateScaleRatio($imageToScaleWidth);
         return $scaleProvider;
     }

@@ -10,22 +10,15 @@ use Gregwar\Image\Image;
 class FixedScaleProvider implements ScaleProvider
 {
     private $scaleRatio;
-    private $scaleMethod; //ScaleMethod
 
     /**
      *
      * @param $scaleRatio float The scale ratio to use.
-     * @param $method ScaleMethod The method used for scaling the image.
      */
-    public function __construct($scaleRatio, ScaleMethod $method = null)
+    public function __construct($scaleRatio)
     {
-        if (empty($method)) {
-            $method = ScaleMethod::getDefault();
-        }
         ArgumentGuard::greaterThanZero($scaleRatio, "scaleRatio");
-        ArgumentGuard::notNull($method, "method");
         $this->scaleRatio = $scaleRatio;
-        $this->scaleMethod = $method;
     }
 
     /**

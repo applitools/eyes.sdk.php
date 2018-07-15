@@ -114,12 +114,14 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param WebDriver $driver The driver for which to check if it represents a mobile device.
+     * @param RemoteWebDriver $driver The driver for which to check if it represents a mobile device.
      * @return bool {@code true} if the platform running the test is a mobile platform. {@code false} otherwise.
      */
-    public static function isMobileDevice(WebDriver $driver)
+    public static function isMobileDevice(RemoteWebDriver $driver)
     {
-        return $driver instanceof AppiumDriver;
+        $caps = $driver->getCapabilities();
+        $platformName = $caps->getCapability("platformName");
+        return (strcasecmp($platformName, "ios") == 0 || strcasecmp($platformName, "android") == 0);
     }
 
     /**
@@ -129,31 +131,15 @@ class EyesSeleniumUtils
      */
     public static function isLandscapeOrientation(WebDriver $driver)
     {
+        if ($driver instanceof EyesWebDriver) {
+            $driver = $driver->getRemoteWebDriver();
+        }
         // We can only find orientation for mobile devices.
         if (self::isMobileDevice($driver)) {
-            $appiumDriver = /*(AppiumDriver)*/
-                $driver;
-
             try {
-                // We must be in native context in order to ask for orientation,
-                // because of an Appium bug.
-                $originalContext = $appiumDriver->getContext();
-                if ($appiumDriver->getContextHandles()->size() > 1 && !$originalContext->equalsIgnoreCase("NATIVE_APP")) {
-                    $appiumDriver->context("NATIVE_APP");
-                } else {
-                    $originalContext = null;
-                }
-
-                $orientation = $appiumDriver->getOrientation();
-
-                if ($originalContext != null) {
-                    $appiumDriver->context($originalContext);
-                }
-
-                return $orientation == ScreenOrientation::LANDSCAPE;
+                return strcasecmp($driver->manage()->window()->getScreenOrientation(), "landscape") == 0;
             } catch (\Exception $e) {
-                throw new EyesDriverOperationException(
-                    "Failed to get orientation!", $e);
+                throw new EyesDriverOperationException("Failed to get orientation!", $e);
             }
         }
 
@@ -381,24 +367,28 @@ class EyesSeleniumUtils
 
     /**
      *
-     * @param WebDriver $driver The driver to test.
+     * @param RemoteWebDriver $driver The driver to test.
      * @return bool {@code true} if the driver is an Android driver.
      * {@code false} otherwise.
      */
-    public static function isAndroid(WebDriver $driver)
+    public static function isAndroid(RemoteWebDriver $driver)
     {
-        return $driver instanceof AndroidDriver;
+        $capabilities = $driver->getCapabilities();
+        $platformName = $capabilities->getCapability("platformName");
+        return strcasecmp("android", $platformName) == 0;
     }
 
     /**
      *
-     * @param WebDriver $driver The driver to test.
+     * @param RemoteWebDriver $driver The driver to test.
      * @return bool {@code true} if the driver is an iOS driver.
      * {@code false} otherwise.
      */
-    public static function isIOS(WebDriver $driver)
+    public static function isIOS(RemoteWebDriver $driver)
     {
-        return $driver instanceof IOSDriver;
+        $capabilities = $driver->getCapabilities();
+        $platformName = $capabilities->getCapability("platformName");
+        return strcasecmp("ios", $platformName) == 0;
     }
 
     /**
@@ -409,8 +399,7 @@ class EyesSeleniumUtils
     public static function getPlatformVersion(RemoteWebDriver $driver)
     {
         $capabilities = $driver->getCapabilities();
-        $platformVersionObj = $capabilities->getCapability(MobileCapabilityType::PLATFORM_VERSION);
-
+        $platformVersionObj = $capabilities->getCapability("platformVersion");
         return $platformVersionObj; //$platformVersionObj == null ? null : String.valueOf($platformVersionObj);
     }
 

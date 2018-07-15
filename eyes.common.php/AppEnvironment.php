@@ -7,11 +7,16 @@ namespace Applitools;
  */
 class AppEnvironment
 {
+    /** @var string */
     private $inferred;
+
+    /** @var string */
     private $os;
+
+    /** @var string */
     private $hostingApp;
 
-    /** @var  RectangleSize */
+    /** @var RectangleSize */
     private $displaySize;
 
     /**

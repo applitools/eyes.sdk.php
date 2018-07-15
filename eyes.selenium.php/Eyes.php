@@ -902,17 +902,15 @@ class Eyes extends EyesBase
 
             $this->logger->log("Setting scale provider..");
             try {
-                $factory = new ContextBasedScaleProviderFactory($this->positionProvider->getEntireSize(), $this->getViewportSize(),
-                    $this->getScaleMethod(), $this->devicePixelRatio, $this->scaleProviderHandler);
+                $factory = new ContextBasedScaleProviderFactory($this->positionProvider->getEntireSize(), $this->getViewportSize(), $this->devicePixelRatio, $this->scaleProviderHandler);
                 /*$this->scaleProviderHandler->set(new ContextBasedScaleProvider(
-                    $this->positionProvider->getEntireSize(), $this->getViewportSize(),
-                    $this->getScaleMethod(), $this->devicePixelRatio));*/
+                    $this->positionProvider->getEntireSize(), $this->getViewportSize(), $this->devicePixelRatio));*/
             } catch (\Exception $e) {
                 // This can happen in Appium for example.
                 $this->logger->log("Failed to set ContextBasedScaleProvider.");
                 $this->logger->log("Using FixedScaleProvider instead...");
                 /*$this->scaleProviderHandler->set(new FixedScaleProvider(1 / $this->devicePixelRatio));*/
-                $factory = new FixedScaleProviderFactory(1 / $this->devicePixelRatio, $this->getScaleMethod(), $this->scaleProviderHandler);
+                $factory = new FixedScaleProviderFactory(1 / $this->devicePixelRatio, $this->scaleProviderHandler);
             }
             $this->logger->log("Done!");
             return $factory;
@@ -1462,17 +1460,9 @@ class Eyes extends EyesBase
         if ($appEnv->getOs() == null) {
             $this->logger->log("No OS set, checking for mobile OS...");
             if (EyesSeleniumUtils::isMobileDevice($underlyingDriver)) {
-                $platformName = null;
-                $this->logger->log("Mobile device detected! Checking device type..");
-                if (EyesSeleniumUtils::isAndroid($underlyingDriver)) {
-                    $this->logger->log("Android detected.");
-                    $platformName = "Android";
-                } else if (EyesSeleniumUtils::isIOS($underlyingDriver)) {
-                    $this->logger->log("iOS detected.");
-                    $platformName = "iOS";
-                } else {
-                    $this->logger->log("Unknown device type.");
-                }
+                $platformName = $underlyingDriver->getCapabilities()->getCapability("platformName");
+                $this->logger->log("Mobile device detected! platform name: $platformName");
+
                 // We only set the OS if we identified the device type.
                 if ($platformName != null) {
                     $os = $platformName;

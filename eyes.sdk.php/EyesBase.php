@@ -500,7 +500,7 @@ abstract class EyesBase
      * @return string The SDK version.
      */
     protected function getVersion() {
-        return "1.2.6";
+        return "1.2.7";
     }
 
     /**

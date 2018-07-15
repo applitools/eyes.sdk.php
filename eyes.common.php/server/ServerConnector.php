@@ -122,6 +122,8 @@ class ServerConnector implements ServerConnectorInterface
                 "scenarioIdOrName" => $sessionStartInfo->getScenarioIdOrName(),
                 "batchInfo" => $sessionStartInfo->getBatchInfo(),
                 "environment" => [
+                    "os" => $sessionStartInfo->getEnvironment()->getOs(),
+                    "hostingApp" => $sessionStartInfo->getEnvironment()->getHostingApp(),
                     "inferred" => $sessionStartInfo->getEnvironment()->getInferred(),
                     "displaySize" => [
                         "width" => $sessionStartInfo->getEnvironment()->getDisplaySize()->getWidth(),
