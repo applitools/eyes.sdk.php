@@ -20,9 +20,6 @@ abstract class TestSetup extends TestCase
     /** @var Eyes */
     protected $eyes;
 
-    /** @var BatchInfo */
-    protected static $batchInfo;
-
     /** @var string */
     protected static $testSuitName;
 
@@ -43,10 +40,6 @@ abstract class TestSetup extends TestCase
 
     public static function setUpClass()
     {
-        self::$batchInfo = new BatchInfo(self::$testSuitName);
-        if (isSet($_SERVER['APPLITOOLS_BATCH_ID'])) {
-            self::$batchInfo->setId($_SERVER['APPLITOOLS_BATCH_ID']);
-        }
     }
 
     public function oneTimeSetUp()
@@ -89,7 +82,7 @@ abstract class TestSetup extends TestCase
             }
 
             $webDriver = RemoteWebDriver::create($seleniumServerUrl, $this->desiredCapabilities);
-            $this->eyes->setBatch(self::$batchInfo);
+            $this->eyes->setBatch(TestDataProvider::$BatchInfo);
 
             $this->eyes->setScaleRatio($this->scaleRatio);
             $this->webDriver = $this->eyes->open($webDriver, self::$testSuitName, $testName, $this->viewportSize);
