@@ -23,7 +23,7 @@ class ImageProviderFactory
                     return new FirefoxScreenshotImageProvider($eyes, $logger, $driver);
                 }
             } else if ($ua->getBrowser() == BrowserNames::Safari) {
-                return new SafariScreenshotImageProvider($eyes, $logger, $driver);
+                return new SafariScreenshotImageProvider($eyes, $logger, $driver, $ua);
             }
         }
         return new TakesScreenshotImageProvider($logger, $driver);

@@ -211,7 +211,6 @@ class FullPageCaptureAlgorithm
             //$partImage = ImageUtils::scaleImage($partImage, $scaleProvider->getScaleRatio());
             // Stitching the current part.
             $this->logger->verbose("Stitching part into the image container...");
-            //$stitchedImage->getRaster()->setRect($currentPosition->getX(), $currentPosition->getY(), $partImage->getData());
             $stitchedImage->merge($partImage, $currentPosition->getX(), $currentPosition->getY());
             $this->logger->verbose("Done!");
 

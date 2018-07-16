@@ -57,8 +57,8 @@ abstract class EyesBase
     /** @var SimplePropertyHandler */
     protected $scaleProviderHandler;
 
-    ///** @var SimplePropertyHandler */
-    //protected $cutProviderHandler;
+    /** @var SimplePropertyHandler */
+    protected $cutProviderHandler;
 
     /** @var Logger */
     protected $logger;
@@ -1324,6 +1324,11 @@ abstract class EyesBase
     public function clearProperties()
     {
         $this->properties = [];
+    }
+
+    public function getIsCutProviderExplicitlySet()
+    {
+        return $this->cutProviderHandler != null && !($this->cutProviderHandler->get() instanceof NullCutProvider);
     }
 
     /**
