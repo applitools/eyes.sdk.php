@@ -11,7 +11,6 @@ use Applitools\CoordinatesType;
 use Applitools\Exceptions\CoordinatesTypeConversionException;
 use Applitools\Exceptions\EyesException;
 use Applitools\PositionProvider;
-use Applitools\Selenium\Exceptions\EyesDriverOperationException;
 use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\EyesScreenshot;
 use Applitools\ImageUtils;
@@ -19,7 +18,6 @@ use Applitools\Location;
 use Applitools\Logger;
 use Applitools\RectangleSize;
 use Applitools\Region;
-use Gregwar\Image\Image;
 
 class EyesWebDriverScreenshot extends EyesScreenshot
 {
@@ -86,14 +84,14 @@ class EyesWebDriverScreenshot extends EyesScreenshot
     /**
      * @param Logger $logger A Logger instance.
      * @param EyesWebDriver $driver The web driver used to get the screenshot.
-     * @param Image $image The actual screenshot image.
+     * @param resource $image The actual screenshot image.
      * @param string $screenshotType (Optional) The screenshot's type (e.g., viewport/full page).
      * @param Location $frameLocationInScreenshot (Optional) The current frame's location in the screenshot.
      * @param RectangleSize $entireFrameSize
      * @throws EyesException
      */
     public function __construct(Logger $logger, EyesWebDriver $driver,
-                                Image $image = null,
+                                $image = null,
                                 $screenshotType = null,
                                 Location $frameLocationInScreenshot = null,
                                 RectangleSize $entireFrameSize = null)
@@ -127,7 +125,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
             $logger->verbose("Calculating frame window...");
             $this->frameWindow = Region::CreateFromLocationAndSize($this->frameLocationInScreenshot, $frameSize);
 
-            $this->frameWindow->intersect(Region::CreateFromLTWH(0, 0, $image->width(), $image->height()));
+            $w = imagesx($image);
+            $h = imagesy($image);
+            $this->frameWindow->intersect(Region::CreateFromLTWH(0, 0, $w, $h));
 
             if ($this->frameWindow->getWidth() <= 0 || $this->frameWindow->getHeight() <= 0) {
                 throw new EyesException("Got empty frame window for screenshot!");
@@ -167,10 +167,10 @@ class EyesWebDriverScreenshot extends EyesScreenshot
 
     /**
      * @param string|null $screenshotType
-     * @param Image $image
+     * @param resource $image
      * @return string
      */
-    private function updateScreenshotType($screenshotType = null, Image $image)
+    private function updateScreenshotType($screenshotType = null, $image)
     {
         if ($screenshotType == null) {
             $viewportSize = $this->driver->getDefaultContentViewportSize();
@@ -182,7 +182,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
                 $viewportSize = $viewportSize->scale($pixelRatio);
             }
 
-            if ($image->width() <= $viewportSize->getWidth() && $image->height() <= $viewportSize->getHeight()) {
+            $w = imagesx($image);
+            $h = imagesy($image);
+            if ($w <= $viewportSize->getWidth() && $h <= $viewportSize->getHeight()) {
                 $screenshotType = ScreenshotType::VIEWPORT;
             } else {
                 $screenshotType = ScreenshotType::ENTIRE_FRAME;
@@ -392,7 +394,9 @@ class EyesWebDriverScreenshot extends EyesScreenshot
 
             // If the request is screenshot based, we intersect with the image
             case CoordinatesType::SCREENSHOT_AS_IS:
-                $intersectedRegion->intersect(Region::CreateFromLTWH(0, 0, $this->image->width(), $this->image->height()));
+                $w = imagesx($this->image);
+                $h = imagesy($this->image);
+                $intersectedRegion->intersect(Region::CreateFromLTWH(0, 0, $w, $h));
                 break;
 
             default:

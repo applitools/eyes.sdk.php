@@ -2,19 +2,16 @@
 
 namespace Applitools;
 
-use Gregwar\Image\Image;
-
 /**
  * Encapsulates the instantiation of an EyesScreenshot object.
  */
 interface EyesScreenshotFactory {
 
-
     /**
-     * @param Image $image
+     * @param resource $image
      * @return EyesScreenshot
      */
-    function makeScreenshot(Image $image);
+    function makeScreenshot($image);
 }
 
 ?>

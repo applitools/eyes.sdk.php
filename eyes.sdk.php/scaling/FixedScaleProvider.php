@@ -34,7 +34,7 @@ class FixedScaleProvider implements ScaleProvider
      *
      * {@inheritDoc}
      */
-    public function scaleImage(Image $image)
+    public function scaleImage($image)
     {
         return ImageUtils::scaleImage($image, $this->scaleRatio);
     }

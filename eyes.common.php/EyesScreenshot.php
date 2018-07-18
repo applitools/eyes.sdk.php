@@ -2,21 +2,19 @@
 
 namespace Applitools;
 
-use Gregwar\Image\Image;
-
 /**
 * Base class for handling screenshots.
 */
 abstract class EyesScreenshot {
     protected $image;
 
-    public function __construct(Image $image = null) { //FIXME
-        ArgumentGuard::notNull($image, "image"); //FIXME
+    public function __construct($image) {
+        ArgumentGuard::notNull($image, "image");
         $this->image = $image;
     }
 
     /**
-    * @return Image The screenshot image.
+    * @return resource The screenshot image.
     */
     public function getImage() {
         return $this->image;

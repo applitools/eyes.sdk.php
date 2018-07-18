@@ -2,7 +2,6 @@
 namespace Applitools\Selenium;
 use Applitools\EyesScreenshotFactory;
 use Applitools\Logger;
-use Gregwar\Image\Image;
 
 /**
  * Encapsulates the instantiation of an {@link EyesWebDriverScreenshot} .
@@ -16,7 +15,7 @@ class EyesWebDriverScreenshotFactory implements EyesScreenshotFactory {
         $this->driver = $driver;
     }
 
-    public function makeScreenshot(Image $image) {
+    public function makeScreenshot($image) {
         return new EyesWebDriverScreenshot($this->logger, $this->driver, $image);
     }
 }

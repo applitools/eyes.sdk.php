@@ -2,8 +2,6 @@
 
 namespace Applitools;
 
-use Gregwar\Image\Image;
-
 /**
  * Interface for saving debug screenshots.
  */
@@ -42,5 +40,5 @@ abstract class DebugScreenshotsProvider {
         return $this->path;
     }
 
-    abstract public function save(Image &$image, $suffix);
+    abstract public function save($image, $suffix);
 }

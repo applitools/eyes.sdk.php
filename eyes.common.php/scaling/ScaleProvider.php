@@ -2,8 +2,6 @@
 
 namespace Applitools;
 
-use Gregwar\Image\Image;
-
 /**
  * Encapsulates scaling logic.
  */
@@ -17,8 +15,8 @@ interface ScaleProvider
 
     /**
      * Scales a given source image.
-     * @param Image $image The source image.
-     * @return Image The scaled image.
+     * @param resource $image The source image.
+     * @return resource The scaled image.
      */
-    function scaleImage(Image $image);
+    function scaleImage($image);
 }

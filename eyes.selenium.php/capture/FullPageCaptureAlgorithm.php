@@ -18,7 +18,6 @@ use Applitools\PositionProvider;
 use Applitools\RectangleSize;
 use Applitools\Region;
 use Applitools\ScaleProviderFactory;
-use Gregwar\Image\Image;
 
 class FullPageCaptureAlgorithm
 {
@@ -38,7 +37,7 @@ class FullPageCaptureAlgorithm
     }
 
 
-    private static function saveDebugScreenshotPart(DebugScreenshotsProvider $debugScreenshotsProvider, Image &$image, Region $region, $name)
+    private static function saveDebugScreenshotPart(DebugScreenshotsProvider $debugScreenshotsProvider, $image, Region $region, $name)
     {
         $suffix = "part-{$name}-{$region->getLeft()}_{$region->getTop()}_{$region->getWidth()}x{$region->getHeight()}";
         $debugScreenshotsProvider->save($image, $suffix);
@@ -57,7 +56,7 @@ class FullPageCaptureAlgorithm
      * @param DebugScreenshotsProvider $debugScreenshotsProvider The factory to use for creating debug screenshots
      * @param EyesScreenshotFactory $screenshotFactory The factory to use for creating screenshots from the images.
      * @param IRegionPositionCompensation $regionPositionCompensation
-     * @return Image
+     * @return resource
      * @throws EyesException
      */
 
@@ -96,12 +95,12 @@ class FullPageCaptureAlgorithm
 
         $this->logger->verbose("Getting top/left image...");
 
-        /** @var Image $image */
         $image = $imageProvider->getImage();
         $debugScreenshotsProvider->save($image, "original");
 
         // FIXME - scaling should be refactored
-        $scaleProvider = $scaleProviderFactory->getScaleProvider($image->width());
+        $imageWidth = imagesx($image);
+        $scaleProvider = $scaleProviderFactory->getScaleProvider($imageWidth);
         // Notice that we want to cut/crop an image before we scale it, we need to change
         $pixelRatio = 1 / $scaleProvider->getScaleRatio();
 
@@ -123,31 +122,33 @@ class FullPageCaptureAlgorithm
         $image = ImageUtils::scaleImage($image, $scaleProvider->getScaleRatio());
         $debugScreenshotsProvider->save($image, "scaled");
 
+        $imageWidth = imagesx($image);
+        $imageHeight = imagesy($image);
+
         try {
             $entireSize = $positionProvider->getEntireSize();
             $this->logger->verbose("Entire size of region context: $entireSize");
         } catch (EyesDriverOperationException $e) {
             $this->logger->log("WARNING: Failed to extract entire size of region context" . $e->getMessage());
-            $entireSize = new RectangleSize($image->width(), $image->height());
+            $entireSize = new RectangleSize($imageWidth, $imageHeight);
             $this->logger->log("Using image size instead: $entireSize");
         }
 
         // Notice that this might still happen even if we used
         // "getImagePart", since "entirePageSize" might be that of a frame.
-        if ($image->width() >= $entireSize->getWidth() && $image->height() >= $entireSize->getHeight()) {
+        if ($imageWidth >= $entireSize->getWidth() && $imageHeight >= $entireSize->getHeight()) {
             $originProvider->restoreState($originalPosition);
             return $image;
         }
 
-        $partWidth = $image->width();
-        $partHeight = $image->height();
+        $partWidth = $imageWidth;
+        $partHeight = $imageHeight;
 
         // These will be used for storing the actual stitched size (it is
         // sometimes less than the size extracted via "getEntireSize").
 
-        // The screenshot part is a bit smaller than the screenshot,
-        // in order to eliminate duplicate bottom scroll bars, as well as fixed
-        // position footers.
+        // The screenshot part is a bit smaller than the screenshot, in order to eliminate
+        // duplicate bottom scroll bars, as well as fixed position footers.
         $partImageSize = new RectangleSize($partWidth, max($partHeight - self::MAX_SCROLL_BAR_SIZE, self::MIN_SCREENSHOT_PART_HEIGHT));
 
         $this->logger->verbose("Total size: {$entireSize}, image part size: {$partImageSize}");
@@ -159,32 +160,26 @@ class FullPageCaptureAlgorithm
         $imageParts = $entirePage->getSubRegions($partImageSize);
         //$this->logger->verbose("imageParts: " . var_export($imageParts, true));
 
+        $this->logger->verbose("pixelRatio: $pixelRatio");
+        $entireSize = $entireSize->scale($pixelRatio);
+
         $this->logger->verbose("Creating stitchedImage container. Size: $entireSize");
         //Notice stitchedImage uses the same type of image as the screenshots.
 
-        $stitchedImage = Image::create($entireSize->getWidth(), $entireSize->getHeight());
+        $this->logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+        $stitchedImage = imagecreatetruecolor($entireSize->getWidth(), $entireSize->getHeight());
+        $this->logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
-        $this->logger->verbose("Done! Adding initial screenshot...");
-        // Starting with the screenshot we already captured at (0,0).
-        $initialPart = clone $image;
-        $this->logger->verbose("Initial part:(0,0)[{$initialPart->width()} x {$initialPart->height()}]");
-        $stitchedImage->merge($initialPart, 0, 0);
-        //$stitchedImage->getRaster()->setRect(0, 0, $initialPart); FIXME need to check
-        $this->logger->verbose("Done!");
-
-        $lastSuccessfulLocation = new Location(0, $initialPart->height());
-        $lastSuccessfulPartSize = new RectangleSize($initialPart->width(), $initialPart->height());
-
+        $lastSuccessfulLocation = new Location(0, 0);
         $originalStitchedState = $positionProvider->getState();
 
         // Take screenshot and stitch for each screenshot part.
         $this->logger->verbose("Getting the rest of the image parts...");
         $partImage = null;
+        $imagePartWidth = 0;
+        $imagePartHeight = 0;
         foreach ($imageParts as $partRegion) {
-            // Skipping screenshot for 0,0 (already taken)
-            if ($partRegion->getLeft() == 0 && $partRegion->getTop() == 0) {
-                continue;
-            }
+            $this->logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
             $this->logger->verbose("Taking screenshot for $partRegion");
             // Set the position to the part's top/left.
@@ -211,28 +206,41 @@ class FullPageCaptureAlgorithm
             //$partImage = ImageUtils::scaleImage($partImage, $scaleProvider->getScaleRatio());
             // Stitching the current part.
             $this->logger->verbose("Stitching part into the image container...");
-            $stitchedImage->merge($partImage, $currentPosition->getX(), $currentPosition->getY());
+
+            $imagePartWidth = imagesx($partImage);
+            $imagePartHeight = imagesy($partImage);
+            $this->logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+
+            imagecopy($stitchedImage, $partImage,
+                $currentPosition->getX() * $pixelRatio, $currentPosition->getY() * $pixelRatio,
+                0, 0, $imagePartWidth, $imagePartHeight);
+
+            $this->logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+
+            //self::saveDebugScreenshotPart($debugScreenshotsProvider, $stitchedImage, $partRegion, "stitched-unscaled-{$currentPosition->getX()}_{$currentPosition->getY()}");
+
+            imagedestroy($partImage);
+
             $this->logger->verbose("Done!");
 
             $lastSuccessfulLocation = $currentPosition;
         }
 
+        $debugScreenshotsProvider->save($stitchedImage, "stitched_unscaled");
+
         $stitchedImage = ImageUtils::scaleImage($stitchedImage, $scaleProvider->getScaleRatio());
-        if ($partImage != null) {
-            $lastSuccessfulPartSize = new RectangleSize($partImage->width(), $partImage->height());
-        }
 
         $this->logger->verbose("Stitching done!");
         $positionProvider->restoreState($originalStitchedState);
         $originProvider->restoreState($originalPosition);
 
         // If the actual image size is smaller than the extracted size, we crop the image.
-        $actualImageWidth = $lastSuccessfulLocation->getX() + $lastSuccessfulPartSize->getWidth();
-        $actualImageHeight = $lastSuccessfulLocation->getY() + $lastSuccessfulPartSize->getHeight();
+        $actualImageWidth = $lastSuccessfulLocation->getX() + $imagePartWidth;
+        $actualImageHeight = $lastSuccessfulLocation->getY() + $imagePartHeight;
         $this->logger->verbose("Extracted entire size: $entireSize");
         $this->logger->verbose("Actual stitched size: {$actualImageWidth}x{$actualImageHeight}");
 
-        if ($actualImageWidth < $stitchedImage->width() || $actualImageHeight < $stitchedImage->height()) {
+        if ($actualImageWidth < $entireSize->getWidth() || $actualImageHeight < $entireSize->getHeight()) {
             $this->logger->verbose("Trimming unnecessary margins...");
             $stitchedImage = ImageUtils::getImagePart($stitchedImage, Region::CreateFromLTWH(0, 0, $actualImageWidth, $actualImageHeight));
             $this->logger->verbose("Done!");
@@ -243,13 +251,13 @@ class FullPageCaptureAlgorithm
 
     /**
      * @param Region $region
-     * @param Image $image
+     * @param resource $image
      * @param double $pixelRatio
      * @param EyesScreenshot $screenshot
      * @param IRegionPositionCompensation $regionPositionCompensation
      * @return Region
      */
-    private function getRegionInScreenshot(Region $region, Image $image, $pixelRatio,
+    private function getRegionInScreenshot(Region $region, $image, $pixelRatio,
                                            EyesScreenshot $screenshot,
                                            IRegionPositionCompensation $regionPositionCompensation)
     {
@@ -272,7 +280,10 @@ class FullPageCaptureAlgorithm
         // Handling a specific case where the region is actually larger than
         // the screenshot (e.g., when body width/height are set to 100%, and
         // an internal div is set to value which is larger than the viewport).
-        $regionInScreenshot->intersect(Region::CreateFromLTWH(0, 0, $image->width(), $image->height()));
+
+        $w = imagesx($image);
+        $h = imagesy($image);
+        $regionInScreenshot->intersect(Region::CreateFromLTWH(0, 0, $w, $h));
         $this->logger->verbose("Region after intersect: $regionInScreenshot");
 
         return $regionInScreenshot;

@@ -3,9 +3,9 @@
 namespace Applitools\Selenium;
 
 use Applitools\ImageProvider;
+use Applitools\ImageUtils;
 use Applitools\Logger;
 use Applitools\Region;
-use Gregwar\Image\Image;
 
 class SafariScreenshotImageProvider implements ImageProvider
 {
@@ -33,13 +33,14 @@ class SafariScreenshotImageProvider implements ImageProvider
     }
 
     /**
-     * @return Image
+     * @return resource
+     * @throws Exceptions\NoFramesException
+     * @throws Exceptions\EyesDriverOperationException
      */
     function getImage()
     {
         $this->logger->verbose("Getting screenshot...");
         $image = $this->tsInstance->getScreenshot();
-
         $this->eyes->getDebugScreenshotsProvider()->save($image, "SAFARI");
 
         if ($this->eyes->getIsCutProviderExplicitlySet()) {
@@ -57,8 +58,8 @@ class SafariScreenshotImageProvider implements ImageProvider
                 $this->initDeviceRegionsTable();
             }
 
-            $imageWidth = $image->width();
-            $imageHeight = $image->height();
+            $imageWidth = imagesx($image);
+            $imageHeight = imagesy($image);
 
             $this->logger->verbose("physical device pixel size: $imageWidth x $imageHeight");
 
@@ -66,7 +67,8 @@ class SafariScreenshotImageProvider implements ImageProvider
             if (isset(self::$devicesRegions[$key])) {
                 $this->logger->verbose("device data found in hash table");
                 $crop = self::$devicesRegions[$key];
-                $image = $image->crop($crop->getLeft(), $crop->getTop(), $crop->getWidth(), $crop->getHeight());
+                $image = ImageUtils::getImagePart($image, $crop);
+                //$image = $image->crop($crop->getLeft(), $crop->getTop(), $crop->getWidth(), $crop->getHeight());
             } else {
                 $this->logger->verbose("device not found in list. returning original image.");
             }
@@ -82,7 +84,8 @@ class SafariScreenshotImageProvider implements ImageProvider
             }
 
             $loc = $loc->scale($scaleRatio);
-            $image = $image->crop($loc->getX(), $loc->getY(), $viewportSize->getWidth(), $viewportSize->getHeight());
+            $image = imagecrop($image, ['x' => $loc->getX(), 'y' => $loc->getY(), 'width' => $viewportSize->getWidth(), 'height' => $viewportSize->getHeight()]);
+            //$image = $image->crop($loc->getX(), $loc->getY(), $viewportSize->getWidth(), $viewportSize->getHeight());
         }
 
         return $image;

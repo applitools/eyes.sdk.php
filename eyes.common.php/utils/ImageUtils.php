@@ -6,7 +6,6 @@
 namespace Applitools;
 
 use Applitools\Exceptions\EyesException;
-use Gregwar\Image\Image;
 use SplFixedArray;
 
 class ImageUtils
@@ -21,85 +20,54 @@ class ImageUtils
     }
 
     /**
-     * Encodes a given image as PNG.
-     *
-     * @param Image $image The image to encode.
-     * @return string The PNG bytes representation of the image.
-     * @throws EyesException
-     */
-    public static function encodeAsPng(Image $image)
-    {
-        ArgumentGuard::notNull($image, "image");
-        $pngData = $image->get('png');
-        return $pngData;
-    }
-
-    /**
-     *
-     * @param Image $image The image from which to get its base64 representation.
-     * @return string The base64 representation of the image (bytes encoded as PNG).
-     */
-    public static function base64FromImage(Image $image)
-    {
-        ArgumentGuard::notNull($image, "image");
-
-        $imageBytes = $image->get('png');
-        return base64_encode($imageBytes);
-    }
-
-    /**
      * Creates a BufferedImage instance from raw image bytes.
      *
      * @param string $imageBytes The raw bytes of the image.
-     * @return Image A BufferedImage instance representing the image.
+     * @return resource A BufferedImage instance representing the image.
      * @throws EyesException If there was a problem
      * creating the {@code BufferedImage} instance.
      */
     public static function imageFromBytes($imageBytes)
     {
         try {
-            //FIXME need to check
-            //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-            $image = new Image();
-            //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-            $image->setResource(imagecreatefromstring($imageBytes));
-            //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+            $image = imagecreatefromstring($imageBytes);
+            return $image;
         } catch (\Exception $e) {
             throw new EyesException("Failed to create buffered image!", $e);
         }
-        return $image;
     }
 
     /**
      * Get a copy of the part of the image given by region.
      *
-     * @param Image $image The image from which to get the part.
+     * @param resource $image The image from which to get the part.
      * @param Region $region The region which should be copied from the image.
-     * @return Image The part of the image.
+     * @return resource The part of the image.
      */
-    public static function getImagePart(Image $image, Region $region)
+    public static function getImagePart($image, Region $region)
     {
         ArgumentGuard::notNull($image, "image");
 
-        if (self::$logger != null) {
-            self::$logger->verbose("getImagePart (image [{$image->width()}x{$image->height()}], $region)");
-        }
+//        if (self::$logger != null) {
+//            self::$logger->verbose("getImagePart (image [{$image->width()}x{$image->height()}], $region)");
+//        }
 
         //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-        $image->crop($region->getLeft(), $region->getTop(), $region->getWidth(), $region->getHeight());
+        //$image->crop($region->getLeft(), $region->getTop(), $region->getWidth(), $region->getHeight());
         //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
+        $image = imagecrop($image, ['x' => $region->getLeft(), 'y' => $region->getTop(), 'width' => $region->getWidth(), 'height' => $region->getHeight()]);
         return $image;
     }
 
     /**
      * Rotates an image by the given degrees.
      *
-     * @param Image $image The image to rotate.
+     * @param resource $image The image to rotate.
      * @param float $deg The degrees by which to rotate the image.
-     * @return Image A rotated image.
+     * @return resource A rotated image.
      */
-    public static function rotateImage(Image $image, $deg)
+    public static function rotateImage($image, $deg)
     {
         /* FIXME
                 ArgumentGuard::notNull($image, "image");
@@ -142,12 +110,12 @@ class ImageUtils
     /**
      * Scales an image by the given ratio
      *
-     * @param Image $image The image to scale.
+     * @param resource $image The image to scale.
      * @param float $scaleRatio Factor to multiply the image dimensions by
-     * @return Image If the scale ratio != 1, returns a new scaled image,
+     * @return resource If the scale ratio != 1, returns a new scaled image,
      * otherwise, returns the original image.
      */
-    public static function scaleImage(Image $image, $scaleRatio)
+    public static function scaleImage($image, $scaleRatio)
     {
         //if you have ScaleProvider use  $scaleProvider->getScaleRatio();
         ArgumentGuard::notNull($image, "image");
@@ -156,8 +124,11 @@ class ImageUtils
             return $image;
         }
 
-        $imageRatio = $image->height() / $image->width();
-        $scaledWidth = ceil($image->width() * $scaleRatio);
+        $wSrc = imagesx($image);
+        $hSrc = imagesy($image);
+
+        $imageRatio = $hSrc / $wSrc;
+        $scaledWidth = ceil($wSrc * $scaleRatio);
         $scaledHeight = ceil($scaledWidth * $imageRatio);
         //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
@@ -165,47 +136,35 @@ class ImageUtils
 
         //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
-        // Verify that the scaled image is the same type as the original.
-        //if ($image->getType() == $scaledImage->getType()) {
-        /*FIXME need to check*/
         return $scaledImage;
-        //}
-
-        //return $this->copyImageWithType($scaledImage, $image->getType());
     }
 
     /**
      * Scales an image by the given ratio
      *
-     * @param Image $image The image to scale.
+     * @param resource $image The image to scale.
      * @param int $targetWidth The width to resize the image to
      * @param int $targetHeight The height to resize the image to
-     * @return Image If the size of image equal to target size, returns the original image,
+     * @return resource If the size of image equal to target size, returns the original image,
      * otherwise, returns a new resized image.
      */
-    public static function resizeImage(Image $image, $targetWidth, $targetHeight)
+    public static function resizeImage($image, $targetWidth, $targetHeight)
     {
         ArgumentGuard::notNull($image, "image");
         ArgumentGuard::notNull($targetWidth, "targetWidth");
         ArgumentGuard::notNull($targetHeight, "targetHeight");
 
-        if ($image->width() == $targetWidth && $image->height() == $targetHeight) {
+        $wSrc = imagesx($image);
+        $hSrc = imagesy($image);
+
+        if ($wSrc == $targetWidth && $hSrc == $targetHeight) {
             return $image;
         }
 
-        self::$logger->verbose("original size: {$image->width()}x{$image->height()} ; target size: {$targetWidth}x{$targetHeight}");
+        self::$logger->verbose("original size: {$wSrc}x{$hSrc} ; target size: {$targetWidth}x{$targetHeight}");
         //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
-        // Save original image type
-        //$originalType = $image->getType();
-
-        // If type is different then replace it
-        /*if ($originalType != BufferedImage::TYPE_4BYTE_ABGR) {
-            $image = $this->copyImageWithType($image, BufferedImage::TYPE_4BYTE_ABGR);
-        }*///FIXME is type important?
-
-        //$resizedImage;
-        if ($targetWidth > $image->width() || $targetHeight > $image->height()) {
+        if ($targetWidth > $wSrc || $targetHeight > $hSrc) {
             $resizedImage = self::scaleImageBicubic($image, $targetWidth, $targetHeight);
         } else {
             $resizedImage = self::scaleImageIncrementally($image, $targetWidth, $targetHeight);
@@ -223,32 +182,21 @@ class ImageUtils
         return $resizedImage;
     }
 
-    private static function interpolateCubic($x0, $x1, $x2, $x3, $t)
+    private static function scaleImageBicubic($srcImage, $targetWidth, $targetHeight)
     {
-        $a0 = $x3 - $x2 - $x0 + $x1;
-        $a1 = $x0 - $x1 - $a0;
-        $a2 = $x2 - $x0;
-        return max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($x1)));
-    }
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+        $bufDst = imagecreatetruecolor($targetWidth, $targetHeight);
+        $wSrc = imagesx($srcImage);
+        $hSrc = imagesy($srcImage);
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
-    private static function scaleImageBicubic(Image $srcImage, $targetWidth, $targetHeight)
-    {
-        $bufDst = imagecreatetruecolor($targetWidth, $targetHeight);//new DataBufferByte($targetWidth * $targetHeight * 4);
-        //$wSrc = $srcImage->width();
-        //$hSrc = $srcImage->height();
-        $imageName = tempnam(sys_get_temp_dir(), "scale_image_") . ".png";
-        $srcImage->save($imageName, "png", 100);
-        $size = getimagesize($imageName);
-        $wSrc = $size[0];
-        $hSrc = $size[1];
-
-        $bufSrc = imagecreatefrompng($imageName);
+        //$bufSrc = imagecreatefrompng($imageName);
 
         // when dst smaller than src/2, interpolate first to a multiple between 0.5 and 1.0 src, then sum squares
         $wM = max(1, floor($wSrc / $targetWidth));
-        $wDst2 = $targetWidth * $wM;
+        $wDst2 = intval($targetWidth * $wM);
         $hM = max(1, floor($hSrc / $targetHeight));
-        $hDst2 = $targetHeight * $hM;
+        $hDst2 = intval($targetHeight * $hM);
 
         // Pass 1 - interpolate rows
         // buf1 has width of dst2 and height of src
@@ -256,91 +204,108 @@ class ImageUtils
         //imagecolorallocate($buf1, 255, 255, 255);
 
         //$start = microtime(true);
-        $pixels = new SplFixedArray($hSrc * $wSrc);
-        //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+        self::$logger->verbose("trying to allocate {$hSrc} x {$wSrc} pixels = " . $hSrc * $wSrc * 4 . " bytes");
+        $pixels = str_repeat("\0\0\0\0", $hSrc * $wSrc);
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+        $pixelsIndexBase = 0;
         for ($h = 0; $h < $hSrc; $h++) {
             for ($w = 0; $w < $wSrc; $w++) {
-                $pixels[$h * $wSrc + $w] = imagecolorat($bufSrc, $w, $h);
+                $rgba = imagecolorat($srcImage, $w, $h);
+                $pixels[$pixelsIndexBase + 0] = chr(($rgba >> 0) & 0xFF); // b
+                $pixels[$pixelsIndexBase + 1] = chr(($rgba >> 8) & 0xFF); // g
+                $pixels[$pixelsIndexBase + 2] = chr(($rgba >> 16) & 0xFF); // r
+                $pixels[$pixelsIndexBase + 3] = chr(($rgba >> 24) & 0x7F); // a
+                $pixelsIndexBase += 4;
             }
-            //if ($h % 100 == 0) {
-            //    self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-            //}
+//            if ($h % 100 == 0) {
+//                self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+//            }
         }
-        imagedestroy($bufSrc);
-        //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+        imagedestroy($srcImage);
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
         $m = $wM * $hM;
+        self::$logger->verbose("m = $m (wM = $wM ; hM = $hM)");
 
-        $pixels2 = new SplFixedArray($hSrc * $wDst2);
-        //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-        $pixels2Index = 0;
+        $pixels2 = str_repeat("\0\0\0\0", $hSrc * $wDst2);
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
         $pixelsIndexBase = 0;
         for ($i = 0; $i < $hSrc; $i++) {
             for ($j = 0; $j < $wDst2; $j++) {
                 $x = $j * ($wSrc - 1) / $wDst2;
-                $xPos = floor($x);
+                $xPos = intval(floor($x));
                 $t = $x - $xPos;
 
-                $pixels2[$pixels2Index] = 0;
-
-                $pixelsIndex = $pixelsIndexBase + $xPos;
-                for ($p = 0; $p <= 24; $p += 8) {
-                    $val = (($pixels[$pixelsIndex] >> $p) & 0xFF);
-                    $x0 = ($xPos > 0) ? (($pixels[$pixelsIndex - 1] >> $p) & 0xFF) : 2 * $val - (($pixels[$pixelsIndex + 1] >> $p) & 0xFF);
+                $pixelsIndex = ($pixelsIndexBase + $xPos) << 2;
+                for ($p = 0; $p < 4; $p++) {
+                    $val = ord($pixels[$pixelsIndex + $p]);
+                    $pixXp1 = ord($pixels[$pixelsIndex + 4 + $p]);
+                    $x0 = ($xPos > 0) ? ord($pixels[$pixelsIndex - 4 + $p]) : 2 * $val - $pixXp1;
                     $x1 = $val;
-                    $x2 = (($pixels[$pixelsIndex + 1] >> $p) & 0xFF);
-                    $x3 = ($xPos < $wSrc - 2) ? (($pixels[$pixelsIndex + 2] >> $p) & 0xFF) : 2 * (($pixels[$pixelsIndex + 1] >> $p) & 0xFF) - $val;
+                    $x2 = $pixXp1;
+                    $x3 = ($xPos < $wSrc - 2) ? ord($pixels[$pixelsIndex + 8 + $p]) : 2 * $pixXp1 - $val;
 
                     $a0 = $x3 - $x2 - $x0 + $x1;
                     $a1 = $x0 - $x1 - $a0;
                     $a2 = $x2 - $x0;
-                    $pixels2[$pixels2Index] |= (max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($x1))) << $p);
+                    $pixels2[$pixelsIndex + $p] = chr(max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($x1))));
                 }
-                ++$pixels2Index;
             }
             $pixelsIndexBase += $wSrc;
-            //if ($i % 100 == 0) {
-            //    self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-            //}
+//            if ($i % 100 == 0) {
+//                self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+//            }
         }
 
         unset($pixels);
-        $pixels3 = new SplFixedArray($hDst2 * $wDst2);
-
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+        $pixels3 = str_repeat("\0\0\0\0", $hDst2 * $wDst2);
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
         $buf2 = imagecreatetruecolor($wDst2, $hDst2);
-        //imagecolorallocate($buf2, 255, 255, 255);
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
+        $stride = $wDst2 << 2;
         for ($i = 0; $i < $hDst2; $i++) {
             for ($j = 0; $j < $wDst2; $j++) {
                 $y = $i * ($hSrc - 1) / $hDst2;
                 $yPos = intval($y);
                 $t = $y - $yPos;
-                $pix = 0;
-                for ($p = 0; $p <= 24; $p += 8) {
-                    $val = ($pixels2[$yPos * $wDst2 + $j] >> $p) & 0xFF;
-                    $y0 = ($yPos > 0) ? (($pixels2[($yPos - 1) * $wDst2 + $j] >> $p) & 0xFF) : 2 * $val - (($pixels2[($yPos + 1) * $wDst2 + $j] >> $p) & 0xFF);
+                $rgba = 0;
+                $rowIndexBase = (($yPos * $wDst2 + $j) << 2);
+                $nextRowIndexBase = $rowIndexBase + $stride;
+                $prevRowIndexBase = $rowIndexBase - $stride;
+                $index = ($i * $wDst2 + $j) << 2;
+                for ($p = 0; $p < 4; $p++) {
+                    $val = ord($pixels2[$rowIndexBase + $p]);
+                    $pixYp1 = ord($pixels2[$nextRowIndexBase + $p]);
+                    $y0 = ($yPos > 0) ? ord($pixels2[$prevRowIndexBase  + $p]) : 2 * $val - $pixYp1;
                     $y1 = $val;
-                    $y2 = (($pixels2[($yPos + 1) * $wDst2 + $j] >> $p) & 0xFF);
-                    $y3 = ($yPos < $hSrc - 2) ? (($pixels2[($yPos + 2) * $wDst2 + $j] >> $p) & 0xFF) : 2 * (($pixels2[($yPos + 1) * $wDst2 + $j] >> $p) & 0xFF) - $val;
+                    $y2 = $pixYp1;
+                    $y3 = ($yPos < $hSrc - 2) ? ord($pixels2[$nextRowIndexBase + $stride + $p]) : 2 * $pixYp1 - $val;
 
                     $a0 = $y3 - $y2 - $y0 + $y1;
                     $a1 = $y0 - $y1 - $a0;
                     $a2 = $y2 - $y0;
-                    $pix |= (max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($y1))) << $p);
+                    $pix = max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($y1)));
+                    if ($m > 1) {
+                        $pixels3[$index + $p] = chr($pix);
+                    } else {
+                        $rgba |= $pix << ($p << 3);
+                    }
                 }
-                if ($m > 1) {
-                    $pixels3[$i * $wDst2 + $j] = $pix;
-                } else {
-                    $a = ($pix >> 24) & 0x7F;
-                    $r = ($pix >> 16) & 0xFF;
-                    $g = ($pix >> 8) & 0xFF;
-                    $b = ($pix >> 0) & 0xFF;
+                if ($m <= 1) {
+                    $a = ($rgba >> 24) & 0x7F;
+                    $r = ($rgba >> 16) & 0xFF;
+                    $g = ($rgba >> 8) & 0xFF;
+                    $b = ($rgba >> 0) & 0xFF;
                     imagesetpixel($buf2, $j, $i, imagecolorallocatealpha($buf2, $r, $g, $b, $a));
                 }
             }
         }
 
         unset($pixels2);
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
         // Pass 3 - scale to dst
 
@@ -355,11 +320,11 @@ class ImageUtils
                         $yPos = $i * $hM + $y;
                         for ($x = 0; $x < $wM; $x++) {
                             $xPos = $j * $wM + $x;
-                            $pix = $pixels3[$yPos * $wDst2 + $xPos];
-                            $a += ($pix >> 24) & 0x7F;
-                            $r += ($pix >> 16) & 0xFF;
-                            $g += ($pix >> 8) & 0xFF;
-                            $b += ($pix >> 0) & 0xFF;
+                            $index = intval($yPos * $wDst2 + $xPos) << 2;
+                            $b += ord($pixels3[$index + 0]);
+                            $g += ord($pixels3[$index + 1]);
+                            $r += ord($pixels3[$index + 2]);
+                            $a += ord($pixels3[$index + 3]);
                         }
                     }
 
@@ -369,17 +334,19 @@ class ImageUtils
         } else {
             $bufDst = $buf2;
         }
-        $dstImage = new Image();
 
-        $dstImage->setResource($bufDst);
-        return $dstImage;
+        unset($pixels3);
+
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+
+        return $bufDst;
     }
 
-    private static function scaleImageIncrementally(Image $src, $targetWidth, $targetHeight)
+    private static function scaleImageIncrementally($src, $targetWidth, $targetHeight)
     {
         $hasReassignedSrc = false;
-        $currentWidth = $src->width();
-        $currentHeight = $src->height();
+        $currentWidth = imagesx($src);
+        $currentHeight = imagesy($src);
 
         // For ultra quality should use 7
         $fraction = 2;
@@ -419,7 +386,7 @@ class ImageUtils
             // BufferedImages created during this incremental down-sampling cycle. If it wasn't one of ours, then it was the original
             // caller-supplied BufferedImage in which case we don't want to flush() it and just leave it alone.
             if ($hasReassignedSrc)
-                $src->flush();
+                imagedestroy($src);
 
             // Now treat our incremental partially scaled image as the src image
             // and cycle through our loop again to do another incremental scaling of it (if necessary).
@@ -436,23 +403,13 @@ class ImageUtils
 
     /**
      * Save image to local file system
-     * @param Image $image The image to save.
+     * @param resource $image The image to save.
      * @param string $filename The path to save image
-     * @return Image
-     * @throws EyesException
      */
-    public static function saveImage(Image &$image, $filename)
+    public static function saveImage($image, $filename)
     {
-        try {
-            //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-            $image->save($filename, "png", 100);
-            //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-            self::$logger->verbose("saving image $filename");
-            $image = new Image($filename);
-            //self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-            return $image;
-        } catch (\Exception $e) {
-            throw new EyesException("Failed to save image", $e);
-        }
+        self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+        self::$logger->verbose("saving image $filename");
+        imagepng($image, $filename);
     }
 }

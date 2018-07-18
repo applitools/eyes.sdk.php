@@ -5,7 +5,6 @@ use Applitools\ArgumentGuard;
 use Applitools\ImageUtils;
 use Applitools\RectangleSize;
 use Applitools\ScaleProvider;
-use Gregwar\Image\Image;
 
 /**
  * Scale provider which determines the scale ratio according to the context.
@@ -49,7 +48,7 @@ class ContextBasedScaleProvider implements ScaleProvider {
      *
      * {@inheritDoc}
      */
-    public function scaleImage(Image $image)
+    public function scaleImage($image)
     {
         return ImageUtils::scaleImage($image, $this->scaleRatio);
     }
