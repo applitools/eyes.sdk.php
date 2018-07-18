@@ -44,6 +44,10 @@ class CssTranslatePositionProvider implements PositionProvider {
         $this->lastSetPosition = $location;
     }
 
+    /**
+     * @return \Applitools\RectangleSize
+     * @throws Exceptions\EyesDriverOperationException
+     */
     public function getEntireSize() {
         $entireSize = EyesSeleniumUtils::getCurrentFrameContentEntireSize($this->executor);
         $this->logger->verbose("Entire size: $entireSize");

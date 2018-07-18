@@ -203,6 +203,14 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         return new FrameChain($this->logger, $this->frameChain);
     }
 
+    /**
+     * @param Region $region
+     * @param bool $throwIfClipped
+     * @return EyesScreenshot|EyesWebDriverScreenshot
+     * @throws CoordinatesTypeConversionException
+     * @throws EyesException
+     * @throws OutOfBoundsException
+     */
     public function getSubScreenshot(Region $region, $throwIfClipped)
     {
         $this->logger->verbose("getSubScreenshot($region, $throwIfClipped)");
@@ -352,6 +360,13 @@ class EyesWebDriverScreenshot extends EyesScreenshot
         return $result;
     }
 
+    /**
+     * @param Location $location
+     * @param string $coordinatesType
+     * @return Location
+     * @throws CoordinatesTypeConversionException
+     * @throws OutOfBoundsException
+     */
     public function getLocationInScreenshot(Location $location, $coordinatesType)
     {
         $location = $this->convertLocation($location, $coordinatesType, CoordinatesType::SCREENSHOT_AS_IS);
@@ -421,6 +436,7 @@ class EyesWebDriverScreenshot extends EyesScreenshot
      *
      * @param EyesRemoteWebElement $element The element which region we want to intersect.
      * @return Region The intersected region, in {@code SCREENSHOT_AS_IS} coordinates type.
+     * @throws CoordinatesTypeConversionException
      */
     public function getIntersectedRegionElement(EyesRemoteWebElement $element) //FIXME need to change back the title
     {

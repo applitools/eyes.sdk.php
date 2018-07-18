@@ -60,6 +60,7 @@ class ScrollPositionProvider implements PositionProvider
     /**
      *
      * @return RectangleSize The entire size of the container which the position is relative to.
+     * @throws EyesDriverOperationException
      */
     public function getEntireSize()
     {
@@ -68,6 +69,10 @@ class ScrollPositionProvider implements PositionProvider
         return $result;
     }
 
+    /**
+     * @return PositionMemento|ScrollPositionMemento
+     * @throws EyesDriverOperationException
+     */
     public function getState()
     {
         return new ScrollPositionMemento($this->getCurrentPosition());

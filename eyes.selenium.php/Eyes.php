@@ -926,6 +926,8 @@ class Eyes extends EyesBase
      *
      * @param int $matchTimeout The amount of time to retry matching. Milliseconds)
      * @param string $tag An optional tag to be associated with the snapshot.
+     * @throws EyesException
+     * @throws TestFailedException
      */
     protected function checkCurrentFrame($matchTimeout, $tag)
     {
@@ -1343,6 +1345,10 @@ class Eyes extends EyesBase
     }
 
 
+    /**
+     * @return \Applitools\EyesScreenshot|EyesWebDriverScreenshot
+     * @throws EyesException
+     */
     public function getScreenshot()
     {
         $this->logger->log("getScreenshot()");

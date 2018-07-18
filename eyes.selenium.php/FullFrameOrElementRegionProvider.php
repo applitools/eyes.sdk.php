@@ -35,6 +35,10 @@ class FullFrameOrElementRegionProvider extends RegionProvider
         $this->imageProvider = $imageProvider;
     }
 
+    /**
+     * @return Region
+     * @throws \Applitools\Exceptions\EyesException
+     */
     public function getRegion()
     {
         if ($this->eyes->getCheckFrameOrElement()) {

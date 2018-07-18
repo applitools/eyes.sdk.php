@@ -2,6 +2,8 @@
 
 namespace Applitools;
 
+use Applitools\Selenium\Exceptions\EyesDriverOperationException;
+
 /**
  * Encapsulates page/element positioning.
  */
@@ -22,6 +24,7 @@ interface PositionProvider
     /**
      *
      * @return RectangleSize The entire size of the container which the position is relative to.
+     * @throws EyesDriverOperationException
      */
     function getEntireSize();
 
