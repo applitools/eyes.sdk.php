@@ -34,56 +34,7 @@ abstract class GeneralUtils
         die();
     }
 
-    /**
-     * Formats date and time as represented by a calendar instance to an TFC
-     * 1123 string.
-     *
-     * @param calendar The date and time which we would like to format.
-     * @return An RFC 1123 formatted string representing the input date and
-     * time.
-     */
-    public static function toRfc1123(Calendar $calendar)
-    {
-        /*ArgumentGuard.notNull(calendar, "calendar");
-
-        SimpleDateFormat formatter =
-        new SimpleDateFormat(DATE_FORMAT_RFC1123, Locale.US);
-
-        // For the string to be formatted correctly you MUST also set
-        // the time zone in the formatter! See:
-        // http://www.coderanch.com/t/376467/java/java/Display-time-timezones
-        formatter.setTimeZone(calendar.getTimeZone());
-        return formatter.format(calendar.getTime());*/
-        echo "MOCK2_MOCK2";   //FIXME
-        die();
-    }
-
-    /**
-     * Creates {@link java.util.Calendar} instance from an ISO 8601 formatted
-     * string.
-     *
-     * @param dateTime An ISO 8601 formatted string.
-     * @return A {@link java.util.Calendar} instance representing the given
-     *          date and time.
-     * @throws java.text.ParseException If {@code dateTime} is not in the ISO
-     * 8601 format.
-     */
-    public static function fromISO8601DateTime($dateTime)
-    {
-        /* throws ParseException {
-         ArgumentGuard.notNull(dateTime, "dateTime");
-
-         SimpleDateFormat formatter =
-         new SimpleDateFormat(DATE_FORMAT_ISO8601);
-
-         Calendar cal = Calendar.getInstance();
-         cal.setTime(formatter.parse(dateTime));
-         return cal;*/
-        echo "MOCK3_MOCK3";  //FIXME
-        die();
-    }
-
-    /**
+     /**
      * Sleeps the input amount of microseconds.
      *
      * @param int $microseconds The number of microsecondsto sleep.
@@ -95,22 +46,6 @@ abstract class GeneralUtils
         } catch (\Exception $ex) {
             throw new \RuntimeException("sleep interrupted", $ex);
         }
-    }
-
-    /**
-     * @param DateFormat $format The date format parser.
-     * @param string $date The date string in a format matching {@code format}.
-     * @return Date  The {@link java.util.Date} represented by the input string.
-     */
-    public static function getDate(DateFormat $format, $date)
-    {
-        /*  try {
-              return format.parse(date);
-          } catch (ParseException ex) {
-              throw new RuntimeException(ex);
-          }*/
-        echo "MOCK4_MOCK4";  //FIXME
-        die();
     }
 
     /**
@@ -129,8 +64,7 @@ abstract class GeneralUtils
      * Creates a {@link String} from a file specified by {@code resource}.
      *
      * @param resource The resource path.
-     * @return The resource's text.
-     * @throws EyesException If there was a problem reading the resource.
+     * @return string The resource's text.
      */
     public static function readTextFromResource($resource)
     {
