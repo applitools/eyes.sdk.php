@@ -14,7 +14,6 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverBy;
-use Gregwar\Image\Image;
 
 /**
  * An Eyes implementation of the interfaces implemented by

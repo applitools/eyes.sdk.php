@@ -5,8 +5,6 @@
 
 namespace Applitools;
 
-use Gregwar\Image\Image;
-
 /**
  * Provides image compression based on delta between consecutive images.
  */
@@ -100,14 +98,14 @@ use Gregwar\Image\Image;
     /**
      * Compresses a target image based on a difference from a source image.
      *
-     * @param Image $target The image we want to compress.
+     * @param resource $target The image we want to compress.
      * @param string $targetEncoded The image we want to compress in its png bytes representation.
-     * @param Image $source The baseline image by which a compression will be performed.
+     * @param resource $source The baseline image by which a compression will be performed.
      * @param int $blockSize How many pixels per block.
      * @return string The compression result, or the {@code targetEncoded} if the compressed bytes count is greater than the uncompressed bytes count.
      * @throws \Exception If there was a problem reading/writing from/to the streams which are created during the process.
      */
-    public static function compressByRawBlocks(Image $target, $targetEncoded, Image $source = null, $blockSize = 30 ){
+    public static function compressByRawBlocks($target, $targetEncoded, $source = null, $blockSize = 30 ){
 //FIXME need to find suitable solution depends on "BufferedImage"
         // If there's no image to compare to, or the images are in different
         // sizes, we simply return the encoded target.

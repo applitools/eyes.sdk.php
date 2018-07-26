@@ -8,7 +8,6 @@ use Applitools\Location;
 use Applitools\Logger;
 use Applitools\Region;
 use Applitools\RegionProvider;
-use Gregwar\Image\Image;
 
 class FullFrameOrElementRegionProvider extends RegionProvider
 {
@@ -48,12 +47,12 @@ class FullFrameOrElementRegionProvider extends RegionProvider
             // FIXME - Scaling should be handled in a single place instead
             $scaleProviderFactory = $this->eyes->updateScalingParams();
 
-            /** @var Image $screenshotImage */
+            /** @var resource $screenshotImage */
             $screenshotImage = $this->imageProvider->getImage();
 
             $this->eyes->getDebugScreenshotsProvider()->save($screenshotImage, "checkFulFrameOrElement");
 
-            $scaleProviderFactory->getScaleProvider($screenshotImage->width());
+            $scaleProviderFactory->getScaleProvider(imagesx($screenshotImage));
 
             $screenshot = new EyesWebDriverScreenshot($this->logger, $this->eyes->getDriver(), $screenshotImage);
 

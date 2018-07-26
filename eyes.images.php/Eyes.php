@@ -3,8 +3,8 @@
 namespace Applitools\Images;
 
 use Applitools\Exceptions\TestFailedException;
-use Gregwar\Image\Image;
 use Applitools\EyesBase;
+use Applitools\fluent\CheckSettings;
 use Applitools\RectangleSize;
 use Applitools\ArgumentGuard;
 use Applitools\RegionProvider;
@@ -45,6 +45,33 @@ class Eyes extends EyesBase
         return "eyes.images.php/{$this->getVersion()}";
     }
 
+
+    private function guessType($filename)
+    {
+        if (function_exists('exif_imagetype')) {
+            $type = @exif_imagetype($filename);
+            if (false !== $type) {
+                if ($type == IMAGETYPE_JPEG) {
+                    return 'jpeg';
+                }
+                if ($type == IMAGETYPE_GIF) {
+                    return 'gif';
+                }
+                if ($type == IMAGETYPE_PNG) {
+                    return 'png';
+                }
+            }
+        }
+        $parts = explode('.', $filename);
+        $ext = strtolower($parts[count($parts) - 1]);
+        if (strcasecmp($ext, 'png')) {
+            return 'png';
+        } else if (strcasecmp($ext, 'gif')) {
+            return 'gif';
+        }
+        return 'jpeg';
+    }
+
     /**
      * Starts a test.
      *
@@ -53,6 +80,7 @@ class Eyes extends EyesBase
      * @param RectangleSize $dimensions Determines the resolution used for the baseline.
      *                       {@code null} will automatically grab the
      *                       resolution from the image.
+     * @throws \Applitools\Exceptions\EyesException
      */
     public function open($appName, $testName, RectangleSize $dimensions = null)
     {
@@ -60,12 +88,13 @@ class Eyes extends EyesBase
     }
 
     /**
-     * @param Image $image The image to perform visual validation for.
+     * @param resource $image The image to perform visual validation for.
      * @param string $tag An optional tag to be associated with the snapshot.
      * @param bool $ignoreMismatch Whether to ignore this check if a mismatch is found.
-     * @return True
+     * @return bool True if the image matched the expected output, false otherwise.
+     * @throws TestFailedException
      */
-    public function checkWindow(Image $image, $tag = null, $ignoreMismatch = null)
+    public function checkWindow($image, $tag = null, $ignoreMismatch = null)
     {
         return $this->checkImage($image, $tag, $ignoreMismatch);
     }
@@ -73,7 +102,7 @@ class Eyes extends EyesBase
     /**
      * Matches the input image with the next expected image.
      *
-     * @param Image|string $image The image path or the image to perform visual validation for.
+     * @param resource|string $image The image path or the image to perform visual validation for.
      * @param string $tag An optional tag to be associated with the validation checkpoint.
      * @param bool $ignoreMismatch True if the server should ignore a negative result for the visual validation.
      * @return bool True if the image matched the expected output, false otherwise.
@@ -81,8 +110,15 @@ class Eyes extends EyesBase
      */
     public function checkImage($image, $tag = null, $ignoreMismatch = false)
     {
-        if (!$image instanceof Image) {
-            $image = Image::open($image);
+        if (is_string($image)) {
+            $type = $this->guessType($image);
+            if ($type == 'png') {
+                $image = imagecreatefrompng($image);
+            } else if ($type == 'gif') {
+                $image = imagecreatefromgif($image);
+            } else {
+                $image = imagecreatefromjpeg($image);
+            }
         }
         if ($this->getIsDisabled()) {
             $this->logger->verbose("CheckImage(Image, '$tag', $ignoreMismatch): Ignored");
@@ -94,7 +130,7 @@ class Eyes extends EyesBase
 
         if ($this->viewportSize == null) {
             $this->setViewportSize(
-                new RectangleSize($image->width(), $image->height())
+                new RectangleSize(imagesx($image), imagesy($image))
             );
         }
 
@@ -104,14 +140,14 @@ class Eyes extends EyesBase
     /**
      * Perform visual validation for the current image.
      *
-     * @param Image $image The image to perform visual validation for.
+     * @param resource|string $image The image to perform visual validation for.
      * @param Region $region The region to validate within the image.
      * @param string $tag An optional tag to be associated with the validation checkpoint.
      * @param bool $ignoreMismatch True if the server should ignore a negative result for the visual validation.
      * @throws TestFailedException Thrown if a mismatch is detected and immediate failure reports are enabled.
      * @return bool Whether or not the image matched the baseline.
      */
-    public function checkRegion(Image $image, Region $region, $tag = null, $ignoreMismatch = false)
+    public function checkRegion($image, Region $region, $tag = null, $ignoreMismatch = false)
     {
         if ($this->getIsDisabled()) {
             $this->logger->verbose(sprintf(
@@ -122,12 +158,23 @@ class Eyes extends EyesBase
         ArgumentGuard::notNull($image, "image cannot be null!");
         ArgumentGuard::notNull($region, "region cannot be null!");
 
+        if (is_string($image)) {
+            $type = $this->guessType($image);
+            if ($type == 'png') {
+                $image = imagecreatefrompng($image);
+            } else if ($type == 'gif') {
+                $image = imagecreatefromgif($image);
+            } else {
+                $image = imagecreatefromjpeg($image);
+            }
+        }
+
         $this->logger->verbose(sprintf("CheckRegion(Image, [%s], '%s', %b)",
             $region, $tag, $ignoreMismatch));
 
         if ($this->viewportSize == null) {
             $this->setViewportSize(
-                new RectangleSize($image->width(), $image->height())
+                new RectangleSize(imagesx($image), imagesy($image))
             );
         }
 
@@ -143,7 +190,7 @@ class Eyes extends EyesBase
      *
      * @param string $action Mouse action.
      * @param Region $control The control on which the trigger is activated (context relative coordinates).
-     * @param Location $cursor  The cursor's position relative to the control.
+     * @param Location $cursor The cursor's position relative to the control.
      */
     public function addMouseTriggerCursor($action, Region $control, Location $cursor)
     {
@@ -154,7 +201,7 @@ class Eyes extends EyesBase
      * Adds a keyboard trigger.
      *
      * @param Region $control The control's context-relatieve region.
-     * @param $text    The trigger's text.
+     * @param string $text The trigger's text.
      */
     public function addTextTrigger(Region $control, $text)
     {
@@ -189,7 +236,7 @@ class Eyes extends EyesBase
 
     /**
      * Sets the inferred environment for the test.
-     * @param $inferred The inferred environment string.
+     * @param string $inferred The inferred environment string.
      */
     public function setInferredEnvironment($inferred)
     {
@@ -204,7 +251,7 @@ class Eyes extends EyesBase
     /**
      * @return string The current title of of the AUT.
      */
-    protected function getTitle()
+    public function getTitle()
     {
         return $this->title;
     }
@@ -214,12 +261,13 @@ class Eyes extends EyesBase
      *
      * @param RegionProvider $regionProvider The region for which verification will be performed. see
      *                       {@link #checkWindowBase(RegionProvider, String, boolean, int)}.
-     * @param Image $image The image to perform visual validation for.
+     * @param resource $image The image to perform visual validation for.
      * @param string $tag An optional tag to be associated with the validation checkpoint.
      * @param bool $ignoreMismatch True if the server should ignore a negative result for the visual validation.
      * @return bool True if the image matched the expected output, false otherwise.
+     * @throws TestFailedException
      */
-    private function checkImage_(RegionProvider $regionProvider, Image $image, $tag, $ignoreMismatch)
+    private function checkImage_(RegionProvider $regionProvider, $image, $tag, $ignoreMismatch)
     {
         // Set the screenshot to be verified.
         $this->screenshot = new EyesImagesScreenshot($image);
@@ -227,7 +275,7 @@ class Eyes extends EyesBase
         // Set the title to be linked to the screenshot.
         $this->title = ($tag != null) ? $tag : "";
 
-        $mr = $this->checkWindowBase($regionProvider, $tag, $ignoreMismatch);
+        $mr = $this->checkWindowBase($regionProvider, $tag, $ignoreMismatch, null);
 
         return $mr->getAsExpected();
     }

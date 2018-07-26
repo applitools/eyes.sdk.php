@@ -2,8 +2,6 @@
 
 namespace Applitools;
 
-use Gregwar\Image\Image;
-
 /**
  * Encapsulates cutting logic.
  */
@@ -11,12 +9,10 @@ interface CutProvider {
 
     /**
      *
-     * @param Image $image The image to cut.
-     * @return Image A new cut image.
+     * @param resource $image The image to cut.
+     * @return resource A new cut image.
      */
-    function cut(Image $image);
-
-
+    function cut($image);
 
     /**
      * Get a scaled version of the cut provider.
@@ -26,5 +22,3 @@ interface CutProvider {
      */
     function scale($scaleRatio);
 }
-
-?>

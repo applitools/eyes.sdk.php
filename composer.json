@@ -11,8 +11,7 @@
   },
   "require": {
     "php": ">=5.6.0",
-    "facebook/webdriver": "^1.4.1",
-    "gregwar/image": "^2.0"
+    "facebook/webdriver": "^1.4.1"
   },
   "suggest": {
     "phpunit/phpunit": "To run your tests"

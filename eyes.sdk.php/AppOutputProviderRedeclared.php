@@ -25,6 +25,11 @@ class AppOutputProviderRedeclared implements AppOutputProvider
         return $this->getAppOutputWithScreenshot($region, $lastScreenshot);
     }
 
+    /**
+     * @param Region $region
+     * @param EyesScreenshot|null $lastScreenshot
+     * @return AppOutputWithScreenshot
+     */
     private function getAppOutputWithScreenshot(Region $region, EyesScreenshot $lastScreenshot = null) {
         $this->logger->verbose("getting screenshot...");
 

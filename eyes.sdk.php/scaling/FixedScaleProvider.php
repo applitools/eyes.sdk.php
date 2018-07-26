@@ -2,8 +2,6 @@
 
 namespace Applitools;
 
-use Gregwar\Image\Image;
-
 /**
  * Scale provider based on a fixed scale ratio.
  */

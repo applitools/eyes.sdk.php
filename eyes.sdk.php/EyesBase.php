@@ -697,6 +697,7 @@ abstract class EyesBase
 
     /**
      * If a test is running, aborts it. Otherwise, does nothing.
+     * @throws \Exception
      */
     public function abortIfNotClosed()
     {
@@ -721,7 +722,7 @@ abstract class EyesBase
                 // When aborting we do not save the test.
                 $this->serverConnector->stopSession($this->runningSession, true, false);
                 $this->logger->log("--- Test aborted.");
-            } catch (EyesException $ex) {
+            } catch (\Exception $ex) {
                 $this->logger->log("Failed to abort server session: " . $ex->getMessage());
             }
         } finally {
@@ -730,6 +731,14 @@ abstract class EyesBase
         }
     }
 
+    /**
+     * @param $appName
+     * @param $testName
+     * @param RectangleSize|null $viewportSize
+     * @param SessionType|null $sessionType
+     * @throws EyesException
+     * @throws \Exception
+     */
     public function openBase($appName, $testName, RectangleSize $viewportSize = null, SessionType $sessionType = null)
     {
         $this->logger->getLogHandler()->open();
@@ -782,6 +791,9 @@ abstract class EyesBase
         $this->logger->log("FailureReports = '{$this->failureReports}'");
     }
 
+    /**
+     * @throws EyesException
+     */
     private function validateApiKey()
     {
         if ($this->getApiKey() == null) {
@@ -791,6 +803,10 @@ abstract class EyesBase
         }
     }
 
+    /**
+     * @throws EyesException
+     * @throws \Exception
+     */
     private function validateNoSession()
     {
         if ($this->isOpen) {
@@ -959,7 +975,7 @@ abstract class EyesBase
      * @return MatchResult The result of matching the output with the expected output.
      * @throws TestFailedException
      */
-    public function checkWindowBase(RegionProvider $regionProvider, $tag, $ignoreMismatch, ICheckSettings $checkSettings)
+    public function checkWindowBase(RegionProvider $regionProvider, $tag, $ignoreMismatch, ICheckSettings $checkSettings = null)
     {
         if ($this->getIsDisabled()) {
             $this->logger->log("Ignored");
@@ -990,6 +1006,9 @@ abstract class EyesBase
         return $result;
     }
 
+    /**
+     * @throws \Exception
+     */
     private function ensureRunningSession()
     {
         if ($this->runningSession != null) {
@@ -1060,14 +1079,15 @@ abstract class EyesBase
      * @param EyesScreenshot $screenshot The screenshot to compress.
      * @param EyesScreenshot $lastScreenshot The previous screenshot, or null.
      * @return string A base64 encoded compressed screenshot.
-     * @throws EyesException
      */
     public function compressScreenshot64(EyesScreenshot $screenshot, EyesScreenshot $lastScreenshot = null)
     {
         ArgumentGuard::notNull($screenshot, "screenshot");
 
         $screenshotImage = $screenshot->getImage();
-        $uncompressed = $screenshotImage->get('png');
+        ob_start();
+        imagepng($screenshotImage,null);
+        $uncompressed = ob_get_clean();
 
         $source = ($lastScreenshot != null) ? $lastScreenshot->getImage() : null;
 
@@ -1084,6 +1104,7 @@ abstract class EyesBase
 
     /**
      * Start eyes session on the eyes server.
+     * @throws \Exception
      */
     protected function startSession()
     {
@@ -1137,7 +1158,7 @@ abstract class EyesBase
                     $this->setViewportSize($this->viewportSize);
                 }
                 $this->isViewportSizeSet = true;
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->isViewportSizeSet = false;
             }
         }
@@ -1150,6 +1171,7 @@ abstract class EyesBase
      * @return TestResults
      * @throws TestFailedException if a mismatch was found and throwEx is true.
      * @throws NewTestException    if this is a new test was found and throwEx is true.
+     * @throws \Exception
      */
     public function close($throwEx = true)
     {
@@ -1238,6 +1260,7 @@ abstract class EyesBase
      * @param bool $isDeadlineExceeded If {@code true} the test will fail (unless it's a new test).
      * @throws TestFailedException
      * @throws NewTestException
+     * @throws \Exception
      */
     protected function closeResponseTime($isDeadlineExceeded)
     {
@@ -1362,7 +1385,7 @@ abstract class EyesBase
      * @param ICheckSettings $checkSettings
      * @return MatchResult
      */
-    private function matchWindow(RegionProvider $regionProvider, $tag, $ignoreMismatch, ICheckSettings $checkSettings)
+    private function matchWindow(RegionProvider $regionProvider, $tag, $ignoreMismatch, ICheckSettings $checkSettings = null)
     {
         $retryTimeout = -1;
         $imageMatchSettings = null;
@@ -1420,5 +1443,3 @@ abstract class EyesBase
     }
 
 }
-
-?>

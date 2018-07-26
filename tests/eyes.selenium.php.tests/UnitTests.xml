@@ -28,6 +28,7 @@
             <file>TestFluentApi_Firefox.php</file>
             <file>TestFluentApi_Firefox_ForceFPS.php</file>
             <file>SpecialTests.php</file>
+            <file>TestIOSDevices.php</file>
         </testsuite>
     </testsuites>
 

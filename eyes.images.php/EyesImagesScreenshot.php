@@ -4,7 +4,6 @@ namespace Applitools;
 
 use Applitools\Exceptions\CoordinatesTypeConversionException;
 use Applitools\Exceptions\OutOfBoundsException;
-use Gregwar\Image\Image;
 
 /**
  * Encapsulates a screenshot taken by the images SDK.
@@ -17,19 +16,25 @@ class EyesImagesScreenshot extends EyesScreenshot
     protected $bounds; //Region
 
     /**
-     * @param Image $image The screenshot image.
+     * @param resource $image The screenshot image.
      * @param Location $location The top/left coordinates of the screenshot in context relative coordinates type.
      */
-    public function __construct(Image $image = null, Location $location = null)
+    public function __construct($image = null, Location $location = null)
     {
         parent::__construct($image);
         if (!empty($image) && empty($location)) {
             $location = Location::getZero();
-            $rectangleSize = new RectangleSize($image->width(), $image->height());
+            $rectangleSize = new RectangleSize(imagesx($image), imagesy($image));
             $this->bounds = Region::CreateFromLocationAndSize($location, $rectangleSize);
         }
     }
 
+    /**
+     * @param Region $region
+     * @param bool $throwIfClipped
+     * @return EyesImagesScreenshot|EyesScreenshot
+     * @throws OutOfBoundsException
+     */
     public function getSubScreenshot(Region $region, $throwIfClipped)
     {
         ArgumentGuard::notNull($region, "region");
@@ -51,6 +56,13 @@ class EyesImagesScreenshot extends EyesScreenshot
             $relativeSubScreenshotRegion->getLocation());
     }
 
+    /**
+     * @param Location $location
+     * @param string $from
+     * @param string $to
+     * @return Location
+     * @throws CoordinatesTypeConversionException
+     */
     protected function convertLocation(Location $location, $from, $to)
     {
         ArgumentGuard::notNull($location, "location");
@@ -86,6 +98,13 @@ class EyesImagesScreenshot extends EyesScreenshot
         return $result;
     }
 
+    /**
+     * @param Location $location
+     * @param string $coordinatesType
+     * @return Location
+     * @throws CoordinatesTypeConversionException
+     * @throws OutOfBoundsException
+     */
     public function getLocationInScreenshot(Location $location, $coordinatesType)
     {
         ArgumentGuard::notNull($location, "location");
