@@ -4,7 +4,7 @@ namespace Applitools\Selenium\fluent;
 
 use Applitools\Exceptions\EyesException;
 use Applitools\fluent\CheckSettings;
-use Applitools\fluent\IgnoreRegionByRectangle;
+use Applitools\fluent\RegionsByRectangle;
 use Applitools\Region;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverElement;
@@ -45,7 +45,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
      */
     public function addFloatingRegionBySelector(WebDriverBy $region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
     {
-        $this->floatingRegions[] = new FloatingRegionBySelector($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset);
+        $this->floatingRegions[] = new FloatingRegionsBySelector($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset);
 
         return $this;
     }
@@ -141,7 +141,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     public function ignoreBySelector(...$regionSelectors)
     {
         foreach ($regionSelectors as $selector) {
-            parent::ignore(new IgnoreRegionBySelector($selector));
+            parent::ignore(new RegionsBySelector($selector));
         }
 
         return $this;
@@ -155,9 +155,9 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     {
         foreach ($regions as $region) {
             if ($region instanceof Region) {
-                $this->ignoreRegions[] = new IgnoreRegionByRectangle($region);
+                $this->ignoreRegions[] = new RegionsByRectangle($region);
             } else if ($region instanceof WebDriverBy) {
-                $this->ignoreRegions[] = new IgnoreRegionBySelector($region);
+                $this->ignoreRegions[] = new RegionsBySelector($region);
             }
         }
 

@@ -9,7 +9,6 @@ use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
 use Applitools\fluent\ICheckSettings;
 use Applitools\fluent\ICheckSettingsInternal;
-use PHPUnit\Runner\Exception;
 
 abstract class EyesBase
 {
@@ -84,9 +83,14 @@ abstract class EyesBase
     /** @var string */
     private $agentId;
 
-    /** @var  boolean */
+    /** @var boolean */
     private $isViewportSizeSet;
 
+    /** @var ScaleMethod */
+    private $scaleMethod;
+
+    /** @var int */
+    private $matchTimeout;
 
     public function __construct($serverUrl)
     {
@@ -499,7 +503,8 @@ abstract class EyesBase
     /**
      * @return string The SDK version.
      */
-    protected function getVersion() {
+    protected function getVersion()
+    {
         return "1.2.7";
     }
 
@@ -1086,7 +1091,7 @@ abstract class EyesBase
 
         $screenshotImage = $screenshot->getImage();
         ob_start();
-        imagepng($screenshotImage,null);
+        imagepng($screenshotImage, null);
         $uncompressed = ob_get_clean();
 
         $source = ($lastScreenshot != null) ? $lastScreenshot->getImage() : null;
@@ -1389,16 +1394,15 @@ abstract class EyesBase
     {
         $retryTimeout = -1;
         $imageMatchSettings = null;
+        $checkSettingsInternal = null;
         if ($checkSettings instanceof ICheckSettingsInternal) {
+            $checkSettingsInternal = $checkSettings;
             $retryTimeout = $checkSettings->getTimeout();
 
             $matchLevel = $checkSettings->getMatchLevel();
             $matchLevel = ($matchLevel == null) ? $this->getDefaultMatchSettings()->getMatchLevel() : $matchLevel;
 
             $imageMatchSettings = new ImageMatchSettings($matchLevel, null);
-
-            $this->collectIgnoreRegions($checkSettings, $imageMatchSettings);
-            $this->collectFloatingRegions($checkSettings, $imageMatchSettings);
 
             $ignoreCaret = $checkSettings->getIgnoreCaret();
             $imageMatchSettings->setIgnoreCaret(($ignoreCaret == null) ? $this->getDefaultMatchSettings()->isIgnoreCaret() : $ignoreCaret);
@@ -1407,39 +1411,9 @@ abstract class EyesBase
         $this->logger->verbose("Calling match window...");
 
         $result = $this->matchWindowTask->matchWindow($this->getUserInputs(), $regionProvider->getRegion(), $tag,
-            $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $imageMatchSettings, $retryTimeout);
+            $this->shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch, $checkSettingsInternal, $this, $retryTimeout);
 
         return $result;
-    }
-
-    /**
-     * @param ICheckSettingsInternal $checkSettings
-     * @param ImageMatchSettings $imageMatchSettings
-     */
-    private function collectIgnoreRegions(ICheckSettingsInternal $checkSettings, ImageMatchSettings $imageMatchSettings)
-    {
-        /** @var Region[] $ignoreRegions */
-        $ignoreRegions = [];
-
-        foreach ($checkSettings->getIgnoreRegions() as $ignoreRegionProvider) {
-            $ignoreRegions[] = $ignoreRegionProvider->getRegion($this);
-        }
-        $imageMatchSettings->setIgnoreRegions($ignoreRegions);
-    }
-
-    /**
-     * @param ICheckSettingsInternal $checkSettings
-     * @param ImageMatchSettings $imageMatchSettings
-     */
-    private function collectFloatingRegions(ICheckSettingsInternal $checkSettings, ImageMatchSettings $imageMatchSettings)
-    {
-        /** @var FloatingMatchSettings[] $floatingRegions */
-        $floatingRegions = [];
-
-        foreach ($checkSettings->getFloatingRegions() as $floatingRegionProvider) {
-            $floatingRegions[] = $floatingRegionProvider->getRegion($this);
-        }
-        $imageMatchSettings->setFloatingMatchSettings($floatingRegions);
     }
 
 }

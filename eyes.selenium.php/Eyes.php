@@ -1380,7 +1380,7 @@ class Eyes extends EyesBase
                 $this->logger->log("Building screenshot object...");
 
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $entireFrameOrElement,
-                    null, null, new RectangleSize($entireFrameOrElement->width(), $entireFrameOrElement->height()));
+                    null, null, new RectangleSize(imagesx($entireFrameOrElement), imagesy($entireFrameOrElement)));
             } else if ($this->forceFullPageScreenshot || $this->stitchContent) {
                 $this->logger->log("Full page screenshot requested.");
                 // Save the current frame path.

@@ -22,6 +22,18 @@ class ImageMatchSettings
     /** @var FloatingMatchSettings[] */
     private $floatingMatchSettings = [];
 
+    /** @var Region[] */
+    private $layoutRegions = [];
+
+    /** @var Region[] */
+    private $strictRegions = [];
+
+    /** @var Region[] */
+    private $contentRegions = [];
+
+    /** @var Region[] */
+    private $exactRegions = [];
+
 
     public function __construct($matchLevel = null, ExactMatchSettings $exact = null)
     {
@@ -120,6 +132,70 @@ class ImageMatchSettings
     public function setFloatingMatchSettings($floatingMatchSettings)
     {
         $this->floatingMatchSettings = $floatingMatchSettings;
+    }
+
+    /**
+     * @return Region[]
+     */
+    public function getLayoutRegions()
+    {
+        return $this->layoutRegions;
+    }
+
+    /**
+     * @param Region[] $layoutRegions
+     */
+    public function setLayoutRegions($layoutRegions)
+    {
+        $this->layoutRegions = $layoutRegions;
+    }
+
+    /**
+     * @return Region[]
+     */
+    public function getStrictRegions()
+    {
+        return $this->strictRegions;
+    }
+
+    /**
+     * @param Region[] $strictRegions
+     */
+    public function setStrictRegions($strictRegions)
+    {
+        $this->strictRegions = $strictRegions;
+    }
+
+    /**
+     * @return Region[]
+     */
+    public function getContentRegions()
+    {
+        return $this->contentRegions;
+    }
+
+    /**
+     * @param Region[] $contentRegions
+     */
+    public function setContentRegions($contentRegions)
+    {
+        $this->contentRegions = $contentRegions;
+    }
+
+    /**
+     * @return Region[]
+     */
+    public function getExactRegions()
+    {
+        return $this->exactRegions;
+    }
+
+    /**
+     * @param Region[] $exactRegions
+     */
+    public function setExactRegions($exactRegions)
+    {
+        $this->exactRegions = $exactRegions;
     }
 
     public function getIgnoreRegionsAsFormattedArray()

@@ -1,7 +1,4 @@
 <?php
-/**
- * Applitools software
- */
 
 namespace Tests\Applitools\Selenium;
 

@@ -6,7 +6,6 @@
 namespace Applitools;
 
 use Applitools\Exceptions\EyesException;
-use SplFixedArray;
 
 class ImageUtils
 {

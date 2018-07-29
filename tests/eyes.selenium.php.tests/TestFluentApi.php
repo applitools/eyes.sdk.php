@@ -101,6 +101,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Applitools\Exceptions\EyesException
      */
     public function TestCheckRegionInFrame2_Fluent()
     {
@@ -136,6 +137,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Applitools\Exceptions\EyesException
      */
     public function TestCheckFrameInFrame_Fully_Fluent2()
     {

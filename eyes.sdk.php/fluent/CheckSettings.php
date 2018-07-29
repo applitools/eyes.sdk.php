@@ -4,8 +4,6 @@ namespace Applitools\fluent {
 
     use Applitools\MatchLevel;
     use Applitools\Region;
-    use Applitools\Selenium\fluent\IgnoreRegionBySelector;
-    use Facebook\WebDriver\WebDriverBy;
 
     class CheckSettings implements ICheckSettings, ICheckSettingsInternal
     {
@@ -25,15 +23,23 @@ namespace Applitools\fluent {
         /** @var int */
         private $timeout = -1;
 
-        /**
-         * @var IGetRegion[]
-         */
+        /** @var IGetRegions[] */
         protected $ignoreRegions = [];
 
-        /**
-         * @var IGetFloatingRegion[]
-         */
+        /** @var IGetFloatingRegions[] */
         protected $floatingRegions = [];
+
+        /** @var IGetRegions[] */
+        protected $layoutRegions = [];
+
+        /** @var IGetRegions[] */
+        protected $contentRegions = [];
+
+        /** @var IGetRegions[] */
+        protected $exactRegions = [];
+
+        /** @var IGetRegions[] */
+        protected $strictRegions = [];
 
         /**
          * CheckSettings constructor.
@@ -53,7 +59,7 @@ namespace Applitools\fluent {
         {
             foreach ($regions as $region) {
                 if ($region instanceof Region) {
-                    $this->ignoreRegions[] = new IgnoreRegionByRectangle($region);
+                    $this->ignoreRegions[] = new RegionsByRectangle($region);
                 }
             }
             return $this;
@@ -96,7 +102,7 @@ namespace Applitools\fluent {
         public function addFloatingRegion(Region $region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
         {
             $this->floatingRegions[] =
-                new FloatingRegionByRectangle(
+                new FloatingRegionsByRectangle(
                     Region::CreateFromLTWH(
                         $region->getLeft(),
                         $region->getTop(),
@@ -170,6 +176,66 @@ namespace Applitools\fluent {
         }
 
         /**
+         * Adds one or more layout regions.
+         * @param Region[] $regions One or more regions to match using the Layout method.
+         * @return ICheckSettings This instance of the settings object.
+         */
+        public function addLayoutRegion(...$regions)
+        {
+            foreach ($regions as $region) {
+                if ($region instanceof Region) {
+                    $this->layoutRegions[] = new RegionsByRectangle($region);
+                }
+            }
+            return $this;
+        }
+
+        /**
+         * Adds one or more exact regions.
+         * @param Region[] $regions One or more regions to match using the Exact method.
+         * @return ICheckSettings This instance of the settings object.
+         */
+        public function addExactRegion(...$regions)
+        {
+            foreach ($regions as $region) {
+                if ($region instanceof Region) {
+                    $this->layoutRegions[] = new RegionsByRectangle($region);
+                }
+            }
+            return $this;
+        }
+
+        /**
+         * Adds one or more content regions.
+         * @param Region[] $regions One or more regions to match using the Content method.
+         * @return ICheckSettings This instance of the settings object.
+         */
+        public function addContentRegion(...$regions)
+        {
+            foreach ($regions as $region) {
+                if ($region instanceof Region) {
+                    $this->layoutRegions[] = new RegionsByRectangle($region);
+                }
+            }
+            return $this;
+        }
+
+        /**
+         * Adds one or more strict regions.
+         * @param Region[] $regions One or more regions to match using the Strict method.
+         * @return ICheckSettings This instance of the settings object.
+         */
+        public function addStrictRegion(...$regions)
+        {
+            foreach ($regions as $region) {
+                if ($region instanceof Region) {
+                    $this->layoutRegions[] = new RegionsByRectangle($region);
+                }
+            }
+            return $this;
+        }
+
+        /**
          * Defines if to detect and ignore a blinking caret in the screenshot.
          * @param boolean $ignoreCaret Whether or not to detect and ignore a blinking caret in the screenshot.
          * @return ICheckSettings This instance of the settings object.
@@ -213,7 +279,7 @@ namespace Applitools\fluent {
         }
 
         /**
-         * @return IGetRegion[]
+         * @return IGetRegions[]
          */
         public function getIgnoreRegions()
         {
@@ -221,7 +287,7 @@ namespace Applitools\fluent {
         }
 
         /**
-         * @return IGetFloatingRegion[]
+         * @return IGetFloatingRegions[]
          */
         public function getFloatingRegions()
         {
@@ -247,6 +313,38 @@ namespace Applitools\fluent {
         public function __toString()
         {
             return __CLASS__ . " - timeout: " . $this->getTimeout();
+        }
+
+        /**
+         * @return IGetRegions[]
+         */
+        function getLayoutRegions()
+        {
+            return $this->layoutRegions;
+        }
+
+        /**
+         * @return IGetRegions[]
+         */
+        function getStrictRegions()
+        {
+            return $this->strictRegions;
+        }
+
+        /**
+         * @return IGetRegions[]
+         */
+        function getExactRegions()
+        {
+            return $this->exactRegions;
+        }
+
+        /**
+         * @return IGetRegions[]
+         */
+        function getContentRegions()
+        {
+            return $this->contentRegions;
         }
     }
 }
