@@ -24,7 +24,6 @@
     <testsuites>
         <testsuite name="Test Fluent API">
             <file>tests/eyes.selenium.php.tests/TestFluentApi_Chrome.php</file>
-            <file>tests/eyes.selenium.php.tests/TestFluentApi_Chrome_ForceFPS.php</file>
         </testsuite>
         <!-- <testsuite name="Images Tests">
             <file>tests/eyes.images.php.tests/TestImages.php</file>
