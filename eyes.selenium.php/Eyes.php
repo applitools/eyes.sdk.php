@@ -85,6 +85,9 @@ class Eyes extends EyesBase
     /** @var IRegionPositionCompensation */
     private $regionPositionCompensation;
 
+    /** @var bool */
+    private $hideCaret = true;
+
     /**
      * @return bool
      */
@@ -1311,6 +1314,19 @@ class Eyes extends EyesBase
     }
 
     /**
+     * @param bool $hideCaret
+     */
+    public function setHideCaret($hideCaret)
+    {
+        $this->hideCaret = $hideCaret;
+    }
+
+    private function getHideCaret()
+    {
+        return $this->hideCaret;
+    }
+
+    /**
      * Use this method only if you made a previous call to {@link #open
      * (WebDriver, String, String)} or one of its variants.
      *
@@ -1359,6 +1375,16 @@ class Eyes extends EyesBase
         if ($this->hideScrollbars) {
             $originalOverflow = EyesSeleniumUtils::hideScrollbars($this->driver, 200);
         }
+
+        $activeElement = null;
+        if ($this->getHideCaret()) {
+            try {
+                $activeElement = $this->driver->executeScript("var activeElement = document.activeElement; activeElement && activeElement.blur(); return activeElement;");
+            } catch (WebDriverException $ex) {
+                $this->logger->verbose("WARNING: Cannot hide caret! " . $ex->getMessage());
+            }
+        }
+
         try {
             $screenshotFactory = new EyesWebDriverScreenshotFactory($this->logger, $this->driver);
 
@@ -1416,6 +1442,15 @@ class Eyes extends EyesBase
                 $this->logger->verbose("Creating screenshot object...");
                 $result = new EyesWebDriverScreenshot($this->logger, $this->driver, $screenshotImage);
             }
+
+            if ($this->getHideCaret() && $activeElement != null) {
+                try {
+                    $this->driver->executeScript("arguments[0].focus();", $activeElement);
+                } catch (WebDriverException $ex) {
+                    $this->logger->verbose("WARNING: Could not return focus to active element! " . $ex->getMessage());
+                }
+            }
+
             $this->logger->verbose("Done!");
             return $result;
         } finally {
@@ -1502,5 +1537,3 @@ class Eyes extends EyesBase
         return $this->elementPositionProvider == null ? $this->positionProvider : $this->elementPositionProvider;
     }
 }
-
-?>
