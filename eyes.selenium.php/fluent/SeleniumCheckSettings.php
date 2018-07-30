@@ -4,7 +4,9 @@ namespace Applitools\Selenium\fluent;
 
 use Applitools\Exceptions\EyesException;
 use Applitools\fluent\CheckSettings;
-use Applitools\fluent\IgnoreRegionByRectangle;
+use Applitools\fluent\ICheckSettings;
+use Applitools\fluent\IGetRegions;
+use Applitools\fluent\RegionByRectangle;
 use Applitools\Region;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverElement;
@@ -18,7 +20,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     /** @var WebDriverElement */
     private $targetElement;
 
-    /** @var FrameLocator */
+    /** @var FrameLocator[] */
     private $frameChain = [];
 
 
@@ -41,54 +43,54 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
      * @param $maxDownOffset
      * @param $maxLeftOffset
      * @param $maxRightOffset
-     * @return $this
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function addFloatingRegionBySelector(WebDriverBy $region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
     {
-        $this->floatingRegions[] = new FloatingRegionBySelector($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset);
+        $this->floatingRegions[] = new FloatingRegionsBySelector($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset);
 
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param WebDriverBy $by
-     * @return $this
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function frameBySelector(WebDriverBy $by)
     {
         $fl = new FrameLocator();
         $fl->setFrameSelector($by);
         $this->frameChain[] = $fl;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param string $nameOrId
-     * @return $this
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function frameByNameOrId($nameOrId)
     {
         $fl = new FrameLocator();
         $fl->setFrameNameOrId($nameOrId);
         $this->frameChain[] = $fl;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param int $index
-     * @return $this
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function frameByIndex($index)
     {
         $fl = new FrameLocator();
         $fl->setFrameIndex($index);
         $this->frameChain[] = $fl;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param WebDriverBy|string|int $frame
-     * @return SeleniumCheckSettings
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      * @throws EyesException
      */
     public function frame($frame)
@@ -107,12 +109,12 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
         }
 
         $this->frameChain[] = $fl;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param Region|WebDriverBy $region
-     * @return $this
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function region($region)
     {
@@ -121,47 +123,128 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
         } else {
             $this->targetSelector = $region;
         }
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param WebDriverBy $by
-     * @return $this
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function regionBySelector(WebDriverBy $by)
     {
         $this->targetSelector = $by;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param WebDriverBy[] $regionSelectors
-     * @return $this;
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function ignoreBySelector(...$regionSelectors)
     {
         foreach ($regionSelectors as $selector) {
-            parent::ignore(new IgnoreRegionBySelector($selector));
+            parent::ignore(new RegionsBySelector($selector));
         }
 
-        return $this;
+        return clone $this;
+    }
+
+    /**
+     * @param $region
+     * @return IGetRegions|RegionByRectangle|RegionByElement|RegionsBySelector
+     */
+    private function getRegionsProvider($region)
+    {
+        /** @var IGetRegions $regionProvider */
+        $regionProvider = null;
+        if ($region instanceof Region) {
+            $regionProvider = new RegionByRectangle($region);
+        } else if ($region instanceof WebDriverBy) {
+            $regionProvider = new RegionsBySelector($region);
+        } else if ($region instanceof WebDriverElement) {
+            $regionProvider = new RegionByElement($region);
+        }
+        return $regionProvider;
     }
 
     /**
      * @param array $regions
-     * @return $this;
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function ignore(...$regions)
     {
         foreach ($regions as $region) {
-            if ($region instanceof Region) {
-                $this->ignoreRegions[] = new IgnoreRegionByRectangle($region);
-            } else if ($region instanceof WebDriverBy) {
-                $this->ignoreRegions[] = new IgnoreRegionBySelector($region);
+            $regionsProvider = $this->getRegionsProvider($region);
+            if ($regionsProvider != null) {
+                $this->ignoreRegions[] = $regionsProvider;
             }
         }
 
-        return $this;
+        return clone $this;
+    }
+
+    /**
+     * @param array $regions
+     * @return SeleniumCheckSettings An updated copy of the settings object.
+     */
+    public function layoutRegions(...$regions)
+    {
+        foreach ($regions as $region) {
+            $regionsProvider = $this->getRegionsProvider($region);
+            if ($regionsProvider != null) {
+                $this->layoutRegions[] = $regionsProvider;
+            }
+        }
+
+        return clone $this;
+    }
+
+//    /**
+//     * @param array $regions
+//     * @return SeleniumCheckSettings An updated copy of the settings object.
+//     */
+//    public function exactRegions(...$regions)
+//    {
+//        foreach ($regions as $region) {
+//            $regionsProvider = $this->getRegionsProvider($region);
+//            if ($regionsProvider != null) {
+//                $this->exactRegions[] = $regionsProvider;
+//            }
+//        }
+//
+//        return clone $this;
+//    }
+
+    /**
+     * @param array $regions
+     * @return SeleniumCheckSettings An updated copy of the settings object.
+     */
+    public function strictRegions(...$regions)
+    {
+        foreach ($regions as $region) {
+            $regionsProvider = $this->getRegionsProvider($region);
+            if ($regionsProvider != null) {
+                $this->strictRegions[] = $regionsProvider;
+            }
+        }
+
+        return clone $this;
+    }
+
+    /**
+     * @param array $regions
+     * @return SeleniumCheckSettings An updated copy of the settings object.
+     */
+    public function contentRegions(...$regions)
+    {
+        foreach ($regions as $region) {
+            $regionsProvider = $this->getRegionsProvider($region);
+            if ($regionsProvider != null) {
+                $this->contentRegions[] = $regionsProvider;
+            }
+        }
+
+        return clone $this;
     }
 
     /**
@@ -181,7 +264,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     }
 
     /**
-     * @return FrameLocator
+     * @return FrameLocator[]
      */
     function getFrameChain()
     {
@@ -192,4 +275,5 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     {
         return __CLASS__ . " - timeout: " . $this->getTimeout();
     }
+
 }

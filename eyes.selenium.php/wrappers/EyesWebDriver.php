@@ -7,6 +7,7 @@ use Applitools\Exceptions\EyesException;
 use Applitools\ImageUtils;
 use Applitools\Logger;
 use Applitools\RectangleSize;
+use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\JavaScriptExecutor;
 use Facebook\WebDriver\Remote\RemoteExecuteMethod;
 use Facebook\WebDriver\Remote\RemoteTouchScreen;
@@ -14,7 +15,6 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverBy;
-use Gregwar\Image\Image;
 
 /**
  * An Eyes implementation of the interfaces implemented by
@@ -373,6 +373,11 @@ class EyesWebDriver implements WebDriver, JavaScriptExecutor /*HasCapabilities, 
         return $this->driver->getCapabilities();
     }
 
+    /**
+     * @param $script
+     * @param array $args
+     * @return mixed
+     */
     public function executeScript($script, array $args = array())
     {
         // Appium commands are sometimes sent as Javascript

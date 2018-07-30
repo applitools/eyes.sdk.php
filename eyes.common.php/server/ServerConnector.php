@@ -280,6 +280,13 @@ class ServerConnector implements ServerConnectorInterface
         return $result;
     }
 
+    /**
+     * @param RunningSession $runningSession
+     * @param bool $isAborted
+     * @param bool $save
+     * @return TestResults
+     * @throws Exception
+     */
     public function stopSession(RunningSession $runningSession, $isAborted, $save)
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
@@ -321,7 +328,11 @@ class ServerConnector implements ServerConnectorInterface
         $retVal = [
             "matchLevel" => $matchSettings->getMatchLevel(),
             "ignoreCaret" => $matchSettings->isIgnoreCaret(),
-            "ignore" => $matchSettings->getIgnoreRegionsAsFormattedArray(),
+            "ignore" => $matchSettings->getRegionsAsFormattedArray($matchSettings->getIgnoreRegions()),
+            "layout" => $matchSettings->getRegionsAsFormattedArray($matchSettings->getLayoutRegions()),
+            "strict" => $matchSettings->getRegionsAsFormattedArray($matchSettings->getStrictRegions()),
+            //"exact" => $matchSettings->getRegionsAsFormattedArray($matchSettings->getExactRegions()),
+            "content" => $matchSettings->getRegionsAsFormattedArray($matchSettings->getContentRegions()),
             "floating" => $matchSettings->getFloatingMatchSettingsAsFormattedArray()
         ];
 
@@ -338,5 +349,3 @@ class ServerConnector implements ServerConnectorInterface
         return $retVal;
     }
 }
-
-?>

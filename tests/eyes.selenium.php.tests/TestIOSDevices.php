@@ -26,62 +26,63 @@ class TestIOSDevices extends TestCase
     public function data()
     {
         return [
-                ["iPhone X Simulator", "11.2", "portrait", false],
-                ["iPhone X Simulator", "11.2", "landscape", false],
-                ["iPhone 7 Simulator", "11.0", "portrait", false],
-                ["iPhone 7 Simulator", "11.0", "landscape", false],
-                ["iPhone 7 Simulator", "10.0", "portrait", false],
-                ["iPhone 7 Simulator", "10.0", "landscape", false],
-                ["iPhone 6 Plus Simulator", "11.0", "portrait", false],
-                ["iPhone 6 Plus Simulator", "11.0", "landscape", false],
-                ["iPhone 6 Plus Simulator", "10.0", "portrait", false],
-                ["iPhone 6 Plus Simulator", "10.0", "landscape", false],
-                ["iPhone 5s Simulator", "10.0", "portrait", false],
-                ["iPhone 5s Simulator", "10.0", "landscape", false],
-                ["iPad Simulator", "11.0", "portrait", false],
-                ["iPad Simulator", "11.0", "landscape", false],
-                ["iPad Pro (9.7 inch) Simulator", "11.0", "portrait", false],
-                ["iPad Pro (9.7 inch) Simulator", "11.0", "landscape", false],
-                ["iPad Pro (12.9 inch) Simulator", "11.0", "portrait", false],
-                ["iPad Pro (12.9 inch) Simulator", "11.0", "landscape", false],
-                ["iPad Pro (12.9 inch) (2nd generation) Simulator", "11.0", "portrait", false],
-                ["iPad Pro (12.9 inch) (2nd generation) Simulator", "11.0", "landscape", false],
-                ["iPad Pro (10.5 inch) Simulator", "11.0", "portrait", false],
-                ["iPad Pro (10.5 inch) Simulator", "11.0", "landscape", false],
-                ["iPad (5th generation) Simulator", "11.0", "portrait", false],
-                ["iPad (5th generation) Simulator", "11.0", "landscape", false],
-                ["iPad Air Simulator", "11.0", "portrait", false],
-                ["iPad Air Simulator", "11.0", "landscape", false],
-                ["iPad Air 2 Simulator", "11.0", "portrait", false],
-                ["iPad Air 2 Simulator", "11.0", "landscape", false],
-                ["iPhone X Simulator", "11.2", "portrait", true],
-                ["iPhone X Simulator", "11.2", "landscape", true],
-                ["iPhone 7 Simulator", "11.0", "portrait", true],
-                ["iPhone 7 Simulator", "11.0", "landscape", true],
-                ["iPhone 7 Simulator", "10.0", "portrait", true],
-                ["iPhone 7 Simulator", "10.0", "landscape", true],
-                ["iPhone 6 Plus Simulator", "11.0", "portrait", true],
-                ["iPhone 6 Plus Simulator", "11.0", "landscape", true],
-                ["iPhone 6 Plus Simulator", "10.0", "portrait", true],
-                ["iPhone 6 Plus Simulator", "10.0", "landscape", true],
-                ["iPhone 5s Simulator", "10.0", "portrait", true],
-                ["iPhone 5s Simulator", "10.0", "landscape", true],
-                ["iPad Simulator", "11.0", "portrait", true],
-                ["iPad Simulator", "11.0", "landscape", true],
-                ["iPad Pro (9.7 inch) Simulator", "11.0", "portrait", true],
-                ["iPad Pro (9.7 inch) Simulator", "11.0", "landscape", true],
-                ["iPad Pro (12.9 inch) Simulator", "11.0", "portrait", true],
-                ["iPad Pro (12.9 inch) Simulator", "11.0", "landscape", true],
-                ["iPad Pro (12.9 inch) (2nd generation) Simulator", "11.0", "portrait", true],
-                ["iPad Pro (12.9 inch) (2nd generation) Simulator", "11.0", "landscape", true],
-                ["iPad Pro (10.5 inch) Simulator", "11.0", "portrait", true],
-                ["iPad Pro (10.5 inch) Simulator", "11.0", "landscape", true],
-                ["iPad (5th generation) Simulator", "11.0", "portrait", true],
-                ["iPad (5th generation) Simulator", "11.0", "landscape", true],
-                ["iPad Air Simulator", "11.0", "portrait", true],
-                ["iPad Air Simulator", "11.0", "landscape", true],
-                ["iPad Air 2 Simulator", "11.0", "portrait", true],
-                ["iPad Air 2 Simulator", "11.0", "landscape", true]
+//                ["iPhone X Simulator", "11.2", "portrait", false],
+//                ["iPhone X Simulator", "11.2", "landscape", false],
+//                ["iPhone 7 Simulator", "11.0", "portrait", false],
+//                ["iPhone 7 Simulator", "11.0", "landscape", false],
+//                ["iPhone 7 Simulator", "10.0", "portrait", false],
+//                ["iPhone 7 Simulator", "10.0", "landscape", false],
+//                ["iPhone 6 Plus Simulator", "11.0", "portrait", false],
+//                ["iPhone 6 Plus Simulator", "11.0", "landscape", false],
+//                ["iPhone 6 Plus Simulator", "10.0", "portrait", false],
+//                ["iPhone 6 Plus Simulator", "10.0", "landscape", false],
+//                ["iPhone 5s Simulator", "10.0", "portrait", false],
+//                ["iPhone 5s Simulator", "10.0", "landscape", false],
+//                ["iPad Simulator", "11.0", "portrait", false],
+//                ["iPad Simulator", "11.0", "landscape", false],
+//                ["iPad Pro (9.7 inch) Simulator", "11.0", "portrait", false],
+//                ["iPad Pro (9.7 inch) Simulator", "11.0", "landscape", false],
+//                ["iPad Pro (12.9 inch) Simulator", "11.0", "portrait", false],
+//                ["iPad Pro (12.9 inch) Simulator", "11.0", "landscape", false],
+//                ["iPad Pro (12.9 inch) (2nd generation) Simulator", "11.0", "portrait", false],
+//                ["iPad Pro (12.9 inch) (2nd generation) Simulator", "11.0", "landscape", false],
+//                ["iPad Pro (10.5 inch) Simulator", "11.0", "portrait", false],
+//                ["iPad Pro (10.5 inch) Simulator", "11.0", "landscape", false],
+//                ["iPad (5th generation) Simulator", "11.0", "portrait", false],
+//                ["iPad (5th generation) Simulator", "11.0", "landscape", false],
+//                ["iPad Air Simulator", "11.0", "portrait", false],
+//                ["iPad Air Simulator", "11.0", "landscape", false],
+//                ["iPad Air 2 Simulator", "11.0", "portrait", false],
+//                ["iPad Air 2 Simulator", "11.0", "landscape", false],
+//                ["iPhone X Simulator", "11.2", "portrait", true],
+//                ["iPhone X Simulator", "11.2", "landscape", true],
+//                ["iPhone 7 Simulator", "11.0", "portrait", true],
+//                ["iPhone 7 Simulator", "11.0", "landscape", true],
+//                ["iPhone 7 Simulator", "10.0", "portrait", true],
+//                ["iPhone 7 Simulator", "10.0", "landscape", true],
+//                ["iPhone 6 Plus Simulator", "11.0", "portrait", true],
+//                ["iPhone 6 Plus Simulator", "11.0", "landscape", true],
+//                ["iPhone 6 Plus Simulator", "10.0", "portrait", true],
+//                ["iPhone 6 Plus Simulator", "10.0", "landscape", true],
+//                ["iPhone 5s Simulator", "10.0", "portrait", true],
+//                ["iPhone 5s Simulator", "10.0", "landscape", true],
+//                ["iPad Simulator", "11.0", "portrait", true],
+//                ["iPad Simulator", "11.0", "landscape", true],
+//                ["iPad Pro (9.7 inch) Simulator", "11.0", "portrait", true],
+//                ["iPad Pro (9.7 inch) Simulator", "11.0", "landscape", true],
+//                ["iPad Pro (12.9 inch) Simulator", "11.0", "portrait", true],
+//                ["iPad Pro (12.9 inch) Simulator", "11.0", "landscape", true],
+//                ["iPad Pro (12.9 inch) (2nd generation) Simulator", "11.0", "portrait", true],
+//                ["iPad Pro (12.9 inch) (2nd generation) Simulator", "11.0", "landscape", true],
+//                ["iPad Pro (10.5 inch) Simulator", "11.0", "portrait", true],
+//                ["iPad Pro (10.5 inch) Simulator", "11.0", "landscape", true],
+//                ["iPad (5th generation) Simulator", "11.0", "portrait", true],
+//                ["iPad (5th generation) Simulator", "11.0", "landscape", true],
+//                ["iPad Air Simulator", "11.0", "portrait", true],
+//                ["iPad Air Simulator", "11.0", "landscape", true],
+//                ["iPad Air 2 Simulator", "11.0", "portrait", true],
+//                ["iPad Air 2 Simulator", "11.0", "landscape", true]
+            ["iPhone 5s", "10.3", "portrait", true],
         ];
     }
 
@@ -90,9 +91,13 @@ class TestIOSDevices extends TestCase
      * @dataProvider data
      * @doesNotPerformAssertions
      * @param string $deviceName
-     * @param string $deviceOrientation
      * @param string $platformVersion
+     * @param string $deviceOrientation
      * @param boolean $fully
+     * @throws \Applitools\Exceptions\EyesException
+     * @throws \Applitools\Exceptions\NewTestException
+     * @throws \Applitools\Exceptions\TestFailedException
+     * @throws \Exception
      */
     public function TestIOSSafariCrop($deviceName, $platformVersion, $deviceOrientation, $fully)
     {
@@ -107,15 +112,17 @@ class TestIOSDevices extends TestCase
 
         $caps->setCapability("name", "$testName ({$eyes->getFullAgentId()})");
         $caps->setCapability("browserName", "Safari");
+        $caps->setCapability("newCommandTimeout", 600);
 
-        $sauceUrl = "http://ondemand.saucelabs.com/wd/hub";
-        $driver = RemoteWebDriver::create($sauceUrl, $caps, null, 240000);
+        //$appiumUrl = "http://ondemand.saucelabs.com/wd/hub";
+        $appiumUrl = "http://192.168.1.197:4723/wd/hub";
+        $driver = RemoteWebDriver::create($appiumUrl, $caps, 300000, 300000);
 
         try {
             $this->initLogging($eyes, $testName);
             $driver->get("https://www.applitools.com/customers");
             $eyes->open($driver, "Eyes Selenium SDK - iOS Safari Cropping", $testName);
-            $eyes->check("Initial view", Target::region(WebDriverBy::cssSelector(".horizontal-page"))->fully($fully));
+            $eyes->check("Initial view", Target::window()->fully($fully));
             $eyes->close();
         } finally {
             $eyes->abortIfNotClosed();
@@ -128,9 +135,13 @@ class TestIOSDevices extends TestCase
      * @dataProvider data
      * @doesNotPerformAssertions
      * @param string $deviceName
-     * @param string $deviceOrientation
      * @param string $platformVersion
+     * @param string $deviceOrientation
      * @param boolean $fully
+     * @throws \Applitools\Exceptions\EyesException
+     * @throws \Applitools\Exceptions\NewTestException
+     * @throws \Applitools\Exceptions\TestFailedException
+     * @throws \Exception
      */
     public function TestIOSNativeApp($deviceName, $platformVersion, $deviceOrientation, $fully)
     {

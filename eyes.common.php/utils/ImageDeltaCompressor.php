@@ -5,12 +5,11 @@
 
 namespace Applitools;
 
-use Gregwar\Image\Image;
-
 /**
  * Provides image compression based on delta between consecutive images.
  */
-    class ImageDeltaCompressor {
+class ImageDeltaCompressor
+{
 
     //private static final byte[] PREAMBLE;
     const COMPRESS_BY_RAW_BLOCKS_FORMAT = 3;
@@ -29,7 +28,7 @@ use Gregwar\Image\Image;
 
         PREAMBLE = preambleBytes;
     }*/
-    
+
     /**
      * Computes the width and height of the image data contained in the block
      * at the input column and row.
@@ -39,7 +38,8 @@ use Gregwar\Image\Image;
      * @param int $blockRow The block row index
      * @return RectangleSize The width and height of the image data contained in the block.
      */
-    private static function getActualBlockSize(RectangleSize $imageSize, $blockSize, $blockColumn, $blockRow) {
+    private static function getActualBlockSize(RectangleSize $imageSize, $blockSize, $blockColumn, $blockRow)
+    {
         $actualWidth = min($imageSize->getWidth() - ($blockColumn * $blockSize), $blockSize);
         $actualHeight = min($imageSize->getHeight() - ($blockRow * $blockSize), $blockSize);
 
@@ -60,9 +60,10 @@ use Gregwar\Image\Image;
      */
 
     private static function CompareAndCopyBlockChannelData(
-                $sourcePixels, $targetPixels,
-                RectangleSize $imageSize, $pixelLength, $blockSize,
-            $blockColumn, $blockRow, $channel) {
+        $sourcePixels, $targetPixels,
+        RectangleSize $imageSize, $pixelLength, $blockSize,
+        $blockColumn, $blockRow, $channel)
+    {
 
         $isIdentical = true; // initial default
 
@@ -75,13 +76,13 @@ use Gregwar\Image\Image;
         $stride = $imageSize->getWidth() * $pixelLength;
 
         // The number of bytes actually contained in the block for the current channel (might be less than blockSize*blockSize)
-        $channelBytes = array_fill(0,$actualBlockHeight*$actualBlockWidth, 0);
+        $channelBytes = array_fill(0, $actualBlockHeight * $actualBlockWidth, 0);
         $channelBytesOffset = 0;
 
         // Actually comparing and copying the pixels
         for ($h = 0; $h < $actualBlockHeight; ++$h) {
             $offset = ((($blockSize * $blockRow) + $h) * $stride) +
-                    ($blockSize * $blockColumn * $pixelLength) + $channel;
+                ($blockSize * $blockColumn * $pixelLength) + $channel;
             for ($w = 0; $w < $actualBlockWidth; ++$w) {
                 $sourceByte = $sourcePixels[$offset];
                 $targetByte = $targetPixels[$offset];
@@ -100,101 +101,115 @@ use Gregwar\Image\Image;
     /**
      * Compresses a target image based on a difference from a source image.
      *
-     * @param Image $target The image we want to compress.
+     * @param resource $target The image we want to compress.
      * @param string $targetEncoded The image we want to compress in its png bytes representation.
-     * @param Image $source The baseline image by which a compression will be performed.
+     * @param resource $source The baseline image by which a compression will be performed.
      * @param int $blockSize How many pixels per block.
      * @return string The compression result, or the {@code targetEncoded} if the compressed bytes count is greater than the uncompressed bytes count.
      * @throws \Exception If there was a problem reading/writing from/to the streams which are created during the process.
      */
-    public static function compressByRawBlocks(Image $target, $targetEncoded, Image $source = null, $blockSize = 30 ){
+    public static function compressByRawBlocks($target, $targetEncoded, $source = null, $blockSize = 30)
+    {
+        return $targetEncoded;
+
 //FIXME need to find suitable solution depends on "BufferedImage"
-        // If there's no image to compare to, or the images are in different
-        // sizes, we simply return the encoded target.
-        if ($source == null
-                || ($source->getWidth() != $target->getWidth())
-                || ($source->getHeight() != $target->getHeight())) {
-            return $targetEncoded;
-        }
-
-        // IMPORTANT: Notice that the pixel bytes are (A)RGB!
-        $targetPixels =
-            /*((DataBufferByte) */$target->getRaster()->getDataBuffer()->getData();
-        $sourcePixels =
-                /*((DataBufferByte)*/ $source->getRaster()->getDataBuffer()->getData();
-
-        // The number of bytes comprising a pixel (depends if there's an Alpha channel).
-        $pixelLength = ($target->getAlphaRaster() != null) ? 4 : 3;
-        $imageSize = new RectangleSize($target->width(), $target->height());
-
-        // Calculating how many block columns and rows we've got.
-        $blockColumnsCount = ($target->width() / $blockSize)
-                + (($target->width() % $blockSize) == 0 ? 0 : 1);
-        $blockRowsCount = ($target->height() / $blockSize)
-                + (($target->height() % $blockSize) == 0 ? 0 : 1);
-        
-        // We'll use a stream for the compression.
-        $resultStream = new ByteArrayOutputStream();
-        $resultCountingStream = new CountingOutputStream($resultStream);
-        // Since we need to write "short" and other variations.
-        $resultDataOutputStream = new DataOutputStream($resultCountingStream);
-        // This will be used for doing actual data compression
-        $compressed = new DeflaterOutputStream($resultCountingStream, new Deflater(Deflater::BEST_COMPRESSION,true));
-
-        $compressedDos = new DataOutputStream($compressed);
-
-        // Writing the header
-        $resultStream->write(PREAMBLE, 0, PREAMBLE.length );//FIXME
-        $resultStream->write(COMPRESS_BY_RAW_BLOCKS_FORMAT);
-        // since we don't have a source ID, we write 0 length (Big endian).
-        $resultDataOutputStream->writeShort(0);
-
-        // Writing the block size (Big endian)
-        $resultDataOutputStream->writeShort($blockSize);
-
-        for ($channel = 0; $channel < 3; ++$channel) {
-
-            // The image is RGB, so all that's left is to skip the Alpha
-            // channel if there is one.
-            $actualChannelIndex = ($pixelLength == 4) ? $channel + 1 : $channel;
-
-            $blockNumber = 0;
-            for ($blockRow = 0; $blockRow < $blockRowsCount; ++$blockRow) {
-                for ($blockColumn = 0; $blockColumn < $blockColumnsCount;
-                        ++$blockColumn) {
-
-                    $compareResult = CompareAndCopyBlockChannelData
-                            ($sourcePixels, $targetPixels, $imageSize,
-                                    $pixelLength, $blockSize, $blockColumn,
-                                    $blockRow, $actualChannelIndex);
-
-                    if (!$compareResult->getIsIdentical()) {
-                        $compressed.write($channel);
-                        $compressedDos.writeInt($blockNumber); // Big endian
-                        $channelBytes = $compareResult->getBuffer();
-                        $compressed->write($channelBytes, 0, $channelBytes->length);
-
-                        // If the number of bytes already written is greater
-                        // then the number of bytes for the uncompressed
-                        // target, we just return the uncompressed target.
-                        if ($resultCountingStream->getBytesCount()
-                            > $targetEncoded->length) {
-                            $compressedDos->close();
-                            return Arrays::copyOf($targetEncoded, $targetEncoded->length);
-                        }
-                    }
-
-                    ++$blockNumber;
-                }
-            }
-        }
-        $compressedDos->close(); // flushing + closing the compression.
-
-        if ($resultCountingStream->getBytesCount() > $targetEncoded->length) {
-            return $targetEncoded;
-        }
-
-        return $resultStream->toByteArray();
+//        // If there's no image to compare to, or the images are in different
+//        // sizes, we simply return the encoded target.
+//        if ($source == null) {
+//            return $targetEncoded;
+//        }
+//
+//        $srcWidth = imagesx($source);
+//        $srcHeight = imagesy($source);
+//
+//        $trgWidth = imagesx($target);
+//        $trgHeight = imagesy($target);
+//
+//        if (($srcWidth != $trgWidth) || ($srcHeight != $trgHeight)) {
+//            return $targetEncoded;
+//        }
+//
+//
+//        // IMPORTANT: Notice that the pixel bytes are (A)RGB!
+//        $targetPixels =
+//            /*((DataBufferByte) */
+//            $target->getRaster()->getDataBuffer()->getData();
+//        $sourcePixels =
+//            /*((DataBufferByte)*/
+//            $source->getRaster()->getDataBuffer()->getData();
+//
+//        // The number of bytes comprising a pixel (depends if there's an Alpha channel).
+//        $pixelLength = ($target->getAlphaRaster() != null) ? 4 : 3;
+//        $imageSize = new RectangleSize($trgWidth, $trgHeight);
+//
+//        // Calculating how many block columns and rows we've got.
+//        $blockColumnsCount = ($trgWidth / $blockSize)
+//            + (($trgWidth % $blockSize) == 0 ? 0 : 1);
+//        $blockRowsCount = ($trgHeight / $blockSize)
+//            + (($trgHeight % $blockSize) == 0 ? 0 : 1);
+//
+//        // We'll use a stream for the compression.
+//        $resultStream = new ByteArrayOutputStream();
+//        $resultCountingStream = new CountingOutputStream($resultStream);
+//        // Since we need to write "short" and other variations.
+//        $resultDataOutputStream = new DataOutputStream($resultCountingStream);
+//        // This will be used for doing actual data compression
+//        $compressed = new DeflaterOutputStream($resultCountingStream, new Deflater(Deflater::BEST_COMPRESSION, true));
+//
+//        $compressedDos = new DataOutputStream($compressed);
+//
+//        // Writing the header
+//        $resultStream->write(PREAMBLE, 0, PREAMBLE . length);//FIXME
+//        $resultStream->write(COMPRESS_BY_RAW_BLOCKS_FORMAT);
+//        // since we don't have a source ID, we write 0 length (Big endian).
+//        $resultDataOutputStream->writeShort(0);
+//
+//        // Writing the block size (Big endian)
+//        $resultDataOutputStream->writeShort($blockSize);
+//
+//        for ($channel = 0; $channel < 3; ++$channel) {
+//
+//            // The image is RGB, so all that's left is to skip the Alpha
+//            // channel if there is one.
+//            $actualChannelIndex = ($pixelLength == 4) ? $channel + 1 : $channel;
+//
+//            $blockNumber = 0;
+//            for ($blockRow = 0; $blockRow < $blockRowsCount; ++$blockRow) {
+//                for ($blockColumn = 0; $blockColumn < $blockColumnsCount;
+//                     ++$blockColumn) {
+//
+//                    $compareResult = CompareAndCopyBlockChannelData
+//                    ($sourcePixels, $targetPixels, $imageSize,
+//                        $pixelLength, $blockSize, $blockColumn,
+//                        $blockRow, $actualChannelIndex);
+//
+//                    if (!$compareResult->getIsIdentical()) {
+//                        $compressed . write($channel);
+//                        $compressedDos . writeInt($blockNumber); // Big endian
+//                        $channelBytes = $compareResult->getBuffer();
+//                        $compressed->write($channelBytes, 0, $channelBytes->length);
+//
+//                        // If the number of bytes already written is greater
+//                        // then the number of bytes for the uncompressed
+//                        // target, we just return the uncompressed target.
+//                        if ($resultCountingStream->getBytesCount()
+//                            > $targetEncoded->length) {
+//                            $compressedDos->close();
+//                            return Arrays::copyOf($targetEncoded, $targetEncoded->length);
+//                        }
+//                    }
+//
+//                    ++$blockNumber;
+//                }
+//            }
+//        }
+//        $compressedDos->close(); // flushing + closing the compression.
+//
+//        if ($resultCountingStream->getBytesCount() > $targetEncoded->length) {
+//            return $targetEncoded;
+//        }
+//
+//        return $resultStream->toByteArray();
     }
 }
 

@@ -10,6 +10,12 @@ use PHPUnit\Framework\TestCase;
 
 class TestImages extends TestCase
 {
+    /**
+     * @throws \Applitools\Exceptions\EyesException
+     * @throws \Applitools\Exceptions\NewTestException
+     * @throws \Applitools\Exceptions\TestFailedException
+     * @throws \Exception
+     */
     public function testSearch()
     {
         $eyes = new Eyes();
@@ -29,9 +35,9 @@ class TestImages extends TestCase
             // Load another page and validate
             $img = "yourpath/element-test/ElementTestPage/minions-800x500.jpg";
             // Visual validation point #2
-            $eyes->checkRegion($img, new Region(100,100,200,200), "Resources page");
+            $eyes->checkRegion($img, Region::CreateFromLTWH(100,100,200,200), "Resources page");
 
-            $eyes->AddMouseTrigger("click", new Region(0,0,50,50), new Location(150, 150));
+            $eyes->addMouseTriggerCursor("click", Region::CreateFromLTWH(0,0,50,50), new Location(150, 150));
 
             // End visual testing. Validate visual correctness.
             $eyes->close();

@@ -18,7 +18,7 @@ namespace Applitools\Selenium\fluent {
         function getTargetElement();
 
         /**
-         * @return FrameLocator
+         * @return FrameLocator[]
          */
         function getFrameChain();
     }

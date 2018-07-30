@@ -47,7 +47,7 @@ abstract class EyesScreenshot {
     * @param string $coordinatesType The coordinates type of {@code location}.
     * @return Location The corresponding location inside the screenshot,
     * in screenshot as-is coordinates type.
-    * @throws /Applitools/Exceptions/OutOfBoundsException If the location is
+    * @throws \Applitools\Exceptions\OutOfBoundsException If the location is
     * not inside the frame's region in the screenshot.
     */
     public abstract function getLocationInScreenshot(Location $location, $coordinatesType);

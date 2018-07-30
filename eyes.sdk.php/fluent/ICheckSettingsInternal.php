@@ -28,14 +28,34 @@ namespace Applitools\fluent {
         function getMatchLevel();
 
         /**
-         * @return IGetRegion[]
+         * @return IGetRegions[]
          */
         function getIgnoreRegions();
 
         /**
-         * @return IGetFloatingRegion[]
+         * @return IGetFloatingRegions[]
          */
         function getFloatingRegions();
+
+        /**
+         * @return IGetRegions[]
+         */
+        function getLayoutRegions();
+
+        /**
+         * @return IGetRegions[]
+         */
+        function getStrictRegions();
+
+//        /**
+//         * @return IGetRegions[]
+//         */
+//        function getExactRegions();
+
+        /**
+         * @return IGetRegions[]
+         */
+        function getContentRegions();
 
         /**
          * @return bool

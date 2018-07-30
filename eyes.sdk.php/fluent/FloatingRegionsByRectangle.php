@@ -3,10 +3,11 @@
 namespace Applitools\fluent {
 
     use Applitools\EyesBase;
+    use Applitools\EyesScreenshot;
     use Applitools\FloatingMatchSettings;
     use Applitools\Region;
 
-    class FloatingRegionByRectangle implements IGetFloatingRegion
+    class FloatingRegionsByRectangle implements IGetFloatingRegions
     {
         /** @var Region */
         private $rect;
@@ -42,13 +43,14 @@ namespace Applitools\fluent {
 
         /**
          * @param EyesBase $eyesBase
-         * @return FloatingMatchSettings
+         * @param EyesScreenshot $screenshot
+         * @return FloatingMatchSettings[]
          */
-        function getRegion(EyesBase $eyesBase)
+        function getRegions(EyesBase $eyesBase, EyesScreenshot $screenshot)
         {
-            return new FloatingMatchSettings(
+            return array(new FloatingMatchSettings(
                 $this->rect->getLeft(), $this->rect->getTop(), $this->rect->getWidth(), $this->rect->getHeight(),
-                $this->maxUpOffset, $this->maxDownOffset, $this->maxLeftOffset, $this->maxRightOffset);
+                $this->maxUpOffset, $this->maxDownOffset, $this->maxLeftOffset, $this->maxRightOffset));
         }
     }
 }

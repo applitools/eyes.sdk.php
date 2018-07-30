@@ -4,12 +4,14 @@ namespace Applitools\Selenium\fluent;
 
 use Applitools\Exceptions\EyesException;
 use Applitools\EyesBase;
+use Applitools\EyesScreenshot;
 use Applitools\FloatingMatchSettings;
-use Applitools\fluent\IGetFloatingRegion;
+use Applitools\fluent\IGetFloatingRegions;
 use Applitools\Selenium\Eyes;
 use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverElement;
 
-class FloatingRegionBySelector implements IGetFloatingRegion
+class FloatingRegionsBySelector implements IGetFloatingRegions
 {
 
     /** @var WebDriverBy */
@@ -46,22 +48,32 @@ class FloatingRegionBySelector implements IGetFloatingRegion
 
     /**
      * @param EyesBase $eyesBase
-     * @return FloatingMatchSettings
+     * @param EyesScreenshot $screenshot
+     * @return FloatingMatchSettings[]
      * @throws EyesException
      */
-    function getRegion(EyesBase $eyesBase)
+    function getRegions(EyesBase $eyesBase, EyesScreenshot $screenshot)
     {
+        $result = [];
         if ($eyesBase instanceof Eyes) {
-            $element = $eyesBase->getDriver()->findElement($this->selector);
 
-            return new FloatingMatchSettings(
-                $element->getLocation()->getX(),
-                $element->getLocation()->getY(),
-                $element->getSize()->getWidth(),
-                $element->getSize()->getHeight(),
-                $this->maxUpOffset, $this->maxDownOffset, $this->maxLeftOffset, $this->maxRightOffset);
+            $elements = $eyesBase->getDriver()->findElements($this->selector);
+
+            /** @var WebDriverElement $element */
+            $element = null;
+
+            foreach($elements as $element) {
+                $result[] = new FloatingMatchSettings(
+                    $element->getLocation()->getX(),
+                    $element->getLocation()->getY(),
+                    $element->getSize()->getWidth(),
+                    $element->getSize()->getHeight(),
+                    $this->maxUpOffset, $this->maxDownOffset, $this->maxLeftOffset, $this->maxRightOffset);
+            }
         } else {
             throw new EyesException("\$eyesBase must be of type Applitools\\Selenium\\Eyes");
         }
+
+        return $result;
     }
 }

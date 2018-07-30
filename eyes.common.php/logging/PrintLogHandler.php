@@ -23,7 +23,9 @@ class PrintLogHandler implements LogHandler {
 
     public function onMessage($verbose, $message) {
         if (!$verbose || $this->isVerbose) {
-            print_r(date("H:i:s") . " Eyes: " . $message. "\r\n");
+            $t = gettimeofday();
+            $mSec = round($t["usec"] / 1000);
+            print_r(date("H:i:s",$t["sec"]). ".$mSec Eyes: " . $message. PHP_EOL);
         }
     }
 

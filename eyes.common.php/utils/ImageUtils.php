@@ -6,7 +6,6 @@
 namespace Applitools;
 
 use Applitools\Exceptions\EyesException;
-use SplFixedArray;
 
 class ImageUtils
 {
@@ -147,6 +146,7 @@ class ImageUtils
      * @param int $targetHeight The height to resize the image to
      * @return resource If the size of image equal to target size, returns the original image,
      * otherwise, returns a new resized image.
+     * @throws \Exception
      */
     public static function resizeImage($image, $targetWidth, $targetHeight)
     {
@@ -212,50 +212,70 @@ class ImageUtils
         for ($h = 0; $h < $hSrc; $h++) {
             for ($w = 0; $w < $wSrc; $w++) {
                 $rgba = imagecolorat($srcImage, $w, $h);
-                $pixels[$pixelsIndexBase + 0] = chr(($rgba >> 0) & 0xFF); // b
-                $pixels[$pixelsIndexBase + 1] = chr(($rgba >> 8) & 0xFF); // g
-                $pixels[$pixelsIndexBase + 2] = chr(($rgba >> 16) & 0xFF); // r
-                $pixels[$pixelsIndexBase + 3] = chr(($rgba >> 24) & 0x7F); // a
-                $pixelsIndexBase += 4;
+                $pixels[$pixelsIndexBase++] = chr(($rgba >> 0) & 0xFF); // b
+                $pixels[$pixelsIndexBase++] = chr(($rgba >> 8) & 0xFF); // g
+                $pixels[$pixelsIndexBase++] = chr(($rgba >> 16) & 0xFF); // r
+                $pixels[$pixelsIndexBase++] = chr(($rgba >> 24) & 0x7F); // a
             }
-//            if ($h % 100 == 0) {
-//                self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-//            }
         }
-        imagedestroy($srcImage);
         self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
+        imagedestroy($srcImage);
 
         $m = $wM * $hM;
         self::$logger->verbose("m = $m (wM = $wM ; hM = $hM)");
 
         $pixels2 = str_repeat("\0\0\0\0", $hSrc * $wDst2);
         self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-        $pixelsIndexBase = 0;
-        for ($i = 0; $i < $hSrc; $i++) {
-            for ($j = 0; $j < $wDst2; $j++) {
-                $x = $j * ($wSrc - 1) / $wDst2;
-                $xPos = intval(floor($x));
-                $t = $x - $xPos;
+        $stride = $wDst2 << 2;
+        $wSrcMinus1 = $wSrc - 1;
+        $wSrcMinus2 = $wSrc - 2;
 
-                $pixelsIndex = ($pixelsIndexBase + $xPos) << 2;
+        $calcX0a = function (&$pixels, $cIndex, $val, $pixXp1) {
+            return ord($pixels[$cIndex]);
+        };
+        $calcX0b = function (&$pixels, $cIndex, $val, $pixXp1) {
+            return ($val << 1) - $pixXp1;
+        };
+        $calcX3a = function (&$pixels, $cIndex, $val, $pixXp1) {
+            return ord($pixels[$cIndex + 8]);
+        };
+        $calcX3b = function (&$pixels, $cIndex, $val, $pixXp1) {
+            return ($pixXp1 << 1) - $val;
+        };
+
+        for ($j = 0; $j < $wDst2; $j++) {
+            $x = $j * $wSrcMinus1 / $wDst2;
+            $xPos = intval(floor($x));
+            $t = $x - $xPos;
+            $t2 = $t * $t;
+            $t3 = $t2 * $t;
+            $pixelsIndexBase = $xPos << 2;
+            $pixelsIndex = $pixelsIndexBase;
+
+            $calcX0 = ($xPos > 0) ? $calcX0a : $calcX0b;
+            $calcX3 = ($xPos < $wSrcMinus2) ? $calcX3a : $calcX3b;
+
+            for ($i = 0; $i < $hSrc; $i++) {
+                $cIndex = $pixelsIndex;
                 for ($p = 0; $p < 4; $p++) {
-                    $val = ord($pixels[$pixelsIndex + $p]);
-                    $pixXp1 = ord($pixels[$pixelsIndex + 4 + $p]);
-                    $x0 = ($xPos > 0) ? ord($pixels[$pixelsIndex - 4 + $p]) : 2 * $val - $pixXp1;
+                    $val = ord($pixels[$cIndex]);
+                    $pixXp1 = ord($pixels[$cIndex + 4]);
+                    $x0 = $calcX0($pixels, $cIndex, $val, $pixXp1);
                     $x1 = $val;
                     $x2 = $pixXp1;
-                    $x3 = ($xPos < $wSrc - 2) ? ord($pixels[$pixelsIndex + 8 + $p]) : 2 * $pixXp1 - $val;
+                    $x3 = $calcX3($pixels, $cIndex, $val, $pixXp1);
 
                     $a0 = $x3 - $x2 - $x0 + $x1;
                     $a1 = $x0 - $x1 - $a0;
                     $a2 = $x2 - $x0;
-                    $pixels2[$pixelsIndex + $p] = chr(max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($x1))));
+                    $pixels2[$cIndex] = chr(max(0, min(255, ($a0 * $t3) + ($a1 * $t2) + ($a2 * $t) + ($x1))));
+                    $cIndex++;
                 }
+                $pixelsIndex += $stride;
             }
-            $pixelsIndexBase += $wSrc;
-//            if ($i % 100 == 0) {
-//                self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
-//            }
+            if ($j % 100 == 0) {
+                self::$logger->verbose("phase 1 - now handling column #$j - memory:\t" . memory_get_usage());
+            }
         }
 
         unset($pixels);
@@ -265,12 +285,35 @@ class ImageUtils
         $buf2 = imagecreatetruecolor($wDst2, $hDst2);
         self::$logger->verbose(__FILE__ . ":" . __LINE__ . ":\t" . memory_get_usage());
 
+
         $stride = $wDst2 << 2;
+
+        $calcY0a = function (&$pixels2, $cIndex, $val, $pixYp1) {
+            return ord($pixels2[$cIndex]);
+        };
+
+        $calcY0b = function (&$pixels2, $cIndex, $val, $pixYp1) {
+            return ($val << 1) - $pixYp1;
+        };
+
+        $calcY3a = function (&$pixels2, $cIndex, $val, $pixYp1) {
+            return ord($pixels2[$cIndex]);
+        };
+
+        $calcY3b = function (&$pixels2, $cIndex, $val, $pixYp1) {
+            return ($pixYp1 << 1) - $val;
+        };
+
         for ($i = 0; $i < $hDst2; $i++) {
+            $y = $i * ($hSrc - 1) / $hDst2;
+            $yPos = intval($y);
+            $t = $y - $yPos;
+            $t2 = $t * $t;
+            $t3 = $t2 * $t;
+
+            $calcY0 = ($yPos > 0) ? $calcY0a : $calcY0b;
+            $calcY3 = ($yPos < $hSrc - 2) ? $calcY3a : $calcY3b;
             for ($j = 0; $j < $wDst2; $j++) {
-                $y = $i * ($hSrc - 1) / $hDst2;
-                $yPos = intval($y);
-                $t = $y - $yPos;
                 $rgba = 0;
                 $rowIndexBase = (($yPos * $wDst2 + $j) << 2);
                 $nextRowIndexBase = $rowIndexBase + $stride;
@@ -279,15 +322,15 @@ class ImageUtils
                 for ($p = 0; $p < 4; $p++) {
                     $val = ord($pixels2[$rowIndexBase + $p]);
                     $pixYp1 = ord($pixels2[$nextRowIndexBase + $p]);
-                    $y0 = ($yPos > 0) ? ord($pixels2[$prevRowIndexBase  + $p]) : 2 * $val - $pixYp1;
+                    $y0 = $calcY0($pixels2, $prevRowIndexBase + $p, $val, $pixYp1);
                     $y1 = $val;
                     $y2 = $pixYp1;
-                    $y3 = ($yPos < $hSrc - 2) ? ord($pixels2[$nextRowIndexBase + $stride + $p]) : 2 * $pixYp1 - $val;
+                    $y3 = $calcY3($pixels2, $nextRowIndexBase + $stride + $p, $val, $pixYp1);
 
                     $a0 = $y3 - $y2 - $y0 + $y1;
                     $a1 = $y0 - $y1 - $a0;
                     $a2 = $y2 - $y0;
-                    $pix = max(0, min(255, ($a0 * $t * $t * $t) + ($a1 * $t * $t) + ($a2 * $t) + ($y1)));
+                    $pix = max(0, min(255, ($a0 * $t3) + ($a1 * $t2) + ($a2 * $t) + ($y1)));
                     if ($m > 1) {
                         $pixels3[$index + $p] = chr($pix);
                     } else {
@@ -301,6 +344,9 @@ class ImageUtils
                     $b = ($rgba >> 0) & 0xFF;
                     imagesetpixel($buf2, $j, $i, imagecolorallocatealpha($buf2, $r, $g, $b, $a));
                 }
+            }
+            if ($i % 100 == 0) {
+                self::$logger->verbose("phase 2 - now handling row #$i - memory:\t" . memory_get_usage());
             }
         }
 
@@ -342,6 +388,13 @@ class ImageUtils
         return $bufDst;
     }
 
+    /**
+     * @param $src
+     * @param $targetWidth
+     * @param $targetHeight
+     * @return resource
+     * @throws \Exception
+     */
     private static function scaleImageIncrementally($src, $targetWidth, $targetHeight)
     {
         $hasReassignedSrc = false;

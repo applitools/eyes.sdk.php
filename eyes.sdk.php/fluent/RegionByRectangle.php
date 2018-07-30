@@ -1,9 +1,10 @@
 <?php
 namespace Applitools\fluent {
     use Applitools\EyesBase;
+    use Applitools\EyesScreenshot;
     use Applitools\Region;
 
-    class IgnoreRegionByRectangle implements IGetRegion
+    class RegionByRectangle implements IGetRegions
     {
         /**
          * @var Region
@@ -17,11 +18,12 @@ namespace Applitools\fluent {
 
         /**
          * @param EyesBase $eyesBase
-         * @return Region
+         * @param EyesScreenshot $screenshot
+         * @return Region[]
          */
-        function getRegion($eyesBase)
+        function getRegions($eyesBase, $screenshot)
         {
-            return $this->region;
+            return array($this->region);
         }
     }
 }
