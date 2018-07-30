@@ -878,7 +878,7 @@ class Eyes extends EyesBase
         if ($stitchContent) {
             $this->checkElement($targetElement, $matchTimeout, $tag);
         } else {
-            $this->checkRegionByElement($this->driver->findElement($targetElement), $matchTimeout, $tag);
+            $this->checkRegionByElement($targetElement, $matchTimeout, $tag);
         }
 
         $this->logger->log("Switching back to parent frame");
@@ -944,7 +944,7 @@ class Eyes extends EyesBase
 
             $this->logger->log("Done! Creating image object...");
 
-            $scaleProvider = $this->updateScalingParams()->getScaleProvider($screenshotImage->width());
+            $scaleProvider = $this->updateScalingParams()->getScaleProvider(imagesx($screenshotImage));
 
             $screenshotImage = ImageUtils::scaleImage($screenshotImage, $scaleProvider->getScaleRatio());
 
