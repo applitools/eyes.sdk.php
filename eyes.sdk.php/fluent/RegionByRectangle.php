@@ -4,7 +4,7 @@ namespace Applitools\fluent {
     use Applitools\EyesScreenshot;
     use Applitools\Region;
 
-    class RegionsByRectangle implements IGetRegions
+    class RegionByRectangle implements IGetRegions
     {
         /**
          * @var Region

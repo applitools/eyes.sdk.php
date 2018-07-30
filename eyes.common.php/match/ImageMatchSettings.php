@@ -31,8 +31,8 @@ class ImageMatchSettings
     /** @var Region[] */
     private $contentRegions = [];
 
-    /** @var Region[] */
-    private $exactRegions = [];
+//    /** @var Region[] */
+//    private $exactRegions = [];
 
 
     public function __construct($matchLevel = null, ExactMatchSettings $exact = null)
@@ -182,27 +182,31 @@ class ImageMatchSettings
         $this->contentRegions = $contentRegions;
     }
 
-    /**
-     * @return Region[]
-     */
-    public function getExactRegions()
-    {
-        return $this->exactRegions;
-    }
+//    /**
+//     * @return Region[]
+//     */
+//    public function getExactRegions()
+//    {
+//        return $this->exactRegions;
+//    }
+//
+//    /**
+//     * @param Region[] $exactRegions
+//     */
+//    public function setExactRegions($exactRegions)
+//    {
+//        $this->exactRegions = $exactRegions;
+//    }
 
     /**
-     * @param Region[] $exactRegions
+     * @param Region[] $regions
+     * @return array
      */
-    public function setExactRegions($exactRegions)
-    {
-        $this->exactRegions = $exactRegions;
-    }
-
-    public function getIgnoreRegionsAsFormattedArray()
+    public function getRegionsAsFormattedArray($regions)
     {
         $retVal = [];
 
-        foreach ($this->ignoreRegions as $r) {
+        foreach ($regions as $r) {
             $retVal[] = [
                 "left" => $r->getLeft(),
                 "top" => $r->getTop(),

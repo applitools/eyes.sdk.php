@@ -4,7 +4,9 @@ namespace Applitools\Selenium\fluent;
 
 use Applitools\Exceptions\EyesException;
 use Applitools\fluent\CheckSettings;
-use Applitools\fluent\RegionsByRectangle;
+use Applitools\fluent\ICheckSettings;
+use Applitools\fluent\IGetRegions;
+use Applitools\fluent\RegionByRectangle;
 use Applitools\Region;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverElement;
@@ -41,7 +43,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
      * @param $maxDownOffset
      * @param $maxLeftOffset
      * @param $maxRightOffset
-     * @return ISeleniumCheckTarget An updated copy of the settings object.
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function addFloatingRegionBySelector(WebDriverBy $region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
     {
@@ -52,7 +54,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
 
     /**
      * @param WebDriverBy $by
-     * @return ISeleniumCheckTarget An updated copy of the settings object.
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function frameBySelector(WebDriverBy $by)
     {
@@ -64,7 +66,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
 
     /**
      * @param string $nameOrId
-     * @return ISeleniumCheckTarget An updated copy of the settings object.
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function frameByNameOrId($nameOrId)
     {
@@ -76,7 +78,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
 
     /**
      * @param int $index
-     * @return ISeleniumCheckTarget An updated copy of the settings object.
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function frameByIndex($index)
     {
@@ -88,7 +90,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
 
     /**
      * @param WebDriverBy|string|int $frame
-     * @return ISeleniumCheckTarget An updated copy of the settings object.
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      * @throws EyesException
      */
     public function frame($frame)
@@ -112,7 +114,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
 
     /**
      * @param Region|WebDriverBy $region
-     * @return ISeleniumCheckTarget An updated copy of the settings object.
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function region($region)
     {
@@ -126,7 +128,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
 
     /**
      * @param WebDriverBy $by
-     * @return ISeleniumCheckTarget An updated copy of the settings object.
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function regionBySelector(WebDriverBy $by)
     {
@@ -136,7 +138,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
 
     /**
      * @param WebDriverBy[] $regionSelectors
-     * @return ISeleniumCheckTarget An updated copy of the settings object.
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function ignoreBySelector(...$regionSelectors)
     {
@@ -148,16 +150,97 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     }
 
     /**
+     * @param $region
+     * @return IGetRegions|RegionByRectangle|RegionByElement|RegionsBySelector
+     */
+    private function getRegionsProvider($region)
+    {
+        /** @var IGetRegions $regionProvider */
+        $regionProvider = null;
+        if ($region instanceof Region) {
+            $regionProvider = new RegionByRectangle($region);
+        } else if ($region instanceof WebDriverBy) {
+            $regionProvider = new RegionsBySelector($region);
+        } else if ($region instanceof WebDriverElement) {
+            $regionProvider = new RegionByElement($region);
+        }
+        return $regionProvider;
+    }
+
+    /**
      * @param array $regions
-     * @return ISeleniumCheckTarget An updated copy of the settings object.
+     * @return SeleniumCheckSettings An updated copy of the settings object.
      */
     public function ignore(...$regions)
     {
         foreach ($regions as $region) {
-            if ($region instanceof Region) {
-                $this->ignoreRegions[] = new RegionsByRectangle($region);
-            } else if ($region instanceof WebDriverBy) {
-                $this->ignoreRegions[] = new RegionsBySelector($region);
+            $regionsProvider = $this->getRegionsProvider($region);
+            if ($regionsProvider != null) {
+                $this->ignoreRegions[] = $regionsProvider;
+            }
+        }
+
+        return clone $this;
+    }
+
+    /**
+     * @param array $regions
+     * @return SeleniumCheckSettings An updated copy of the settings object.
+     */
+    public function layoutRegions(...$regions)
+    {
+        foreach ($regions as $region) {
+            $regionsProvider = $this->getRegionsProvider($region);
+            if ($regionsProvider != null) {
+                $this->layoutRegions[] = $regionsProvider;
+            }
+        }
+
+        return clone $this;
+    }
+
+//    /**
+//     * @param array $regions
+//     * @return SeleniumCheckSettings An updated copy of the settings object.
+//     */
+//    public function exactRegions(...$regions)
+//    {
+//        foreach ($regions as $region) {
+//            $regionsProvider = $this->getRegionsProvider($region);
+//            if ($regionsProvider != null) {
+//                $this->exactRegions[] = $regionsProvider;
+//            }
+//        }
+//
+//        return clone $this;
+//    }
+
+    /**
+     * @param array $regions
+     * @return SeleniumCheckSettings An updated copy of the settings object.
+     */
+    public function strictRegions(...$regions)
+    {
+        foreach ($regions as $region) {
+            $regionsProvider = $this->getRegionsProvider($region);
+            if ($regionsProvider != null) {
+                $this->strictRegions[] = $regionsProvider;
+            }
+        }
+
+        return clone $this;
+    }
+
+    /**
+     * @param array $regions
+     * @return SeleniumCheckSettings An updated copy of the settings object.
+     */
+    public function contentRegions(...$regions)
+    {
+        foreach ($regions as $region) {
+            $regionsProvider = $this->getRegionsProvider($region);
+            if ($regionsProvider != null) {
+                $this->contentRegions[] = $regionsProvider;
             }
         }
 
@@ -192,4 +275,5 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     {
         return __CLASS__ . " - timeout: " . $this->getTimeout();
     }
+
 }

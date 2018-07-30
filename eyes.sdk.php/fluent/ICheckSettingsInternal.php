@@ -47,10 +47,10 @@ namespace Applitools\fluent {
          */
         function getStrictRegions();
 
-        /**
-         * @return IGetRegions[]
-         */
-        function getExactRegions();
+//        /**
+//         * @return IGetRegions[]
+//         */
+//        function getExactRegions();
 
         /**
          * @return IGetRegions[]

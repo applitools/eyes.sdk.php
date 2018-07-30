@@ -19,28 +19,28 @@ namespace Applitools\fluent {
          * @param Region[] $regions One or more regions to match using the Layout method.
          * @return ICheckSettings This instance of the settings object.
          */
-        function addLayoutRegion(...$regions);
+        function layoutRegions(...$regions);
 
-        /**
-         * Adds one or more exact regions.
-         * @param Region[] $regions One or more regions to match using the Exact method.
-         * @return ICheckSettings This instance of the settings object.
-         */
-        function addExactRegion(...$regions);
+//        /**
+//         * Adds one or more exact regions.
+//         * @param Region[] $regions One or more regions to match using the Exact method.
+//         * @return ICheckSettings This instance of the settings object.
+//         */
+//        function exactRegions(...$regions);
 
         /**
          * Adds one or more strict regions.
          * @param Region[] $regions One or more regions to match using the Strict method.
          * @return ICheckSettings This instance of the settings object.
          */
-        function addStrictRegion(...$regions);
+        function strictRegions(...$regions);
 
         /**
          * Adds one or more content regions.
          * @param Region[] $regions One or more regions to match using the Content method.
          * @return ICheckSettings This instance of the settings object.
          */
-        function addContentRegion(...$regions);
+        function contentRegions(...$regions);
 
         /**
          * Defines that the screenshot will contain the entire element or region, even if it's outside the view.

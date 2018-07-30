@@ -35,8 +35,8 @@ namespace Applitools\fluent {
         /** @var IGetRegions[] */
         protected $contentRegions = [];
 
-        /** @var IGetRegions[] */
-        protected $exactRegions = [];
+        ///** @var IGetRegions[] */
+        //protected $exactRegions = [];
 
         /** @var IGetRegions[] */
         protected $strictRegions = [];
@@ -59,7 +59,7 @@ namespace Applitools\fluent {
         {
             foreach ($regions as $region) {
                 if ($region instanceof Region) {
-                    $this->ignoreRegions[] = new RegionsByRectangle($region);
+                    $this->ignoreRegions[] = new RegionByRectangle($region);
                 }
             }
             return clone $this;
@@ -180,41 +180,41 @@ namespace Applitools\fluent {
          * @param Region[] $regions One or more regions to match using the Layout method.
          * @return ICheckSettings An updated copy of the settings object.
          */
-        public function addLayoutRegion(...$regions)
+        public function layoutRegions(...$regions)
         {
             foreach ($regions as $region) {
                 if ($region instanceof Region) {
-                    $this->layoutRegions[] = new RegionsByRectangle($region);
+                    $this->layoutRegions[] = new RegionByRectangle($region);
                 }
             }
             return clone $this;
         }
 
-        /**
-         * Adds one or more exact regions.
-         * @param Region[] $regions One or more regions to match using the Exact method.
-         * @return ICheckSettings An updated copy of the settings object.
-         */
-        public function addExactRegion(...$regions)
-        {
-            foreach ($regions as $region) {
-                if ($region instanceof Region) {
-                    $this->layoutRegions[] = new RegionsByRectangle($region);
-                }
-            }
-            return clone $this;
-        }
+//        /**
+//         * Adds one or more exact regions.
+//         * @param Region[] $regions One or more regions to match using the Exact method.
+//         * @return ICheckSettings An updated copy of the settings object.
+//         */
+//        public function exactRegions(...$regions)
+//        {
+//            foreach ($regions as $region) {
+//                if ($region instanceof Region) {
+//                    $this->layoutRegions[] = new RegionByRectangle($region);
+//                }
+//            }
+//            return clone $this;
+//        }
 
         /**
          * Adds one or more content regions.
          * @param Region[] $regions One or more regions to match using the Content method.
          * @return ICheckSettings An updated copy of the settings object.
          */
-        public function addContentRegion(...$regions)
+        public function contentRegions(...$regions)
         {
             foreach ($regions as $region) {
                 if ($region instanceof Region) {
-                    $this->layoutRegions[] = new RegionsByRectangle($region);
+                    $this->layoutRegions[] = new RegionByRectangle($region);
                 }
             }
             return clone $this;
@@ -225,11 +225,11 @@ namespace Applitools\fluent {
          * @param Region[] $regions One or more regions to match using the Strict method.
          * @return ICheckSettings An updated copy of the settings object.
          */
-        public function addStrictRegion(...$regions)
+        public function strictRegions(...$regions)
         {
             foreach ($regions as $region) {
                 if ($region instanceof Region) {
-                    $this->layoutRegions[] = new RegionsByRectangle($region);
+                    $this->layoutRegions[] = new RegionByRectangle($region);
                 }
             }
             return clone $this;
@@ -331,13 +331,13 @@ namespace Applitools\fluent {
             return $this->strictRegions;
         }
 
-        /**
-         * @return IGetRegions[]
-         */
-        function getExactRegions()
-        {
-            return $this->exactRegions;
-        }
+//        /**
+//         * @return IGetRegions[]
+//         */
+//        function getExactRegions()
+//        {
+//            return $this->exactRegions;
+//        }
 
         /**
          * @return IGetRegions[]

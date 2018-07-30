@@ -13,6 +13,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckWindowWithIgnoreRegion_Fluent()
     {
@@ -23,12 +24,14 @@ abstract class TestFluentApi extends TestSetup
                 ->fully()
                 ->timeout(5000)
                 ->ignore(Region::CreateFromLTWH(50, 50, 100, 100))
+                ->layoutRegions(WebDriverBy::cssSelector("#overflowing-div-image"))
         );
     }
 
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckRegionWithIgnoreRegion_Fluent()
     {
@@ -43,6 +46,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckFrame_Fully_Fluent()
     {
@@ -54,6 +58,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckFrame_Fluent()
     {
@@ -64,6 +69,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckFrameInFrame_Fully_Fluent()
     {
@@ -76,6 +82,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckRegionInFrame_Fluent()
     {
@@ -88,6 +95,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckRegionInFrameInFrame_Fluent()
     {
@@ -101,7 +109,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
-     * @throws \Applitools\Exceptions\EyesException
+     * @throws \Exception
      */
     public function TestCheckRegionInFrame2_Fluent()
     {
@@ -137,7 +145,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
-     * @throws \Applitools\Exceptions\EyesException
+     * @throws \Exception
      */
     public function TestCheckFrameInFrame_Fully_Fluent2()
     {
@@ -155,6 +163,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckWindowWithIgnoreBySelector_Fluent()
     {
@@ -166,6 +175,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckWindowWithFloatingBySelector_Fluent()
     {
@@ -177,6 +187,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckElementFully_Fluent()
     {
@@ -188,6 +199,7 @@ abstract class TestFluentApi extends TestSetup
     /**
      * @test
      * @doesNotPerformAssertions
+     * @throws \Exception
      */
     public function TestCheckElement_Fluent()
     {
