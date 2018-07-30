@@ -41,54 +41,54 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
      * @param $maxDownOffset
      * @param $maxLeftOffset
      * @param $maxRightOffset
-     * @return $this
+     * @return ISeleniumCheckTarget An updated copy of the settings object.
      */
     public function addFloatingRegionBySelector(WebDriverBy $region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset)
     {
         $this->floatingRegions[] = new FloatingRegionsBySelector($region, $maxUpOffset, $maxDownOffset, $maxLeftOffset, $maxRightOffset);
 
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param WebDriverBy $by
-     * @return $this
+     * @return ISeleniumCheckTarget An updated copy of the settings object.
      */
     public function frameBySelector(WebDriverBy $by)
     {
         $fl = new FrameLocator();
         $fl->setFrameSelector($by);
         $this->frameChain[] = $fl;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param string $nameOrId
-     * @return $this
+     * @return ISeleniumCheckTarget An updated copy of the settings object.
      */
     public function frameByNameOrId($nameOrId)
     {
         $fl = new FrameLocator();
         $fl->setFrameNameOrId($nameOrId);
         $this->frameChain[] = $fl;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param int $index
-     * @return $this
+     * @return ISeleniumCheckTarget An updated copy of the settings object.
      */
     public function frameByIndex($index)
     {
         $fl = new FrameLocator();
         $fl->setFrameIndex($index);
         $this->frameChain[] = $fl;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param WebDriverBy|string|int $frame
-     * @return SeleniumCheckSettings
+     * @return ISeleniumCheckTarget An updated copy of the settings object.
      * @throws EyesException
      */
     public function frame($frame)
@@ -107,12 +107,12 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
         }
 
         $this->frameChain[] = $fl;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param Region|WebDriverBy $region
-     * @return $this
+     * @return ISeleniumCheckTarget An updated copy of the settings object.
      */
     public function region($region)
     {
@@ -121,22 +121,22 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
         } else {
             $this->targetSelector = $region;
         }
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param WebDriverBy $by
-     * @return $this
+     * @return ISeleniumCheckTarget An updated copy of the settings object.
      */
     public function regionBySelector(WebDriverBy $by)
     {
         $this->targetSelector = $by;
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param WebDriverBy[] $regionSelectors
-     * @return $this;
+     * @return ISeleniumCheckTarget An updated copy of the settings object.
      */
     public function ignoreBySelector(...$regionSelectors)
     {
@@ -144,12 +144,12 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
             parent::ignore(new RegionsBySelector($selector));
         }
 
-        return $this;
+        return clone $this;
     }
 
     /**
      * @param array $regions
-     * @return $this;
+     * @return ISeleniumCheckTarget An updated copy of the settings object.
      */
     public function ignore(...$regions)
     {
@@ -161,7 +161,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
             }
         }
 
-        return $this;
+        return clone $this;
     }
 
     /**
