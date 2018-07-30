@@ -505,7 +505,7 @@ abstract class EyesBase
      */
     protected function getVersion()
     {
-        return "1.2.7";
+        return "1.2.8";
     }
 
     /**
