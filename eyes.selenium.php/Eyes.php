@@ -27,11 +27,10 @@ use Applitools\ScaleProviderIdentityFactory;
 use Applitools\Selenium\fluent\FrameLocator;
 use Applitools\Selenium\fluent\ISeleniumCheckTarget;
 use Applitools\Selenium\fluent\Target;
-use Applitools\SessionType;
 use Applitools\SimplePropertyHandler;
+use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriver;
-use Facebook\WebDriver\WebDriverAction;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverElement;
 
@@ -294,6 +293,7 @@ class Eyes extends EyesBase
      * @param $sessionType string          The type of test (e.g.,  standard test / visual performance test).
      * @return EyesWebDriver|WebDriver     A wrapped WebDriver which enables Eyes trigger recording and frame handling.
      * @throws EyesException
+     * @throws \Exception
      */
     public function open(WebDriver $driver, $appName, $testName, RectangleSize $viewportSize = null, $sessionType = null)
     {
@@ -324,6 +324,10 @@ class Eyes extends EyesBase
         return $this->driver;
     }
 
+    /**
+     * @param $driver
+     * @throws EyesException
+     */
     private function initDriver($driver)
     {
         if ($driver instanceof RemoteWebDriver) {
@@ -403,6 +407,10 @@ class Eyes extends EyesBase
      * @param $viewportSize RectangleSize  The required browser's viewport size
      *                                    (i.e., the visible part of the document's body) or
      *                                    {@code null} to use the current window's viewport.
+     * @throws EyesException
+     * @throws TestFailedException
+     * @throws \Applitools\Exceptions\NewTestException
+     * @throws \Exception
      */
     public function testWindow(WebDriver $driver, $appName = null, $testName, RectangleSize $viewportSize = null)
     {
@@ -416,56 +424,6 @@ class Eyes extends EyesBase
     }
 
     /**
-     * Run a visual performance test.
-     * @param $driver WebDriver The driver to use.
-     * @param $appName string The name of the application being tested.
-     * @param $testName string The test name.
-     * @param $action WebDriverAction Action to be performed in parallel to starting the test.
-     * @param $deadline int The expected time until the application should have been loaded. (Seconds)
-     * @param $timeout int The maximum time until the application should have been loaded. (Seconds)
-     * @param RectangleSize $viewportSize
-     */
-    public function testResponseTime(WebDriver $driver, $appName,
-                                     $testName, WebDriverAction $action = null,
-                                     $deadline, $timeout, RectangleSize $viewportSize)
-    {
-        if (empty($deadline)) {
-            $deadline = self::RESPONSE_TIME_DEFAULT_DEADLINE;
-        }
-        if (empty($timeout)) {
-            $timeout = $deadline + self::RESPONSE_TIME_DEFAULT_DIFF_FROM_DEADLINE;
-        }
-        if (!empty($viewportSize)) {
-            $this->setViewportSize($viewportSize, $driver);
-        }
-        $this->open($driver, $appName, $testName, SessionType::PROGRESSION);
-        $runnableAction = null;
-        if ($action != null) {
-            $runnableAction = null;/*new Runnable() {
-                public void run() {
-                action.drive(driver);
-                }
-            };*/
-        }
-        $regionProvider = new RegionProvider();
-        $result = parent::testResponseTimeBase($regionProvider, $runnableAction, $deadline, $timeout, 5000);
-
-        $this->logger->log("Checking if deadline was exceeded...");
-        $deadlineExceeded = true;
-        if ($result != null) {
-            $tao = /*TimedAppOutput*/
-                $result->getMatchWindowData()->getAppOutput();
-            $resultElapsed = $tao->getElapsed();
-            $deadlineMs = $deadline * 1000;
-            $this->logger->log(sprintf("Deadline: %d, Elapsed time for match: %d", $deadlineMs, $resultElapsed));
-            $deadlineExceeded = $resultElapsed > $deadlineMs;
-        }
-        $this->logger->log("Deadline exceeded? $deadlineExceeded");
-
-        $this->closeResponseTime($deadlineExceeded);
-    }
-
-    /**
      * @return EyesWebDriver
      */
     public function getDriver()
@@ -476,6 +434,10 @@ class Eyes extends EyesBase
     /**
      * @param string $name
      * @param ICheckSettings $checkSettings
+     * @throws Exceptions\EyesDriverOperationException
+     * @throws EyesException
+     * @throws TestFailedException
+     * @throws \Facebook\WebDriver\Exception\NoSuchFrameException
      */
     public function check($name, ICheckSettings $checkSettings)
     {
@@ -529,6 +491,8 @@ class Eyes extends EyesBase
     /**
      * @param ISeleniumCheckTarget $checkTarget
      * @return int;
+     * @throws EyesException
+     * @throws \Facebook\WebDriver\Exception\NoSuchFrameException
      */
     private function switchToFrame(ISeleniumCheckTarget $checkTarget)
     {
@@ -549,6 +513,8 @@ class Eyes extends EyesBase
     /**
      * @param FrameLocator $frameTarget
      * @return bool
+     * @throws EyesException
+     * @throws \Facebook\WebDriver\Exception\NoSuchFrameException
      */
     private function switchToFrameByLocator(FrameLocator $frameTarget)
     {
@@ -579,6 +545,8 @@ class Eyes extends EyesBase
      * @param ICheckSettings $checkSettings
      * @param int $switchedToFrameCount
      * @return int;
+     * @throws EyesException
+     * @throws TestFailedException
      */
     private function checkFrameFluent($name, ICheckSettings $checkSettings, $switchedToFrameCount)
     {
@@ -607,7 +575,7 @@ class Eyes extends EyesBase
     /**
      * @param $name
      * @param ICheckSettings $checkSettings
-     * @return string
+     * @throws TestFailedException
      */
     private function checkFullFrameOrElement($name, ICheckSettings $checkSettings)
     {
@@ -626,6 +594,9 @@ class Eyes extends EyesBase
      * @param WebDriverElement $targetElement
      * @param string $name
      * @param ICheckSettings $checkSettings
+     * @throws Exceptions\EyesDriverOperationException
+     * @throws EyesException
+     * @throws TestFailedException
      */
     private function checkElement_(WebDriverElement $targetElement, $name, ICheckSettings $checkSettings)
     {
@@ -692,8 +663,7 @@ class Eyes extends EyesBase
      * @param WebDriverElement $element A non empty region representing the screen region to check.
      * @param string $name An optional name to be associated with the snapshot.
      * @param ICheckSettings $checkSettings
-     * @return Region
-     * @throws \Exception
+     * @throws TestFailedException
      */
     private function checkRegion_(WebDriverElement $element, $name, ICheckSettings $checkSettings)
     {
@@ -770,7 +740,9 @@ class Eyes extends EyesBase
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
      * @param string $tag An optional tag to be associated with the screenshot.
      * @param  bool $stitchContent
-     * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
+     * @throws EyesException
+     * @throws TestFailedException
+     * @throws \Exception
      */
     public function checkRegionBySelector(WebDriverBy $selector, $matchTimeout = null, $tag, $stitchContent = false)
     {
@@ -791,6 +763,9 @@ class Eyes extends EyesBase
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
      * @param string $tag An optional tag to be associated with the snapshot.
      * @param bool $stitchContent
+     * @throws EyesException
+     * @throws TestFailedException
+     * @throws \Exception
      */
     public function checkRegionByElement(WebDriverElement $element, $matchTimeout = -1, $tag, $stitchContent = false)
     {
@@ -826,6 +801,12 @@ class Eyes extends EyesBase
         $this->logger->verbose("Done!");
     }
 
+    /**
+     * @param $element
+     * @return EyesRemoteWebElement|\Facebook\WebDriver\Remote\RemoteWebElement|WebDriverElement|null
+     * @throws EyesException
+     * @throws \Exception
+     */
     private function findElementMixed($element)
     {
         $targetElement = null;
@@ -853,6 +834,10 @@ class Eyes extends EyesBase
      * @param string $tag An optional tag to be associated with the snapshot.
      * @param bool $stitchContent If {@code true}, stitch the internal content of the region (i.e., perform {@link #checkElement(By, int, String)} on the region.
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
+     * @throws EyesException
+     * @throws TestFailedException
+     * @throws \Exception
+     * @throws \Facebook\WebDriver\Exception\NoSuchFrameException
      */
     public function checkRegionInFrame($frame, $element, $tag = null, $stitchContent = false, $matchTimeout = null)
     {
@@ -972,6 +957,10 @@ class Eyes extends EyesBase
      * @param $frameNameOrId string The name or id of the frame to check. (The same name/id as would be used in a call to driver.switchTo().frame()).
      * @param $matchTimeout int The amount of time to retry matching. (Milliseconds)
      * @param $tag string An optional tag to be associated with the match.
+     * @throws EyesException
+     * @throws TestFailedException
+     * @throws \Exception
+     * @throws \Facebook\WebDriver\Exception\NoSuchFrameException
      */
     public function checkFrame($frameNameOrId, $matchTimeout, $tag)
     {
@@ -1077,6 +1066,10 @@ class Eyes extends EyesBase
      *                      the region (i.e., perform
      *                      {@link #checkElement(By, int, String)} on the
      *                      region.
+     * @throws EyesException
+     * @throws TestFailedException
+     * @throws \Exception
+     * @throws \Facebook\WebDriver\Exception\NoSuchFrameException
      */
     public function checkRegionInFramePath($framePath = array(), WebDriverBy $selector,
                                            $matchTimeout = null, $tag,
@@ -1118,7 +1111,10 @@ class Eyes extends EyesBase
      * @param mixed $element The element to check.
      * @param int $matchTimeout The amount of time to retry matching. (Milliseconds)
      * @param string $tag An optional tag to be associated with the snapshot.
+     * @throws Exceptions\EyesDriverOperationException
+     * @throws EyesException
      * @throws TestFailedException if a mismatch is detected and immediate failure reports are enabled
+     * @throws \Exception
      */
     protected function checkElement($element, $matchTimeout = null, $tag = null)
     {
@@ -1198,6 +1194,7 @@ class Eyes extends EyesBase
      *
      * @param string $action Mouse action.
      * @param WebDriverElement $element The WebElement on which the click was called.
+     * @throws \Applitools\Exceptions\CoordinatesTypeConversionException
      */
     public function addMouseTriggerElement($action, WebDriverElement $element)
     {

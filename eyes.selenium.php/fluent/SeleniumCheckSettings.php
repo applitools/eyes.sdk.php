@@ -18,7 +18,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     /** @var WebDriverElement */
     private $targetElement;
 
-    /** @var FrameLocator */
+    /** @var FrameLocator[] */
     private $frameChain = [];
 
 
@@ -181,7 +181,7 @@ class SeleniumCheckSettings extends CheckSettings implements ISeleniumCheckTarge
     }
 
     /**
-     * @return FrameLocator
+     * @return FrameLocator[]
      */
     function getFrameChain()
     {
