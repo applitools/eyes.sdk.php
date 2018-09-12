@@ -50,8 +50,7 @@ class MatchWindowTask
     public function __construct(Logger $logger,
                                 ServerConnector $serverConnector,
                                 RunningSession $runningSession, $retryTimeout,
-                                EyesBase $eyes,
-                                AppOutputProvider $appOutputProvider)
+                                AppOutputProvider $appOutputProvider, EyesBase $eyes = null)
     {
         ArgumentGuard::notNull($serverConnector, "serverConnector");
         ArgumentGuard::notNull($runningSession, "runningSession");
