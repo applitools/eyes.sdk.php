@@ -52,4 +52,14 @@ class EyesSeleniumAgentSetup
     {
         return $this->eyes->getForceFullPageScreenshot();
     }
+
+    public function getCutProvider()
+    {
+        $this->eyes->getCutProvider();
+    }
+
+    public function getScaleProvider()
+    {
+        return $this->eyes->getScaleProvider();
+    }
 }
