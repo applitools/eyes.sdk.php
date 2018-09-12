@@ -1416,4 +1416,7 @@ abstract class EyesBase
         return $result;
     }
 
+    public function getAgentSetup(){
+        return null;
+    }
 }

@@ -1533,4 +1533,11 @@ class Eyes extends EyesBase
     {
         return $this->elementPositionProvider == null ? $this->positionProvider : $this->elementPositionProvider;
     }
+
+    public function getAgentSetup()
+    {
+        return new EyesSeleniumAgentSetup($this, $this->driver);
+    }
+
+
 }
