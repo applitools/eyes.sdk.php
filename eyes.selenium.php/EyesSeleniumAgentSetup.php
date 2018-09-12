@@ -6,51 +6,24 @@
 namespace Applitools\Selenium;
 
 use Applitools\Selenium\WebDriverInfo;
+use JsonSerializable;
 
-class EyesSeleniumAgentSetup
+class EyesSeleniumAgentSetup implements JsonSerializable
 {
     private $remoteWebDriver;
     private $eyes;
+    private $webDriverInfo;
 
     public function __construct(Eyes $eyes, EyesWebDriver $driver)
     {
         $this->eyes = $eyes;
         $this->remoteWebDriver = $driver->getRemoteWebDriver();
-    }
-
-    public function EyesSeleniumAgentSetup()
-    {
-        return $this->remoteWebDriver;
-    }
-
-    public function getSeleniumSessionId()
-    {
-        return $this->remoteWebDriver->getSessionId()->toString();
+        $this->webDriverInfo = new WebDriverInfo($this->remoteWebDriver);
     }
 
     public function getWebDriver()
     {
-        return new WebDriverInfo($this->remoteWebDriver);
-    }
-
-    public function getDevicePixelRatio()
-    {
-        return $this->eyes->getDevicePixelRatio();
-    }
-
-    public function getStitchMode()
-    {
-        return $this->eyes->getStitchMode();
-    }
-
-    public function getHideScrollbars()
-    {
-        return $this->eyes->getHideScrollbars();
-    }
-
-    public function getForceFullPageScreenshot()
-    {
-        return $this->eyes->getForceFullPageScreenshot();
+        return $this->webDriverInfo;
     }
 
     public function getCutProvider()
@@ -61,5 +34,25 @@ class EyesSeleniumAgentSetup
     public function getScaleProvider()
     {
         return $this->eyes->getScaleProvider();
+    }
+    /**
+     * Specify data which should be serialized to JSON
+     * @link https://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        return [
+            "forceFullPageScreenshot" => $this->eyes->getForceFullPageScreenshot(),
+            "stitchMode" => $this->eyes->getStitchMode(),
+            "hideScrollbars" => $this->eyes->getHideScrollbars(),
+            "devicePixelRatio" => $this->eyes->getDevicePixelRatio(),
+            "scaleProvider" => $this->eyes->getScaleProvider(),
+            "webDriver" => json_encode($this->getWebDriver()),
+            "cutProvider" => $this->getCutProvider(),
+            "seleniumSessionId" => $this->remoteWebDriver->getSessionID()
+        ];
     }
 }
