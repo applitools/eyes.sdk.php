@@ -1539,5 +1539,15 @@ class Eyes extends EyesBase
         return new EyesSeleniumAgentSetup($this, $this->driver);
     }
 
+    public function getScaleProvider()
+    {
+        return get_class($this->scaleProviderHandler);
+    }
+
+    public function getCutProvider()
+    {
+        return get_class($this->cutProviderHandler);
+    }
+
 
 }

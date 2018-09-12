@@ -1419,4 +1419,12 @@ abstract class EyesBase
     public function getAgentSetup(){
         return null;
     }
+
+    public function getCutProvider(){
+        return "";
+    }
+
+    public function getScaleProvider(){
+        return "";
+    }
 }
