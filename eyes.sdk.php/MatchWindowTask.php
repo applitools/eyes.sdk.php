@@ -36,16 +36,21 @@ class MatchWindowTask
     /** @var Region */
     private $lastScreenshotBounds;
 
+    /** @var EyesBase */
+    private $eyes;
+
     /**
      * @param $logger Logger A logger instance.
      * @param $serverConnector ServerConnector Our gateway to the agent
      * @param $runningSession RunningSession The running session in which we should match the window
      * @param $retryTimeout int The default total time we tell the agent to ignore mismatches.
+     * @param EyesBase $eyes eyes is  used for getting the agent setup
      * @param $appOutputProvider AppOutputProvider A callback for getting the application output when performing match
      */
     public function __construct(Logger $logger,
                                 ServerConnector $serverConnector,
                                 RunningSession $runningSession, $retryTimeout,
+                                EyesBase $eyes,
                                 AppOutputProvider $appOutputProvider)
     {
         ArgumentGuard::notNull($serverConnector, "serverConnector");
@@ -59,6 +64,7 @@ class MatchWindowTask
         $this->defaultRetryTimeout = $retryTimeout/* 1000*/
         ;
         $this->appOutputProvider = $appOutputProvider;
+        $this->eyes = $eyes;
     }
 
     /**
@@ -76,11 +82,22 @@ class MatchWindowTask
         AppOutputWithScreenshot $appOutput,
         $tag, $ignoreMismatch, ImageMatchSettings $imageMatchSettings)
     {
+
+        //Get agent setup
+        $agentSetupJsonStr = "";
+        if (!empty($this->eyes)) {
+            $agentSetup = $this->eyes->getAgentSetup();
+            if (!empty($agentSetup)) {
+                $agentSetupJsonStr .= json_encode($agentSetup);
+                $this->logger->log("AgentSetup: $agentSetupJsonStr");
+            }
+        }
+
         // Prepare match data.
         $data = new MatchWindowData($userInputs, $appOutput->getAppOutput(), $tag, $ignoreMismatch,
             new Options($tag, $userInputs, $ignoreMismatch,
                 false, false, false,
-                $imageMatchSettings));
+                $imageMatchSettings), $agentSetupJsonStr);
         // Perform match.
         return $this->serverConnector->matchWindow($this->runningSession, $data);
     }
