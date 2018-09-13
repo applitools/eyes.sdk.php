@@ -1420,11 +1420,19 @@ abstract class EyesBase
         return null;
     }
 
-    public function getCutProvider(){
+    public function getScaleProvider()
+    {
+        if (!empty($this->scaleProviderHandler)) {
+            return get_class($this->scaleProviderHandler);
+        }
         return "";
     }
 
-    public function getScaleProvider(){
+    public function getCutProvider()
+    {
+        if (!empty($this->cutProviderHandler)) {
+            return get_class($this->cutProviderHandler);
+        }
         return "";
     }
 }
