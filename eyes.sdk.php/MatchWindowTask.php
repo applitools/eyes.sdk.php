@@ -264,9 +264,7 @@ class MatchWindowTask
                                     $ignoreMismatch, ICheckSettingsInternal $checkSettingsInternal, EyesBase $eyes,
                                     $retryTimeout)
     {
-$this->logger->verbose("1 - takeScreenshot($userInputs, Region $region, $tag, $shouldMatchWindowRunOnceOnTimeout,
-                                    $ignoreMismatch, ICheckSettingsInternal $checkSettingsInternal, EyesBase $eyes,
-                                    $retryTimeout)");
+$this->logger->verbose("1 - takeScreenshot()");
         $elapsedTimeStart = microtime(true);
 
         /** @var EyesScreenshot $screenshot */
@@ -275,15 +273,15 @@ $this->logger->verbose("1 - takeScreenshot($userInputs, Region $region, $tag, $s
         // If the wait to load time is 0, or "run once" is true,
         // we perform a single check window.
         if (0 == $retryTimeout || $shouldMatchWindowRunOnceOnTimeout) {
-$this->logger->verbose("2 - 0 == $retryTimeout || $shouldMatchWindowRunOnceOnTimeout");
+$this->logger->verbose("2 - 0 == retry || ahouldMatchWindowRunOnceOnTimeout");
             if ($shouldMatchWindowRunOnceOnTimeout) {
 $this->logger->verbose("3 - $shouldMatchWindowRunOnceOnTimeout");
                 GeneralUtils::sleep($retryTimeout);
             }
-$this->logger->verbose("tryTakeScreenshot($userInputs, $region, $tag, $ignoreMismatch, $checkSettingsInternal, $eyes)");
+$this->logger->verbose("4 - tryTakeScreenshot()");
             $screenshot = $this->tryTakeScreenshot($userInputs, $region, $tag, $ignoreMismatch, $checkSettingsInternal, $eyes);
         } else {
-$this->logger->verbose("retryTakingScreenshot($userInputs, $region, $tag, $ignoreMismatch, $checkSettingsInternal, $eyes)");
+$this->logger->verbose("5 - retryTakingScreenshot()");
             $screenshot = $this->retryTakingScreenshot($userInputs, $region, $tag, $ignoreMismatch, $checkSettingsInternal, $eyes, $retryTimeout);
         }
 
