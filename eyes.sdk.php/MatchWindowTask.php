@@ -82,7 +82,6 @@ class MatchWindowTask
         $tag, $ignoreMismatch, ImageMatchSettings $imageMatchSettings)
     {
         $this->logger("performMatch()");
-        echo "performMatch()";
         //Get agent setup
         $agentSetupJsonStr = "";
         if (!empty($this->eyes)) {
@@ -314,6 +313,7 @@ $this->logger->verbose("5 - retryTakingScreenshot()");
 
         $retry = microtime(true) - $start;
 
+        $this->logger->verbose("retry < retryTimeout - ".($retry < $retryTimeout));
         // The match retry loop.
         while ($retry < $retryTimeout) {
 
