@@ -49,7 +49,7 @@ class EyesSeleniumAgentSetup implements JsonSerializable
             "hideScrollbars" => $this->eyes->getHideScrollbars(),
             "devicePixelRatio" => $this->eyes->getDevicePixelRatio(),
             "scaleProvider" => $this->eyes->getScaleProvider(),
-            "webDriver" => json_encode($this->getWebDriver()),
+            "webDriver" => $this->getWebDriver(),
             "cutProvider" => $this->getCutProvider(),
             "seleniumSessionId" => $this->remoteWebDriver->getSessionID()
         ];
