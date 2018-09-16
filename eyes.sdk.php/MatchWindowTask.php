@@ -44,13 +44,12 @@ class MatchWindowTask
      * @param $serverConnector ServerConnector Our gateway to the agent
      * @param $runningSession RunningSession The running session in which we should match the window
      * @param $retryTimeout int The default total time we tell the agent to ignore mismatches.
-     * @param EyesBase $eyes eyes is  used for getting the agent setup
      * @param $appOutputProvider AppOutputProvider A callback for getting the application output when performing match
      */
     public function __construct(Logger $logger,
                                 ServerConnector $serverConnector,
                                 RunningSession $runningSession, $retryTimeout,
-                                AppOutputProvider $appOutputProvider, EyesBase $eyes = null)
+                                AppOutputProvider $appOutputProvider)
     {
         ArgumentGuard::notNull($serverConnector, "serverConnector");
         ArgumentGuard::notNull($runningSession, "runningSession");
@@ -63,7 +62,6 @@ class MatchWindowTask
         $this->defaultRetryTimeout = $retryTimeout/* 1000*/
         ;
         $this->appOutputProvider = $appOutputProvider;
-        $this->eyes = $eyes;
     }
 
     /**
@@ -74,20 +72,20 @@ class MatchWindowTask
      * @param string $tag Optional tag to be associated with the match (can be {@code null}).
      * @param bool $ignoreMismatch Whether to instruct the server to ignore the match attempt in case of a mismatch.
      * @param ImageMatchSettings $imageMatchSettings
+     * @param EyesBase $eyes eyes instance for getting AgentSetup JSON
      * @return MatchResult The match result.
      */
     protected function performMatch(
         $userInputs,
         AppOutputWithScreenshot $appOutput,
-        $tag, $ignoreMismatch, ImageMatchSettings $imageMatchSettings)
+        $tag, $ignoreMismatch, ImageMatchSettings $imageMatchSettings, EyesBase $eyes = null)
     {
         $this->logger->verbose("performMatch()");
         //Get agent setup
         $agentSetupJsonStr = "";
-        $this->logger->verbose($this->eyes);
-        if (!empty($this->eyes)) {
+        if (!empty($eyes)) {
             $this->logger->verbose("Eyes not empty for agent setup retrieve");
-            $agentSetup = $this->eyes->getAgentSetup();
+            $agentSetup = $eyes->getAgentSetup();
             if (!empty($agentSetup)) {
                 $agentSetupJsonStr .= json_encode($agentSetup);
                 $this->logger->verbose("AgentSetup: $agentSetupJsonStr");
@@ -350,15 +348,10 @@ $this->logger->verbose("5 - retryTakingScreenshot()");
                                        $ignoreMismatch,
                                        ICheckSettingsInternal $checkSettingsInternal, EyesBase $eyes)
     {
-$this->logger->verbose("Test Michael 1");
         $appOutput = $this->appOutputProvider->getAppOutput($region, $this->lastScreenshot);
-$this->logger->verbose("Test Michael 2");
         $screenshot = $appOutput->getScreenshot();
-$this->logger->verbose("Test Michael 3");
         $matchSettings = $this->createImageMatchSettings($checkSettingsInternal, $eyes, $screenshot);
-$this->logger->verbose("Test Michael 4");
-        $this->matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch, $matchSettings);
-$this->logger->verbose("Test Michael 5");
+        $this->matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch, $matchSettings, $eyes);
         return $screenshot;
     }
 
