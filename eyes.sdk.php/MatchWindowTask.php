@@ -84,6 +84,7 @@ class MatchWindowTask
         $this->logger->verbose("performMatch()");
         //Get agent setup
         $agentSetupJsonStr = "";
+        $this->logger->verbose($this->eyes);
         if (!empty($this->eyes)) {
             $this->logger->verbose("Eyes not empty for agent setup retrieve");
             $agentSetup = $this->eyes->getAgentSetup();
