@@ -349,10 +349,15 @@ $this->logger->verbose("5 - retryTakingScreenshot()");
                                        $ignoreMismatch,
                                        ICheckSettingsInternal $checkSettingsInternal, EyesBase $eyes)
     {
+$this->logger->verbose("Test Michael 1");
         $appOutput = $this->appOutputProvider->getAppOutput($region, $this->lastScreenshot);
+$this->logger->verbose("Test Michael 2");
         $screenshot = $appOutput->getScreenshot();
+$this->logger->verbose("Test Michael 3");
         $matchSettings = $this->createImageMatchSettings($checkSettingsInternal, $eyes, $screenshot);
+$this->logger->verbose("Test Michael 4");
         $this->matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch, $matchSettings);
+$this->logger->verbose("Test Michael 5");
         return $screenshot;
     }
 
