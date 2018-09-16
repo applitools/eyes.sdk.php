@@ -277,7 +277,7 @@ $this->logger->verbose("1 - takeScreenshot($userInputs, Region $region, $tag, $s
         if (0 == $retryTimeout || $shouldMatchWindowRunOnceOnTimeout) {
 $this->logger->verbose("2 - 0 == $retryTimeout || $shouldMatchWindowRunOnceOnTimeout");
             if ($shouldMatchWindowRunOnceOnTimeout) {
-                $this->logger->verbose("3 - $shouldMatchWindowRunOnceOnTimeout");
+$this->logger->verbose("3 - $shouldMatchWindowRunOnceOnTimeout");
                 GeneralUtils::sleep($retryTimeout);
             }
 $this->logger->verbose("tryTakeScreenshot($userInputs, $region, $tag, $ignoreMismatch, $checkSettingsInternal, $eyes)");
