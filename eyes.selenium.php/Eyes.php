@@ -458,6 +458,7 @@ class Eyes extends EyesBase
 
         if ($targetRegion != null) {
             $regionProvider = new RegionProvider($targetRegion);
+$this->logger->verbose("checkWindowBase(1)");
             $this->checkWindowBase($regionProvider, $name, false, $checkSettings);
         } else if ($checkSettings instanceof ISeleniumCheckTarget) {
             $targetSelector = $checkSettings->getTargetSelector();
@@ -467,13 +468,18 @@ class Eyes extends EyesBase
             }
             if ($targetElement != null) {
                 if ($this->stitchContent) {
+$this->logger->verbose("checkElement_(2)");
                     $this->checkElement_($targetElement, $name, $checkSettings);
                 } else {
+$this->logger->verbose("checkRegion_(3)");
                     $this->checkRegion_($targetElement, $name, $checkSettings);
                 }
             } else if (count($checkSettings->getFrameChain()) > 0) {
+$this->logger->verbose("checkFrameFluent(4)");
                 $switchedToFrameCount = $this->checkFrameFluent($name, $checkSettings, $switchedToFrameCount);
             } else {
+
+$this->logger->verbose("checkWindowBase(5)");
                 $this->checkWindowBase(NullRegionProvider::getInstance(), $name, false, $checkSettings);
             }
         }
