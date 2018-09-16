@@ -39,7 +39,6 @@ class WebDriverInfo implements JsonSerializable
      */
     public function jsonSerialize()
     {
-        echo "jsonSerialize(webDriverInfo)";
         return [
             "name" => get_class($this->remoteWebDriver),
             "capabilities" => [
