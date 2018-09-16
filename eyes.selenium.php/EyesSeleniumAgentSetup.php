@@ -5,7 +5,6 @@
 
 namespace Applitools\Selenium;
 
-use Applitools\Selenium\WebDriverInfo;
 use JsonSerializable;
 
 class EyesSeleniumAgentSetup implements JsonSerializable
