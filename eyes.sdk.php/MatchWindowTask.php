@@ -81,10 +81,12 @@ class MatchWindowTask
         AppOutputWithScreenshot $appOutput,
         $tag, $ignoreMismatch, ImageMatchSettings $imageMatchSettings)
     {
-
+        $this->logger("performMatch()");
+        echo "performMatch()";
         //Get agent setup
         $agentSetupJsonStr = "";
         if (!empty($this->eyes)) {
+            $this->logger->log("Eyes not empty for agent setup retrieve");
             $agentSetup = $this->eyes->getAgentSetup();
             if (!empty($agentSetup)) {
                 $agentSetupJsonStr .= json_encode($agentSetup);
