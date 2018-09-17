@@ -48,7 +48,7 @@ class MatchWindowData
         $this->tag = $tag;
         $this->ignoreMismatch = $ignoreMismatch;
         $this->options = $options;
-        $this->agentSetupStr = "" . $agentSetupAsJson;
+        $this->agentSetupStr = $agentSetupAsJson;
     }
 
     public function getAppOutput()

@@ -10,12 +10,6 @@ use Facebook\WebDriver\WebDriverBy;
 
 abstract class TestFluentApi extends TestSetup
 {
-
-    public function testAgentSetup(){
-        $this->init(__FUNCTION__);
-        $eyesSeleniumAgentSetup = $this->eyes->getAgentSetup();
-        echo json_encode($eyesSeleniumAgentSetup);
-    }
     /**
      * @test
      * @doesNotPerformAssertions
