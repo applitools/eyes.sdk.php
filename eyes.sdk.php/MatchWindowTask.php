@@ -69,18 +69,31 @@ class MatchWindowTask
      * @param string $tag Optional tag to be associated with the match (can be {@code null}).
      * @param bool $ignoreMismatch Whether to instruct the server to ignore the match attempt in case of a mismatch.
      * @param ImageMatchSettings $imageMatchSettings
+     * @param EyesBase $eyes eyes instance for getting AgentSetup JSON
      * @return MatchResult The match result.
      */
     protected function performMatch(
         $userInputs,
         AppOutputWithScreenshot $appOutput,
-        $tag, $ignoreMismatch, ImageMatchSettings $imageMatchSettings)
+        $tag, $ignoreMismatch, ImageMatchSettings $imageMatchSettings, EyesBase $eyes = null)
     {
+        $this->logger->verbose("performMatch()");
+        //Get agent setup
+        $agentSetupJsonStr = "";
+        if (!empty($eyes)) {
+            $this->logger->verbose("Eyes not empty for agent setup retrieve");
+            $agentSetup = $eyes->getAgentSetup();
+            if (!empty($agentSetup)) {
+                $agentSetupJsonStr .= json_encode($agentSetup);
+                $this->logger->verbose("AgentSetup: $agentSetupJsonStr");
+            }
+        }
+
         // Prepare match data.
         $data = new MatchWindowData($userInputs, $appOutput->getAppOutput(), $tag, $ignoreMismatch,
             new Options($tag, $userInputs, $ignoreMismatch,
                 false, false, false,
-                $imageMatchSettings));
+                $imageMatchSettings), $agentSetupJsonStr);
         // Perform match.
         return $this->serverConnector->matchWindow($this->runningSession, $data);
     }
@@ -330,7 +343,7 @@ class MatchWindowTask
         $appOutput = $this->appOutputProvider->getAppOutput($region, $this->lastScreenshot);
         $screenshot = $appOutput->getScreenshot();
         $matchSettings = $this->createImageMatchSettings($checkSettingsInternal, $eyes, $screenshot);
-        $this->matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch, $matchSettings);
+        $this->matchResult = $this->performMatch($userInputs, $appOutput, $tag, $ignoreMismatch, $matchSettings, $eyes);
         return $screenshot;
     }
 
