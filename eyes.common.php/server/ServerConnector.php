@@ -231,7 +231,8 @@ class ServerConnector implements ServerConnectorInterface
                     "imageMatchSettings" => $this->getImageMatchSettingsAsFormattedArray($matchSettings),
                     "userInputs" => $options->getUserInputsAsFormattedArray()
                 ],
-                "userInputs" => []
+                "userInputs" => [],
+                "agentSetup" => $matchData->getAgentSetupStr()
             ];
             $json = json_encode($params);
 
