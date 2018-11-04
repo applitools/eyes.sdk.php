@@ -556,7 +556,7 @@ class Eyes extends EyesBase
 //            $imageProvider = new TakesScreenshotImageProvider($this->logger, $this->driver);
 //            $regionProvider = new FullFrameOrElementRegionProvider($this->logger, $this, $imageProvider);
 
-            $this->checkWindow($regionProvider, $name, false, $checkSettings);
+            parent::checkWindowBase($regionProvider, $name, false, $checkSettings);
         }
         return $switchedToFrameCount;
     }
@@ -574,7 +574,7 @@ class Eyes extends EyesBase
 
         $regionProvider = new FullFrameOrElementRegionProvider($this->logger, $this, $this->imageProvider);
 
-        $this->checkWindow($regionProvider, $name, false, $checkSettings);
+        parent::checkWindowBase($regionProvider, $name, false, $checkSettings);
 
         $this->checkFrameOrElement = false;
     }
@@ -629,7 +629,7 @@ class Eyes extends EyesBase
 
             $this->logger->verbose("Element region: $this->regionToCheck");
 
-            $this->checkWindow(NullRegionProvider::getInstance(), $name, false, $checkSettings);
+            parent::checkWindowBase(NullRegionProvider::getInstance(), $name, false, $checkSettings);
         } finally {
             if ($originalOverflow != null) {
                 $element->setOverflow($originalOverflow);
@@ -664,7 +664,7 @@ class Eyes extends EyesBase
         $regionProvider = new RegionProvider(Region::CreateFromLTWH($p->getX(), $p->getY(), $s->getWidth(), $s->getHeight()));
         $regionProvider->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
 
-        $this->checkWindow($regionProvider, $name, false, $checkSettings);
+        parent::checkWindowBase($regionProvider, $name, false, $checkSettings);
 
         $this->logger->verbose("Done! trying to scroll back to original position...");
     }
