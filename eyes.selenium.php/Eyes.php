@@ -383,19 +383,8 @@ class Eyes extends EyesBase
      */
     public function checkWindow($tag, $matchTimeout = null)
     {
-        if (empty($matchTimeout)) {
-            $matchTimeout = self::USE_DEFAULT_MATCH_TIMEOUT;
-        }
-
-        if ($this->getIsDisabled()) {
-            $this->logger->log(sprintf("CheckWindow(%d, '%s'): Ignored", $matchTimeout, $tag));
-            return;
-        }
         $this->logger->log(sprintf("CheckWindow(%d, '%s')", $matchTimeout, $tag));
-
-        $checkSettings = new CheckSettings();
-        $checkSettings->timeout($matchTimeout);
-        parent::checkWindowBase(NullRegionProvider::getInstance(), $tag, false, $checkSettings);
+        $this->check($tag, Target::window()->timeout($matchTimeout));
     }
 
     /**
@@ -567,7 +556,7 @@ class Eyes extends EyesBase
 //            $imageProvider = new TakesScreenshotImageProvider($this->logger, $this->driver);
 //            $regionProvider = new FullFrameOrElementRegionProvider($this->logger, $this, $imageProvider);
 
-            $this->checkWindowBase($regionProvider, $name, false, $checkSettings);
+            $this->checkWindow($regionProvider, $name, false, $checkSettings);
         }
         return $switchedToFrameCount;
     }
@@ -585,7 +574,7 @@ class Eyes extends EyesBase
 
         $regionProvider = new FullFrameOrElementRegionProvider($this->logger, $this, $this->imageProvider);
 
-        $this->checkWindowBase($regionProvider, $name, false, $checkSettings);
+        $this->checkWindow($regionProvider, $name, false, $checkSettings);
 
         $this->checkFrameOrElement = false;
     }
@@ -640,7 +629,7 @@ class Eyes extends EyesBase
 
             $this->logger->verbose("Element region: $this->regionToCheck");
 
-            $this->checkWindowBase(NullRegionProvider::getInstance(), $name, false, $checkSettings);
+            $this->checkWindow(NullRegionProvider::getInstance(), $name, false, $checkSettings);
         } finally {
             if ($originalOverflow != null) {
                 $element->setOverflow($originalOverflow);
@@ -675,7 +664,7 @@ class Eyes extends EyesBase
         $regionProvider = new RegionProvider(Region::CreateFromLTWH($p->getX(), $p->getY(), $s->getWidth(), $s->getHeight()));
         $regionProvider->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
 
-        $this->checkWindowBase($regionProvider, $name, false, $checkSettings);
+        $this->checkWindow($regionProvider, $name, false, $checkSettings);
 
         $this->logger->verbose("Done! trying to scroll back to original position...");
     }
@@ -721,7 +710,7 @@ class Eyes extends EyesBase
 
         $regionProvider = new RegionProvider($targetRegion);
         $regionProvider->setCoordinatesType(CoordinatesType::SCREENSHOT_AS_IS); //FIXME need to check
-        parent::checkWindowBase(
+        $this->checkWindow(
             $regionProvider,
             $tag,
             false,
@@ -790,7 +779,7 @@ class Eyes extends EyesBase
 
         $eyesElement = new EyesRemoteWebElement($this->logger, $this->driver, $element);
         $fullRegion = new FullRegionProvider($eyesElement);
-        parent::checkWindowBase(
+        $this->checkWindow(
             $fullRegion,
             $tag,
             false,
@@ -943,7 +932,7 @@ class Eyes extends EyesBase
 
             $this->regionToCheck->setCoordinatesType(CoordinatesType::SCREENSHOT_AS_IS);
 
-            parent::checkWindowBase($this->regionToCheck, $tag, false, Target::window()->timeout($matchTimeout));
+            $this->checkWindow($this->regionToCheck, $tag, false, Target::window()->timeout($matchTimeout));
         } finally {
             $this->checkFrameOrElement = false;
             $this->regionToCheck = null;
@@ -1147,7 +1136,7 @@ class Eyes extends EyesBase
 
             $this->regionToCheck = new RegionProvider($elementRegion);
             $this->regionToCheck->setCoordinatesType(CoordinatesType::CONTEXT_RELATIVE);
-            parent::checkWindowBase($this->regionToCheck, $tag, false, Target::window()->timeout($matchTimeout));
+            $this->checkWindow($this->regionToCheck, $tag, false, Target::window()->timeout($matchTimeout));
         } finally {
             if ($originalOverflow != null) {
                 $eyesElement->setOverflow($originalOverflow);
