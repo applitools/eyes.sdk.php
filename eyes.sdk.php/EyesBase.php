@@ -7,6 +7,7 @@ use Applitools\Exceptions\EyesException;
 use Applitools\Exceptions\OutOfBoundsException;
 use Applitools\Exceptions\TestFailedException;
 use Applitools\Exceptions\NewTestException;
+use Applitools\fluent\CheckSettings;
 use Applitools\fluent\ICheckSettings;
 use Applitools\fluent\ICheckSettingsInternal;
 
@@ -1394,7 +1395,7 @@ abstract class EyesBase
     {
         $retryTimeout = -1;
         $imageMatchSettings = null;
-        $checkSettingsInternal = null;
+        $checkSettingsInternal = new CheckSettings();
         if ($checkSettings instanceof ICheckSettingsInternal) {
             $checkSettingsInternal = $checkSettings;
             $retryTimeout = $checkSettings->getTimeout();
