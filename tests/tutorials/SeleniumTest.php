@@ -70,4 +70,5 @@ $test = new HelloWorld();
 try {
     $test->demo();
 } catch (Exception $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
