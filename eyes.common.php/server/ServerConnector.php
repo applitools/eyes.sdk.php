@@ -141,7 +141,7 @@ class ServerConnector implements ServerConnectorInterface
 
         try {
             $this->ch = curl_init();
-            curl_setopt($this->ch, CURLOPT_URL, "{$this->endPoint}.json?apiKey={$this->getApiKey()}");
+            curl_setopt($this->ch, CURLOPT_URL, "{$this->endPoint}?apiKey={$this->getApiKey()}");
 
             if ($this->proxySettings != null) {
                 curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
@@ -152,6 +152,7 @@ class ServerConnector implements ServerConnectorInterface
             curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $params);
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
+                    'Accept: application/json',
                     'Content-Type: application/json',
                     'Content-Length: ' . strlen($params),
                 )
@@ -210,7 +211,7 @@ class ServerConnector implements ServerConnectorInterface
         $this->logger->log("base64 data length: " . strlen($base64data));
         $this->logger->log("image data length: " . strlen($imageData));
 
-        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . ".json?apiKey=" . $this->getApiKey();
+        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . "?apiKey=" . $this->getApiKey();
 
         $options = $matchData->getOptions();
         $matchSettings = $options->getImageMatchSettings();
@@ -252,6 +253,7 @@ class ServerConnector implements ServerConnectorInterface
             curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $params);
             curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
+                    'Accept: application/json',
                     'Content-Type: application/octet-stream',
                     'Content-Length: ' . strlen($params),
                 )
@@ -292,7 +294,7 @@ class ServerConnector implements ServerConnectorInterface
     {
         ArgumentGuard::notNull($runningSession, "runningSession");
 
-        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . ".json?apiKey=" . $this->getApiKey();
+        $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . "?apiKey=" . $this->getApiKey();
 
         curl_reset($this->ch);
         curl_setopt($this->ch, CURLOPT_URL, "{$runningSessionsEndpoint}&aborted={$isAborted}&updateBaseline={$save}");
@@ -305,6 +307,7 @@ class ServerConnector implements ServerConnectorInterface
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, array(
+                'Accept: application/json',
                 'Content-Type: application/json',
             )
         );
