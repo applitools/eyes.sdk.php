@@ -296,8 +296,11 @@ class ServerConnector implements ServerConnectorInterface
 
         $runningSessionsEndpoint = $this->endPoint . '/' . $runningSession->getId() . "?apiKey=" . $this->getApiKey();
 
+        $isAbortedStr = $isAborted ? 'true' : 'false';
+        $saveStr = $save ? 'true' : 'false';
+
         curl_reset($this->ch);
-        curl_setopt($this->ch, CURLOPT_URL, "{$runningSessionsEndpoint}&aborted={$isAborted}&updateBaseline={$save}");
+        curl_setopt($this->ch, CURLOPT_URL, "{$runningSessionsEndpoint}&aborted={$isAbortedStr}&updateBaseline={$saveStr}");
 
         if ($this->proxySettings != null) {
             curl_setopt($this->ch, CURLOPT_PROXY, $this->proxySettings->getUri());
