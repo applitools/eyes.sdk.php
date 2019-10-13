@@ -676,7 +676,7 @@ abstract class EyesBase
 
     public static function getDefaultServerUrl()
     {
-        return "https://eyessdk.applitools.com";
+        return "https://eyesapi.applitools.com";
     }
 
     /** Superseded by {@link #setHostOS(String)} and {@link #setHostApp (String)}.
