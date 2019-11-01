@@ -9,7 +9,10 @@ dist: trusty
 
 addons:
   chrome: stable
-
+  apt:
+    packages:
+      - chromium-chromedriver
+      
 before_install:
   - export APPLITOOLS_BATCH_ID=`echo $TRAVIS_COMMIT`
   - echo $APPLITOOLS_BATCH_ID
