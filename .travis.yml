@@ -1,8 +1,16 @@
 language: php
+
 php:
   - '7.2'
+
 # Use the faster container based infrastructure.
 sudo: false
+
+dist: trusty
+
+addons:
+  chrome: stable
+
 before_install:
   - export APPLITOOLS_BATCH_ID=`echo $TRAVIS_COMMIT`
   - echo $APPLITOOLS_BATCH_ID
@@ -12,5 +20,6 @@ before_install:
   - env webdriver.chrome.driver=/home/travis/build/
   - wget https://selenium-release.storage.googleapis.com/3.141/selenium-server-standalone-3.141.59.jar
   - java -jar ./selenium-server-standalone-3.141.59.jar &
+
 install:
   - composer install
