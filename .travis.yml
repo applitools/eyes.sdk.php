@@ -22,7 +22,7 @@ before_install:
   - env webdriver.chrome.driver=/home/travis/build/
   - wget https://selenium-release.storage.googleapis.com/3.141/selenium-server-standalone-3.141.59.jar
   - mv ./selenium-server-standalone-3.141.59.jar /home/travis/build/
-  - netstat -anp|grep "4444"
+  - sudo netstat -anp|grep "4444"
   - java -jar /home/travis/build/selenium-server-standalone-3.141.59.jar &
  
 install:
