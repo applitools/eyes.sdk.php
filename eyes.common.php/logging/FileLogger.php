@@ -31,6 +31,7 @@ class FileLogger implements LogHandler
 
     /**
      * Open the log file for writing.
+     * @throws EyesException
      */
     public function open()
     {
@@ -47,7 +48,7 @@ class FileLogger implements LogHandler
             }
             $this->file = fopen($this->filename, $this->append ? "a" : "c");
         } catch (\Exception $e) {
-            throw new EyesException("Failed to create log file!", 0, $e);
+            throw new EyesException("Failed to create log file: {$this->filename}", 0, $e);
         }
     }
 
