@@ -28,6 +28,10 @@ abstract class TestSetup extends TestCase
     /** @var bool */
     protected static $forceFullPageScreenshot;
 
+
+    /** @var WebDriver */
+    protected $driver;
+
     /** @var WebDriver */
     protected $webDriver;
 
@@ -75,19 +79,24 @@ abstract class TestSetup extends TestCase
             } else {
                 $this->eyes->setLogHandler(new PrintLogHandler(true));
             }
-            $seleniumServerUrl = $_SERVER['SELENIUM_SERVER_URL'];
-            if (strcasecmp($seleniumServerUrl, "http://ondemand.saucelabs.com/wd/hub") == 0) {
-                $this->desiredCapabilities->setCapability("name", "$testName ({$this->eyes->getFullAgentId()})");
+            if (isset($_SERVER['SELENIUM_SERVER_URL'])) {
+                $seleniumServerUrl = $_SERVER['SELENIUM_SERVER_URL'];
+                if (strcasecmp($seleniumServerUrl, "http://ondemand.saucelabs.com/wd/hub") == 0) {
+                    $this->desiredCapabilities->setCapability("name", "$testName ({$this->eyes->getFullAgentId()})");
+                }
+            } else {
+                $seleniumServerUrl="http://127.0.0.1:4444/wd/hub";
             }
-
-            $webDriver = RemoteWebDriver::create($seleniumServerUrl, $this->desiredCapabilities);
+            $this->driver = RemoteWebDriver::create($seleniumServerUrl, $this->desiredCapabilities);
             $this->eyes->setBatch(TestDataProvider::$BatchInfo);
 
             $this->eyes->setScaleRatio($this->scaleRatio);
-            $this->webDriver = $this->eyes->open($webDriver, self::$testSuitName, $testName, $this->viewportSize);
-            $this->webDriver->get('http://applitools.github.io/demo/TestPages/FramesTestPage/');
-        } catch (\Exception $ex) {
-            echo $ex->getMessage();
+            $this->webDriver = $this->eyes->open($this->driver, self::$testSuitName, $testName, $this->viewportSize);
+            $this->webDriver->get('https://applitools.github.io/demo/TestPages/FramesTestPage/');
+        } catch (\Facebook\WebDriver\Exception\SessionNotCreatedException $sncEx) {
+            throw $sncEx;
+        } catch(\Exception $ex) {
+            print $ex->getMessage();
         }
     }
 
@@ -98,13 +107,14 @@ abstract class TestSetup extends TestCase
      */
     protected function tearDown() : void
     {
+        if ($this->driver == null) return;
         try {
             if ($this->eyes->getIsOpen()) {
                 $this->eyes->close();
             }
         } finally {
             $this->eyes->abortIfNotClosed();
-            $this->webDriver->quit();
+            $this->driver->quit();
         }
     }
 
