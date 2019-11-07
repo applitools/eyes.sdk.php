@@ -105,7 +105,7 @@ abstract class TestSetup extends TestCase
      * @throws \Applitools\Exceptions\TestFailedException
      * @throws \Exception
      */
-    public function tearDown()
+    protected function tearDown() : void
     {
         if ($this->driver == null) return;
         try {
