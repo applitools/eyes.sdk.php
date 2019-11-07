@@ -5,6 +5,8 @@
 ### Fixed
 - MatchWindowTask.
 - Images tests.
+### Added
+- Eyes->getLogger() method.
 
 ## [1.3.1] - 2019-10-14
 ### Added 
