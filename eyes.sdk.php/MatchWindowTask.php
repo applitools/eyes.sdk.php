@@ -146,24 +146,23 @@ class MatchWindowTask
     public function createImageMatchSettings(ICheckSettingsInternal $checkSettingsInternal = null,
                                              EyesBase $eyes, EyesScreenshot $screenshot)
     {
+        $dms = $eyes->getDefaultMatchSettings();
+        $matchLevel = ($checkSettingsInternal != null) ? $checkSettingsInternal->getMatchLevel() : null;
+        if ($matchLevel == null) {
+            $matchLevel = $dms->getMatchLevel();
+        }
+
         /** @var ImageMatchSettings $imageMatchSettings */
-        $imageMatchSettings = new ImageMatchSettings(null, null);
-        if ($checkSettingsInternal != null) {
+        $imageMatchSettings = new ImageMatchSettings($matchLevel, null);
 
-            $matchLevel = $checkSettingsInternal->getMatchLevel();
-            if ($matchLevel == null) {
-                $matchLevel = $eyes->getDefaultMatchSettings()->getMatchLevel();
-            }
+        $ignoreCaret = ($checkSettingsInternal != null) ? $checkSettingsInternal->getIgnoreCaret() : null;
+        if ($ignoreCaret == null) {
+            $ignoreCaret = $dms->isIgnoreCaret();
+        }
 
-            $imageMatchSettings->setMatchLevel($matchLevel);
+        $imageMatchSettings->setIgnoreCaret($ignoreCaret);
 
-            $ignoreCaret = $checkSettingsInternal->getIgnoreCaret();
-            if ($ignoreCaret == null) {
-                $ignoreCaret = $eyes->getDefaultMatchSettings()->isIgnoreCaret();
-            }
-
-            $imageMatchSettings->setIgnoreCaret($ignoreCaret);
-
+        if ($checkSettingsInternal != null){
             $this->collectSimpleRegions($checkSettingsInternal, $imageMatchSettings, $eyes, $screenshot);
             $this->collectFloatingRegions($checkSettingsInternal, $imageMatchSettings, $eyes, $screenshot);
         }
