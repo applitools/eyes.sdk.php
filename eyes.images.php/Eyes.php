@@ -49,6 +49,7 @@ class Eyes extends EyesBase
     private function guessType($filename)
     {
         if (function_exists('exif_imagetype')) {
+            $this->logger->verbose("using exif_imagetype...");
             $type = @exif_imagetype($filename);
             if (false !== $type) {
                 if ($type == IMAGETYPE_JPEG) {
@@ -62,11 +63,15 @@ class Eyes extends EyesBase
                 }
             }
         }
+
+        $this->logger->verbose("exif_imagetype not found. getting extension.");
+
         $parts = explode('.', $filename);
         $ext = strtolower($parts[count($parts) - 1]);
-        if (strcasecmp($ext, 'png')) {
+        $this->logger->verbose("extension: $ext");
+        if (strcasecmp($ext, 'png') == 0) {
             return 'png';
-        } else if (strcasecmp($ext, 'gif')) {
+        } else if (strcasecmp($ext, 'gif') == 0) {
             return 'gif';
         }
         return 'jpeg';
@@ -113,6 +118,8 @@ class Eyes extends EyesBase
     {
         if (is_string($image)) {
             $type = $this->guessType($image);
+            $this->logger->verbose("CheckImage($image, '$tag', $ignoreMismatch): guessed image type: $type");
+
             if ($type == 'png') {
                 $image = imagecreatefrompng($image);
             } else if ($type == 'gif') {
