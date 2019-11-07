@@ -5,39 +5,37 @@ namespace Tests\Applitools\Images;
 use Applitools\Images\Eyes;
 use Applitools\RectangleSize;
 use Applitools\Region;
-use Applitools\Location;
 use PHPUnit\Framework\TestCase;
+
+require_once('TestDataProvider.php');
 
 class TestImages extends TestCase
 {
     /**
+     * @test
      * @throws \Applitools\Exceptions\EyesException
      * @throws \Applitools\Exceptions\NewTestException
      * @throws \Applitools\Exceptions\TestFailedException
      * @throws \Exception
      */
-    public function testSearch()
+    public function TestCheckImage()
     {
         $eyes = new Eyes();
-        $eyes->setApiKey($_SERVER['APPLITOOLS_API_KEY']);
-        $eyes->setHostOS("Windows7");
-        $eyes->setHostApp("My maxthon browser");
+        $eyes->setBatch(TestDataProvider::$BatchInfo);
 
         try {
             // Start visual testing
             $eyes->open("Applitools Test", "Sanity Test", new RectangleSize(800, 500));
 
-            // Load page image and validate
-            $img = "yourpath/element-test/ElementTestPage/minions-800x500_2.jpg";
+            // Load image and validate
+            $img = "./minions-800x500.jpg";
             // Visual validation point #1
-            $eyes->checkImage($img, "Contact-us page");
+            $eyes->checkImage($img, "Minions");
 
-            // Load another page and validate
-            $img = "yourpath/element-test/ElementTestPage/minions-800x500.jpg";
+            // Load another image and validate
+            $img = "./minions-800x500.jpg";
             // Visual validation point #2
-            $eyes->checkRegion($img, Region::CreateFromLTWH(100,100,200,200), "Resources page");
-
-            $eyes->addMouseTriggerCursor("click", Region::CreateFromLTWH(0,0,50,50), new Location(150, 150));
+            $eyes->checkRegion($img, Region::CreateFromLTWH(100, 100, 200, 200), "Resources page");
 
             // End visual testing. Validate visual correctness.
             $eyes->close();

@@ -81,6 +81,7 @@ class Eyes extends EyesBase
      *                       {@code null} will automatically grab the
      *                       resolution from the image.
      * @throws \Applitools\Exceptions\EyesException
+     * @throws \Exception
      */
     public function open($appName, $testName, RectangleSize $dimensions = null)
     {
