@@ -79,6 +79,8 @@ abstract class TestSetup extends TestCase
             } else {
                 $this->eyes->setLogHandler(new PrintLogHandler(true));
             }
+
+            $this->eyes->getLogger()->log("Test $testName starting...");
             if (isset($_SERVER['SELENIUM_SERVER_URL'])) {
                 $seleniumServerUrl = $_SERVER['SELENIUM_SERVER_URL'];
                 if (strcasecmp($seleniumServerUrl, "http://ondemand.saucelabs.com/wd/hub") == 0) {
@@ -87,7 +89,9 @@ abstract class TestSetup extends TestCase
             } else {
                 $seleniumServerUrl="http://127.0.0.1:4444/wd/hub";
             }
+            $this->eyes->getLogger()->log("Creating remote web driver. Server URL: $seleniumServerUrl.");
             $this->driver = RemoteWebDriver::create($seleniumServerUrl, $this->desiredCapabilities);
+          
             $this->eyes->setBatch(TestDataProvider::$BatchInfo);
 
             $this->eyes->setScaleRatio($this->scaleRatio);
