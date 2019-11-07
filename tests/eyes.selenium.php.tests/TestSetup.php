@@ -96,7 +96,7 @@ abstract class TestSetup extends TestCase
      * @throws \Applitools\Exceptions\TestFailedException
      * @throws \Exception
      */
-    public function tearDown()
+    protected function tearDown() : void
     {
         try {
             if ($this->eyes->getIsOpen()) {
