@@ -71,6 +71,8 @@ class MatchWindowTask
      * @param ImageMatchSettings $imageMatchSettings
      * @param EyesBase $eyes eyes instance for getting AgentSetup JSON
      * @return MatchResult The match result.
+     * @throws Exceptions\EyesException
+     * @throws \Exception
      */
     protected function performMatch(
         $userInputs,
@@ -113,7 +115,7 @@ class MatchWindowTask
      * @return MatchResult Returns the results of the match
      */
     public function matchWindow($userInputs, Region $region, $tag, $shouldMatchWindowRunOnceOnTimeout, $ignoreMismatch,
-                                ICheckSettingsInternal $checkSettingsInternal, EyesBase $eyes, $retryTimeout)
+                                ICheckSettingsInternal $checkSettingsInternal = null, EyesBase $eyes, $retryTimeout)
     {
         if ($retryTimeout === null || $retryTimeout < 0) {
             $retryTimeout = $this->defaultRetryTimeout;
@@ -141,27 +143,26 @@ class MatchWindowTask
      * @param EyesScreenshot screenshot the Screenshot wrapper object.
      * @return ImageMatchSettings Merged match settings.
      */
-    public function createImageMatchSettings(ICheckSettingsInternal $checkSettingsInternal,
+    public function createImageMatchSettings(ICheckSettingsInternal $checkSettingsInternal = null,
                                              EyesBase $eyes, EyesScreenshot $screenshot)
     {
+        $dms = $eyes->getDefaultMatchSettings();
+        $matchLevel = ($checkSettingsInternal != null) ? $checkSettingsInternal->getMatchLevel() : null;
+        if ($matchLevel == null) {
+            $matchLevel = $dms->getMatchLevel();
+        }
+
         /** @var ImageMatchSettings $imageMatchSettings */
-        $imageMatchSettings = null;
-        if ($checkSettingsInternal != null) {
+        $imageMatchSettings = new ImageMatchSettings($matchLevel, null);
 
-            $matchLevel = $checkSettingsInternal->getMatchLevel();
-            if ($matchLevel == null) {
-                $matchLevel = $eyes->getDefaultMatchSettings()->getMatchLevel();
-            }
+        $ignoreCaret = ($checkSettingsInternal != null) ? $checkSettingsInternal->getIgnoreCaret() : null;
+        if ($ignoreCaret == null) {
+            $ignoreCaret = $dms->isIgnoreCaret();
+        }
 
-            $imageMatchSettings = new ImageMatchSettings($matchLevel, null);
+        $imageMatchSettings->setIgnoreCaret($ignoreCaret);
 
-            $ignoreCaret = $checkSettingsInternal->getIgnoreCaret();
-            if ($ignoreCaret == null) {
-                $ignoreCaret = $eyes->getDefaultMatchSettings()->isIgnoreCaret();
-            }
-
-            $imageMatchSettings->setIgnoreCaret($ignoreCaret);
-
+        if ($checkSettingsInternal != null){
             $this->collectSimpleRegions($checkSettingsInternal, $imageMatchSettings, $eyes, $screenshot);
             $this->collectFloatingRegions($checkSettingsInternal, $imageMatchSettings, $eyes, $screenshot);
         }
@@ -256,7 +257,7 @@ class MatchWindowTask
      * @return EyesScreenshot
      */
     private function takeScreenshot($userInputs, Region $region, $tag, $shouldMatchWindowRunOnceOnTimeout,
-                                    $ignoreMismatch, ICheckSettingsInternal $checkSettingsInternal, EyesBase $eyes,
+                                    $ignoreMismatch, ICheckSettingsInternal $checkSettingsInternal = null, EyesBase $eyes,
                                     $retryTimeout)
     {
         $elapsedTimeStart = microtime(true);
@@ -294,7 +295,7 @@ class MatchWindowTask
      * @return EyesScreenshot
      */
     private function retryTakingScreenshot($userInputs, Region $region, $tag, $ignoreMismatch,
-                                           ICheckSettingsInternal $checkSettingsInternal, EyesBase $eyes,
+                                           ICheckSettingsInternal $checkSettingsInternal = null, EyesBase $eyes,
                                            $retryTimeout)
     {
         // Start the retry timer.
@@ -335,10 +336,12 @@ class MatchWindowTask
      * @param ICheckSettingsInternal $checkSettingsInternal
      * @param EyesBase $eyes
      * @return EyesScreenshot
+     * @throws Exceptions\EyesException
+     * @throws \Exception
      */
     private function tryTakeScreenshot($userInputs, Region $region, $tag,
                                        $ignoreMismatch,
-                                       ICheckSettingsInternal $checkSettingsInternal, EyesBase $eyes)
+                                       ICheckSettingsInternal $checkSettingsInternal = null, EyesBase $eyes)
     {
         $appOutput = $this->appOutputProvider->getAppOutput($region, $this->lastScreenshot);
         $screenshot = $appOutput->getScreenshot();

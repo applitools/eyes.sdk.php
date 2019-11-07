@@ -17,9 +17,9 @@ class TestFluentApi_Chrome extends TestFluentApi
         parent::setUpClass();
     }
 
-    public function setUp()
+    protected function setUp() : void
     {
-        $this->viewportSize = new RectangleSize(800, 599);
+        $this->viewportSize = new RectangleSize(800, 600);
 
         $options = new ChromeOptions();
 

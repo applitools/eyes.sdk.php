@@ -558,9 +558,17 @@ abstract class EyesBase
     /**
      * @return LogHandler The currently set log handler.
      */
-    public function getLogHandler()
+    public function getLogHandler() : LogHandler
     {
         return $this->logger->getLogHandler();
+    }
+
+    /**
+     * @return Logger The logger.
+     */
+    public function getLogger() : Logger
+    {
+        return $this->logger;
     }
 
     /**
