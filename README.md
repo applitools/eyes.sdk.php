@@ -26,3 +26,8 @@ Please check the applitools website for usage instructions:
 - Php Appium native example: https://applitools.com/resources/tutorial/appium/native_php#step-2
 
 - Php Appium web example: https://applitools.com/resources/tutorial/appium/php#step-2
+
+## License
+
+See SDK Licence Agreement at https://applitools.com/eula/sdk
+

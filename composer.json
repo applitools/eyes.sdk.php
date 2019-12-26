@@ -4,7 +4,7 @@
   "keywords": ["webdriver", "Applitools", "php"],
   "homepage": "https://github.com/applitools/eyes.sdk.php",
   "type": "library",
-  "license": "Apache-2.0",
+  "license": "proprietary",
   "support": {
     "issues": "https://github.com/applitools/eyes.sdk.php/issues",
     "source": "https://github.com/applitools/eyes.sdk.php"
