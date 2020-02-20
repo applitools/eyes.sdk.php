@@ -10,8 +10,8 @@
     "source": "https://github.com/applitools/eyes.sdk.php"
   },
   "require": {
-    "php": ">=5.6.0",
-    "facebook/webdriver": "^1.6.0",
+    "php": ">=7.2.0",
+    "php-webdriver/webdriver": ">=1.7.1",
     "ext-gd": "*"
   },
   "suggest": {
