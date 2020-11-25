@@ -28,5 +28,8 @@ class TestImageUtils extends TestCase
         $t = gettimeofday();
         $timestamp = date("Y_m_d H_i_s", $t['sec']);
         imagepng($resizedImage, "minions-400x250_$timestamp.png");
+
+        // Avoid PHPUnit's 'no assertion warning' warning
+        $this->assertTrue(true);
     }
 }

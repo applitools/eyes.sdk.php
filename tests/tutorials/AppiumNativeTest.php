@@ -12,6 +12,12 @@ class HelloWorld
 
     protected $webDriver;
 
+    /**
+     * @throws \Applitools\Exceptions\EyesException
+     * @throws \Applitools\Exceptions\NewTestException
+     * @throws \Applitools\Exceptions\TestFailedException
+     * @throws Exception
+     */
     public function demo()
     {
         // Initialize the eyes SDK and set your private API key.
@@ -57,4 +63,8 @@ class HelloWorld
 }
 
 $test = new HelloWorld();
-$test->demo();
+try {
+    $test->demo();
+} catch (Exception $e) {
+    echo $e->getMessage() . PHP_EOL;
+}

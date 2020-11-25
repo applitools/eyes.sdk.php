@@ -14,6 +14,12 @@ class HelloWorld
     protected $url = 'https://applitools.com/helloworld';
     protected $webDriver;
 
+    /**
+     * @throws \Applitools\Exceptions\EyesException
+     * @throws \Applitools\Exceptions\NewTestException
+     * @throws \Applitools\Exceptions\TestFailedException
+     * @throws Exception
+     */
     public function demo()
     {
 
@@ -61,4 +67,8 @@ class HelloWorld
 }
 
 $test = new HelloWorld();
-$test->demo();
+try {
+    $test->demo();
+} catch (Exception $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
