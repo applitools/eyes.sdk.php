@@ -160,7 +160,6 @@ class FullPageCaptureAlgorithm
         $imageParts = $entirePage->getSubRegions($partImageSize);
         //$this->logger->verbose("imageParts: " . var_export($imageParts, true));
 
-        $originalEntirePage = $entireSize;
         $this->logger->verbose("pixelRatio: $pixelRatio");
         $entireSize = $entireSize->scale($pixelRatio);
 
@@ -243,7 +242,7 @@ class FullPageCaptureAlgorithm
 
         if ($actualImageWidth < $entireSize->getWidth() || $actualImageHeight < $entireSize->getHeight()) {
             $this->logger->verbose("Trimming unnecessary margins...");
-            $stitchedImage = ImageUtils::getImagePart($stitchedImage, Region::CreateFromLTWH(0, 0, $originalEntirePage->getWidth(), $originalEntirePage->getHeight()));
+            $stitchedImage = ImageUtils::getImagePart($stitchedImage, Region::CreateFromLTWH(0, 0, $actualImageWidth, $actualImageHeight));
             $this->logger->verbose("Done!");
         }
         $debugScreenshotsProvider->save($stitchedImage, "stitched");
